@@ -8,25 +8,64 @@
       "url": "pmtiles://osm.pmtiles",
       "attribution": "© OpenStreetMap contributors"
     },
-    "contours": {
-      "type": "geojson",
-      "data": "contours.geojson"
+    "khan": {
+      "type": "vector",
+      "url": "pmtiles://khan.pmtiles",
+      "attribution": "© OpenStreetMap contributors"
     },
-    "public-land": {
-      "type": "geojson",
-      "data": "layers/public_land.geojson"
+    "aerial": {
+      "type": "raster",
+      "url": "pmtiles://aerial.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
     },
-    "flood": {
-      "type": "geojson",
-      "data": "layers/flood.geojson"
+    "aerial-1": {
+      "type": "raster",
+      "url": "pmtiles://aerial-1.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
     },
-    "hazards": {
-      "type": "geojson",
-      "data": "layers/hazards.geojson"
+    "aerial-2": {
+      "type": "raster",
+      "url": "pmtiles://aerial-2.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
     },
-    "wild": {
-      "type": "geojson",
-      "data": "wild.geojson"
+    "aerial-3": {
+      "type": "raster",
+      "url": "pmtiles://aerial-3.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
+    "aerial-4": {
+      "type": "raster",
+      "url": "pmtiles://aerial-4.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
+    "aerial-5": {
+      "type": "raster",
+      "url": "pmtiles://aerial-5.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
+    "aerial-6": {
+      "type": "raster",
+      "url": "pmtiles://aerial-6.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
+    "aerial-7": {
+      "type": "raster",
+      "url": "pmtiles://aerial-7.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
+    "aerial-8": {
+      "type": "raster",
+      "url": "pmtiles://aerial-8.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
     },
     "hillshade": {
       "type": "image",
@@ -49,6 +88,11 @@
           34.35
         ]
       ]
+    },
+    "overlay": {
+      "type": "vector",
+      "url": "pmtiles://overlay.pmtiles",
+      "attribution": "© OpenStreetMap contributors"
     }
   },
   "layers": [
@@ -64,10 +108,10 @@
       "type": "raster",
       "source": "hillshade",
       "paint": {
-        "raster-opacity": 0.16,
+        "raster-opacity": 0.2,
         "raster-saturation": -0.65,
         "raster-brightness-max": 0.38,
-        "raster-contrast": 0.12
+        "raster-contrast": 0.16
       }
     },
     {
@@ -82,24 +126,24 @@
             "class"
           ],
           "desert",
-          "#17120c",
+          "#4A2410",
           "playa",
-          "#1a1a1e",
+          "#243048",
           "mountain",
-          "#121417",
+          "#182030",
           "bosque",
-          "#0b1410",
+          "#042818",
           "woodland",
-          "#0a120d",
+          "#0E3018",
           "farm",
-          "#0e1410",
+          "#28280C",
           "town",
-          "#141417",
+          "#282830",
           "park",
-          "#0a140a",
+          "#14301C",
           "protected",
-          "#0c1310",
-          "#101010"
+          "#102820",
+          "#141414"
         ],
         "fill-opacity": [
           "interpolate",
@@ -110,34 +154,173 @@
             "zoom"
           ],
           6,
-          0.62,
+          0.7,
           11,
-          0.46,
+          0.52,
           13,
-          0.22,
-          14,
-          0.12
+          0.3,
+          15,
+          0.18
         ]
       },
       "source-layer": "land"
     },
     {
+      "id": "aerial",
+      "type": "raster",
+      "source": "aerial",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-1",
+      "type": "raster",
+      "source": "aerial-1",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-2",
+      "type": "raster",
+      "source": "aerial-2",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-3",
+      "type": "raster",
+      "source": "aerial-3",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-4",
+      "type": "raster",
+      "source": "aerial-4",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-5",
+      "type": "raster",
+      "source": "aerial-5",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-6",
+      "type": "raster",
+      "source": "aerial-6",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-7",
+      "type": "raster",
+      "source": "aerial-7",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-8",
+      "type": "raster",
+      "source": "aerial-8",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
       "id": "public-land-fill",
       "type": "fill",
-      "source": "public-land",
+      "source": "overlay",
       "paint": {
-        "fill-color": "#0a140a",
-        "fill-opacity": 0.34
-      }
+        "fill-color": "#0C1810",
+        "fill-opacity": 0.12
+      },
+      "source-layer": "public-land"
+    },
+    {
+      "id": "public-land-line",
+      "type": "line",
+      "source": "overlay",
+      "paint": {
+        "line-color": "#2A3A28",
+        "line-width": 1.2,
+        "line-opacity": 0.55
+      },
+      "source-layer": "public-land"
     },
     {
       "id": "flood-fill",
       "type": "fill",
-      "source": "flood",
+      "source": "overlay",
       "paint": {
-        "fill-color": "#0a1822",
-        "fill-opacity": 0.34
-      }
+        "fill-color": "#0A2030",
+        "fill-opacity": 0.22
+      },
+      "source-layer": "flood"
     },
     {
       "id": "water-fill",
@@ -158,7 +341,7 @@
         ]
       ],
       "paint": {
-        "fill-color": "#142430",
+        "fill-color": "#243844",
         "fill-opacity": 0.82
       },
       "source-layer": "water"
@@ -185,7 +368,7 @@
         ]
       ],
       "paint": {
-        "line-color": "#3d6478",
+        "line-color": "#6E747A",
         "line-width": [
           "interpolate",
           [
@@ -197,7 +380,7 @@
           10,
           0.8,
           15,
-          2.6
+          3.2
         ]
       },
       "source-layer": "water"
@@ -222,7 +405,7 @@
         ]
       ],
       "paint": {
-        "line-color": "#2f4a59",
+        "line-color": "#54595E",
         "line-width": [
           "interpolate",
           [
@@ -234,7 +417,7 @@
           12,
           0.7,
           15,
-          2.0
+          2.4
         ],
         "line-dasharray": [
           2.5,
@@ -265,7 +448,7 @@
         ]
       ],
       "paint": {
-        "circle-color": "#142430",
+        "circle-color": "#6E747A",
         "circle-radius": [
           "interpolate",
           [
@@ -287,7 +470,7 @@
           ],
           "tank_other",
           "#5a5f66",
-          "#6f97a8"
+          "#B8BDC2"
         ],
         "circle-stroke-width": 1.4
       },
@@ -315,7 +498,7 @@
         ]
       ],
       "paint": {
-        "circle-color": "#142430",
+        "circle-color": "#243844",
         "circle-opacity": 0.01,
         "circle-radius": 22,
         "circle-stroke-width": 0
@@ -325,12 +508,13 @@
     {
       "id": "contours",
       "type": "line",
-      "source": "contours",
+      "source": "overlay",
       "paint": {
-        "line-color": "#2a2e28",
-        "line-width": 0.45,
-        "line-opacity": 0.4
-      }
+        "line-color": "#3C4438",
+        "line-width": 0.7,
+        "line-opacity": 0.55
+      },
+      "source-layer": "contours"
     },
     {
       "id": "roads-casing",
@@ -568,6 +752,10 @@
           ]
         ]
       ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
       "paint": {
         "line-color": "#B8BDC2",
         "line-opacity": 0.72,
@@ -594,7 +782,7 @@
     {
       "id": "wild-roads",
       "type": "line",
-      "source": "wild",
+      "source": "overlay",
       "filter": [
         "has",
         "highway"
@@ -602,15 +790,258 @@
       "paint": {
         "line-color": "#B8BDC2",
         "line-width": 2.6
-      }
+      },
+      "source-layer": "wild"
     },
     {
       "id": "hazards",
       "type": "line",
-      "source": "hazards",
+      "source": "overlay",
       "paint": {
         "line-color": "#E10600",
         "line-width": 1.4
+      },
+      "source-layer": "hazards"
+    },
+    {
+      "id": "khan-buildings",
+      "type": "fill-extrusion",
+      "source": "khan",
+      "source-layer": "building",
+      "minzoom": 11,
+      "filter": [
+        "!",
+        [
+          "in",
+          [
+            "get",
+            "kind"
+          ],
+          [
+            "literal",
+            [
+              "tree",
+              "wood"
+            ]
+          ]
+        ]
+      ],
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "fill-extrusion-color": [
+          "match",
+          [
+            "get",
+            "kind"
+          ],
+          "tree",
+          "#3F8F4E",
+          "wood",
+          "#2E6A3A",
+          "house",
+          "#A39C94",
+          "detached",
+          "#A39C94",
+          "apartments",
+          "#8A929A",
+          "residential",
+          "#8A929A",
+          "industrial",
+          "#6E767E",
+          "warehouse",
+          "#6E767E",
+          "retail",
+          "#968A7C",
+          "commercial",
+          "#968A7C",
+          "#8E949C"
+        ],
+        "fill-extrusion-height": [
+          "to-number",
+          [
+            "get",
+            "height_m"
+          ]
+        ],
+        "fill-extrusion-base": 0,
+        "fill-extrusion-opacity": 1.0,
+        "fill-extrusion-vertical-gradient": true
+      }
+    },
+    {
+      "id": "khan-trees",
+      "type": "fill-extrusion",
+      "source": "khan",
+      "source-layer": "building",
+      "minzoom": 11,
+      "filter": [
+        "in",
+        [
+          "get",
+          "kind"
+        ],
+        [
+          "literal",
+          [
+            "tree",
+            "wood"
+          ]
+        ]
+      ],
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "fill-extrusion-color": [
+          "match",
+          [
+            "get",
+            "kind"
+          ],
+          "wood",
+          "#2E6A3A",
+          "#3F8F4E"
+        ],
+        "fill-extrusion-height": [
+          "to-number",
+          [
+            "get",
+            "height_m"
+          ]
+        ],
+        "fill-extrusion-base": 0,
+        "fill-extrusion-opacity": 0.9,
+        "fill-extrusion-vertical-gradient": true
+      }
+    },
+    {
+      "id": "khan-signals",
+      "type": "circle",
+      "source": "khan",
+      "source-layer": "furniture",
+      "minzoom": 11,
+      "filter": [
+        "==",
+        [
+          "get",
+          "kind"
+        ],
+        "signal"
+      ],
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "circle-color": "#E10600",
+        "circle-radius": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          11,
+          2.8,
+          16,
+          5.6
+        ],
+        "circle-stroke-color": "#000000",
+        "circle-stroke-width": 1.0
+      }
+    },
+    {
+      "id": "khan-lamps",
+      "type": "circle",
+      "source": "khan",
+      "source-layer": "furniture",
+      "minzoom": 11,
+      "filter": [
+        "==",
+        [
+          "get",
+          "kind"
+        ],
+        "lamp"
+      ],
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "circle-color": "#E8A040",
+        "circle-radius": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          11,
+          2.2,
+          16,
+          4.4
+        ],
+        "circle-stroke-color": "#000000",
+        "circle-stroke-width": 0.8
+      }
+    },
+    {
+      "id": "khan-signs",
+      "type": "symbol",
+      "source": "khan",
+      "source-layer": "furniture",
+      "minzoom": 12,
+      "filter": [
+        "==",
+        [
+          "get",
+          "kind"
+        ],
+        "sign"
+      ],
+      "layout": {
+        "visibility": "none",
+        "text-field": [
+          "coalesce",
+          [
+            "get",
+            "sign"
+          ],
+          [
+            "get",
+            "name"
+          ],
+          ""
+        ],
+        "text-size": 12,
+        "text-font": [
+          "Open Sans Regular"
+        ],
+        "text-anchor": "bottom",
+        "text-offset": [
+          0,
+          -0.4
+        ],
+        "text-optional": true
+      },
+      "paint": {
+        "text-color": [
+          "match",
+          [
+            "get",
+            "sign"
+          ],
+          "STOP",
+          "#E10600",
+          "YIELD",
+          "#E8A040",
+          "#B8BDC2"
+        ],
+        "text-halo-color": "#000000",
+        "text-halo-width": 2.0
       }
     },
     {
@@ -682,7 +1113,7 @@
         "text-keep-upright": true
       },
       "paint": {
-        "text-color": "#7fa6b8",
+        "text-color": "#8A9AA4",
         "text-halo-color": "#000000",
         "text-halo-width": 2.0,
         "text-halo-blur": 0.15
@@ -816,8 +1247,8 @@
         "symbol-sort-key": 0
       },
       "paint": {
-        "text-color": "#E10600",
-        "text-halo-color": "#B8BDC2",
+        "text-color": "#B8BDC2",
+        "text-halo-color": "#000000",
         "text-halo-width": 2.0,
         "text-halo-blur": 0.05
       },
@@ -866,6 +1297,16 @@
       "source-layer": "place"
     }
   ],
+  "light": {
+    "anchor": "viewport",
+    "color": "#ffffff",
+    "intensity": 0.7,
+    "position": [
+      1.15,
+      210,
+      30
+    ]
+  },
   "metadata": {
     "engine": "maplibre-metal-offline",
     "network": "deny-all",

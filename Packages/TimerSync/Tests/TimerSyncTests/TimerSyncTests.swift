@@ -48,4 +48,47 @@ final class TimerSyncTests: XCTestCase {
         XCTAssertEqual(b.doneLines(id: id), ["1min ALL DONE"])
         XCTAssertEqual(b.doneLines().count, 1)
     }
+
+    func testNamedTimerProgressAndProfile() {
+        let b = TimerBoard(box: EventLog())
+        let start = Date(timeIntervalSince1970: 1_700_000_000)
+        XCTAssertNotNil(b.add(who: "Khan", task: "COOK", duration: 60, subjectAll: true, now: start))
+        XCTAssertEqual(b.timers[0].remaining(now: start), 60, accuracy: 0.001)
+        XCTAssertEqual(b.timers[0].remainingFraction(now: start), 1, accuracy: 0.001)
+        XCTAssertEqual(b.timers[0].remainingFraction(now: start.addingTimeInterval(30)), 0.5, accuracy: 0.001)
+        XCTAssertEqual(b.timers[0].remaining(now: start.addingTimeInterval(61)), 0, accuracy: 0.001)
+        let mine = b.onProfile(personID: "YOU", name: "Khan", isYou: false)
+        XCTAssertEqual(mine.map(\.task), ["COOK"])
+        XCTAssertTrue(b.onProfile(personID: "peer", name: "Sam", isYou: false).isEmpty)
+        XCTAssertNotNil(b.add(who: "ALL", task: "1min", duration: 60, subjectAll: true, now: start))
+        XCTAssertEqual(b.onProfile(personID: "YOU", name: "", isYou: true).map(\.task), ["1min"])
+        XCTAssertFalse(b.onProfile(personID: "peer", name: "Sam", isYou: false).contains(where: { $0.task == "1min" }))
+    }
+
+    func testDurationParseReadsMinutesAndHours() {
+        XCTAssertEqual(TimerDuration.parse("1"), 60)
+        XCTAssertEqual(TimerDuration.parse("30"), 1800)
+        XCTAssertEqual(TimerDuration.parse("2H"), 7200)
+        XCTAssertEqual(TimerDuration.parse("2 HR"), 7200)
+        XCTAssertEqual(TimerDuration.parse("90m"), 5400)
+        XCTAssertNil(TimerDuration.parse(""))
+        XCTAssertNil(TimerDuration.parse("0"))
+        XCTAssertEqual(TimerDuration.label(60), "1 MIN")
+        XCTAssertEqual(TimerDuration.label(7200), "2 HR")
+    }
+
+    func testGroupPresetShowsOnTheSetterProfile() {
+        let b = TimerBoard(box: EventLog())
+        XCTAssertNotNil(
+            b.add(who: "ALL", task: "1min", duration: 60, subjectAll: true, owner: "Khan")
+        )
+        XCTAssertEqual(
+            b.onProfile(personID: "peer-1", name: "Khan", isYou: false).map(\.task),
+            ["1min"]
+        )
+        XCTAssertTrue(b.onProfile(personID: "peer-2", name: "Sam", isYou: false).isEmpty)
+        let id = b.timers[0].id
+        b.markDone(id)
+        XCTAssertEqual(b.doneLines(id: id), ["1min ALL DONE"])
+    }
 }

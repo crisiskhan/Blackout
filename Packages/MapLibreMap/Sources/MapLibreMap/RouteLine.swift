@@ -1,10 +1,32 @@
 import Foundation
 import Router
+import Tokens
 
 public enum RouteLine {
     public static let sourceID = "route-line-src"
+    public static let casingLayerID = "route-line-casing"
     public static let layerID = "route-line"
+    public static let coreLayerID = "route-line-core"
     public static let offGraph = GraphPlan.offGraph
+    /// Void halo has to beat the street casing at walking zoom (10.6 at z15).
+    public static let casingWidth: Double = 12.5
+    /// Silver fill has to beat the major street fill at walking zoom (6.6 at z15).
+    public static let fillWidth: Double = 7.4
+    /// Scarce accent thread so the path still reads on an arterial.
+    public static let coreWidth: Double = 2.4
+    /// The annotation is a hook. Style layers carry the paint, so this stays
+    /// thin enough not to cover the void casing or the accent core.
+    public static let annotationWidth: Double = 0.01
+    /// Multiples of the accent core width. WALK is a broken thread so it
+    /// never reads as another arterial; DRIVE stays continuous.
+    public static let walkDash: [Double] = [2.2, 1.6]
+
+    public static func dashPattern(_ mode: TravelMode) -> [Double]? {
+        switch mode {
+        case .walk: return walkDash
+        case .drive: return nil
+        }
+    }
 
     public static func shouldDraw(_ coords: [(lat: Double, lon: Double)]) -> Bool {
         coords.count >= 2
@@ -12,8 +34,11 @@ public enum RouteLine {
 
     public static func needsReapply(
         stored: [(lat: Double, lon: Double)]?,
-        route: [(lat: Double, lon: Double)]
+        route: [(lat: Double, lon: Double)],
+        storedMode: TravelMode? = nil,
+        mode: TravelMode = .walk
     ) -> Bool {
+        if let storedMode, storedMode != mode { return true }
         guard let stored else { return true }
         if stored.count != route.count { return true }
         for (a, b) in zip(stored, route) {
@@ -64,6 +89,96 @@ public enum DestinationPin {
     }
 }
 
+/// A party body on the canvas. Heading is live when the peer sent it.
+public struct PartyBody: Equatable, Sendable {
+    public var id: String
+    public var lat: Double
+    public var lon: Double
+    public var headingDeg: Double?
+    public var emblem: String?
+    public var condition: String
+    public var ageTitle: String
+    public var ageLabel: String
+    public var lead: Bool
+    public var kid: Bool
+    public var ghost: Bool
+    public var overdue: Bool
+    public var markKind: String
+    public var rangeMeters: Double?
+
+    public init(
+        id: String,
+        lat: Double,
+        lon: Double,
+        headingDeg: Double? = nil,
+        emblem: String? = nil,
+        condition: String = "green",
+        ageTitle: String = "",
+        ageLabel: String = "",
+        lead: Bool = false,
+        kid: Bool = false,
+        ghost: Bool = false,
+        overdue: Bool = false,
+        markKind: String = "",
+        rangeMeters: Double? = nil
+    ) {
+        self.id = id
+        self.lat = lat
+        self.lon = lon
+        self.headingDeg = headingDeg
+        self.emblem = emblem
+        self.condition = condition
+        self.ageTitle = ageTitle
+        self.ageLabel = ageLabel
+        self.lead = lead
+        self.kid = kid
+        self.ghost = ghost
+        self.overdue = overdue
+        self.markKind = markKind
+        self.rangeMeters = rangeMeters
+    }
+}
+
+/// Bodies on the canvas. Silver only — red stays scarce.
+public enum PartyPips {
+    public static let sourceID = "party-pips-src"
+    public static let haloLayerID = "party-pips-halo"
+    public static let coreLayerID = "party-pips-core"
+    public static let markLayerID = "party-mark"
+
+    public static func markImageName(id: String) -> String {
+        "party-mark-\(id)"
+    }
+    public static let haloRadius: Double = 16
+    public static let coreRadius: Double = 7
+    public static let titlePrefix = "PARTY·"
+
+    public static func needsReapply(
+        stored: [PartyBody]?,
+        pips: [PartyBody]
+    ) -> Bool {
+        // Position and heading move in place via syncPartyMarks. Rebuilding
+        // style sources on every peer POS is the same class as tearing YOU
+        // down on GPS ticks.
+        guard let stored else { return true }
+        if stored.count != pips.count { return true }
+        for (a, b) in zip(stored, pips) {
+            if a.id != b.id || a.emblem != b.emblem
+                || a.condition != b.condition
+                || a.ageTitle != b.ageTitle
+                || a.lead != b.lead
+                || a.kid != b.kid
+                || a.ghost != b.ghost
+                || a.overdue != b.overdue
+                || a.markKind != b.markKind
+            {
+                return true
+            }
+        }
+        return false
+    }
+}
+
 /// Why a WALK or DRIVE tap could not draw a street line. The chips are never
 /// disabled, so every tap either draws or says one of these out loud.
 public enum RouteBlock: String, Equatable, Sendable, CaseIterable {
@@ -71,13 +186,14 @@ public enum RouteBlock: String, Equatable, Sendable, CaseIterable {
     case noGraph
     case noDestination
     case destinationOffPack
+    case noYou
     case noPath
 
     /// Plan state handed to VoiceNav. Only a real routing failure is OFF GRAPH;
     /// an unset destination is a prompt, not a dead end.
     public var planChrome: String {
         switch self {
-        case .noDestination:
+        case .noDestination, .noYou:
             return ""
         case .noPack, .noGraph, .destinationOffPack, .noPath:
             return RouteLine.offGraph
@@ -96,6 +212,8 @@ public enum RouteBlock: String, Equatable, Sendable, CaseIterable {
             return "\(verb) — TAP THE MAP TO SET A DESTINATION"
         case .destinationOffPack:
             return "\(verb) — DESTINATION IS OUTSIDE \(pack)"
+        case .noYou:
+            return "\(verb) — NO FIX"
         case .noPath:
             return "\(RouteLine.offGraph) — NO \(verb) PATH FROM YOU"
         }
@@ -117,12 +235,14 @@ public enum WalkDriveChip {
         hasPack: Bool,
         hasUsableGraph: Bool,
         hasDestination: Bool,
-        destinationOnPack: Bool
+        destinationOnPack: Bool,
+        hasYouFix: Bool = true
     ) -> RouteBlock? {
         if !hasPack { return .noPack }
         if !hasUsableGraph { return .noGraph }
         if !hasDestination { return .noDestination }
         if !destinationOnPack { return .destinationOffPack }
+        if !hasYouFix { return .noYou }
         return nil
     }
 
@@ -150,19 +270,23 @@ public enum RouteSummary {
         }
     }
 
-    public static func chrome(mode: TravelMode, coords: [(lat: Double, lon: Double)]) -> String {
+    public static func chrome(mode: TravelMode, coords: [(lat: Double, lon: Double)], seconds: Double? = nil) -> String {
         guard RouteLine.shouldDraw(coords) else {
             return RouteBlock.noPath.chrome(mode: mode, packName: "")
         }
         let total = meters(coords)
-        let speed = mode == .walk ? walkMetersPerSecond : driveMetersPerSecond
-        let minutes = max(1, Int((total / speed / 60).rounded()))
+        let speed: Double
+        switch mode {
+        case .walk: speed = walkMetersPerSecond
+        case .drive: speed = driveMetersPerSecond
+        }
+        let elapsed = seconds ?? (total / speed)
+        let minutes = max(1, Int((elapsed / 60).rounded()))
         return "\(WalkDriveChip.verb(mode)) \(distancePhrase(total)) · ~\(minutes) min"
     }
 
     public static func distancePhrase(_ meters: Double) -> String {
-        if meters < 1000 { return String(format: "%.0f m", meters.rounded()) }
-        return String(format: "%.1f km", meters / 1000)
+        BlackoutTokens.Distance.hud(meters)
     }
 }
 
@@ -173,13 +297,27 @@ public enum MapRuler {
     ) -> String {
         guard let from, let to else { return "RULER —" }
         let meters = GraphRouter.haversine(from.lat, from.lon, to.lat, to.lon)
-        return String(format: "RULER %.0f m", meters)
+        return "RULER \(BlackoutTokens.Distance.hud(meters))"
     }
 }
 
 public enum MagTrueChip {
     /// A bare `MAG` / `TRUE` token read as stack junk on the field. Say which north.
     public static func chrome(magNorth: Bool) -> String { magNorth ? "MAG NORTH" : "TRUE NORTH" }
+}
+
+public enum MapFieldDestMode: String, CaseIterable, Sendable {
+    case coordinates
+    case turns
+
+    public var title: String {
+        switch self {
+        case .coordinates:
+            return "COORDINATES"
+        case .turns:
+            return "TURNS"
+        }
+    }
 }
 
 public struct MapFieldLine: Equatable, Sendable, Identifiable {
@@ -200,8 +338,9 @@ public struct MapFieldLine: Equatable, Sendable, Identifiable {
 }
 
 /// The MAP field chrome stack: at most three short lines, each one deduped. Lock, route
-/// and tool statuses share a line, the heading gets its own, and Speak gets one status
-/// line — never a turn-by-turn paragraph over the canvas.
+/// and tool statuses share a line, COORDINATES glow YOU when idle and the dest pin
+/// while navigating, and Speak gets one status line — never a turn-by-turn paragraph
+/// over the canvas. No MAP BEARING chip.
 public enum MapFieldChrome: Sendable {
     public static let separator = " · "
     public static let maxLines = MapFieldLine.Slot.allCases.count
@@ -211,24 +350,66 @@ public enum MapFieldChrome: Sendable {
         joined([lock, route, tool])
     }
 
-    /// The destination is a pin on the canvas, so this line carries the one thing a
-    /// pin cannot: which way to walk. Printing `DEST 31.7619, -106.4850` spent the
-    /// row on a number nobody can steer by.
-    public static func destLine(bearingDeg: Double?) -> String {
-        guard let bearingDeg else { return "" }
-        return String(format: "BEARING %.0f°", bearingDeg)
+    /// COORDINATES mount for a dest pin or a live YOU fix. LOCK-ON or a drawn
+    /// route without a dest does not invent a dest pin.
+    public static func destRailVisible(
+        hasDestination: Bool,
+        lockOn: Bool,
+        hasRoute: Bool,
+        hasYouFix: Bool = false
+    ) -> Bool {
+        _ = lockOn
+        _ = hasRoute
+        return hasDestination || hasYouFix
+    }
+
+    /// Dest pin while navigating. Live YOU when idle. Never a DEST pair.
+    /// No dest and no YOU stays quiet — the rail does not print NO FIX as a fake dest.
+    public static func destLine(
+        dest: (lat: Double, lon: Double)? = nil,
+        you: (lat: Double, lon: Double)? = nil
+    ) -> String {
+        if dest != nil { return destValue(point: dest) }
+        if you != nil { return destValue(point: you) }
+        return ""
+    }
+
+    /// Coordinate pair formatter. MAP COORDINATES rail passes dest or YOU.
+    /// Profile cards pass the held person or address.
+    public static func destValue(
+        point: (lat: Double, lon: Double)?
+    ) -> String {
+        guard let point, point.lat.isFinite, point.lon.isFinite else { return "NO FIX" }
+        return String(format: "%.5f, %.5f", point.lat, point.lon)
+    }
+
+    /// Profile course filter. MAP dest rail does not print bearing. An
+    /// unusable heading is not a course — Apple's `-1°` must not print as 359°.
+    /// Idle YOU coords are not a course.
+    public static func activeBearing(
+        headingDeg: Double?,
+        hasDestination: Bool,
+        lockOn: Bool,
+        hasRoute: Bool
+    ) -> Double? {
+        _ = lockOn
+        _ = hasRoute
+        guard hasDestination else { return nil }
+        guard let headingDeg, headingDeg >= 0 else { return nil }
+        return headingDeg
     }
 
     public static func lines(
         lock: String,
         route: String,
         tool: String,
-        bearingDeg: Double?,
+        dest: (lat: Double, lon: Double)? = nil,
+        you: (lat: Double, lon: Double)? = nil,
         speak: String
     ) -> [MapFieldLine] {
         [
             (MapFieldLine.Slot.status, statusLine(lock: lock, route: route, tool: tool)),
-            (.dest, destLine(bearingDeg: bearingDeg)),
+            (.dest, destLine(dest: dest, you: you)),
             (.speak, speak.trimmingCharacters(in: .whitespacesAndNewlines)),
         ]
         .filter { !$0.1.isEmpty }
@@ -251,15 +432,16 @@ public enum MapFieldChrome: Sendable {
     }
 }
 
+/// DEST is the pin the thumb set. A leftover MARK is not a destination.
 public enum RouteTarget {
     public static func pick(
         explicit: (lat: Double, lon: Double)?,
         lastMark: (lat: Double, lon: Double)?,
         origin: (lat: Double, lon: Double)
     ) -> (lat: Double, lon: Double)? {
+        _ = lastMark
         _ = origin
         if let explicit { return explicit }
-        if let lastMark { return lastMark }
         return nil
     }
 }

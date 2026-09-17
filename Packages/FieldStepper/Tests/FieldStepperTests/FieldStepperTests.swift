@@ -12,5 +12,14 @@ final class FieldStepperTests: XCTestCase {
         XCTAssertEqual(s.index, 1)
         XCTAssertTrue(s.speaking)
         XCTAssertEqual(s.step.metronomeBpm, 110)
+        var stale = StepperState(card: card, index: 99, speaking: false, sentToParty: false)
+        XCTAssertEqual(stale.step.metronomeBpm, 110)
+        XCTAssertTrue(stale.isLast)
+        let emptyCard = FieldCard(schema: "1.4", id: "empty", category: "medical", states: ["TX"], title: loc, situation: loc, stop_if: [loc], get_to_care: loc, speak: true, sendToParty: true, steps: [])
+        var empty = StepperState(card: emptyCard, index: 0, speaking: false, sentToParty: false)
+        XCTAssertTrue(empty.isLast)
+        XCTAssertEqual(empty.step.image, "")
+        empty.next()
+        XCTAssertEqual(empty.index, 0)
     }
 }

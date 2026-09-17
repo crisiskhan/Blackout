@@ -17,7 +17,7 @@ struct SOSHold: View {
                 : 0
             ZStack {
                 Circle()
-                    .stroke(Theme.accent.opacity(0.25 + 0.7 * pulse), lineWidth: 3 + 3 * pulse)
+                    .stroke(Theme.accent.opacity(0.25 + 0.7 * pulse), lineWidth: Theme.strokeWidth(3) + 3 * pulse)
                     .frame(
                         width: BlackoutTokens.Chrome.sosDiameter + 14,
                         height: BlackoutTokens.Chrome.sosDiameter + 14
@@ -25,6 +25,12 @@ struct SOSHold: View {
                     .scaleEffect(1 + 0.08 * pulse)
                 Circle()
                     .fill(lit ? Theme.accent : Theme.accent.opacity(0.92))
+                    .frame(
+                        width: BlackoutTokens.Chrome.sosDiameter,
+                        height: BlackoutTokens.Chrome.sosDiameter
+                    )
+                Circle()
+                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1.5))
                     .frame(
                         width: BlackoutTokens.Chrome.sosDiameter,
                         height: BlackoutTokens.Chrome.sosDiameter
@@ -59,7 +65,7 @@ struct SOSHold: View {
                 }
         )
         .accessibilityLabel(L10n.t("sos.call", runtime.locale))
-        .accessibilityHint(L10n.t("sos.offer", runtime.locale))
+        .accessibilityHint(L10n.t("sos.hold", runtime.locale))
         .accessibilityAddTraits(.isButton)
     }
 
@@ -79,10 +85,13 @@ struct IAMOKBar: View {
                 .font(.system(size: 11, weight: .heavy))
                 .foregroundStyle(Theme.silver)
                 .padding(.horizontal, 12)
-                .frame(minHeight: 36)
+                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                 .background(Theme.glass())
-                .clipShape(Capsule())
-                .overlay(Capsule().strokeBorder(Theme.silver.opacity(0.28), lineWidth: 1))
+                .clipShape(Theme.plateRect())
+                .overlay(
+                    Theme.plateRect()
+                        .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
+                )
                 Spacer()
             }
             Spacer()

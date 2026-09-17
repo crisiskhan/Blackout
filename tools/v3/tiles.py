@@ -26,6 +26,8 @@ from shapely.ops import unary_union
 from shapely.strtree import STRtree
 from shapely.validation import make_valid
 
+from . import khan
+
 # How many dimensions a shape covers, so a repaired polygon is not allowed to
 # come back as the stray line where its ring crossed itself.
 DIMENSION = {"Polygon": 2, "MultiPolygon": 2, "LineString": 1, "MultiLineString": 1, "Point": 0, "MultiPoint": 0}
@@ -37,6 +39,9 @@ BUFFER = 64
 
 MIN_ZOOM = 6
 MAX_ZOOM = 14
+# Houses only pay rent at the zoom a pitched desk can still tell a house from
+# a hill. The street archive still starts at 6.
+KHAN_MIN_ZOOM = 11
 
 # What a zoom is allowed to carry. Drawing every driveway at z10 costs bytes
 # nobody can see and time everybody feels.
@@ -90,7 +95,10 @@ LAND_CLASS = {
     ("landuse", "orchard"): "farm",
     ("landuse", "meadow"): "farm",
     ("landuse", "vineyard"): "farm",
+    ("landuse", "greenhouse_horticulture"): "farm",
     ("landuse", "residential"): "town",
+    ("landuse", "recreation_ground"): "park",
+    ("landuse", "grass"): "desert",
     ("leisure", "park"): "park",
 }
 
@@ -354,6 +362,22 @@ def read_layers(pack: Path) -> dict[str, Layer]:
                 geom = geom.representative_point()
             water.add(geom, keep, WATER_CLASS_ZOOM.get(kind, WATERWAY_ZOOM))
             continue
+        # A cave, sink, or named tree mapped as an area is still a point the
+        # hold has to name. The land table has no class for a hole, and a
+        # canopy ring is not woodland fill — FIELD opens cave or tree-use,
+        # never a meal, never an animal pin.
+        natural = props.get("natural")
+        if natural in ("cave", "cave_entrance", "sinkhole", "tree"):
+            if geom.geom_type != "Point":
+                geom = geom.representative_point()
+            keep = {
+                k: v
+                for k, v in props.items()
+                if k in ("place", "name", "amenity", "emergency", "natural")
+            }
+            if keep:
+                place.add(geom, keep, place_min_zoom(props))
+            continue
         ground = land_class(props)
         if ground and geom.geom_type in ("Polygon", "MultiPolygon"):
             keep = {k: v for k, v in props.items() if k in RECORD_TAGS}
@@ -507,6 +531,118 @@ def build(pack: Path, bbox: dict, name: str) -> dict:
                                 "man_made": "String", "amenity": "String", "name": "String"}},
                     {"id": "place", "minzoom": MIN_ZOOM, "maxzoom": MAX_ZOOM,
                      "fields": {"place": "String", "name": "String", "amenity": "String"}},
+                ],
+            },
+        )
+    return {"tiles": tiles, "bytes": out.stat().st_size}
+
+
+def _khan_building_zoom(props: dict) -> int:
+    kind = props.get("kind")
+    if kind in {"tree", "wood"}:
+        return 13
+    try:
+        height = float(props.get("height_m") or 0)
+    except (TypeError, ValueError):
+        height = 0
+    return 11 if height >= 12 else 12
+
+
+def read_khan_layers(pack: Path) -> dict[str, Layer]:
+    """Houses and street furniture for the KHAN EYE desk, not the walking map."""
+    building = Layer(khan.KHAN_BUILDING_LAYER)
+    furniture = Layer(khan.KHAN_FURNITURE_LAYER)
+    khan_path = pack / "khan.geojson"
+    if khan_path.is_file():
+        fc = json.loads(khan_path.read_text())
+        for feat in fc.get("features") or []:
+            props = feat.get("properties") or {}
+            try:
+                geom = shape(feat["geometry"])
+            except Exception:
+                continue
+            if geom.is_empty:
+                continue
+            geom = repair(geom)
+            if geom is None or geom.is_empty:
+                continue
+            kind = props.get("kind")
+            keep = {k: props[k] for k in ("kind", "name", "sign", "height_m") if k in props}
+            if geom.geom_type in ("Polygon", "MultiPolygon"):
+                building.add(geom, keep, _khan_building_zoom(props))
+            elif kind in {"signal", "lamp", "sign"}:
+                if geom.geom_type != "Point":
+                    geom = geom.representative_point()
+                furniture.add(geom, keep, 13)
+    osm_path = pack / "osm.geojson"
+    if osm_path.is_file():
+        osm = json.loads(osm_path.read_text())
+        for feat in osm.get("features") or []:
+            canopy = khan.canopy_from_osm_feature(feat)
+            if not canopy:
+                continue
+            try:
+                geom = shape(canopy["geometry"])
+            except Exception:
+                continue
+            geom = repair(geom)
+            if geom is None or geom.is_empty:
+                continue
+            if geom.geom_type in ("Polygon", "MultiPolygon"):
+                building.add(geom, canopy["properties"], 13)
+    layers = {khan.KHAN_BUILDING_LAYER: building, khan.KHAN_FURNITURE_LAYER: furniture}
+    for layer in layers.values():
+        layer.index()
+    return layers
+
+
+def build_khan(pack: Path, bbox: dict, name: str) -> dict:
+    """Write `khan.pmtiles` — 3D houses and furniture for the walking desk and KHAN EYE."""
+    layers = read_khan_layers(pack)
+    out = pack / "khan.pmtiles"
+    tiles = 0
+    with open(out, "wb") as fh:
+        writer = Writer(fh)
+        for z in range(KHAN_MIN_ZOOM, MAX_ZOOM + 1):
+            x0, y0, x1, y1 = tile_range(bbox, z)
+            for x in range(x0, x1 + 1):
+                for y in range(y0, y1 + 1):
+                    blob = encode_tile(layers, z, x, y)
+                    if not blob:
+                        continue
+                    writer.write_tile(zxy_to_tileid(z, x, y), blob)
+                    tiles += 1
+        writer.finalize(
+            {
+                "tile_type": TileType.MVT,
+                "tile_compression": Compression.GZIP,
+                "min_zoom": KHAN_MIN_ZOOM,
+                "max_zoom": MAX_ZOOM,
+                "min_lon_e7": int(bbox["west"] * 1e7),
+                "min_lat_e7": int(bbox["south"] * 1e7),
+                "max_lon_e7": int(bbox["east"] * 1e7),
+                "max_lat_e7": int(bbox["north"] * 1e7),
+                "center_zoom": MAX_ZOOM - 1,
+                "center_lon_e7": int((bbox["west"] + bbox["east"]) / 2 * 1e7),
+                "center_lat_e7": int((bbox["south"] + bbox["north"]) / 2 * 1e7),
+            },
+            {
+                "name": f"{name} KHAN EYE",
+                "format": "pbf",
+                "attribution": "© OpenStreetMap contributors",
+                "vector_layers": [
+                    {
+                        "id": khan.KHAN_BUILDING_LAYER,
+                        "minzoom": KHAN_MIN_ZOOM,
+                        "maxzoom": MAX_ZOOM,
+                        "fields": {"kind": "String", "name": "String", "height_m": "Number"},
+                    },
+                    {
+                        "id": khan.KHAN_FURNITURE_LAYER,
+                        "minzoom": 13,
+                        "maxzoom": MAX_ZOOM,
+                        "fields": {"kind": "String", "name": "String", "sign": "String"},
+                    },
                 ],
             },
         )

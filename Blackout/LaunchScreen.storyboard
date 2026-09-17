@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="ARM-LS-VC1">
+    <device id="retina6_12" orientation="portrait" appearance="dark"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23504"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <scene sceneID="ARM-LS-SCN">
+            <objects>
+                <viewController id="ARM-LS-VC1" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="ARM-LS-VW">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="BootField" translatesAutoresizingMaskIntoConstraints="NO" id="ARM-LS-LG">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                            </imageView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="ARM-LS-SA"/>
+                        <color key="backgroundColor" red="0" green="0" blue="0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="ARM-LS-LG" firstAttribute="leading" secondItem="ARM-LS-VW" secondAttribute="leading" id="ARM-LS-L"/>
+                            <constraint firstAttribute="trailing" secondItem="ARM-LS-LG" secondAttribute="trailing" id="ARM-LS-T"/>
+                            <constraint firstItem="ARM-LS-LG" firstAttribute="top" secondItem="ARM-LS-VW" secondAttribute="top" id="ARM-LS-TP"/>
+                            <constraint firstAttribute="bottom" secondItem="ARM-LS-LG" secondAttribute="bottom" id="ARM-LS-B"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ARM-LS-FR" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="0.0" y="0.0"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="BootField" width="1152" height="1712"/>
+    </resources>
+</document>

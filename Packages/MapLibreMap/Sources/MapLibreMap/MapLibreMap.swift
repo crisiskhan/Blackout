@@ -6,16 +6,130 @@ import DeadReckoning
 import Almanac
 import BlackBox
 
-public struct MapMark: Codable, Equatable, Sendable, Identifiable {
+public struct MapMark: Equatable, Sendable, Identifiable {
     public var id: String
     public var lat: Double
     public var lon: Double
     public var label: String
-    public init(id: String, lat: Double, lon: Double, label: String) {
+    public var name: String
+    public var note: String
+    public var emblem: String
+    public var from: String
+    public var kind: String
+
+    public init(
+        id: String,
+        lat: Double,
+        lon: Double,
+        label: String,
+        name: String = "",
+        note: String = "",
+        emblem: String = PersonEmblem.fallback.rawValue,
+        from: String = "",
+        kind: String = ""
+    ) {
         self.id = id
         self.lat = lat
         self.lon = lon
         self.label = label
+        self.name = name
+        self.note = note
+        self.emblem = emblem
+        self.from = from
+        self.kind = kind
+    }
+
+    /// Glass row and SEARCH use the chosen NAME. Label keeps pack / OFF PACK.
+    public var title: String {
+        let named = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        return named.isEmpty ? label : named
+    }
+}
+
+extension MapMark: Codable {
+    enum CodingKeys: String, CodingKey {
+        case id, lat, lon, label, name, note, emblem, from, kind
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        lat = try c.decode(Double.self, forKey: .lat)
+        lon = try c.decode(Double.self, forKey: .lon)
+        label = try c.decode(String.self, forKey: .label)
+        name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
+        note = try c.decodeIfPresent(String.self, forKey: .note) ?? ""
+        emblem = try c.decodeIfPresent(String.self, forKey: .emblem) ?? PersonEmblem.fallback.rawValue
+        from = try c.decodeIfPresent(String.self, forKey: .from) ?? ""
+        kind = try c.decodeIfPresent(String.self, forKey: .kind) ?? ""
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(lat, forKey: .lat)
+        try c.encode(lon, forKey: .lon)
+        try c.encode(label, forKey: .label)
+        try c.encode(name, forKey: .name)
+        try c.encode(note, forKey: .note)
+        try c.encode(emblem, forKey: .emblem)
+        try c.encode(from, forKey: .from)
+        try c.encode(kind, forKey: .kind)
+    }
+}
+
+/// Composer for a party place. NAME / NOTE / FACE live here until DROP.
+public struct MapMarkDraft: Equatable, Sendable {
+    public var lat: Double
+    public var lon: Double
+    public var name: String
+    public var note: String
+    public var emblem: String
+    public var existingID: String?
+
+    public init(
+        lat: Double,
+        lon: Double,
+        name: String = "",
+        note: String = "",
+        emblem: String = PersonEmblem.fallback.rawValue,
+        existingID: String? = nil
+    ) {
+        self.lat = lat
+        self.lon = lon
+        self.name = name
+        self.note = note
+        self.emblem = emblem
+        self.existingID = existingID
+    }
+}
+
+/// Canvas id for a planted place, distinct from a person pip.
+public enum PlaceMark {
+    public static let idPrefix = "MARK·"
+    public static let setDest = "SET DEST"
+
+    public static func canvasID(_ id: String) -> String {
+        idPrefix + id
+    }
+
+    public static func parse(_ raw: String) -> String? {
+        guard raw.hasPrefix(idPrefix) else { return nil }
+        let rest = String(raw.dropFirst(idPrefix.count))
+        return rest.isEmpty ? nil : rest
+    }
+
+    public static func body(_ mark: MapMark) -> PartyBody {
+        PartyBody(
+            id: canvasID(mark.id),
+            lat: mark.lat,
+            lon: mark.lon,
+            headingDeg: nil,
+            emblem: mark.emblem,
+            condition: mark.kind == EyeDesk.MarkKind.down.rawValue ? "red" : "green",
+            kid: EyeDesk.kidMark(name: mark.name, kind: mark.kind),
+            markKind: mark.kind
+        )
     }
 }
 
@@ -78,6 +192,68 @@ public enum MarkDrop {
         }
         return marks + [MapMark(id: UUID().uuidString, lat: lat, lon: lon, label: label)]
     }
+
+    /// NAME / NOTE / FACE rewrite the pin at that coordinate. Same coord stays one mark.
+    public static func upsert(_ marks: [MapMark], mark: MapMark) -> [MapMark] {
+        if let i = marks.firstIndex(where: {
+            $0.id == mark.id || sameCoord(($0.lat, $0.lon), (mark.lat, mark.lon))
+        }) {
+            var next = marks
+            let kept = next[i]
+            next[i] = MapMark(
+                id: kept.id,
+                lat: mark.lat,
+                lon: mark.lon,
+                label: mark.label,
+                name: mark.name,
+                note: mark.note,
+                emblem: mark.emblem,
+                from: mark.from.isEmpty ? kept.from : mark.from,
+                kind: mark.kind.isEmpty ? kept.kind : mark.kind
+            )
+            return next
+        }
+        return marks + [mark]
+    }
+}
+
+/// What a mark's label is made of.
+///
+/// A mark used to be labelled with the pack it was dropped in, and every read
+/// off disk rewrote all of them so the OFF PACK flag stayed truthful. Once a
+/// press can mark a named acequia, that rewrite would throw the name away, so
+/// the label is now a subject plus an optional flag and only the flag moves.
+public enum MarkLabel {
+    public static let separator = " · "
+    public static var offPackSuffix: String { separator + PackChrome.offPack }
+
+    /// What the mark is of, with the pack flag taken off.
+    public static func subject(of label: String) -> String {
+        guard label.hasSuffix(offPackSuffix) else { return label }
+        return String(label.dropLast(offPackSuffix.count))
+    }
+
+    public static func flagged(subject: String, offPack: Bool) -> String {
+        offPack ? subject + offPackSuffix : subject
+    }
+
+    /// Re-flag a mark for the pack it is being read under.
+    ///
+    /// A subject that is only a pack name describes nothing, so it keeps
+    /// following the pack exactly as it always has. Anything else is what the
+    /// mark was of, and only its flag moves.
+    public static func relabel(
+        existing: String,
+        packName: String,
+        packNames: [String],
+        offPack: Bool
+    ) -> String {
+        let was = subject(of: existing)
+        if was.isEmpty || was == PackChrome.offPack || packNames.contains(was) {
+            return offPack ? PackChrome.offPack : packName
+        }
+        return flagged(subject: was, offPack: offPack)
+    }
 }
 
 public enum PackChrome {
@@ -126,6 +302,7 @@ public enum PackOverlay {
     public static let fillsBBox = false
 }
 
+/// Pack-file license line. Never HUD. MapLibre's own mark stays hidden.
 public enum OSMCredit {
     public static let line = "© OpenStreetMap contributors"
 }
@@ -175,9 +352,70 @@ public struct MapSession: Sendable {
 }
 
 public enum USNG {
+    public static let dash = "USNG —"
+    private static let bands = "CDEFGHJKLMNPQRSTUVWX"
+    private static let rows = "ABCDEFGHJKLMNPQRSTUV"
+    private static let columns = ["ABCDEFGH", "JKLMNPQR", "STUVWXYZ"]
+    private static let digits = 4
+    private static let a = 6_378_137.0
+    private static let f = 1.0 / 298.257223563
+    private static let k0 = 0.9996
+
     public static func label(lat: Double, lon: Double) -> String {
-        let zone = Int(floor((lon + 180) / 6) + 1)
-        return String(format: "USNG %d / %.4f %.4f", zone, lat, lon)
+        guard lat.isFinite, lon.isFinite, abs(lat) <= 84, abs(lon) <= 180 else { return dash }
+        let e2 = f * (2 - f)
+        let e4 = e2 * e2
+        let e6 = e4 * e2
+        let ep2 = e2 / (1 - e2)
+        var zone = Int(floor((lon + 180) / 6) + 1)
+        if lon >= 180 { zone = 60 }
+        let latR = lat * .pi / 180
+        let lonR = lon * .pi / 180
+        let lon0 = ((Double(zone) - 1) * 6 - 180 + 3) * .pi / 180
+        let n = a / sqrt(1 - e2 * sin(latR) * sin(latR))
+        let t = tan(latR) * tan(latR)
+        let c = ep2 * cos(latR) * cos(latR)
+        let aa = cos(latR) * (lonR - lon0)
+        let m =
+            a * (
+                (1 - e2 / 4 - 3 * e4 / 64 - 5 * e6 / 256) * latR
+                    - (3 * e2 / 8 + 3 * e4 / 32 + 45 * e6 / 1024) * sin(2 * latR)
+                    + (15 * e4 / 256 + 45 * e6 / 1024) * sin(4 * latR)
+                    - (35 * e6 / 3072) * sin(6 * latR)
+            )
+        let easting =
+            k0 * n * (
+                aa
+                    + (1 - t + c) * pow(aa, 3) / 6
+                    + (5 - 18 * t + t * t + 72 * c - 58 * ep2) * pow(aa, 5) / 120
+            ) + 500_000
+        var northing =
+            k0 * (
+                m + n * tan(latR) * (
+                    pow(aa, 2) / 2
+                        + (5 - t + 9 * c + 4 * c * c) * pow(aa, 4) / 24
+                        + (61 - 58 * t + t * t + 600 * c - 330 * ep2) * pow(aa, 6) / 720
+                )
+            )
+        if lat < 0 { northing += 10_000_000 }
+        let bandIndex = min(Int(floor((lat + 80) / 8)), bands.count - 1)
+        guard bandIndex >= 0 else { return dash }
+        let band = bands[bands.index(bands.startIndex, offsetBy: bandIndex)]
+        let colIdx = Int(floor(easting / 100_000)) - 1
+        let colSet = columns[(zone - 1) % 3]
+        guard colIdx >= 0, colIdx < colSet.count else { return dash }
+        let col = colSet[colSet.index(colSet.startIndex, offsetBy: colIdx)]
+        var rowIdx = Int(floor(northing / 100_000)) % 20
+        if zone.isMultiple(of: 2) {
+            rowIdx = (rowIdx + 5) % 20
+        }
+        let row = rows[rows.index(rows.startIndex, offsetBy: rowIdx)]
+        let scale = pow(10.0, Double(5 - digits))
+        let east = Int(floor(easting.truncatingRemainder(dividingBy: 100_000) / scale))
+        let north = Int(floor(northing.truncatingRemainder(dividingBy: 100_000) / scale))
+        let eastToken = String(format: "%0\(digits)d", east)
+        let northToken = String(format: "%0\(digits)d", north)
+        return "USNG \(zone)\(band) \(col)\(row) \(eastToken) \(northToken)"
     }
 }
 
@@ -196,6 +434,8 @@ public enum PackGeometry {
 /// Self marker when MapLibre `showsUserLocation` has no GPS fix yet.
 public enum UserPuck {
     public static let title = "YOU"
+    public static let markLayerID = "you-mark"
+    public static let markImageName = "you-mark"
     public static let haloRadiusMeters: Double = 80
     public static let haloSteps = 32
 
@@ -217,7 +457,10 @@ public enum UserPuck {
         lastKnown: (lat: Double, lon: Double)?,
         packCenter: (lat: Double, lon: Double)
     ) -> (lat: Double, lon: Double) {
-        lastKnown ?? packCenter
+        if let last = lastKnown, last.lat.isFinite, last.lon.isFinite {
+            return last
+        }
+        return packCenter
     }
 
     public static func coordinate(
@@ -228,18 +471,10 @@ public enum UserPuck {
         packNorth: Double,
         packEast: Double
     ) -> (lat: Double, lon: Double) {
-        if let last = lastKnown,
-           contains(
-            lat: last.lat,
-            lon: last.lon,
-            south: packSouth,
-            west: packWest,
-            north: packNorth,
-            east: packEast
-           ) {
-            return last
-        }
-        return packCenter
+        // Pack bbox is the camera rest, not a YOU clamp. Off-pack last known
+        // stays where the body is.
+        _ = (packSouth, packWest, packNorth, packEast)
+        return coordinate(lastKnown: lastKnown, packCenter: packCenter)
     }
 
     public static func haloRing(
@@ -266,27 +501,84 @@ public enum UserPuck {
 
     public static func needsReapply(
         storedPack: (south: Double, west: Double, north: Double, east: Double)?,
-        storedPuck: (lat: Double, lon: Double)?,
+        storedPuck _: (lat: Double, lon: Double)?,
         pack: (south: Double, west: Double, north: Double, east: Double),
-        puck: (lat: Double, lon: Double),
+        puck _: (lat: Double, lon: Double),
         mapHasPuck: Bool
     ) -> Bool {
-        guard mapHasPuck, let storedPack, let storedPuck else { return true }
-        return storedPack != pack || storedPuck != puck
+        // Position-only is an in-place move. Rebuilding YOU (and the pack
+        // outline) on every GPS tick is what tore the canvas down in WALK.
+        guard mapHasPuck, let storedPack else { return true }
+        return storedPack != pack
     }
 }
 
 public enum PackCamera {
     public static let edgePaddingPoints: Double = 28
+    /// HUD chrome around a plotted line so DEST is not under the dock.
+    public static let routePaddingPoints: Double = 72
+    /// GODS EYE. Search, overlay, dock, and tabs sit on the canvas, so the
+    /// pack has to land in the clear glass.
+    public static let packPaddingPoints: Double = 112
+    /// Left-hand tab column. Same side inset so west pack is not under tabs.
+    public static let packSidePaddingPoints: Double = 72
 
     /// Street names only render from `PackStyle` road-labels `minzoom` up. Fitting a
     /// whole 0.3° pack lands near z11, which is why TX WEST opened as nameless lines.
-    /// The map therefore opens on YOU at walking zoom; FIT PACK still shows the region.
+    /// The map therefore opens on YOU at walking zoom; pinch-out stays on photo.
     public static let openZoom: Double = 15
+    /// Cesium camera height that matches walking `openZoom` on the ellipsoid.
+    public static func openHeightMeters(lat: Double) -> Double {
+        let earth = 40_075_017.0
+        let cosine = max(cos(lat * .pi / 180), 0.2)
+        return earth * cosine / pow(2, openZoom + 1)
+    }
     public static let streetNameMinZoom: Double = 12
+    /// Walking MAP pinch floor. Packed NAIP is sharp here; below this, LOCKED
+    /// walking would drop into schematic streets.
+    public static let photoMinZoom: Double = 14
+    /// Archive floor (`tools/v3/tiles.py` MIN_ZOOM). KHAN EYE pinch floor so
+    /// the packed extract fits the glass.
+    public static let minZoom: Double = 6
+    /// Style overzoom ceiling. Packed streets do not get sharper past this.
+    public static let maxZoom: Double = 16
+    /// KHAN EYE may pinch one more zoom so packed photo and houses still read.
+    public static let godsEyeMaxZoom: Double = 17.5
 
     public static func opensOnStreetNames(openZoom: Double = openZoom, labelMinZoom: Double = streetNameMinZoom) -> Bool {
         openZoom >= labelMinZoom
+    }
+
+    /// First GNSS after a dark puck. DEST already picked keeps the camera on
+    /// that pin; LOCK-ON is how YOU takes the glass back. GODS EYE holds the pack.
+    public static func shouldOpenOnYou(
+        showYou: Bool,
+        wasShowingYou: Bool,
+        hasDest: Bool,
+        godsEye: Bool = false
+    ) -> Bool {
+        !godsEye && showYou && !wasShowingYou && !hasDest
+    }
+
+    /// Search / MARK dest off the glass. Canvas taps are already under the thumb.
+    public static func shouldFrameDest(
+        lockOn: Bool,
+        destChanged: Bool,
+        destVisible: Bool,
+        godsEye: Bool = false
+    ) -> Bool {
+        !godsEye && !lockOn && destChanged && !destVisible
+    }
+
+    /// HUD search and dock cover the edges, so a pin in that pad is not on glass.
+    public static func destIsOnGlass(
+        x: Double,
+        y: Double,
+        width: Double,
+        height: Double,
+        pad: Double = routePaddingPoints
+    ) -> Bool {
+        x >= pad && x <= width - pad && y >= pad && y <= height - pad
     }
 
     public static func bounds(
@@ -303,6 +595,116 @@ public enum PackCamera {
         )
     }
 
+    /// Oblique satellite desk. Enter north-up; the lift is pitch, not a globe.
+    public static let godsEyePitch: Double = 45
+    /// Walking MAP is the 3D neighborhood desk. Pitch reads house walls on the photo.
+    public static let walkPitch: Double = 55
+    /// Viewing distance is this times the packed-extract radius so KHAN EYE
+    /// lifts to the whole archive, not a 160m neighborhood desk.
+    public static let godsEyeRangeFactor: Double = 1.15
+    public static let godsEyeHeading: Double = 0
+    public static let godsEyeFlySeconds: Double = 2
+    public static let godsEyeFlyPeakFactor: Double = 1.6
+    /// Oblique ceiling on the packed desk. Pinch can flatten; it cannot go past this.
+    public static let godsEyeMaxPitch: Double = 60
+
+    public static func packCenter(
+        south: Double,
+        west: Double,
+        north: Double,
+        east: Double
+    ) -> (lat: Double, lon: Double) {
+        let box = bounds(south: south, west: west, north: north, east: east)
+        return ((box.south + box.north) / 2, (box.west + box.east) / 2)
+    }
+
+    public static func packRadiusMeters(
+        south: Double,
+        west: Double,
+        north: Double,
+        east: Double
+    ) -> Double {
+        let box = bounds(south: south, west: west, north: north, east: east)
+        let mid = packCenter(south: box.south, west: box.west, north: box.north, east: box.east)
+        let corners = [
+            (box.south, box.west),
+            (box.south, box.east),
+            (box.north, box.west),
+            (box.north, box.east),
+        ]
+        return corners.map { GraphRouter.haversine(mid.lat, mid.lon, $0.0, $0.1) }.max() ?? 0
+    }
+
+    public static func godsEyeDistance(radiusMeters: Double) -> Double {
+        max(radiusMeters, 1) * godsEyeRangeFactor
+    }
+
+    public static func holdPitch(godsEye: Bool) -> Double {
+        godsEye ? godsEyePitch : walkPitch
+    }
+
+    /// LOCK-ON walking is course-up. EYE stays north. A dead compass stays put.
+    public static func followHeading(lockOn: Bool, godsEye: Bool, youHeading: Double?) -> Double? {
+        guard !godsEye, lockOn, let heading = youHeading, heading >= 0, heading.isFinite else {
+            return nil
+        }
+        return heading
+    }
+
+    public static func holdMinPitch(godsEye _: Bool) -> Double {
+        0
+    }
+
+    public static func holdMaxPitch(godsEye _: Bool) -> Double {
+        godsEyeMaxPitch
+    }
+
+    public static func holdMinZoom(godsEye: Bool) -> Double {
+        godsEye ? minZoom : photoMinZoom
+    }
+
+    public static func holdMaxZoom(godsEye: Bool) -> Double {
+        godsEye ? godsEyeMaxZoom : maxZoom
+    }
+
+    public static func allowsOrbit(godsEye _: Bool) -> Bool {
+        true
+    }
+
+    /// Walking MAP can pan. GODS EYE can pan too, but only while the look
+    /// stays on the packed area.
+    public static func allowsPan(godsEye _: Bool) -> Bool {
+        true
+    }
+
+    public static func allowsTilt(godsEye _: Bool) -> Bool {
+        true
+    }
+
+    public static func cameraStaysOnPack(
+        godsEye: Bool,
+        lat: Double,
+        lon: Double,
+        south: Double,
+        west: Double,
+        north: Double,
+        east: Double
+    ) -> Bool {
+        if !godsEye { return true }
+        let box = bounds(south: south, west: west, north: north, east: east)
+        return lat >= box.south && lat <= box.north && lon >= box.west && lon <= box.east
+    }
+
+    /// Farther of overhead range vs HUD-padded fit. Never closer than the
+    /// 1.6× look; farther when chrome needs more air around the pack.
+    public static func godsEyeCameraDistance(gev: Double, hudFit: Double) -> Double {
+        max(gev, hudFit)
+    }
+
+    public static func godsEyeFlyPeakAltitude(current: Double, target: Double) -> Double {
+        max(current, target) * godsEyeFlyPeakFactor
+    }
+
     public static func shouldRefit(
         fittedPack: (south: Double, west: Double, north: Double, east: Double)?,
         pack: (south: Double, west: Double, north: Double, east: Double),
@@ -314,6 +716,53 @@ public enum PackCamera {
         if fittedPack != pack { return true }
         return abs(fittedSize.width - size.width) > 1 || abs(fittedSize.height - size.height) > 1
     }
+
+    /// LOCK-ON keeps YOU in frame. GPS jitter under this stays put so the
+    /// canvas does not swim. Arming always recenters even if YOU have not moved.
+    public static let followMeters: Double = 8
+
+    public static func shouldFollow(
+        lockOn: Bool,
+        wasLocked: Bool,
+        lastFollow: (lat: Double, lon: Double)?,
+        puck: (lat: Double, lon: Double),
+        godsEye: Bool = false
+    ) -> Bool {
+        guard !godsEye, lockOn else { return false }
+        if !wasLocked { return true }
+        guard let lastFollow else { return true }
+        return GraphRouter.haversine(lastFollow.lat, lastFollow.lon, puck.lat, puck.lon) >= followMeters
+    }
+
+    /// A new drawable line, and LOCK-ON is off, so show the whole walk.
+    public static func shouldFitRoute(
+        lockOn: Bool,
+        stored: [(lat: Double, lon: Double)]?,
+        route: [(lat: Double, lon: Double)],
+        godsEye: Bool = false
+    ) -> Bool {
+        guard !godsEye, !lockOn else { return false }
+        guard RouteLine.shouldDraw(route) else { return false }
+        return RouteLine.needsReapply(stored: stored, route: route)
+    }
+
+    public static func shouldHoldPack(godsEye: Bool) -> Bool {
+        godsEye
+    }
+
+    public static func shouldLeavePack(wasHolding: Bool, godsEye: Bool) -> Bool {
+        wasHolding && !godsEye
+    }
+
+    /// Overlay camera holds are exclusive. GODS EYE wins if both flags are set.
+    public static func liveLockOn(lockOn: Bool, godsEye: Bool) -> Bool {
+        lockOn && !godsEye
+    }
+
+    public static func liveGodsEye(lockOn: Bool, godsEye: Bool) -> Bool {
+        _ = lockOn
+        return godsEye
+    }
 }
 
 public enum PackStyle {
@@ -324,19 +773,53 @@ public enum PackStyle {
     public static let roadRefsLayerID = "road-refs"
     public static let placeLabelsLayerID = "place-labels"
     public static let tracksLayerID = "tracks"
+    public static let waterLineLayerID = "water"
+    public static let waterDetailSourceID = "water-detail"
+    public static let waterDetailPointsLayerID = "water-detail-points"
+    public static let waterDetailLabelsLayerID = "water-detail-labels"
+    public static let groundPointsLayerID = "ground-points"
+    public static let groundLabelsLayerID = "ground-labels"
+    public static let groundWorkedSourceID = "ground-worked"
+    public static let groundWorkedFillLayerID = "ground-worked-fill"
+    public static let groundWorkedLineLayerID = "ground-worked-line"
+    public static let landFillLayerID = "land-fill"
+    public static let khanSourceID = "khan"
+    public static let khanBuildingsLayerID = "khan-buildings"
+    public static let khanTreesLayerID = "khan-trees"
+    public static let khanSignalsLayerID = "khan-signals"
+    public static let khanLampsLayerID = "khan-lamps"
+    public static let khanSignsLayerID = "khan-signs"
+    public static let khanBuildingSourceLayer = "building"
+    public static let khanFurnitureSourceLayer = "furniture"
+    public static let aerialSourceID = "aerial"
+    public static let aerialLayerID = "aerial"
+    public static let aerialFileName = "aerial.pmtiles"
+    public static let overlaySourceID = "overlay"
+    public static let overlayFileName = "overlay.pmtiles"
+    public static let overlayContoursLayer = "contours"
+    public static let overlayWildLayer = "wild"
+    public static let overlayGroundLayer = "ground"
+    public static let overlayWaterDetailLayer = "water-detail"
+    public static let waterInk = "#6E747A"
+    /// Peaks and holes live on the pack's place slice from this zoom, same as
+    /// the tiler's POI floor. Closer than that they are noise; farther they
+    /// are not in the tiles.
+    public static let groundMinZoom: Double = 13
 
     /// Streets arrive as vector tiles, which are addressed by layer. A layer on
     /// the `osm` source that does not name one draws nothing at all, silently,
     /// so the mapping lives here rather than being repeated at each call site.
     public static let roadSourceLayer = "road"
     public static let placeSourceLayer = "place"
-    public static let voidInk = "#000000"
-    public static let silverInk = "#B8BDC2"
-    public static let accentInk = "#E10600"
+        public static let voidInk = "#000000"
+        public static let silverInk = "#B8BDC2"
+        public static let accentInk = "#E10600"
+        public static let sunFieldHex = "#E6E3D9"
+        public static let sunInkHex = "#141414"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
-    /// not keep replaying it. v2 stopped percent-escaping the glyph tokens.
-    public static let resolverVersion = 2
+    /// not keep replaying it. v13 merges sharded NAIP on the phone and reads overlay tiles.
+    public static let resolverVersion = 13
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -395,7 +878,9 @@ public enum PackStyle {
             } else if kind == "image", let rel = src["url"] as? String, !rel.hasPrefix("file:"), !rel.contains("://") {
                 src["url"] = packRoot.appendingPathComponent(rel).absoluteString
                 sources[key] = src
-            } else if kind == "vector", let rel = src["url"] as? String, PMTilesURL.isRelative(rel) {
+            } else if (kind == "vector" || kind == "raster"),
+                      let rel = src["url"] as? String, PMTilesURL.isRelative(rel)
+            {
                 src["url"] = PMTilesURL.resolve(rel, packRoot: packRoot)
                 sources[key] = src
             }
@@ -410,8 +895,14 @@ public enum PackStyle {
     public static func attachOfflineVectorLayers(_ obj: inout [String: Any], packRoot: URL) {
         var sources = obj["sources"] as? [String: Any] ?? [:]
         var layers = obj["layers"] as? [[String: Any]] ?? []
+        attachWaterLayers(&sources, &layers, packRoot: packRoot)
+        attachGroundLayers(&sources, &layers, packRoot: packRoot)
+        attachAerialLayers(&sources, &layers, packRoot: packRoot)
+        attachKhanLayers(&sources, &layers, packRoot: packRoot)
+        attachOverlaySource(&sources, packRoot: packRoot)
         let wildFile = packRoot.appendingPathComponent("wild.geojson")
-        if FileManager.default.fileExists(atPath: wildFile.path) {
+        if !FileManager.default.fileExists(atPath: packRoot.appendingPathComponent(overlayFileName).path),
+           FileManager.default.fileExists(atPath: wildFile.path) {
             if var existing = sources[wildSourceID] as? [String: Any] {
                 if let rel = existing["data"] as? String, !rel.hasPrefix("file:"), !rel.hasPrefix("{") {
                     existing["data"] = packRoot.appendingPathComponent(rel).absoluteString
@@ -520,8 +1011,8 @@ public enum PackStyle {
                     "symbol-sort-key": 0,
                 ],
                 "paint": [
-                    "text-color": accentInk,
-                    "text-halo-color": silverInk,
+                    "text-color": silverInk,
+                    "text-halo-color": voidInk,
                     "text-halo-width": 2.0,
                 ],
             ])
@@ -551,22 +1042,533 @@ public enum PackStyle {
         obj["sources"] = sources
         obj["layers"] = layers
     }
+
+    public static func attachOverlaySource(
+        _ sources: inout [String: Any],
+        packRoot: URL
+    ) {
+        let archive = packRoot.appendingPathComponent(overlayFileName)
+        guard FileManager.default.fileExists(atPath: archive.path) else { return }
+        if var existing = sources[overlaySourceID] as? [String: Any] {
+            if let rel = existing["url"] as? String, PMTilesURL.isRelative(rel) {
+                existing["url"] = PMTilesURL.resolve(rel, packRoot: packRoot)
+                sources[overlaySourceID] = existing
+            }
+        } else {
+            sources[overlaySourceID] = [
+                "type": "vector",
+                "url": PMTilesURL.shipped(for: archive),
+            ]
+        }
+    }
+
+    /// Packed USGS NAIP photo. Ground on the walking 3D desk and on KHAN EYE.
+    /// Not a live feed. Archives may be sharded under GitHub's 100 MB file cap.
+    public static func attachAerialLayers(
+        _ sources: inout [String: Any],
+        _ layers: inout [[String: Any]],
+        packRoot: URL
+    ) {
+        let names = ((try? FileManager.default.contentsOfDirectory(atPath: packRoot.path)) ?? [])
+            .filter { $0.hasPrefix("aerial") && $0.hasSuffix(".pmtiles") }
+            .sorted { lhs, rhs in
+                func rank(_ name: String) -> Int {
+                    if name == aerialFileName { return 0 }
+                    let trimmed = name.dropFirst("aerial-".count).dropLast(".pmtiles".count)
+                    return (Int(trimmed) ?? 0) + 1
+                }
+                return rank(lhs) < rank(rhs)
+            }
+        let wanted = Set(names.map { String($0.dropLast(8)) })
+        for key in sources.keys where key.hasPrefix("aerial") && !wanted.contains(key) {
+            sources.removeValue(forKey: key)
+        }
+        layers.removeAll { layer in
+            let id = layer["id"] as? String ?? ""
+            return id.hasPrefix("aerial") && !wanted.contains(id)
+        }
+        guard !names.isEmpty else { return }
+        var insertAt = layers.firstIndex(where: { $0["id"] as? String == landFillLayerID }).map { $0 + 1 }
+            ?? layers.count
+        for name in names {
+            let archive = packRoot.appendingPathComponent(name)
+            guard FileManager.default.fileExists(atPath: archive.path) else { continue }
+            let sourceID = String(name.dropLast(8))
+            if var existing = sources[sourceID] as? [String: Any] {
+                if let rel = existing["url"] as? String, PMTilesURL.isRelative(rel) {
+                    existing["url"] = PMTilesURL.resolve(rel, packRoot: packRoot)
+                    sources[sourceID] = existing
+                }
+            } else {
+                sources[sourceID] = [
+                    "type": "raster",
+                    "url": PMTilesURL.shipped(for: archive),
+                    "tileSize": 256,
+                ]
+            }
+            let layer: [String: Any] = [
+                "id": sourceID,
+                "type": "raster",
+                "source": sourceID,
+                "minzoom": 6,
+                "layout": ["visibility": "none"],
+                "paint": [
+                    "raster-opacity": 1,
+                    "raster-fade-duration": 0,
+                ],
+            ]
+            if let index = layers.firstIndex(where: { $0["id"] as? String == sourceID }) {
+                layers[index] = layer
+                if index >= insertAt {
+                    insertAt = index + 1
+                }
+            } else {
+                layers.insert(layer, at: insertAt)
+                insertAt += 1
+            }
+        }
+    }
+
+    /// Packed OSM houses, trees, signals, lamps and signs. Standing walls on
+    /// the walking 3D desk and on KHAN EYE.
+    public static func attachKhanLayers(
+        _ sources: inout [String: Any],
+        _ layers: inout [[String: Any]],
+        packRoot: URL
+    ) {
+        let archive = packRoot.appendingPathComponent("khan.pmtiles")
+        guard FileManager.default.fileExists(atPath: archive.path) else { return }
+        if var existing = sources[khanSourceID] as? [String: Any] {
+            if let rel = existing["url"] as? String, PMTilesURL.isRelative(rel) {
+                existing["url"] = PMTilesURL.resolve(rel, packRoot: packRoot)
+                sources[khanSourceID] = existing
+            }
+        } else {
+            sources[khanSourceID] = [
+                "type": "vector",
+                "url": PMTilesURL.shipped(for: archive),
+            ]
+        }
+        let hidden: [String: Any] = ["visibility": "none"]
+        let buildingColor: [Any] = [
+            "match",
+            ["get", "kind"],
+            "tree", "#3F8F4E",
+            "wood", "#2E6A3A",
+            "house", "#A39C94",
+            "detached", "#A39C94",
+            "apartments", "#8A929A",
+            "residential", "#8A929A",
+            "industrial", "#6E767E",
+            "warehouse", "#6E767E",
+            "retail", "#968A7C",
+            "commercial", "#968A7C",
+            "#8E949C",
+        ]
+        let wanted: [[String: Any]] = [
+            [
+                "id": khanBuildingsLayerID,
+                "type": "fill-extrusion",
+                "source": khanSourceID,
+                "source-layer": khanBuildingSourceLayer,
+                "minzoom": 11,
+                "filter": ["!", ["in", ["get", "kind"], ["literal", ["tree", "wood"]]]],
+                "layout": hidden,
+                "paint": [
+                    "fill-extrusion-color": buildingColor,
+                    "fill-extrusion-height": ["to-number", ["get", "height_m"]],
+                    "fill-extrusion-base": 0,
+                    "fill-extrusion-opacity": 1.0,
+                    "fill-extrusion-vertical-gradient": true,
+                ],
+            ],
+            [
+                "id": khanTreesLayerID,
+                "type": "fill-extrusion",
+                "source": khanSourceID,
+                "source-layer": khanBuildingSourceLayer,
+                "minzoom": 11,
+                "filter": ["in", ["get", "kind"], ["literal", ["tree", "wood"]]],
+                "layout": hidden,
+                "paint": [
+                    "fill-extrusion-color": [
+                        "match",
+                        ["get", "kind"],
+                        "wood", "#2E6A3A",
+                        "#3F8F4E",
+                    ],
+                    "fill-extrusion-height": ["to-number", ["get", "height_m"]],
+                    "fill-extrusion-base": 0,
+                    "fill-extrusion-opacity": 0.9,
+                    "fill-extrusion-vertical-gradient": true,
+                ],
+            ],
+            [
+                "id": khanSignalsLayerID,
+                "type": "circle",
+                "source": khanSourceID,
+                "source-layer": khanFurnitureSourceLayer,
+                "minzoom": 11,
+                "filter": ["==", ["get", "kind"], "signal"],
+                "layout": hidden,
+                "paint": [
+                    "circle-color": accentInk,
+                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 2.8, 16, 5.6],
+                    "circle-stroke-color": voidInk,
+                    "circle-stroke-width": 1.0,
+                ],
+            ],
+            [
+                "id": khanLampsLayerID,
+                "type": "circle",
+                "source": khanSourceID,
+                "source-layer": khanFurnitureSourceLayer,
+                "minzoom": 11,
+                "filter": ["==", ["get", "kind"], "lamp"],
+                "layout": hidden,
+                "paint": [
+                    "circle-color": "#E8A040",
+                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 2.2, 16, 4.4],
+                    "circle-stroke-color": voidInk,
+                    "circle-stroke-width": 0.8,
+                ],
+            ],
+            [
+                "id": khanSignsLayerID,
+                "type": "symbol",
+                "source": khanSourceID,
+                "source-layer": khanFurnitureSourceLayer,
+                "minzoom": 12,
+                "filter": ["==", ["get", "kind"], "sign"],
+                "layout": [
+                    "visibility": "none",
+                    "text-field": ["coalesce", ["get", "sign"], ["get", "name"], ""],
+                    "text-size": 12,
+                    "text-font": ["Open Sans Regular"],
+                    "text-anchor": "bottom",
+                    "text-offset": [0, -0.4],
+                    "text-optional": true,
+                ],
+                "paint": [
+                    "text-color": [
+                        "match",
+                        ["get", "sign"],
+                        "STOP", accentInk,
+                        "YIELD", "#E8A040",
+                        silverInk,
+                    ],
+                    "text-halo-color": voidInk,
+                    "text-halo-width": 2.0,
+                ],
+            ],
+        ]
+        for layer in wanted {
+            guard let id = layer["id"] as? String else { continue }
+            if let index = layers.firstIndex(where: { $0["id"] as? String == id }) {
+                layers[index] = layer
+            } else {
+                layers.append(layer)
+            }
+        }
+    }
+
+    /// Water by zoom, on a pack that may predate the class-mark file.
+    ///
+    /// Packs that already carry the marks in `style.json` are left alone.
+    /// Others get the dots if `layers/water.geojson` is on disk, and water
+    /// lines are gated at the zoom the tiles actually carry waterways.
+    public static func attachWaterLayers(
+        _ sources: inout [String: Any],
+        _ layers: inout [[String: Any]],
+        packRoot: URL
+    ) {
+        for index in layers.indices where layers[index]["id"] as? String == waterLineLayerID {
+            if layers[index]["minzoom"] == nil {
+                layers[index]["minzoom"] = WaterZoom.lineMinZoom
+            }
+        }
+        layers.removeAll { $0["id"] as? String == waterDetailLabelsLayerID }
+
+        let overlayFile = packRoot.appendingPathComponent(overlayFileName)
+        if FileManager.default.fileExists(atPath: overlayFile.path) {
+            attachOverlaySource(&sources, packRoot: packRoot)
+            if !layers.contains(where: { $0["id"] as? String == waterDetailPointsLayerID }) {
+                layers.append([
+                    "id": waterDetailPointsLayerID,
+                    "type": "circle",
+                    "source": overlaySourceID,
+                    "source-layer": overlayWaterDetailLayer,
+                    "minzoom": WaterZoom.detailMinZoom,
+                    "paint": [
+                        "circle-color": waterInk,
+                        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 2.6, 17, 5.2],
+                        "circle-stroke-color": silverInk,
+                        "circle-stroke-width": 1.1,
+                    ],
+                ])
+            }
+            return
+        }
+
+        let detailFile = packRoot.appendingPathComponent("layers/water.geojson")
+        guard FileManager.default.fileExists(atPath: detailFile.path) else { return }
+        if var existing = sources[waterDetailSourceID] as? [String: Any] {
+            if let rel = existing["data"] as? String, !rel.hasPrefix("file:"), !rel.hasPrefix("{") {
+                existing["data"] = packRoot.appendingPathComponent(rel).absoluteString
+                sources[waterDetailSourceID] = existing
+            }
+        } else {
+            sources[waterDetailSourceID] = [
+                "type": "geojson",
+                "data": detailFile.absoluteString,
+            ]
+        }
+        if !layers.contains(where: { $0["id"] as? String == waterDetailPointsLayerID }) {
+            layers.append([
+                "id": waterDetailPointsLayerID,
+                "type": "circle",
+                "source": waterDetailSourceID,
+                "minzoom": WaterZoom.detailMinZoom,
+                "paint": [
+                    "circle-color": waterInk,
+                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 2.6, 17, 5.2],
+                    "circle-stroke-color": silverInk,
+                    "circle-stroke-width": 1.1,
+                ],
+            ])
+        }
+    }
+
+    /// Peaks, holes and named trees the extract already put on the place slice,
+    /// plus glasshouses the land tiles currently drop, cave preserves that
+    /// otherwise read as picnic parks, wildlife range the Field book
+    /// already has, botanic gardens that otherwise read as picnic parks,
+    /// and open reserves (named nature reserves, ACECs, prairie preserves)
+    /// that otherwise read as picnic woodland.
+    /// Silver marks, no labels, no animals.
+    /// A hold reads the record; the mark only says something is here.
+    public static func attachGroundLayers(
+        _ sources: inout [String: Any],
+        _ layers: inout [[String: Any]],
+        packRoot: URL
+    ) {
+        layers.removeAll { $0["id"] as? String == groundLabelsLayerID }
+        attachWorkedGround(&sources, &layers, packRoot: packRoot)
+        guard sources["osm"] != nil else { return }
+        if !layers.contains(where: { $0["id"] as? String == groundPointsLayerID }) {
+            layers.append([
+                "id": groundPointsLayerID,
+                "type": "circle",
+                "source": "osm",
+                "source-layer": placeSourceLayer,
+                "minzoom": groundMinZoom,
+                "filter": [
+                    "in",
+                    ["get", "natural"],
+                    ["literal", Array(Inspect.packGroundPointNaturals).sorted()],
+                ],
+                "paint": [
+                    "circle-color": silverInk,
+                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 3.0, 16, 5.4],
+                    "circle-stroke-color": voidInk,
+                    "circle-stroke-width": 1.1,
+                ],
+            ])
+        }
+    }
+
+    /// Glasshouses the tiler has not yet classed as farm, cave preserves
+    /// that otherwise read as picnic parks, wildlife management areas
+    /// and nature preserves that otherwise read as picnic woodland, botanic gardens that
+    /// otherwise read as picnic parks, and open reserves (named nature
+    /// reserves, ACECs, prairie preserves) that otherwise
+    /// read as picnic woodland. Quiet fill under the streets
+    /// so a hold can name them — and the hold also asks this geojson source,
+    /// not only the faint fill, the same way a tank is asked of the pack
+    /// source. Silver outline at walking zoom so the record is visible — wide
+    /// enough to read, not a fill that greys the streets. No class label, not
+    /// a meal, not an animal pin.
+    private static func attachWorkedGround(
+        _ sources: inout [String: Any],
+        _ layers: inout [[String: Any]],
+        packRoot: URL
+    ) {
+        let overlayFile = packRoot.appendingPathComponent(overlayFileName)
+        if FileManager.default.fileExists(atPath: overlayFile.path) {
+            attachOverlaySource(&sources, packRoot: packRoot)
+            let fill: [String: Any] = [
+                "id": groundWorkedFillLayerID,
+                "type": "fill",
+                "source": overlaySourceID,
+                "source-layer": overlayGroundLayer,
+                "minzoom": groundMinZoom,
+                "paint": [
+                    "fill-color": silverInk,
+                    "fill-opacity": 0.01,
+                ],
+            ]
+            let line: [String: Any] = [
+                "id": groundWorkedLineLayerID,
+                "type": "line",
+                "source": overlaySourceID,
+                "source-layer": overlayGroundLayer,
+                "minzoom": groundMinZoom,
+                "layout": [
+                    "line-cap": "round",
+                    "line-join": "round",
+                ],
+                "paint": [
+                    "line-color": silverInk,
+                    "line-opacity": 0.88,
+                    "line-width": 2.2,
+                ],
+            ]
+            if !layers.contains(where: { $0["id"] as? String == groundWorkedFillLayerID }) {
+                if let idx = layers.firstIndex(where: { $0["id"] as? String == landFillLayerID }) {
+                    layers.insert(fill, at: idx + 1)
+                } else {
+                    layers.append(fill)
+                }
+            }
+            if !layers.contains(where: { $0["id"] as? String == groundWorkedLineLayerID }) {
+                layers.append(line)
+            }
+            return
+        }
+        let groundFile = packRoot.appendingPathComponent("layers/ground.geojson")
+        guard FileManager.default.fileExists(atPath: groundFile.path) else { return }
+        if var existing = sources[groundWorkedSourceID] as? [String: Any] {
+            if let rel = existing["data"] as? String, !rel.hasPrefix("file:"), !rel.hasPrefix("{") {
+                existing["data"] = packRoot.appendingPathComponent(rel).absoluteString
+                sources[groundWorkedSourceID] = existing
+            }
+        } else {
+            sources[groundWorkedSourceID] = [
+                "type": "geojson",
+                "data": groundFile.absoluteString,
+            ]
+        }
+        let fill: [String: Any] = [
+            "id": groundWorkedFillLayerID,
+            "type": "fill",
+            "source": groundWorkedSourceID,
+            "minzoom": groundMinZoom,
+            "paint": [
+                "fill-color": silverInk,
+                // One percent is enough for visibleFeatures and not enough
+                // to grey the streets that sit on top of the sheet.
+                "fill-opacity": 0.01,
+            ],
+        ]
+        let line: [String: Any] = [
+            "id": groundWorkedLineLayerID,
+            "type": "line",
+            "source": groundWorkedSourceID,
+            "minzoom": groundMinZoom,
+            "layout": [
+                "line-cap": "round",
+                "line-join": "round",
+            ],
+            "paint": [
+                "line-color": silverInk,
+                "line-opacity": 0.88,
+                "line-width": 2.2,
+            ],
+        ]
+        if !layers.contains(where: { $0["id"] as? String == groundWorkedFillLayerID }) {
+            if let idx = layers.firstIndex(where: { $0["id"] as? String == landFillLayerID }) {
+                layers.insert(fill, at: idx + 1)
+            } else {
+                layers.append(fill)
+            }
+        }
+        if !layers.contains(where: { $0["id"] as? String == groundWorkedLineLayerID }) {
+            layers.append(line)
+        }
+    }
 }
 
 public enum OverlaySync: Sendable {
+    /// Style mutation is add/remove of sources and layers. GPS ticks must
+    /// not request it for YOU or party position — those move in place.
     public static func needsStyleMutation(
         force: Bool,
         puckNeedsReapply: Bool,
         routeNeedsReapply: Bool,
-        destinationNeedsReapply: Bool = false
+        destinationNeedsReapply: Bool = false,
+        inspectNeedsReapply: Bool = false,
+        partyNeedsReapply: Bool = false
     ) -> Bool {
-        force || puckNeedsReapply || routeNeedsReapply || destinationNeedsReapply
+        force || puckNeedsReapply || routeNeedsReapply || destinationNeedsReapply || inspectNeedsReapply || partyNeedsReapply
+    }
+
+    public static func needsEyeLayerPass(
+        force: Bool,
+        lampFlip: Bool,
+        paletteFlip: Bool,
+        eyeFlip: Bool,
+        layersChanged: Bool
+    ) -> Bool {
+        force || lampFlip || paletteFlip || eyeFlip || layersChanged
+    }
+}
+
+public enum PersonMarkPaint: Sendable {
+    public static func quantizedHeading(_ heading: Double?) -> Int {
+        guard let heading, heading >= 0, heading.isFinite else { return -1 }
+        let stepped = (PersonCompass.normalized(heading) / FixPublish.minHeadingDelta).rounded()
+            * FixPublish.minHeadingDelta
+        return Int(stepped)
+    }
+
+    public static func needsImage(
+        force: Bool,
+        showYou: Bool,
+        lastShowYou: Bool?,
+        emblem: String,
+        lastEmblem: String?,
+        condition: String,
+        lastCondition: String?,
+        heading: Double?,
+        lastHeading: Double?,
+        pipKey: String,
+        lastPipKey: String?
+    ) -> Bool {
+        if force { return true }
+        if showYou != (lastShowYou ?? false) { return true }
+        if emblem != lastEmblem { return true }
+        if condition != lastCondition { return true }
+        if quantizedHeading(heading) != quantizedHeading(lastHeading) { return true }
+        if pipKey != lastPipKey { return true }
+        return false
+    }
+
+    public static func pipKey(_ pips: [PartyBody]) -> String {
+        pips.map { pip in
+            let heading = quantizedHeading(pip.ghost ? nil : pip.headingDeg)
+            return "\(pip.id)|\(pip.emblem)|\(pip.condition)|\(heading)|\(pip.markKind)|\(pip.lead)|\(pip.kid)"
+        }
+        .joined(separator: ";")
     }
 }
 
 public enum MapKeepAwake: Sendable {
-    public static func idleTimerDisabled(mapInstrumentActive: Bool) -> Bool {
-        mapInstrumentActive
+    public static func idleTimerDisabled(
+        mapInstrumentActive: Bool,
+        pocket: Bool = false,
+        signaling: Bool = false
+    ) -> Bool {
+        if signaling { return true }
+        if pocket { return false }
+        return mapInstrumentActive
+    }
+}
+
+/// UIKit `MLNMapView` ignores SwiftUI `allowsHitTesting`. The Metal view has
+/// to take this itself, and a hold card owns the canvas while it is up.
+public enum MapCanvasHit: Sendable {
+    public static func enabled(onMap: Bool, holding: Bool, arranging: Bool = false) -> Bool {
+        onMap && !holding && !arranging
     }
 }
 
@@ -594,6 +1596,7 @@ public enum FixPublish: Sendable {
             return true
         }
         if heading != nil && lastHeading == nil { return true }
+        if heading == nil && lastHeading != nil { return true }
         if let coord, let lastCoord {
             return GraphRouter.haversine(coord.lat, coord.lon, lastCoord.lat, lastCoord.lon) >= minMoveMeters
         }

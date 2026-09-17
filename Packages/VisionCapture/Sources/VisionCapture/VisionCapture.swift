@@ -18,10 +18,11 @@ public struct GuidedCapture: Equatable, Sendable {
         frames.append(CaptureFrame(features: features, added: true))
     }
     public func mergedFeatures() -> [Double] {
-        guard !frames.isEmpty else { return [0, 0, 0]
-        }
+        guard !frames.isEmpty else { return [0, 0, 0] }
+        let width = frames.map(\.features.count).min() ?? 0
+        guard width > 0 else { return [0, 0, 0] }
         let n = Double(frames.count)
-        return (0..<frames[0].features.count).map { i in
+        return (0..<width).map { i in
             frames.map { $0.features[i] }.reduce(0, +) / n
         }
     }

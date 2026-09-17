@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 import BlackBox
 
 public enum PowerMode: String, CaseIterable, Sendable { case quiet, normal, search }
@@ -10,6 +11,7 @@ public struct PowerState: Equatable, Sendable {
     public var screenBuffer: Bool
 }
 
+@Observable
 public final class AuctionBoard: @unchecked Sendable {
     public private(set) var state: PowerState
     private let box: EventLog

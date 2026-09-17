@@ -17,7 +17,22 @@ check() {
   fi
 }
 
-check 'URLSession' 'no URLSession'
+check_except() {
+  local pattern="$1"
+  local label="$2"
+  local except="$3"
+  local hits
+  hits="$(grep -RIn --include='*.swift' -E "$pattern" "$root/Blackout" "$root/Packages" | grep -v "/${except}:" || true)"
+  if [[ -n "$hits" ]]; then
+    echo "FAIL $label"
+    echo "$hits"
+    fail=1
+  else
+    echo "OK   $label"
+  fi
+}
+
+check_except 'URLSession' 'URLSession only UpdateSocket' 'UpdateSocket.swift'
 check 'WKWebView' 'no WKWebView'
 check 'FirebaseAnalytics|Amplitude|Mixpanel|TelemetryDeck|PostHog' 'no analytics SDKs'
 check 'CKContainer|NSPersistentCloudKitContainer' 'no CloudKit'
@@ -38,6 +53,13 @@ if [[ -f "$root/Vendor/MapLibre/MapLibre.xcframework/Info.plist" ]]; then
 else
   echo "FAIL MapLibre xcframework"
   fail=1
+fi
+
+if [[ -e "$root/Resources/Globe" || -f "$root/Blackout/GlobeView.swift" ]]; then
+  echo "FAIL Cesium leftover"
+  fail=1
+else
+  echo "OK   no Cesium leftover"
 fi
 
 python3 "$root/tools/validate_v3.py" || fail=1

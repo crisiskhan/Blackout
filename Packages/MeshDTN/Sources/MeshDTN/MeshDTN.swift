@@ -28,10 +28,250 @@ public struct MeshPip: Equatable, Sendable {
     public var from: String
     public var lat: Double
     public var lon: Double
-    public init(from: String, lat: Double, lon: Double) {
+    public var headingDeg: Double?
+    public var emblem: String?
+    public var name: String?
+    public var status: String?
+    public var vitals: [Double]?
+    public init(
+        from: String,
+        lat: Double,
+        lon: Double,
+        headingDeg: Double? = nil,
+        emblem: String? = nil,
+        name: String? = nil,
+        status: String? = nil,
+        vitals: [Double]? = nil
+    ) {
         self.from = from
         self.lat = lat
         self.lon = lon
+        self.headingDeg = headingDeg
+        self.emblem = emblem
+        self.name = name
+        self.status = status
+        self.vitals = vitals
+    }
+}
+
+/// Safety chrome on a person, not a party-wide chip blast.
+public enum PartyStatus: String, CaseIterable, Sendable {
+    case good, okay, bad, emergency
+
+    public static let fallback = PartyStatus.good
+
+    public var title: String {
+        switch self {
+        case .good:
+            return "GOOD"
+        case .okay:
+            return "OKAY"
+        case .bad:
+            return "BAD"
+        case .emergency:
+            return "EMERGENCY!"
+        }
+    }
+
+    public static func parse(_ raw: String?) -> PartyStatus {
+        guard let raw else { return .good }
+        let key = raw.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        switch key {
+        case "good", "ok":
+            return .good
+        case "okay", "wait":
+            return .okay
+        case "bad", "water":
+            return .bad
+        case "emergency", "emergency!", "down":
+            return .emergency
+        default:
+            return .good
+        }
+    }
+}
+
+public enum PartyNote {
+    public static let maxChars = 80
+
+    public static func clean(_ raw: String) -> String {
+        String(raw.trimmingCharacters(in: .whitespacesAndNewlines).prefix(maxChars))
+    }
+}
+
+public struct PartyThreadLine: Codable, Equatable, Sendable, Identifiable {
+    public var id: String
+    public var from: String
+    public var to: String
+    public var text: String
+
+    public init(id: String = UUID().uuidString, from: String, to: String, text: String) {
+        self.id = id
+        self.from = from
+        self.to = to
+        self.text = PartyNote.clean(text)
+    }
+}
+
+/// `lat,lon` still parses. Newer peers add heading, face, name, status, rails.
+public enum MeshPOS {
+    public static func body(
+        lat: Double,
+        lon: Double,
+        headingDeg: Double?,
+        emblem: String?,
+        name: String? = nil,
+        status: String? = nil,
+        vitals: [Double]? = nil
+    ) -> String {
+        let heading: String
+        if let headingDeg, headingDeg >= 0 {
+            heading = String(headingDeg)
+        } else {
+            heading = ""
+        }
+        let face = emblem ?? ""
+        let who = nameToken(name ?? "")
+        let band = PartyStatus.parse(status).rawValue
+        let core = "\(lat),\(lon),\(heading),\(face),\(who),\(band)"
+        guard let vitals, vitals.count == 6 else { return core }
+        let rails = vitals.map { String(format: "%.2f", $0) }.joined(separator: ",")
+        return "\(core),\(rails)"
+    }
+
+    public static func nameToken(_ raw: String) -> String {
+        let kept = raw.uppercased().filter { $0.isLetter || $0.isNumber || $0 == " " }
+        let collapsed = kept.split(whereSeparator: { $0 == " " }).joined(separator: " ")
+        return String(collapsed.prefix(16))
+    }
+
+    public static func parse(
+        _ text: String
+    ) -> (
+        lat: Double,
+        lon: Double,
+        headingDeg: Double?,
+        emblem: String?,
+        name: String?,
+        status: String?,
+        vitals: [Double]?
+    )? {
+        let parts = text.split(separator: ",", omittingEmptySubsequences: false)
+        guard parts.count >= 2, let lat = Double(parts[0]), let lon = Double(parts[1]),
+              lat.isFinite, lon.isFinite else {
+            return nil
+        }
+        var heading: Double?
+        if parts.count >= 3, !parts[2].isEmpty, let value = Double(parts[2]), value >= 0 {
+            heading = value
+        }
+        var emblem: String?
+        if parts.count >= 4 {
+            let raw = String(parts[3])
+            if !raw.isEmpty { emblem = raw }
+        }
+        var name: String?
+        if parts.count >= 5 {
+            let token = nameToken(String(parts[4]))
+            if !token.isEmpty { name = token }
+        }
+        var status: String?
+        if parts.count >= 6 {
+            let raw = String(parts[5])
+            if !raw.isEmpty { status = PartyStatus.parse(raw).rawValue }
+        }
+        var vitals: [Double]?
+        if parts.count >= 12 {
+            let rails = (6..<12).compactMap { Double(String(parts[$0])) }
+            if rails.count == 6 { vitals = rails }
+        }
+        return (lat, lon, heading, emblem, name, status, vitals)
+    }
+}
+
+public enum MeshTimerBody {
+    public static func parse(_ raw: String) -> (task: String, duration: TimeInterval) {
+        let parts = raw.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+        if parts.count >= 2, let sec = TimeInterval(parts[1]), sec > 0 {
+            return (parts[0], sec)
+        }
+        if raw == "1min" { return ("1min", 60) }
+        return (raw, 7200)
+    }
+
+    public static func encode(task: String, duration: TimeInterval, done: Bool) -> String {
+        if done { return task }
+        if task == "1min", duration == 60 { return "1min" }
+        if task == "water", duration == 7200 { return "water" }
+        return "\(task)\t\(Int(duration.rounded()))"
+    }
+}
+
+public enum MeshKitBody {
+    public static func parse(_ raw: String) -> (id: String, name: String, count: Int, assignedTo: String, working: Bool)? {
+        let parts = raw.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+        guard parts.count >= 5 else { return nil }
+        let count = Int(parts[2]) ?? 0
+        let assigned = parts[3] == "-" ? "" : parts[3]
+        return (parts[0], parts[1], count, assigned, parts[4] == "1")
+    }
+}
+
+public enum MeshMarkBody {
+    public static func encode(
+        id: String,
+        lat: Double,
+        lon: Double,
+        name: String,
+        note: String,
+        emblem: String,
+        label: String
+    ) -> String {
+        [
+            id,
+            String(lat),
+            String(lon),
+            clean(name),
+            clean(note),
+            emblem,
+            clean(label),
+        ].joined(separator: "\t")
+    }
+
+    public static func parse(_ raw: String) -> (
+        id: String,
+        lat: Double,
+        lon: Double,
+        name: String,
+        note: String,
+        emblem: String,
+        label: String
+    )? {
+        let parts = raw.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+        guard parts.count >= 7 else { return nil }
+        guard let lat = Double(parts[1]), let lon = Double(parts[2]) else { return nil }
+        return (parts[0], lat, lon, parts[3], parts[4], parts[5], parts[6])
+    }
+
+    public static func clean(_ raw: String) -> String {
+        raw.replacingOccurrences(of: "\t", with: " ")
+            .replacingOccurrences(of: "\n", with: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+/// Seat announcement. Separate from POS so vitals stay a 12-part body.
+public enum MeshRosterBody {
+    public static func encode(id: String, role: String, name: String) -> String {
+        [id, role, MeshMarkBody.clean(name)].joined(separator: "\t")
+    }
+
+    public static func parse(_ raw: String) -> (id: String, role: String, name: String)? {
+        let parts = raw.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+        guard parts.count >= 3 else { return nil }
+        let id = parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !id.isEmpty else { return nil }
+        return (id, parts[1], parts[2])
     }
 }
 
@@ -62,6 +302,7 @@ public final class LoopbackRadio: MeshRadio {
     public private(set) var sent: [MeshEnvelope] = []
     private let livePath: RadioPath
     private var onPeer: ((String) -> Void)?
+    private var onLost: ((String) -> Void)?
     private var onEnvelope: ((MeshEnvelope) -> Void)?
 
     public init(path: RadioPath = .ble) { livePath = path }
@@ -74,9 +315,9 @@ public final class LoopbackRadio: MeshRadio {
     ) {
         startedCode = partyCode
         self.onPeer = onPeer
+        self.onLost = onLost
         self.onEnvelope = onEnvelope
         path = .none
-        _ = onLost
     }
 
     public func stop() { path = .none }
@@ -86,6 +327,10 @@ public final class LoopbackRadio: MeshRadio {
     public func appearPeer(_ name: String = "loop") {
         path = livePath
         onPeer?(name)
+    }
+
+    public func losePeer(_ name: String) {
+        onLost?(name)
     }
 
     public func deliver(_ env: MeshEnvelope) { onEnvelope?(env) }
@@ -178,6 +423,7 @@ public final class MeshNet: @unchecked Sendable {
     public private(set) var inboundTimers: [MeshTimerEvent] = []
     public private(set) var lastRedOn: Bool?
     public private(set) var chromeNet = "NET · NONE"
+    public private(set) var listening = false
     public var airplane = true
     public var loRaBrickPresent = false
     public var partyCode = ""
@@ -201,11 +447,13 @@ public final class MeshNet: @unchecked Sendable {
         }
         nearby = []
         joined = false
+        listening = false
         refreshChrome()
         guard let radio else {
             box.log("mesh", "NET NONE local writes only")
             return
         }
+        listening = true
         radio.start(partyCode: partyCode, onPeer: { [weak self] peer in
             self?.heardPeer(peer)
         }, onLost: { [weak self] peer in
@@ -219,7 +467,9 @@ public final class MeshNet: @unchecked Sendable {
     public func stopLocal() {
         radio?.stop()
         nearby = []
+        pips.removeAll()
         joined = false
+        listening = false
         refreshChrome()
         box.log("mesh", "radio stopped")
     }
@@ -239,23 +489,122 @@ public final class MeshNet: @unchecked Sendable {
             chromeNet = "NO PEERS · LOGGED"
             box.log("mesh", "NO PEERS · LOGGED local write \(env.kind) \(env.id)")
         }
+        if isSelfAddressed(env) {
+            receive(env)
+        }
     }
 
-    public func sendPOS(from: String, lat: Double, lon: Double) {
-        enqueue(make(from: from, kind: "pos", body: Data("\(lat),\(lon)".utf8)))
-        upsertPip(MeshPip(from: from, lat: lat, lon: lon))
+    public func sendPOS(
+        from: String,
+        lat: Double,
+        lon: Double,
+        headingDeg: Double? = nil,
+        emblem: String? = nil,
+        name: String? = nil,
+        status: String? = nil,
+        vitals: [Double]? = nil
+    ) {
+        guard lat.isFinite, lon.isFinite else { return }
+        enqueue(
+            make(
+                from: from,
+                kind: "pos",
+                body: Data(
+                    MeshPOS.body(
+                        lat: lat,
+                        lon: lon,
+                        headingDeg: headingDeg,
+                        emblem: emblem,
+                        name: name,
+                        status: status,
+                        vitals: vitals
+                    ).utf8
+                )
+            )
+        )
+        if from != localID {
+            upsertPip(
+                MeshPip(
+                    from: from,
+                    lat: lat,
+                    lon: lon,
+                    headingDeg: headingDeg,
+                    emblem: emblem,
+                    name: name,
+                    status: status,
+                    vitals: vitals
+                )
+            )
+        }
     }
 
-    public func sendChip(from: String, chip: String) {
-        enqueue(make(from: from, kind: "chip", body: Data(chip.utf8)))
+    public func sendChip(from: String, chip: String, to: String = "*") {
+        enqueue(make(from: from, kind: "chip", body: Data(chip.utf8), to: to))
+    }
+
+    public func sendNote(from: String, text: String, to: String = "*") {
+        let body = PartyNote.clean(text)
+        guard !body.isEmpty else { return }
+        enqueue(make(from: from, kind: "note", body: Data(body.utf8), to: to))
+    }
+
+    public func clearInboundChip(_ name: String) {
+        inboundChips.removeAll { $0 == name }
+    }
+
+    public func sendVoice(from: String, opus: Data, to: String = "*") {
+        enqueue(make(from: from, kind: "voice", body: opus, to: to))
     }
 
     public func sendRED(from: String, on: Bool) {
         enqueue(make(from: from, kind: "red", body: Data((on ? "on" : "off").utf8)))
     }
 
-    public func sendTimer(from: String, task: String, done: Bool) {
-        enqueue(make(from: from, kind: done ? "timer.done" : "timer.set", body: Data(task.utf8)))
+    public func sendTimer(from: String, task: String, done: Bool, duration: TimeInterval = 7200) {
+        let body = MeshTimerBody.encode(task: task, duration: duration, done: done)
+        enqueue(make(from: from, kind: done ? "timer.done" : "timer.set", body: Data(body.utf8)))
+    }
+
+    public func sendKit(
+        from: String,
+        itemID: String,
+        name: String,
+        count: Int,
+        assignedTo: String,
+        working: Bool
+    ) {
+        let assigned = assignedTo.isEmpty ? "-" : assignedTo
+        let work = working ? "1" : "0"
+        let body = "\(itemID)\t\(name)\t\(count)\t\(assigned)\t\(work)"
+        enqueue(make(from: from, kind: "kit", body: Data(body.utf8)))
+    }
+
+    public func sendMark(
+        from: String,
+        id: String,
+        lat: Double,
+        lon: Double,
+        name: String,
+        note: String,
+        emblem: String,
+        label: String
+    ) {
+        guard lat.isFinite, lon.isFinite else { return }
+        let body = MeshMarkBody.encode(
+            id: id,
+            lat: lat,
+            lon: lon,
+            name: name,
+            note: note,
+            emblem: emblem,
+            label: label
+        )
+        enqueue(make(from: from, kind: "mark", body: Data(body.utf8)))
+    }
+
+    public func sendRoster(from: String, id: String, role: String, name: String) {
+        let body = MeshRosterBody.encode(id: id, role: role, name: name)
+        enqueue(make(from: from, kind: "roster", body: Data(body.utf8)))
     }
 
     public func linkKind() -> LinkKind {
@@ -271,8 +620,14 @@ public final class MeshNet: @unchecked Sendable {
         return !nearby.isEmpty
     }
 
-    private func make(from: String, kind: String, body: Data) -> MeshEnvelope {
-        MeshEnvelope(id: UUID().uuidString, from: from, to: "*", kind: kind, body: body)
+    private func make(from: String, kind: String, body: Data, to: String = "*") -> MeshEnvelope {
+        MeshEnvelope(id: UUID().uuidString, from: from, to: to, kind: kind, body: body)
+    }
+
+    private func isSelfAddressed(_ env: MeshEnvelope) -> Bool {
+        guard env.from == localID else { return false }
+        let dest = env.to.trimmingCharacters(in: .whitespacesAndNewlines)
+        return dest == "YOU" || dest == localID
     }
 
     private func heardPeer(_ peer: String) {
@@ -284,33 +639,62 @@ public final class MeshNet: @unchecked Sendable {
 
     private func lostPeer(_ peer: String) {
         nearby.removeAll { $0 == peer }
+        pips.removeAll { $0.from == peer }
         refreshChrome()
         box.log("mesh", "lost \(peer) \(chromeNet)")
+        onPeersChanged?()
     }
 
     private func receive(_ env: MeshEnvelope) {
-        if env.from == localID { return }
+        if env.from == localID, !isSelfAddressed(env) { return }
         if inbox.contains(where: { $0.id == env.id }) { return }
         inbox.append(env)
-        store.append(env)
+        if !store.contains(where: { $0.id == env.id }) {
+            store.append(env)
+        }
         switch env.kind {
         case "pos":
-            if let text = String(data: env.body, encoding: .utf8) {
-                let parts = text.split(separator: ",")
-                if parts.count >= 2, let lat = Double(parts[0]), let lon = Double(parts[1]) {
-                    upsertPip(MeshPip(from: env.from, lat: lat, lon: lon))
-                }
+            if let text = String(data: env.body, encoding: .utf8),
+               let parsed = MeshPOS.parse(text) {
+                upsertPip(
+                    MeshPip(
+                        from: env.from,
+                        lat: parsed.lat,
+                        lon: parsed.lon,
+                        headingDeg: parsed.headingDeg,
+                        emblem: parsed.emblem,
+                        name: parsed.name,
+                        status: parsed.status,
+                        vitals: parsed.vitals
+                    )
+                )
             }
         case "chip":
             if let name = String(data: env.body, encoding: .utf8) {
                 inboundChips.append(name)
+                if inboundChips.count > 16 {
+                    inboundChips.removeFirst(inboundChips.count - 16)
+                }
+            }
+        case "note":
+            if let text = String(data: env.body, encoding: .utf8) {
+                let note = PartyNote.clean(text)
+                if !note.isEmpty {
+                    inboundChips.append(note)
+                    if inboundChips.count > 16 {
+                        inboundChips.removeFirst(inboundChips.count - 16)
+                    }
+                }
             }
         case "red":
             lastRedOn = String(data: env.body, encoding: .utf8) == "on"
         case "timer.set", "timer.done":
-            if let task = String(data: env.body, encoding: .utf8) {
-                upsertTimer(MeshTimerEvent(id: env.id, from: env.from, task: task, done: env.kind == "timer.done"))
+            if let raw = String(data: env.body, encoding: .utf8) {
+                let parsed = MeshTimerBody.parse(raw)
+                upsertTimer(MeshTimerEvent(id: env.id, from: env.from, task: parsed.task, done: env.kind == "timer.done"))
             }
+        case "mark", "kit", "voice", "roster":
+            break
         default:
             break
         }

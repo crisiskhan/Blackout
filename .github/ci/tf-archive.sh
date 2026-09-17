@@ -13,6 +13,11 @@ if [ -z "$NEXT" ]; then
 fi
 echo "CURRENT_PROJECT_VERSION on the command line only: $NEXT (not committed)"
 
+# Dolphin 3.0 Llama 3.2 3B Q4 for FIELD ASK. Unsigned compile must not fetch
+# this 2 GB file. Archive may. Missing weights still ship a grounded walk.
+echo "fetch ASK model if missing"
+"${PYBIN:-python3}" tools/fetch_field_ask_model.py || echo "ASK model fetch failed; archive continues"
+
 if [ -n "${SIGNING_KEYCHAIN:-}" ] && [ -f "$SIGNING_KEYCHAIN" ]; then
   security unlock-keychain -p "$SIGNING_KC_PASS" "$SIGNING_KEYCHAIN"
   security set-keychain-settings -lut 21600 "$SIGNING_KEYCHAIN"
@@ -344,7 +349,21 @@ resign_submission() {
   if [ -d "$app/Frameworks" ]; then
     while IFS= read -r fw; do
       echo "re-sign nested $fw"
-      /usr/bin/codesign --force --sign "$IDHASH" --identifier com.maplibre.mapbox --timestamp --generate-entitlement-der "$fw"
+      # MapLibre keeps Apple-shipped com.maplibre.mapbox. llama keeps
+      # org.ggml.llama. Do not seal llama as MapLibre. Do not rewrite
+      # either onto com.crisiskhan.blackout.* (no ASC app for nested FMWKs).
+      case "$(basename "$fw")" in
+        MapLibre.framework)
+          /usr/bin/codesign --force --sign "$IDHASH" --identifier com.maplibre.mapbox --timestamp --generate-entitlement-der "$fw"
+          ;;
+        llama.framework)
+          /usr/bin/codesign --force --sign "$IDHASH" --identifier org.ggml.llama --timestamp --generate-entitlement-der "$fw"
+          ;;
+        *)
+          echo "unknown nested FMWK $fw"
+          return 1
+          ;;
+      esac
     done < <(find "$app/Frameworks" -name '*.framework' -print | sort -r)
   fi
   if [ -d "$app/PlugIns" ]; then
@@ -529,8 +548,9 @@ echo "IPA has no Watch/ companion (phone Internal only)."
 # 33925258357 / 33929367958: altool -19000 on com.maplibre.mapbox, then on
 # com.crisiskhan.blackout.maplibre when upload was unbound. 33931992681:
 # bound altool then Apple rejected empty FMWK BID. Keep vendor
-# com.maplibre.mapbox. Do not strip. Do not rewrite onto an owned BID.
-# Inspect Payload before declaring IPA ready. No ASC app for MapLibre.
+# com.maplibre.mapbox. llama.framework keeps org.ggml.llama. Do not strip.
+# Do not rewrite onto an owned BID. Inspect Payload before declaring IPA ready.
+# No ASC app for MapLibre or llama.
 "$PYBIN" tools/tf_ipa_inspect.py --ipa "$IPA"
 VERIFY="$RUNNER_TEMP/ipa-verify"
 rm -rf "$VERIFY"

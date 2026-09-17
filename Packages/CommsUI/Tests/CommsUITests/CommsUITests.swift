@@ -13,4 +13,23 @@ final class CommsUITests: XCTestCase {
         s.setChannel("1:1")
         XCTAssertEqual(s.channel, "1:1")
     }
+
+    func testRadioCheckDoesNotInventAPeer() {
+        var s = CommsState()
+        s.radioCheck()
+        XCTAssertFalse(s.radioCheckOK)
+        s.radioCheck(heard: true)
+        XCTAssertTrue(s.radioCheckOK)
+        XCTAssertEqual(s.meshTo(nearby: []), "*")
+        s.setChannel("1:1")
+        XCTAssertEqual(s.meshTo(nearby: []), "*")
+        XCTAssertEqual(s.meshTo(nearby: ["A", "B"]), "A")
+        s.pickPeer("B")
+        XCTAssertEqual(s.meshTo(nearby: ["A", "B"]), "B")
+        XCTAssertEqual(s.meshTo(nearby: []), "B")
+        XCTAssertEqual(s.channel, "1:1")
+        s.pickPeer("YOU")
+        XCTAssertEqual(s.meshTo(nearby: []), "YOU")
+        XCTAssertEqual(s.meshTo(nearby: ["A", "B"]), "YOU")
+    }
 }
