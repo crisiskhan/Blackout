@@ -2223,7 +2223,7 @@ extension PackStyle {
             let id = layer.identifier
             if id == "hillshade" || id.hasPrefix("hillshade") {
                 layer.isVisible = shade
-                if godsEye, shade, let raster = layer as? MLNRasterStyleLayer {
+                if shade, let raster = layer as? MLNRasterStyleLayer {
                     paintKhanShade(raster)
                 }
             }

@@ -388,6 +388,58 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
             self.assertIn("Pinch-out stays on packed photo", blob)
             self.assertIn("pack diamond on black is a FAIL", blob)
 
+    def test_walk_hillshade_paints_the_floor_off_photo(self):
+        """6:47 still: looking north off the Oleaster stamp was void, not ground."""
+        eye = OFFLINE.read_text().split("public static func applyEyeLayers")[1].split(
+            "public static func applyEyePalette"
+        )[0]
+        self.assertNotIn("if godsEye, shade, let raster", eye)
+        self.assertIn("if shade, let raster = layer as? MLNRasterStyleLayer", eye)
+        self.assertIn("paintKhanShade(raster)", eye)
+        for blob in (
+            (ROOT / "docs" / "SOLO_QA.md").read_text(),
+            (ROOT / "docs" / "DEVICE.md").read_text(),
+        ):
+            self.assertIn("Looking north off the photo stamp is hillshade, not void", blob)
+            self.assertIn("Oleaster–Canutillo photo is packed", blob)
+
+    def test_canutillo_borderland_mowad_are_on_packed_photo(self):
+        """6:47 still: Borderland / TX 20 / Mowad sat past the NAIP postage stamp."""
+        you = {"lat": 31.87051, "lon": -106.59729}
+        canutillo = {"lat": 31.917, "lon": -106.600}
+        borderland = {"lat": 31.90, "lon": -106.58}
+        mowad = {"lat": 31.93, "lon": -106.58}
+        boxes = aerial.photo_bboxes({"id": "tx-west", "slices": PACKS["tx-west"]["slices"]})
+        union = aerial.union_photo_bbox(boxes)
+        for name, pt in (
+            ("YOU", you),
+            ("Canutillo", canutillo),
+            ("Borderland", borderland),
+            ("Mowad", mowad),
+        ):
+            self.assertTrue(
+                union["south"] <= pt["lat"] <= union["north"],
+                f"{name} lat {pt['lat']} is off packed photo {union}",
+            )
+            self.assertTrue(
+                union["west"] <= pt["lon"] <= union["east"],
+                f"{name} lon {pt['lon']} is off packed photo {union}",
+            )
+        extra = aerial.PHOTO_EXTRA["tx-west"][0]
+        self.assertLessEqual(extra["south"], 31.85)
+        self.assertLessEqual(extra["west"], -106.63)
+        self.assertGreaterEqual(extra["north"], 31.94)
+        self.assertGreaterEqual(extra["east"], -106.55)
+        archive = PACK_ROOT / "tx-west" / "aerial.pmtiles"
+        with open(archive, "rb") as fh:
+            reader = Reader(MmapSource(fh))
+            cx, cy = lonlat_to_tile(canutillo["lon"], canutillo["lat"], 16)
+            blob = reader.get(16, int(cx), int(cy))
+        self.assertIsNotNone(blob, "Canutillo has no packed photo at z16")
+        assert blob is not None
+        self.assertTrue(blob.startswith(b"\xff\xd8"), "Canutillo aerial is not JPEG")
+        self.assertGreater(len(blob), 800)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -39,11 +39,11 @@ JPEG_MAGIC = b"\xff\xd8"
 PHOTO_EXTRA = {
     "tx-west": [
         {
-            "name": "Oleaster walk",
-            "south": 31.86,
-            "west": -106.61,
-            "north": 31.88,
-            "east": -106.58,
+            "name": "Oleaster–Canutillo walk",
+            "south": 31.85,
+            "west": -106.63,
+            "north": 31.94,
+            "east": -106.55,
         }
     ]
 }
