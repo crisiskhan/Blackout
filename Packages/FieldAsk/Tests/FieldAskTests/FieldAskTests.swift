@@ -200,6 +200,26 @@ final class FieldAskTests: XCTestCase {
         XCTAssertEqual((live.links ?? []).map(\.label).first, "CPR")
     }
 
+    func testFindPeopleIsListenAndLouder() {
+        for query in ["find people", "civilization", "anyone out there"] {
+            let live = FieldAsk.grounded(
+                query: query,
+                chapter: [],
+                packId: "tx-west",
+                locale: "en"
+            )
+            XCTAssertEqual(live.id, FieldAsk.liveID, query)
+            let first = live.steps[0].do.en.lowercased()
+            let blob = live.steps.map { $0.do.en }.joined(separator: " ").lowercased()
+            XCTAssertTrue(
+                first.contains("listen") || first.contains("louder") || first.contains("radio")
+                    || blob.contains("listen") || blob.contains("louder") || blob.contains("radio"),
+                "\(query) first move \(first)"
+            )
+            XCTAssertEqual((live.links ?? []).map(\.label), ["SIGNAL", "STAY"], query)
+        }
+    }
+
     func testDrownWalkGetsThemOntoLandFirst() {
         let live = FieldAsk.grounded(
             query: "someone is drowning",

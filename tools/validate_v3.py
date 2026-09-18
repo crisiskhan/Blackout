@@ -827,6 +827,8 @@ def mesh() -> None:
         ok("RALLY/DOWN chips and RED/timer mesh wiring")
     if "chromeNear" not in src or "noteHear" not in src or "ble, hop" not in src:
         bad("mesh missing NEAR / hop carry")
+    elif "func startListen(" not in src or "chromeSignal" not in src:
+        bad("mesh missing listen / signal chrome")
     else:
         ok("mesh hears radios and hops store")
 

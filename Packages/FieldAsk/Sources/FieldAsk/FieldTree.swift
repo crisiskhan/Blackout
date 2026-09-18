@@ -112,6 +112,7 @@ public enum FieldTree {
         case .tornado: return [cpr, stay]
         case .fracture: return [bleed, shock, stay]
         case .lost: return [signal, stay]
+        case .people: return [signal, stay]
         case .eye: return [stay]
         case .animal: return [bite, stay]
         case .avalanche: return [cpr, cold, stay]

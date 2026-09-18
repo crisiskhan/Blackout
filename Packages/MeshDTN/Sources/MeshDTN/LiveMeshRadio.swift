@@ -59,19 +59,22 @@ public final class LiveMeshRadio: NSObject, MeshRadio {
 
     public func start(
         partyCode: String,
+        join: Bool,
         onPeer: @escaping (String) -> Void,
         onLost: @escaping (String) -> Void,
         onEnvelope: @escaping (MeshEnvelope) -> Void
     ) {
         stop()
-        self.partyCode = partyCode.uppercased()
+        self.partyCode = join ? partyCode.uppercased() : ""
         self.onPeer = onPeer
         self.onLost = onLost
         self.onEnvelope = onEnvelope
         knownPeers = []
         knownHops = []
         path = .none
-        startMPC()
+        if join, !self.partyCode.isEmpty {
+            startMPC()
+        }
         startBLE()
     }
 
@@ -198,8 +201,13 @@ public final class LiveMeshRadio: NSObject, MeshRadio {
 
     private func startBLE() {
         #if canImport(CoreBluetooth)
-        serviceUUID = CBUUID(nsuuid: PartyMeshUUID.uuid(for: partyCode))
-        charUUID = CBUUID(nsuuid: PartyMeshUUID.characteristic(for: partyCode))
+        if !partyCode.isEmpty {
+            serviceUUID = CBUUID(nsuuid: PartyMeshUUID.uuid(for: partyCode))
+            charUUID = CBUUID(nsuuid: PartyMeshUUID.characteristic(for: partyCode))
+        } else {
+            serviceUUID = nil
+            charUUID = nil
+        }
         hopUUID = CBUUID(nsuuid: PartyMeshUUID.hopService())
         hopCharUUID = CBUUID(nsuuid: PartyMeshUUID.hopCharacteristic())
         central = CBCentralManager(delegate: self, queue: .main)
@@ -445,32 +453,33 @@ extension LiveMeshRadio: CBCentralManagerDelegate, CBPeripheralManagerDelegate, 
     }
 
     public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
-        guard peripheral.state == .poweredOn, let serviceUUID, let charUUID else { return }
-        let ch = CBMutableCharacteristic(
-            type: charUUID,
-            properties: [.write, .writeWithoutResponse, .notify],
-            value: nil,
-            permissions: [.writeable, .readable]
-        )
-        envelopeChar = ch
-        let svc = CBMutableService(type: serviceUUID, primary: true)
-        svc.characteristics = [ch]
+        guard peripheral.state == .poweredOn, let hopUUID, let hopCharUUID else { return }
         peripheral.removeAllServices()
-        peripheral.add(svc)
-        var advertised: [CBUUID] = [serviceUUID]
-        if let hopUUID, let hopCharUUID {
-            let hopCh = CBMutableCharacteristic(
-                type: hopCharUUID,
+        var advertised: [CBUUID] = []
+        if let serviceUUID, let charUUID {
+            let ch = CBMutableCharacteristic(
+                type: charUUID,
                 properties: [.write, .writeWithoutResponse, .notify],
                 value: nil,
                 permissions: [.writeable, .readable]
             )
-            hopEnvelopeChar = hopCh
-            let hopSvc = CBMutableService(type: hopUUID, primary: true)
-            hopSvc.characteristics = [hopCh]
-            peripheral.add(hopSvc)
-            advertised.append(hopUUID)
+            envelopeChar = ch
+            let svc = CBMutableService(type: serviceUUID, primary: true)
+            svc.characteristics = [ch]
+            peripheral.add(svc)
+            advertised.append(serviceUUID)
         }
+        let hopCh = CBMutableCharacteristic(
+            type: hopCharUUID,
+            properties: [.write, .writeWithoutResponse, .notify],
+            value: nil,
+            permissions: [.writeable, .readable]
+        )
+        hopEnvelopeChar = hopCh
+        let hopSvc = CBMutableService(type: hopUUID, primary: true)
+        hopSvc.characteristics = [hopCh]
+        peripheral.add(hopSvc)
+        advertised.append(hopUUID)
         peripheral.startAdvertising([
             CBAdvertisementDataLocalNameKey: "BO",
             CBAdvertisementDataServiceUUIDsKey: advertised,

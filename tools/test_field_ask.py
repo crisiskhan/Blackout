@@ -259,6 +259,11 @@ def ask_book(cards: list[dict], query: str, locale: str = "en") -> list[dict]:
         if "sick" in expanded:
             continue
         if (
+            {"people", "civilization", "anyone", "radio", "phone"} & expanded
+            and not ({"water", "thirst", "choke", "bleed", "hurt"} & expanded)
+        ):
+            continue
+        if (
             "stay" in expanded
             and ({"stable", "stabilize", "alive"} & set(q_tokens))
             and "cold" not in expanded
@@ -1033,6 +1038,8 @@ def _walk_family(toks: set[str]) -> str:
         return "break"
     if toks & {"lost", "gps", "separated"}:
         return "lost"
+    if toks & {"people", "civilization", "anyone", "radio", "phone"}:
+        return "people"
     if toks & {"eye"}:
         return "eye"
     if toks & {"nose", "nosebleed"}:
@@ -1091,6 +1098,7 @@ def grounded_ask(query: str, chapter: list[dict], pack_id: str | None, locale: s
         "overdose",
         "tight",
         "stuck",
+        "people",
     }
     start = [] if family in urgent else [
         _step(
@@ -1304,6 +1312,46 @@ def grounded_ask(query: str, chapter: list[dict], pack_id: str | None, locale: s
         care = _loc(
             "Get to trained help for any burn that is big, on the face, or on the hands.",
             "Llega a ayuda entrenada si la quemadura es grande, en la cara o en las manos.",
+        )
+    elif family == "people":
+        body = [
+            _step(
+                "Open COMMS LISTEN. Face the radio. Walk toward NEAR · LOUDER. A louder radio is closer. Silence is not a house.",
+                "Abre COMMS LISTEN. Enfrenta la radio. Camina hacia NEAR · LOUDER. Una radio más fuerte está más cerca. El silencio no es una casa.",
+                "Tap LISTEN. Walk toward louder. Do not invent a house.",
+                "Toca LISTEN. Camina hacia más fuerte. No inventes una casa.",
+                "The glass cannot place a closed phone. Louder is closer. A quiet radio is farther, not gone.",
+                "El visor no coloca un teléfono cerrado. Más fuerte es más cerca. Una radio quieta está más lejos, no desapareció.",
+                "Stop if the path is a cliff, fire, or water you cannot cross.",
+                "Para si el camino es un acantilado, fuego o agua que no puedes cruzar.",
+                picture,
+            ),
+            _step(
+                "If a LAST hop mark sits on the field, walk that street. If the hold says NO PLACE, stay visible and tap SIGNAL. Do not invent a house from a quiet radio.",
+                "Si un LAST hop está en el campo, camina esa calle. Si el hold dice NO PLACE, quédate visible y toca SIGNAL. No inventes una casa desde una radio quieta.",
+                "Walk the LAST mark. If there is no place, sit where people can see you.",
+                "Camina la marca LAST. Si no hay lugar, siéntate donde te vean.",
+                "A hop POS is the last place a Blackout phone told. RSSI is not a map pin.",
+                "Un hop POS es el último sitio que un teléfono Blackout dijo. RSSI no es un pin.",
+                "Stop if moving would put you in a wash, fire, or night cold you cannot survive.",
+                "Para si moverte te mete en un arroyo, fuego o frío de noche que no sobrevives.",
+                picture,
+            ),
+            _step(
+                "From that spot, yell in threes and wave a bright cloth. Keep LISTEN on. Tap SIGNAL when you need to be seen.",
+                "Desde ese sitio, grita de a tres y agita un paño brillante. Deja LISTEN encendido. Toca SIGNAL cuando hay que ser visto.",
+                "Three yells. Then listen. Then three more.",
+                "Tres gritos. Luego escucha. Luego tres más.",
+                "A pattern is how people know you are a person. The radio keeps listening while you stay put.",
+                "Un patrón es cómo saben que eres una persona. La radio sigue escuchando mientras te quedas.",
+                "Stop yelling if you need that breath to stay warm.",
+                "Deja de gritar si necesitas ese aire para no enfriar.",
+                picture,
+            ),
+        ]
+        care = _loc(
+            "Stay visible. Keep LISTEN on. Do not wait on a number the glass cannot dial.",
+            "Quédate visible. Deja LISTEN encendido. No esperes un número que el visor no puede marcar.",
         )
     elif family == "lost":
         body = [
@@ -2426,6 +2474,7 @@ _FAMILY_FORKS = {
     "tornado": ("CPR", "STAY"),
     "break": ("BLEED", "SHOCK", "STAY"),
     "lost": ("SIGNAL", "STAY"),
+    "people": ("SIGNAL", "STAY"),
     "eye": ("STAY",),
     "animal": ("BITE", "STAY"),
     "avalanche": ("CPR", "COLD", "STAY"),

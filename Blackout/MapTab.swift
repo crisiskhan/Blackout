@@ -436,7 +436,11 @@ struct MapTab: View {
         let lines = MapFieldChrome.lines(
             lock: runtime.lockChrome,
             route: runtime.routeChrome,
-            tool: MapFieldChrome.joined([runtime.toolChrome, runtime.mesh.chromeNear]),
+            tool: MapFieldChrome.joined([
+                runtime.toolChrome,
+                runtime.mesh.chromeNear,
+                runtime.mesh.chromeSignal,
+            ]),
             dest: dest,
             you: you,
             speak: runtime.speechChrome

@@ -210,7 +210,6 @@ final class AppRuntime {
                 self?.sendRosterSeat()
             }
         }
-        mesh.startLocal()
         roster = roster.rebindingLead(to: mesh.localID, name: displayYouName)
         if let raw = UserDefaults.standard.string(forKey: "you.role"),
            let role = PartyRole.parse(raw)
@@ -259,7 +258,29 @@ final class AppRuntime {
         fix.arm()
         box.log("arming", "activated")
         applyMapKeepAwake()
+        listenNet()
         pulse()
+    }
+
+    func listenNet() {
+        mesh.airplane = true
+        if mesh.radio == nil { mesh.attach(LiveMeshRadio()) }
+        if mesh.listening, !mesh.joined { return }
+        mesh.startListen()
+    }
+
+    func quietRadio() {
+        clipTask?.cancel()
+        clipTask = nil
+        clipLive = false
+        clipArming = false
+        pttHold = false
+        if ptt.live { endPTTSolo() }
+        _ = PTTMic.shared.stop()
+        mesh.stopLocal()
+        comms.radioCheck(heard: false)
+        commsChrome = ""
+        clearIncoming()
     }
 
     func joinNet() {
@@ -278,7 +299,7 @@ final class AppRuntime {
         pttHold = false
         if ptt.live { endPTTSolo() }
         _ = PTTMic.shared.stop()
-        mesh.stopLocal()
+        mesh.stopParty()
         comms.radioCheck(heard: false)
         commsChrome = ""
         clearIncoming()
@@ -776,38 +797,65 @@ final class AppRuntime {
         heldCam = nil
         let marks = mesh.presenceMarks(you: fieldYou)
         if let mark = marks.first(where: { $0.id == id }) {
-            heldNear = NearHold(
-                id: mark.id,
-                lat: mark.lat,
-                lon: mark.lon,
-                count: mark.count,
-                kinds: mark.kinds
-            )
+            heldNear = hold(from: mark)
             return
         }
         if let mark = marks.min(by: {
             MeshPresence.meters(lat, lon, $0.lat, $0.lon)
                 < MeshPresence.meters(lat, lon, $1.lat, $1.lon)
         }), MeshPresence.meters(lat, lon, mark.lat, mark.lon) <= MeshPresence.houseMeters {
+            heldNear = hold(from: mark)
+            return
+        }
+        if let parsed = NearMark.parse(id) {
             heldNear = NearHold(
-                id: mark.id,
-                lat: mark.lat,
-                lon: mark.lon,
-                count: mark.count,
-                kinds: mark.kinds
+                id: id,
+                lat: parsed.lat,
+                lon: parsed.lon,
+                count: 1,
+                kinds: [],
+                placed: true,
+                last: parsed.last,
+                signal: mesh.chromeSignal
             )
             return
         }
-        heldNear = NearHold(id: id, lat: lat, lon: lon, count: 1, kinds: [])
+        heldNear = NearHold(
+            id: id,
+            lat: lat,
+            lon: lon,
+            count: max(1, mesh.hears.count),
+            kinds: Array(Set(mesh.hears.map(\.kind.rawValue))),
+            placed: false,
+            last: false,
+            signal: mesh.chromeSignal
+        )
     }
 
     func walkHeldNear() {
         guard let near = heldNear else { return }
+        guard near.placed, near.lat.isFinite, near.lon.isFinite else {
+            navChrome = "WALK — NO PLACE"
+            return
+        }
         pickDestination(lat: near.lat, lon: near.lon)
         Task { @MainActor in
             closeHold()
             navigate(mode: .walk)
         }
+    }
+
+    private func hold(from mark: MeshPresence.Mark) -> NearHold {
+        NearHold(
+            id: mark.id,
+            lat: mark.lat,
+            lon: mark.lon,
+            count: mark.count,
+            kinds: mark.kinds,
+            placed: true,
+            last: mark.id.hasPrefix(NearMark.lastPrefix),
+            signal: mesh.chromeSignal
+        )
     }
 
     func nearCourse(lat: Double, lon: Double) -> String {
@@ -822,26 +870,14 @@ final class AppRuntime {
         guard let card = heldNear else { return }
         let marks = mesh.presenceMarks(you: fieldYou)
         if let next = marks.first(where: { $0.id == card.id }) {
-            heldNear = NearHold(
-                id: next.id,
-                lat: next.lat,
-                lon: next.lon,
-                count: next.count,
-                kinds: next.kinds
-            )
+            heldNear = hold(from: next)
             return
         }
         if let next = marks.min(by: {
             MeshPresence.meters(card.lat, card.lon, $0.lat, $0.lon)
                 < MeshPresence.meters(card.lat, card.lon, $1.lat, $1.lon)
         }), MeshPresence.meters(card.lat, card.lon, next.lat, next.lon) <= MeshPresence.houseMeters {
-            heldNear = NearHold(
-                id: next.id,
-                lat: next.lat,
-                lon: next.lon,
-                count: next.count,
-                kinds: next.kinds
-            )
+            heldNear = hold(from: next)
         }
     }
 

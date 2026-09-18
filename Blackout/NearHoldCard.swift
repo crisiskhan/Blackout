@@ -30,7 +30,7 @@ struct NearHoldCard: View {
 
     private var headline: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text("NEAR")
+            Text(hold.last ? "LAST HEARD" : "NEAR")
                 .font(.system(size: 20, weight: .heavy))
                 .foregroundStyle(Color.white)
                 .lineLimit(1)
@@ -58,8 +58,11 @@ struct NearHoldCard: View {
         VStack(alignment: .leading, spacing: 8) {
             row(key: "COUNT", value: countLine)
             row(key: "KIND", value: kindsLine)
-            row(key: "COORDINATES", value: coordinates)
-            row(key: "BEARING", value: bearing)
+            if !hold.signal.isEmpty {
+                row(key: "SIGNAL", value: hold.signal)
+            }
+            row(key: "COORDINATES", value: hold.placed ? coordinates : "NO PLACE")
+            row(key: "BEARING", value: hold.placed ? bearing : "NO PLACE")
         }
     }
 
@@ -81,7 +84,7 @@ struct NearHoldCard: View {
 
     private var actions: some View {
         HStack(spacing: 8) {
-            Button("WALK") { onWalk() }
+            Button(hold.placed ? "WALK" : "WALK — NO PLACE") { onWalk() }
                 .buttonStyle(HoldActionStyle(filled: false, expand: true))
         }
     }
