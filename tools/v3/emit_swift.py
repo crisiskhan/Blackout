@@ -1817,72 +1817,24 @@ final class KitStoreTests: XCTestCase {
 ''',
     )
 
-    w(PKG / "TripBrief" / "Package.swift", package_swift("TripBrief", ["TimerSync"]))
+    w(PKG / "TripBrief" / "Package.swift", package_swift("TripBrief", []))
     w(
         PKG / "TripBrief" / "Sources" / "TripBrief" / "TripBrief.swift",
-        r'''import Foundation
-import TimerSync
-
-public struct TripSheet: Equatable, Sendable {
-    public var brief: String
-    public var debrief: String
-    public var outTime: Date
-    public var dueBack: Date
-    public func overdue(now: Date = Date()) -> Bool { now > dueBack }
-}
-
-public enum TripBrief {
-    public static func make(brief: String, hours: Double, now: Date = Date()) -> TripSheet {
-        TripSheet(brief: brief, debrief: "", outTime: now, dueBack: now.addingTimeInterval(hours * 3600))
-    }
-}
-''',
+        (PKG / "TripBrief" / "Sources" / "TripBrief" / "TripBrief.swift").read_text(encoding="utf-8"),
     )
     w(
         PKG / "TripBrief" / "Tests" / "TripBriefTests" / "TripBriefTests.swift",
-        r'''import XCTest
-@testable import TripBrief
-
-final class TripBriefTests: XCTestCase {
-    func testDue() {
-        let s = TripBrief.make(brief: "water run", hours: 2, now: Date().addingTimeInterval(-3 * 3600))
-        XCTAssertTrue(s.overdue())
-    }
-}
-''',
+        (PKG / "TripBrief" / "Tests" / "TripBriefTests" / "TripBriefTests.swift").read_text(encoding="utf-8"),
     )
 
     w(PKG / "PaperGen" / "Package.swift", package_swift("PaperGen", ["TripBrief", "RosterRoles", "PackIO"]))
     w(
         PKG / "PaperGen" / "Sources" / "PaperGen" / "PaperGen.swift",
-        r'''import Foundation
-import TripBrief
-import RosterRoles
-
-public enum PaperGen {
-    public static func export(trip: TripSheet, roster: PartyRoster, packName: String) -> String {
-        var lines = ["BLACKOUT PAPER", packName, trip.brief, "due \(trip.dueBack)", "roster:"]
-        lines += roster.members.map { "\($0.role.title) \($0.name)" }
-        return lines.joined(separator: "\n")
-    }
-}
-''',
+        (PKG / "PaperGen" / "Sources" / "PaperGen" / "PaperGen.swift").read_text(encoding="utf-8"),
     )
     w(
         PKG / "PaperGen" / "Tests" / "PaperGenTests" / "PaperGenTests.swift",
-        r'''import XCTest
-import TripBrief
-import RosterRoles
-@testable import PaperGen
-
-final class PaperGenTests: XCTestCase {
-    func testExport() {
-        let text = PaperGen.export(trip: TripBrief.make(brief: "loop", hours: 2), roster: PartyRoster.create(lead: "A"), packName: "TX WEST")
-        XCTAssertTrue(text.contains("TX WEST"))
-        XCTAssertTrue(text.contains("LEAD A"))
-    }
-}
-''',
+        (PKG / "PaperGen" / "Tests" / "PaperGenTests" / "PaperGenTests.swift").read_text(encoding="utf-8"),
     )
 
     w(PKG / "Instruments" / "Package.swift", package_swift("Instruments", ["BlackBox"]))

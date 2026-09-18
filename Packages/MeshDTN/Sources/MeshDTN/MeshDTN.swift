@@ -277,6 +277,30 @@ public enum MeshRosterBody {
     }
 }
 
+/// Party day line. Same group only — the body seals with the party code.
+public enum MeshDiaryBody {
+    public static func encode(id: String, from: String, name: String, at: Date, text: String) -> String {
+        [
+            id,
+            from,
+            MeshMarkBody.clean(name),
+            String(Int(at.timeIntervalSince1970)),
+            MeshMarkBody.clean(text),
+        ].joined(separator: "\t")
+    }
+
+    public static func parse(_ raw: String) -> (id: String, from: String, name: String, at: Date, text: String)? {
+        let parts = raw.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+        guard parts.count >= 5 else { return nil }
+        let id = parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
+        let from = parts[1].trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !id.isEmpty, !from.isEmpty, let epoch = TimeInterval(parts[3]) else { return nil }
+        let text = MeshMarkBody.clean(parts[4])
+        guard !text.isEmpty else { return nil }
+        return (id, from, MeshMarkBody.clean(parts[2]), Date(timeIntervalSince1970: epoch), text)
+    }
+}
+
 public struct MeshTimerEvent: Equatable, Sendable, Identifiable {
     public var id: String
     public var from: String
@@ -287,6 +311,21 @@ public struct MeshTimerEvent: Equatable, Sendable, Identifiable {
         self.from = from
         self.task = task
         self.done = done
+    }
+}
+
+public struct MeshDiaryEvent: Equatable, Sendable, Identifiable {
+    public var id: String
+    public var from: String
+    public var name: String
+    public var text: String
+    public var at: Date
+    public init(id: String, from: String, name: String, text: String, at: Date) {
+        self.id = id
+        self.from = from
+        self.name = name
+        self.text = text
+        self.at = at
     }
 }
 
@@ -457,6 +496,7 @@ public final class MeshNet: @unchecked Sendable {
     public private(set) var pips: [MeshPip] = []
     public private(set) var inboundChips: [String] = []
     public private(set) var inboundTimers: [MeshTimerEvent] = []
+    public private(set) var inboundDiary: [MeshDiaryEvent] = []
     public private(set) var lastRedOn: Bool?
     public private(set) var chromeNet = "NET · NONE"
     public private(set) var chromeNear = ""
@@ -708,6 +748,18 @@ public final class MeshNet: @unchecked Sendable {
         enqueue(make(from: from, kind: "roster", body: Data(body.utf8)))
     }
 
+    public func sendDiary(
+        from: String,
+        name: String,
+        text: String,
+        at: Date = Date(),
+        id: String = UUID().uuidString
+    ) {
+        let body = MeshDiaryBody.encode(id: id, from: from, name: name, at: at, text: text)
+        guard MeshDiaryBody.parse(body) != nil else { return }
+        enqueue(make(from: from, kind: "diary", body: Data(body.utf8)))
+    }
+
     public func linkKind() -> LinkKind {
         if loRaBrickPresent { return .optionalLoRaBrick }
         if joined { return .bleTensOfMeters }
@@ -914,6 +966,19 @@ public final class MeshNet: @unchecked Sendable {
                 let parsed = MeshTimerBody.parse(raw)
                 upsertTimer(MeshTimerEvent(id: env.id, from: env.from, task: parsed.task, done: env.kind == "timer.done"))
             }
+        case "diary":
+            if let raw = String(data: shown.body, encoding: .utf8),
+               let parsed = MeshDiaryBody.parse(raw) {
+                upsertDiary(
+                    MeshDiaryEvent(
+                        id: parsed.id,
+                        from: parsed.from,
+                        name: parsed.name,
+                        text: parsed.text,
+                        at: parsed.at
+                    )
+                )
+            }
         case "mark", "kit", "voice", "roster":
             break
         default:
@@ -936,6 +1001,18 @@ public final class MeshNet: @unchecked Sendable {
             inboundTimers[i] = ev
         } else {
             inboundTimers.append(ev)
+        }
+    }
+
+    private func upsertDiary(_ ev: MeshDiaryEvent) {
+        if let i = inboundDiary.firstIndex(where: { $0.id == ev.id }) {
+            inboundDiary[i] = ev
+        } else {
+            inboundDiary.append(ev)
+        }
+        inboundDiary.sort {
+            if $0.at != $1.at { return $0.at > $1.at }
+            return $0.id > $1.id
         }
     }
 

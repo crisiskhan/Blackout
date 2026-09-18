@@ -849,6 +849,20 @@ def party_seal() -> None:
     ok("Done: party seal — AES-GCM bodies, HTTPS SNAP, no new chrome")
 
 
+def diary() -> None:
+    """DIARY is the party day feed. Current time, same group, newest first."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_diary.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"diary contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: diary — party day feed, now stamp, newest first, HERE / SILENT")
+
+
 def mesh_presence() -> None:
     """Heard phones cluster. Discovery is not a peer. Hop carries store."""
     contracts = subprocess.run(
@@ -1292,6 +1306,7 @@ def main() -> None:
     mesh()
     mesh_presence()
     party_seal()
+    diary()
     vessel()
     archive_bundle_id()
     l10n()

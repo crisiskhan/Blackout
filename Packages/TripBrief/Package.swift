@@ -7,12 +7,8 @@ let package = Package(
     products: [
         .library(name: "TripBrief", targets: ["TripBrief"]),
     ],
-    dependencies: [
-        .package(path: "../TimerSync"),
-    ],
     targets: [
-        .target(name: "TripBrief", dependencies: ["TimerSync"]),
+        .target(name: "TripBrief"),
         .testTarget(name: "TripBriefTests", dependencies: ["TripBrief"]),
-
     ]
 )

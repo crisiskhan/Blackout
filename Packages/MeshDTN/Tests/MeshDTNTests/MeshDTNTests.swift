@@ -594,4 +594,59 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertEqual(withRails.split(separator: ",", omittingEmptySubsequences: false).count, 12)
         XCTAssertEqual(MeshPOS.parse(withRails)?.vitals?.count, 6)
     }
+
+    func testDiaryBodyRoundtrip() {
+        let at = Date(timeIntervalSince1970: 1_779_163_200)
+        let packed = MeshDiaryBody.encode(id: "d1", from: "peer-1", name: "RUI", at: at, text: "ridge is quiet")
+        let parsed = MeshDiaryBody.parse(packed)
+        XCTAssertEqual(parsed?.id, "d1")
+        XCTAssertEqual(parsed?.from, "peer-1")
+        XCTAssertEqual(parsed?.name, "RUI")
+        XCTAssertEqual(parsed?.text, "ridge is quiet")
+        XCTAssertEqual(parsed?.at.timeIntervalSince1970, at.timeIntervalSince1970)
+        XCTAssertNil(MeshDiaryBody.parse("only-one-field"))
+        XCTAssertNil(MeshDiaryBody.parse("id\tfrom\tname\tnot-a-date\ttext"))
+    }
+
+    func testSendDiaryLogsWhenSolo() {
+        let box = EventLog()
+        let net = MeshNet(box: box)
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.partyCode = "ABC123"
+        net.startLocal()
+        net.sendDiary(from: net.localID, name: "YOU", text: "tank is full")
+        XCTAssertTrue(radio.sent.isEmpty)
+        XCTAssertEqual(net.chromeNet, "NO PEERS · LOGGED")
+        XCTAssertTrue(net.store.contains(where: { $0.kind == "diary" }))
+        XCTAssertTrue(PartySeal.isSealed(net.store.last?.body ?? Data()))
+    }
+
+    func testDiarySealsToPartyAndWrongCodeStaysClosed() throws {
+        let net = MeshNet(box: EventLog())
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.partyCode = "ABC123"
+        net.startLocal()
+        radio.appearPeer("peer-1")
+        let at = Date(timeIntervalSince1970: 1_779_163_200)
+        let plain = MeshDiaryBody.encode(id: "d2", from: "peer-1", name: "RUI", at: at, text: "ridge")
+        let sealed = try PartySeal.wrap(Data(plain.utf8), key: PartySeal.key(code: "ABC123"))
+        radio.deliver(
+            MeshEnvelope(id: "d2", from: "peer-1", to: "*", kind: "diary", body: sealed)
+        )
+        XCTAssertEqual(net.inboundDiary.count, 1)
+        XCTAssertEqual(net.inboundDiary.first?.text, "ridge")
+        XCTAssertEqual(net.inbox.last?.kind, "diary")
+        let other = MeshNet(box: EventLog())
+        let otherRadio = LoopbackRadio(path: .ble)
+        other.attach(otherRadio)
+        other.partyCode = "OTHER9"
+        other.startLocal()
+        otherRadio.deliver(
+            MeshEnvelope(id: "d2", from: "peer-1", to: "*", kind: "diary", body: sealed)
+        )
+        XCTAssertTrue(other.inboundDiary.isEmpty)
+        XCTAssertFalse(other.inbox.contains(where: { $0.kind == "diary" }))
+    }
 }
