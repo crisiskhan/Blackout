@@ -25,6 +25,7 @@ struct FieldTab: View {
     @State private var askBusy = false
     @State private var askFailed = false
     @State private var askSeq = 0
+    @State private var visionSeq = 0
 
     var body: some View {
         HUDPage(
@@ -98,6 +99,8 @@ struct FieldTab: View {
             sayFailed = false
             askFailed = false
             askBusy = false
+            askSeq += 1
+            visionSeq += 1
             load()
         }
         .onChange(of: query) { _, _ in
@@ -118,7 +121,7 @@ struct FieldTab: View {
             return "STEP \(s.index + 1) OF \(s.card.steps.count)"
         }
         guard let g = guess else {
-            if askFailed { return "NO ASK MODEL" }
+            if askFailed { return "NO MATCH" }
             return "TYPE OR SAY"
         }
         if g.noModel { return L10n.t("vision.none", runtime.locale) }
@@ -213,6 +216,8 @@ struct FieldTab: View {
     }
 
     private func applyVision(image: CGImage?) {
+        visionSeq += 1
+        let seq = visionSeq
         guard let image else {
             let next = VisionCoreML.noModelGuess()
             guess = next
@@ -236,6 +241,7 @@ struct FieldTab: View {
                 next = VisionCoreML.noModelGuess()
             }
             DispatchQueue.main.async {
+                guard seq == visionSeq else { return }
                 guess = next
                 speakVision(next)
             }
@@ -577,7 +583,7 @@ struct FieldTab: View {
         guard seq == askSeq else { return }
         askBusy = false
         let now = catalogQuery
-        if !now.isEmpty && now != expected { return }
+        if now.isEmpty || now != expected { return }
         if let card {
             fieldQuery = expected
             openLive(card)

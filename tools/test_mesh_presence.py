@@ -308,6 +308,9 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         self.assertIn("NEAR ·", qa)
         self.assertIn("LOUDER", qa)
         self.assertIn("green", qa.lower())
+        refresh = app.split("private func refreshHeldNear")[1].split("func setYouName")[0]
+        self.assertIn("last: true", refresh)
+        self.assertIn('signal: ""', refresh)
         for blob, name in (
             (presence, "MeshPresence"),
             (live, "LiveMeshRadio"),

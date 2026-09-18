@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""KHAN EYE paints packed USGS NAIP photo, then packed OSM houses.
+"""KHAN EYE paints packed USGS NAIP photo, then packed OSM furniture.
 
 Airplane. No live photo mesh. The desk reads `aerial.pmtiles` and
 `khan.pmtiles` built at pack time. Walking MAP is the 3D photo desk.
+Grey house masses stay off the glass — the photo is the building.
 """
 from __future__ import annotations
 
@@ -126,13 +127,13 @@ class HeightAndKindTests(unittest.TestCase):
 
 
 class StyleAndResolverTests(unittest.TestCase):
-    def test_style_extrudes_houses_only_in_khan_eye(self):
+    def test_style_does_not_extrude_grey_houses(self):
         style = maplibre_style("tx-west", None)
         self.assertEqual((style.get("sources") or {}).get("khan", {}).get("type"), "vector")
         self.assertEqual(style["sources"]["khan"]["url"], "pmtiles://khan.pmtiles")
         layers = {item["id"]: item for item in style["layers"]}
+        self.assertNotIn(khan.KHAN_BUILDINGS_ID, layers)
         for lid in (
-            khan.KHAN_BUILDINGS_ID,
             khan.KHAN_TREES_ID,
             khan.KHAN_SIGNALS_ID,
             khan.KHAN_LAMPS_ID,
@@ -142,16 +143,12 @@ class StyleAndResolverTests(unittest.TestCase):
             self.assertEqual((layers[lid].get("layout") or {}).get("visibility"), "none")
             self.assertEqual(layers[lid]["source"], "khan")
             self.assertTrue(layers[lid].get("source-layer"), lid)
-        self.assertEqual(layers[khan.KHAN_BUILDINGS_ID]["type"], "fill-extrusion")
         self.assertEqual(layers[khan.KHAN_TREES_ID]["type"], "fill-extrusion")
-        self.assertEqual(layers[khan.KHAN_BUILDINGS_ID]["source-layer"], "building")
         self.assertEqual(layers[khan.KHAN_SIGNALS_ID]["source-layer"], "furniture")
-        self.assertEqual(layers[khan.KHAN_BUILDINGS_ID]["minzoom"], 11)
         self.assertEqual(layers[khan.KHAN_TREES_ID]["minzoom"], 11)
         self.assertEqual(layers[khan.KHAN_SIGNALS_ID]["minzoom"], 11)
         self.assertEqual(layers[khan.KHAN_LAMPS_ID]["minzoom"], 11)
         self.assertEqual(layers[khan.KHAN_SIGNS_ID]["minzoom"], 12)
-        self.assertEqual(layers[khan.KHAN_BUILDINGS_ID]["paint"]["fill-extrusion-opacity"], 1.0)
         self.assertEqual(khan.HOUSE_INK, "#A39C94")
         self.assertEqual(khan.TREE_INK, "#3F8F4E")
         self.assertEqual(style["sources"]["aerial"]["type"], "raster")
@@ -160,22 +157,33 @@ class StyleAndResolverTests(unittest.TestCase):
         ids = [item["id"] for item in style["layers"]]
         self.assertIn("aerial", ids)
         self.assertEqual(ids.index("aerial"), ids.index("land-fill") + 1)
-        self.assertLess(ids.index("aerial"), ids.index(khan.KHAN_BUILDINGS_ID))
+        self.assertLess(ids.index("aerial"), ids.index(khan.KHAN_TREES_ID))
         self.assertEqual((layers["aerial"].get("layout") or {}).get("visibility"), "none")
         blob = json.dumps(style).lower()
         self.assertNotIn("https://", blob)
         self.assertNotIn("cesium", blob)
         self.assertNotIn("googleapis", blob)
+        for pid in PACKS:
+            packed = json.loads((PACK_ROOT / pid / "style.json").read_text())
+            packed_ids = [item["id"] for item in packed.get("layers") or []]
+            self.assertNotIn(khan.KHAN_BUILDINGS_ID, packed_ids, pid)
+            for item in packed.get("layers") or []:
+                if item.get("type") == "fill-extrusion":
+                    self.assertEqual(item.get("id"), khan.KHAN_TREES_ID, pid)
 
     def test_resolver_and_eye_layers_lock(self):
         swift = SWIFT.read_text()
         offline = OFFLINE.read_text()
-        self.assertIn("resolverVersion = 14", swift)
+        self.assertIn("resolverVersion = 15", swift)
         self.assertIn("func attachKhanLayers", swift)
         self.assertIn("func attachAerialLayers", swift)
         self.assertIn("khan.pmtiles", swift)
         self.assertIn("aerial.pmtiles", swift)
         self.assertIn('"type": "fill-extrusion"', swift)
+        attach_khan = swift.split("func attachKhanLayers")[1].split("func attachWaterLayers")[0]
+        self.assertIn("khanBuildingsLayerID", attach_khan)
+        self.assertIn("removeAll", attach_khan)
+        self.assertNotIn('"id": khanBuildingsLayerID', attach_khan)
         self.assertIn('"type": "raster"', swift)
         self.assertIn("kind == \"vector\" || kind == \"raster\"", swift)
         self.assertIn("source-layer", swift.split("func attachKhanLayers")[1].split("func attachWaterLayers")[0])
@@ -183,6 +191,7 @@ class StyleAndResolverTests(unittest.TestCase):
         self.assertIn('khanFurnitureSourceLayer = "furniture"', swift)
         eye = offline.split("public static func applyEyeLayers")[1].split("public static func applyEyePalette")[0]
         self.assertIn('id.hasPrefix("khan-")', eye)
+        self.assertIn("!coversPhoto(id)", eye)
         self.assertIn("layer.isVisible = true", eye)
         self.assertIn("layer.isVisible = aerial", eye)
         self.assertIn("!godsEye || EyeDesk.layerOn(.aerial, in: layers)", eye)
@@ -254,15 +263,18 @@ class PackedArchiveTests(unittest.TestCase):
             self.assertEqual(style["sources"]["aerial"]["url"], "pmtiles://aerial.pmtiles")
             self.assertEqual(style["sources"]["aerial"]["type"], "raster")
             ids = [layer["id"] for layer in style["layers"]]
-            self.assertIn(khan.KHAN_BUILDINGS_ID, ids)
+            self.assertNotIn(khan.KHAN_BUILDINGS_ID, ids)
             self.assertIn("aerial", ids)
+            self.assertIn(khan.KHAN_TREES_ID, ids)
             self.assertEqual(ids.index("aerial"), ids.index("land-fill") + 1)
-            self.assertLess(ids.index("aerial"), ids.index(khan.KHAN_BUILDINGS_ID))
+            self.assertLess(ids.index("aerial"), ids.index(khan.KHAN_TREES_ID))
             self.assertEqual(style["light"]["intensity"], 0.7)
             paints = {item["id"]: item for item in style["layers"]}
             self.assertEqual(paints[khan.KHAN_TREES_ID]["minzoom"], 11)
             self.assertEqual(paints[khan.KHAN_SIGNS_ID]["minzoom"], 12)
-            self.assertIn(khan.HOUSE_INK, json.dumps(paints[khan.KHAN_BUILDINGS_ID]))
+            for item in style["layers"]:
+                if item.get("type") == "fill-extrusion":
+                    self.assertEqual(item.get("id"), khan.KHAN_TREES_ID, pid)
 
     def test_downtown_el_paso_has_houses(self):
         archive = PACK_ROOT / "tx-west" / "khan.pmtiles"
@@ -362,6 +374,18 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         covers = eye.split("func coversPhoto")[1].split("func holdsKhanDetail")[0]
         self.assertIn("landFillLayerID", covers)
         self.assertIn("tracks", covers)
+        self.assertIn("khanTreesLayerID", covers)
+        self.assertIn("water-fill", covers)
+        self.assertIn("groundWorkedFillLayerID", covers)
+        self.assertIn("groundWorkedLineLayerID", covers)
+        self.assertIn("!coversPhoto(id)", eye)
+        desk = OFFLINE.read_text().split("func setDeskChrome")[1].split("private func installDeskChromeIfNeeded")[0]
+        self.assertIn("packStamp.isHidden = true", desk)
+        self.assertNotIn("packStamp.isHidden = !godsEye", desk)
+        layout = OFFLINE.read_text().split("private func layoutDeskChrome")[1].split("final class HiddenUserLocationView")[0]
+        self.assertIn("creditBottomInset", layout)
+        self.assertNotIn("maxY - 96", layout)
+        self.assertIn("insertUnderMarks", OFFLINE.read_text())
 
     def test_planted_marks_are_pins_not_you_roses(self):
         offline = OFFLINE.read_text()
@@ -503,6 +527,8 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         )[0]
         covers = eye.split("func coversPhoto")[1].split("func holdsKhanDetail")[0]
         self.assertIn("landFillLayerID", covers)
+        self.assertIn("khanTreesLayerID", covers)
+        self.assertIn("water-fill", covers)
         self.assertNotIn("aerial ? 0", eye)
         for name, pt, z in (
             ("Vinton", vinton, 16),
@@ -598,7 +624,7 @@ class FullExtractPhotoTests(unittest.TestCase):
         self.assertIn("contentsOfDirectory", attach)
         self.assertIn('hasPrefix("aerial")', attach)
         self.assertIn("hasSuffix(\".pmtiles\")", attach)
-        self.assertIn("resolverVersion = 14", SWIFT.read_text())
+        self.assertIn("resolverVersion = 15", SWIFT.read_text())
         copy = (ROOT / "tools" / "copy_resources.sh").read_text()
         self.assertIn("Packs/*/.naip-cache", copy)
         ignore = (ROOT / ".gitignore").read_text()

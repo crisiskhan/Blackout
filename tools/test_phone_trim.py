@@ -112,7 +112,7 @@ class OneAerialOnPhoneTests(unittest.TestCase):
         )[0]
         self.assertIn("aerialFileName", attach)
         self.assertIn('hasPrefix("aerial")', attach)
-        self.assertIn("resolverVersion = 14", swift)
+        self.assertIn("resolverVersion = 15", swift)
 
     def test_phone_style_drops_aerial_when_the_archive_is_off_the_phone(self):
         from pack_phone import pack_phone

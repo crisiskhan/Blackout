@@ -838,9 +838,9 @@ public enum PackStyle {
         public static let sunInkHex = "#141414"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
-    /// not keep replaying it. v14 strips missing NAIP so a 147→150 upgrade cannot
-    /// keep file:// URLs to aerial archives the IPA no longer ships.
-    public static let resolverVersion = 14
+    /// not keep replaying it. v15 strips grey house masses so a cached v14 style
+    /// cannot keep covering the photo.
+    public static let resolverVersion = 15
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -1150,13 +1150,14 @@ public enum PackStyle {
         }
     }
 
-    /// Packed OSM houses, trees, signals, lamps and signs. Standing walls on
-    /// the walking 3D desk and on KHAN EYE.
+    /// Packed OSM houses stay in khan.pmtiles. The desk does not extrude grey
+    /// masses over the photo — trees, signals, lamps and signs only.
     public static func attachKhanLayers(
         _ sources: inout [String: Any],
         _ layers: inout [[String: Any]],
         packRoot: URL
     ) {
+        layers.removeAll { $0["id"] as? String == khanBuildingsLayerID }
         let archive = packRoot.appendingPathComponent("khan.pmtiles")
         guard FileManager.default.fileExists(atPath: archive.path) else { return }
         if var existing = sources[khanSourceID] as? [String: Any] {
@@ -1171,38 +1172,7 @@ public enum PackStyle {
             ]
         }
         let hidden: [String: Any] = ["visibility": "none"]
-        let buildingColor: [Any] = [
-            "match",
-            ["get", "kind"],
-            "tree", "#3F8F4E",
-            "wood", "#2E6A3A",
-            "house", "#A39C94",
-            "detached", "#A39C94",
-            "apartments", "#8A929A",
-            "residential", "#8A929A",
-            "industrial", "#6E767E",
-            "warehouse", "#6E767E",
-            "retail", "#968A7C",
-            "commercial", "#968A7C",
-            "#8E949C",
-        ]
         let wanted: [[String: Any]] = [
-            [
-                "id": khanBuildingsLayerID,
-                "type": "fill-extrusion",
-                "source": khanSourceID,
-                "source-layer": khanBuildingSourceLayer,
-                "minzoom": 11,
-                "filter": ["!", ["in", ["get", "kind"], ["literal", ["tree", "wood"]]]],
-                "layout": hidden,
-                "paint": [
-                    "fill-extrusion-color": buildingColor,
-                    "fill-extrusion-height": ["to-number", ["get", "height_m"]],
-                    "fill-extrusion-base": 0,
-                    "fill-extrusion-opacity": 1.0,
-                    "fill-extrusion-vertical-gradient": true,
-                ],
-            ],
             [
                 "id": khanTreesLayerID,
                 "type": "fill-extrusion",

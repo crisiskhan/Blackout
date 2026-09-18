@@ -32,6 +32,9 @@ public enum EyeDesk {
     public static let phoneStamp = "PHONE"
     public static let normStamp = "NORM"
     public static let packStamp = "PACK"
+    /// OSM credit sits above the tab strip, dock, and pack footer so it
+    /// cannot cover TX WEST / NO PIPE. 52 tab + 52 dock + 36 footer + 16 air.
+    public static let creditBottomInset: Double = 156
     public static let rallyTitle = "RALLY"
     public static let calBad = "CAL BAD"
     public static let noFix = "NO FIX"

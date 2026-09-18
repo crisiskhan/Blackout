@@ -429,7 +429,6 @@ class FieldAskGlassTests(unittest.TestCase):
         self.assertNotIn("TextField(", tab)
         self.assertNotIn("textInputAutocapitalization", tab)
         self.assertIn("NO MATCH", tab)
-        self.assertIn("NO ASK MODEL", tab)
         self.assertIn("ASK · LIVE", tab)
         self.assertNotIn("ForEach(listCards)", tab)
         self.assertIn("openAnswer()", tab)
@@ -445,6 +444,17 @@ class FieldAskGlassTests(unittest.TestCase):
         self.assertLess(bar.find('HUDField("SEARCH"'), bar.find('Button("SEARCH")'))
         self.assertLess(bar.find('Button("SEARCH")'), bar.find('Button("SAY")'))
         self.assertLess(search.find("HStack"), search.find('HUDField("SEARCH"'))
+        apply_ask = tab.split("private func applyAsk")[1].split("private func openLive")[0]
+        self.assertIn("now.isEmpty", apply_ask)
+        self.assertIn("now != expected", apply_ask)
+        pack = tab.split("onChange(of: runtime.packs?.active?.id)")[1].split(".onChange(of: query)")[0]
+        self.assertIn("askSeq += 1", pack)
+        status = tab.split("private var fieldStatus")[1].split("private var fieldTone")[0]
+        self.assertIn('if askFailed { return "NO MATCH" }', status)
+        self.assertNotIn('if askFailed { return "NO ASK MODEL" }', status)
+        vision = tab.split("private func applyVision")[1].split("private func speakVision")[0]
+        self.assertIn("visionSeq += 1", vision)
+        self.assertIn("guard seq == visionSeq", vision)
         self.assertIn("FieldCorpus.chapter(", tab)
         self.assertIn("static func doLines", corpus)
         self.assertIn("static func prepare(", corpus)
@@ -674,7 +684,6 @@ class FieldSearchSayAndStepperTests(unittest.TestCase):
         self.assertIn("openLive(", tab)
         self.assertNotIn("ForEach(listCards)", tab)
         self.assertIn("NO MATCH", tab)
-        self.assertIn("NO ASK MODEL", tab)
         self.assertIn("ASK · LIVE", tab)
         self.assertNotIn("edible", tab.lower())
         self.assertNotIn("drinkable", tab.lower())

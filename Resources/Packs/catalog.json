@@ -171,7 +171,7 @@
         "search.json",
         "style.json"
       ],
-      "bytes": 1189226994
+      "bytes": 1189225671
     },
     {
       "id": "tx-east",
@@ -317,7 +317,7 @@
         "search.json",
         "style.json"
       ],
-      "bytes": 313827780
+      "bytes": 313826457
     },
     {
       "id": "nm",
@@ -470,7 +470,7 @@
         "search.json",
         "style.json"
       ],
-      "bytes": 828522049
+      "bytes": 828520726
     }
   ]
 }
