@@ -128,6 +128,11 @@ LIVE_FIRST = (
     ("I'm hurt", ("blood", "bleed", "chest")),
     ("I'm sick", ("shade", "sense", "hurt")),
     ("keep them stable", ("side", "breath", "food")),
+    ("baby choking", ("back", "chest", "belly")),
+    ("choking on my own", ("chair", "fist", "navel")),
+    ("sucking chest", ("seal", "plastic", "open")),
+    ("low blood sugar", ("sugar", "swallow", "juice")),
+    ("overdose", ("naloxone", "side", "kit")),
 )
 
 

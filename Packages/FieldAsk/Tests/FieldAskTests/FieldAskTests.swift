@@ -171,7 +171,7 @@ final class FieldAskTests: XCTestCase {
             locale: "en"
         )
         XCTAssertEqual(choke.id, "med-airway")
-        XCTAssertEqual((choke.links ?? []).map(\.label).first, "ALLERGY")
+        XCTAssertEqual((choke.links ?? []).map(\.label).first, "INFANT")
     }
 
     func testHurtWalkLooksForBleedAndBreath() {
@@ -184,6 +184,20 @@ final class FieldAskTests: XCTestCase {
         let first = live.steps[0].do.en.lowercased()
         XCTAssertTrue(first.contains("blood") || first.contains("chest"))
         XCTAssertEqual((live.links ?? []).map(\.label).first, "BLEED")
+    }
+
+    func testInfantChokeIsBackAndChestNotBelly() {
+        let live = FieldAsk.grounded(
+            query: "baby choking",
+            chapter: [],
+            packId: "tx-west",
+            locale: "en"
+        )
+        let blob = live.steps.map { $0.do.en }.joined(separator: " ").lowercased()
+        XCTAssertTrue(blob.contains("back"))
+        XCTAssertTrue(blob.contains("chest"))
+        XCTAssertTrue(blob.contains("belly"))
+        XCTAssertEqual((live.links ?? []).map(\.label).first, "CPR")
     }
 
     func testDrownWalkGetsThemOntoLandFirst() {

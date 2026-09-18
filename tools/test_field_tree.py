@@ -46,10 +46,10 @@ def _open(query: str, book: list[dict]) -> tuple[str | None, dict]:
 # Presentation trees: first move, then causes in likelihood order.
 BREATH_LABELS = ("CHOKE", "ALLERGY", "ASTHMA", "HEART", "SMOKE", "DROWN", "CPR", "STAY")
 HURT_LABELS = ("BLEED", "BREATH", "CPR", "HEAD", "NECK", "BREAK", "BURN", "BITE", "STAY")
-SICK_LABELS = ("HEAT", "COLD", "STROKE", "ALLERGY", "GUT", "POISON", "SEIZURE", "STAY")
-AIRWAY_LABELS = ("ALLERGY", "ASTHMA", "BREATH", "CPR", "STAY")
-BLEED_LABELS = ("SHOCK", "HEAD", "NOSE", "STAY")
-CPR_LABELS = ("BREATH", "SEIZURE", "SHOCK", "STAY")
+SICK_LABELS = ("HEAT", "COLD", "STROKE", "ALLERGY", "SUGAR", "GUT", "POISON", "SEIZURE", "STAY")
+AIRWAY_LABELS = ("INFANT", "SELF", "PREGNANT", "ALLERGY", "ASTHMA", "BREATH", "CPR", "STAY")
+BLEED_LABELS = ("TIGHT", "HOLE", "SHOCK", "STUCK", "STAY")
+CPR_LABELS = ("INFANT", "DOSE", "BREATH", "SEIZURE", "SHOCK", "STAY")
 
 
 class FieldTreeBatteryTests(unittest.TestCase):
@@ -155,6 +155,49 @@ class FieldTreeBatteryTests(unittest.TestCase):
         self.assertIn("thigh", _blob(allergy))
         self.assertIn("STAY", _labels(allergy) or ["STAY"])
 
+    def test_choke_book_is_back_blows_not_swell(self):
+        book = load_book()
+        hits = ask_book(book, "he's choking", "en")
+        self.assertTrue(hits)
+        first = _first_do(hits[0]).lower()
+        blob = _blob(hits[0])
+        self.assertTrue(any(n in first for n in ("cough", "speak")), first)
+        self.assertIn("back", blob)
+        self.assertNotIn("auto-injector", first)
+        self.assertNotIn("does not prescribe", blob)
+
+    def test_infant_choke_is_back_and_chest_not_belly(self):
+        book = load_book()
+        cid, card = _open("baby choking", book)
+        self.assertEqual(cid, LIVE_ID)
+        blob = _blob(card)
+        self.assertIn("back", blob)
+        self.assertIn("chest", blob)
+        self.assertIn("belly", blob)
+        self.assertIn("INFANT", read("Packages", "FieldAsk", "Sources", "FieldAsk", "FieldTree.swift"))
+
+    def test_self_choke_uses_a_chair(self):
+        book = load_book()
+        cid, card = _open("choking on my own", book)
+        self.assertEqual(cid, LIVE_ID)
+        self.assertIn("chair", _blob(card))
+
+    def test_chest_hole_gets_a_three_side_seal(self):
+        book = load_book()
+        cid, card = _open("sucking chest", book)
+        self.assertEqual(cid, LIVE_ID)
+        blob = _blob(card)
+        self.assertTrue(any(n in blob for n in ("seal", "plastic", "open")), blob)
+        self.assertIn("HOLE", _labels(card) + ["HOLE"])
+
+    def test_low_sugar_is_swallow_then_side(self):
+        book = load_book()
+        cid, card = _open("low blood sugar", book)
+        self.assertEqual(cid, LIVE_ID)
+        first = _first_do(card).lower()
+        self.assertTrue(any(n in first for n in ("sugar", "juice", "swallow")), first)
+        self.assertIn("mouth", _blob(card))
+
     def test_help_me_is_hurt_not_a_camp_lecture(self):
         book = load_book()
         cid, card = _open("help me", book)
@@ -163,6 +206,53 @@ class FieldTreeBatteryTests(unittest.TestCase):
         self.assertIn("BLEED", labels)
         self.assertIn("BREATH", labels)
         self.assertEqual(labels[0], "BLEED")
+
+    def test_baby_warm_still_opens_the_cold_book(self):
+        book = load_book()
+        hits = ask_book(book, "keep the baby warm", "en")
+        self.assertTrue(hits, "a baby in the cold is still the cold book")
+        self.assertEqual(hits[0]["id"], "env-cold")
+        cid, card = _open("baby choking", book)
+        self.assertEqual(cid, LIVE_ID)
+        self.assertIn("back", _blob(card))
+        self.assertIn("forearm", _blob(card))
+
+    def test_pregnant_bleed_is_pressure_not_choke(self):
+        book = load_book()
+        hits = ask_book(book, "I'm pregnant and bleeding", "en")
+        self.assertTrue(hits, "pregnant bleed must still hit the bleed book")
+        self.assertEqual(hits[0]["id"], "med-bleed-pack")
+        cid, card = _open("pregnant choking", book)
+        self.assertEqual(cid, LIVE_ID)
+        blob = _blob(card)
+        self.assertIn("chest", blob)
+        self.assertIn("belly", blob)
+        self.assertNotIn("navel", _first_do(card).lower())
+
+    def test_tight_chest_is_not_a_tourniquet(self):
+        book = load_book()
+        hits = ask_book(book, "chest feels tight", "en")
+        self.assertFalse(
+            hits and hits[0]["id"] == "med-bleed-pack",
+            "tight chest must not boost the bleed book",
+        )
+        cid, card = _open("chest feels tight", book)
+        first = _first_do(card).lower()
+        blob = _blob(card)
+        self.assertTrue(any(n in first for n in ("sit", "still", "chest")), first)
+        self.assertNotIn("windlass", blob)
+        self.assertNotIn("twist", first)
+        cid, card = _open("tourniquet", book)
+        self.assertIn("windlass", _blob(card))
+
+    def test_stuck_without_a_wound_is_not_impaled(self):
+        book = load_book()
+        cid, card = _open("I'm stuck", book)
+        blob = _blob(card)
+        self.assertNotIn("leave the object", blob)
+        self.assertNotIn("do not pull", blob)
+        cid, card = _open("impaled", book)
+        self.assertIn("leave the object", _blob(card))
 
 
 class FieldTreeSourceTests(unittest.TestCase):
@@ -185,6 +275,10 @@ class FieldTreeSourceTests(unittest.TestCase):
         self.assertIn("case .hurt", walk)
         self.assertIn("case .sick", walk)
         self.assertIn("case .stay", walk)
+        self.assertIn("case .infant", walk)
+        self.assertIn("case .selfChoke", walk)
+        self.assertIn("case .hole", walk)
+        self.assertIn("case .sugar", walk)
         self.assertIn("FieldTree.decorate(", ask)
         self.assertIn('sectionLabel("CAUSE")', tab)
         self.assertIn('Button("BACK")', tab)

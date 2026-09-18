@@ -10,9 +10,55 @@ public enum FieldAskWalk {
         case fracture, lost, eye, nose, animal
         case stroke, head, poison, asthma, avalanche, rip
         case breath, hurt, sick, stay, start
+        case infant, selfChoke, pregnant, hole, sugar, overdose, tight, stuck
     }
 
     public static func family(for tokens: Set<String>) -> Family {
+        if !tokens.isDisjoint(with: ["infant", "baby", "newborn"])
+            && !tokens.isDisjoint(with: [
+                "choke", "choking", "airway", "cpr",
+                "unresponsive", "unconscious", "collapsed", "fainted", "selfchoke",
+            ])
+        {
+            return .infant
+        }
+        if !tokens.isDisjoint(with: ["selfchoke"]) {
+            return .selfChoke
+        }
+        if !tokens.isDisjoint(with: ["pregnant", "pregnancy"])
+            && !tokens.isDisjoint(with: [
+                "choke", "choking", "airway", "cpr",
+                "unresponsive", "unconscious", "collapsed", "fainted",
+            ])
+        {
+            return .pregnant
+        }
+        if !tokens.isDisjoint(with: ["sucking"])
+            || (
+                !tokens.isDisjoint(with: ["hole", "puncture"])
+                    && tokens.contains("chest")
+            )
+        {
+            return .hole
+        }
+        if tokens.contains("impaled")
+            || (
+                tokens.contains("stuck")
+                    && !tokens.isDisjoint(with: ["wound", "bleed", "chest"])
+                    && tokens.isDisjoint(with: ["food", "throat", "choke"])
+            )
+        {
+            return .stuck
+        }
+        if !tokens.isDisjoint(with: ["sugar", "diabetic", "glucose"]) {
+            return .sugar
+        }
+        if !tokens.isDisjoint(with: ["overdose", "narcan", "fentanyl", "opioid"]) {
+            return .overdose
+        }
+        if !tokens.isDisjoint(with: ["tourniquet", "windlass"]) {
+            return .tight
+        }
         if !tokens.isDisjoint(with: ["bleed", "bleeding", "blood", "cut", "wound", "shot", "stab", "gash", "sangrando"])
             && tokens.isDisjoint(with: ["nose", "nosebleed"])
         {
@@ -127,6 +173,7 @@ public enum FieldAskWalk {
             .bleed, .cardiac, .allergy, .choke, .cpr, .drown,
             .stroke, .poison, .asthma, .avalanche, .rip,
             .breath, .hurt, .stay,
+            .infant, .selfChoke, .pregnant, .hole, .sugar, .overdose, .tight, .stuck,
         ]
         let start: [FieldStep] = urgent.contains(family) ? [] : [
             step(
@@ -158,21 +205,21 @@ public enum FieldAskWalk {
         case .bleed:
             body = [
                 step(
-                    "If you have a cloth, press it hard on the bleeding spot and keep pressing.",
-                    "Si tienes un paño, presiónalo fuerte en el sangrado y no lo sueltes.",
-                    "Use both hands. Do not peek. Peeking lets the blood out.",
-                    "Usa las dos manos. No mires debajo. Mirar deja salir la sangre.",
-                    "Pressure is the first move. Looking under the cloth restarts the bleed.",
-                    "La presión es el primer movimiento. Mirar debajo reinicia el sangrado.",
-                    "Stop if the scene is unsafe. Move them with you if you must.",
-                    "Para si la escena es insegura. Muévelos contigo si hace falta.",
+                    "Expose the wound. Feed a cloth straight into the hole. Press hard with both hands. Do not peek.",
+                    "Expón la herida. Mete un paño en el hueco. Presiona con las dos manos. No mires debajo.",
+                    "Say: I am pressing. It will hurt. That means it is working. Both hands. Do not lift.",
+                    "Di: estoy presionando. Va a doler. Eso significa que funciona. Las dos manos. No levantes.",
+                    "Surface wipes do not close a vessel. Looking under the cloth restarts the bleed.",
+                    "Limpiar la superficie no cierra un vaso. Mirar debajo reinicia el sangrado.",
+                    "If a limb still pours, tap TIGHT. If the chest sucks air, tap HOLE. If something is still in it, tap STUCK.",
+                    "Si una extremidad chorrea, toca TIGHT. Si el pecho chupa aire, toca HOLE. Si algo sigue adentro, toca STUCK.",
                     bleedPic
                 ),
                 step(
                     "If blood soaks through, put another cloth on top. Do not take the first one off.",
                     "Si la sangre traspasa, pon otro paño encima. No quites el primero.",
-                    "Keep pressing. Ask a grown-up to hold if your arms shake.",
-                    "Sigue presionando. Pide a un adulto que sostenga si te tiembran los brazos.",
+                    "Say: keep the first cloth. Add another. Keep pressing.",
+                    "Di: deja el primero. Pon otro. Sigue presionando.",
                     "The first cloth is the plug.",
                     "El primer paño es el tapón.",
                     "Stop pressing only if trained help takes over.",
@@ -180,14 +227,14 @@ public enum FieldAskWalk {
                     bleedPic
                 ),
                 step(
-                    "Keep them lying down and warm while you press. Do not leave the cloth to go look for a number.",
-                    "Mantenlos acostados y calientes mientras presionas. No sueltes el paño para ir a buscar un número.",
-                    "Kneel. Both hands on the cloth. Talk to them.",
-                    "Arrodíllate. Las dos manos en el paño. Háblales.",
-                    "A bleed that waits on a phone starts again.",
-                    "Un sangrado que espera un teléfono vuelve a salir.",
-                    "Stop if trained help takes the cloth.",
-                    "Para si la ayuda entrenada toma el paño.",
+                    "Keep them lying down and warm while you press. No food. No drink. Watch the chest.",
+                    "Mantenlos acostados y calientes mientras presionas. Sin comida. Sin bebida. Mira el pecho.",
+                    "Say: stay down. I will not leave. Kneel. Both hands on the cloth.",
+                    "Di: quédate abajo. No me voy. Arrodíllate. Las dos manos en el paño.",
+                    "A bleed that waits on a phone starts again. A drink they cannot swallow is a choke.",
+                    "Un sangrado que espera un teléfono vuelve. Una bebida que no tragan es un ahogo.",
+                    "If they fade or the chest stops, tap CPR. Pale and cold: tap SHOCK.",
+                    "Si se apagan o el pecho para, toca CPR. Pálido y frío: toca SHOCK.",
                     bleedPic
                 ),
             ]
@@ -238,15 +285,16 @@ public enum FieldAskWalk {
         case .allergy:
             body = [
                 step(
-                    "If they have their own injector, use it in the outer thigh now. Hold three seconds. Do not wait to see if it 'gets better'.",
-                    "Si tienen su inyector, úsalo en el muslo de afuera ya. Sostén tres segundos. No esperes a ver si 'mejora'.",
-                    "Take the injector. Orange to the thigh. Click. Hold.",
-                    "Toma el inyector. Naranja al muslo. Clic. Sostén.",
+                    "If they have their own injector, use it in the outer thigh now. Hold three seconds. Do not wait to see if it 'gets better'. A second injector after five minutes if they have one and they are still swelling.",
+                    "Si tienen su inyector, úsalo en el muslo de afuera ya. Sostén tres segundos. No esperes a ver si 'mejora'. Un segundo a los cinco minutos si tienen otro y siguen hinchando.",
+                    "Say: orange to the thigh. Click. Hold. Count three. Then lie them down.",
+                    "Di: naranja al muslo. Clic. Sostén. Cuenta tres. Luego acuéstalos.",
                     "The injector is the first move. Waiting is how a throat closes.",
                     "El inyector es el primer movimiento. Esperar es cómo se cierra la garganta.",
                     "If there is no injector, skip to lying them down.",
                     "Si no hay inyector, pasa a acostarlos.",
-                    bookPic
+                    bookPic,
+                    tick: 5
                 ),
                 step(
                     "Lay them down. Legs up if they can breathe. Do not make them walk or stand. Do not put anything in the mouth.",
@@ -326,18 +374,20 @@ public enum FieldAskWalk {
                     "La demora mata. El jadeo no es respiración normal.",
                     "If they cough, move, or breathe normally, stop compressions and watch them.",
                     "Si tosen, se mueven o respiran normal, detén y vigílalos.",
-                    picture(chapter, prefer: "cpr-check.png")
+                    picture(chapter, prefer: "cpr-check.png"),
+                    tick: 10
                 ),
                 step(
-                    "Hard, fast compressions in the center of the chest. Let the chest come back up each time.",
-                    "Compresiones fuertes y rápidas al centro del pecho. Deja que el pecho suba cada vez.",
-                    "Do not stand on the chest. Do not 'help' with a bounce.",
-                    "No te subas al pecho. No 'ayudes' con un rebote.",
+                    "Hard, fast compressions in the center of the chest. One hundred to one hundred twenty a minute. Let the chest come back up each time. Two inches deep on an adult.",
+                    "Compresiones fuertes y rápidas al centro del pecho. Cien a ciento veinte por minuto. Deja que el pecho suba cada vez. Cinco centímetros en un adulto.",
+                    "Say the count. Heel of the hand. Do not stand on the chest. Do not bounce.",
+                    "Di la cuenta. Talón de la mano. No te subas al pecho. No rebotes.",
                     "Blood has to reach the brain. Shallow pumps do nothing.",
                     "La sangre tiene que llegar al cerebro. Las palmaditas no sirven.",
                     "Stop if an AED is attached and says stay clear, or if they start breathing.",
                     "Para si un DEA dice apartarse o si empiezan a respirar.",
-                    picture(chapter, prefer: "cpr-compress.png")
+                    picture(chapter, prefer: "cpr-compress.png"),
+                    bpm: 110
                 ),
                 step(
                     "Keep going. Swap every two minutes if someone else can push. Do not stop to check a pulse with your fingers.",
@@ -1001,6 +1051,332 @@ public enum FieldAskWalk {
                 en: "Stay on the sand until a known voice reaches you. Do not go back in.",
                 es: "Quédate en la arena hasta que una voz conocida te alcance. No vuelvas al agua."
             )
+        case .infant:
+            body = [
+                step(
+                    "A baby. Face down on your forearm, head lower than the chest. Five hard back blows between the shoulders. Then look in the mouth. Only sweep what you can see.",
+                    "Un bebé. Boca abajo en tu antebrazo, cabeza más baja que el pecho. Cinco golpes fuertes entre los hombros. Luego mira la boca. Solo saca lo que ves.",
+                    "Say: I have you. Support the head. Hits go to the back, not the neck.",
+                    "Di: te tengo. Sostén la cabeza. Los golpes van a la espalda, no al cuello.",
+                    "A baby airway is short. Belly thrusts crush it.",
+                    "La vía de un bebé es corta. Los empujes al vientre la aplastan.",
+                    "If they cry or cough, stop and watch. If the chest is still, go to the next move.",
+                    "Si lloran o tosen, para y vigila. Si el pecho sigue quieto, pasa al siguiente.",
+                    bookPic
+                ),
+                step(
+                    "Turn them face up on your other arm. Two fingers in the center of the chest. Five thrusts, one third of the way down. Repeat back blows and chest thrusts.",
+                    "Gíralos boca arriba en el otro brazo. Dos dedos al centro del pecho. Cinco empujes, un tercio hacia abajo. Repite espalda y pecho.",
+                    "Say the count. Two fingers. Not the belly. Not the throat.",
+                    "Di la cuenta. Dos dedos. No el vientre. No la garganta.",
+                    "Chest thrusts move a block a belly thrust would lodge.",
+                    "El pecho mueve un bloqueo que el vientre clavaría.",
+                    "If they go limp, start infant compressions. Look in the mouth each time the chest comes up.",
+                    "Si quedan flojos, empieza compresiones de bebé. Mira la boca cada vez que el pecho sube.",
+                    bookPic
+                ),
+                step(
+                    "If the chest has stopped: two fingers, center of the chest, one third deep, one hundred to one hundred twenty a minute. Cover the mouth and nose with your mouth only if you know how. Otherwise hands only.",
+                    "Si el pecho paró: dos dedos, centro, un tercio, cien a ciento veinte por minuto. Cubre boca y nariz con tu boca solo si sabes. Si no, solo manos.",
+                    "Say the count. Keep the head in line. Do not shake the baby.",
+                    "Di la cuenta. Cabeza en línea. No sacudas al bebé.",
+                    "A baby's heart is under a small sternum. Two fingers. Not a palm.",
+                    "El corazón de un bebé está bajo un esternón chico. Dos dedos. No la palma.",
+                    "Stop if they cry or breathe, or trained help takes over.",
+                    "Para si lloran o respiran, o la ayuda entrenada toma el relevo.",
+                    picture(chapter, prefer: "cpr-compress.png"),
+                    bpm: 110
+                ),
+            ]
+            care = FieldLoc(
+                en: "Get trained help even if they cry it out. A baby can swell later.",
+                es: "Consigue ayuda entrenada aunque lloren el bloqueo. Un bebé puede hincharse después."
+            )
+        case .selfChoke:
+            body = [
+                step(
+                    "If you can cough or make a sound, keep coughing. Do not put fingers in your mouth.",
+                    "Si puedes toser o hacer un sonido, sigue tosiendo. No metas los dedos en la boca.",
+                    "Say nothing. Cough. Wave someone over if you can.",
+                    "No hables. Tose. Llama a alguien con la mano si puedes.",
+                    "Air can still move if you cough.",
+                    "El aire aún pasa si toses.",
+                    "If no air comes out, go to the chair now.",
+                    "Si no sale aire, pasa a la silla ya.",
+                    bookPic
+                ),
+                step(
+                    "Make a fist above your navel. Bend over a chair back, a counter, or a rail. Drive the fist in and up. Repeat until air moves.",
+                    "Haz un puño sobre tu ombligo. Inclínate sobre un respaldo, un mesón o un riel. Empuja el puño adentro y arriba. Repite hasta que pase el aire.",
+                    "Fist in. Lean. Drive. Count out loud if you can.",
+                    "Puño adentro. Inclínate. Empuja. Cuenta si puedes.",
+                    "The chair is the other pair of hands you do not have.",
+                    "La silla es el otro par de manos que no tienes.",
+                    "If you start to fade, get to the floor before you fall.",
+                    "Si te apagas, llega al piso antes de caerte.",
+                    bookPic
+                ),
+                step(
+                    "If you go down and someone is there, they start CPR. If you are alone and air is moving, sit and watch your own chest. Do not eat or drink.",
+                    "Si te caes y hay alguien, ellos empiezan RCP. Si estás solo y el aire pasa, siéntate y mira tu pecho. No comas ni bebas.",
+                    "Hands on your knees. Watch the next breath.",
+                    "Manos en las rodillas. Mira la siguiente respiración.",
+                    "A second swell can close what you just opened.",
+                    "Una segunda hinchazón puede cerrar lo que acabas de abrir.",
+                    "If the chest stops and no one is there, you cannot coach yourself. Stay visible.",
+                    "Si el pecho para y no hay nadie, no te puedes entrenar solo. Quédate visible.",
+                    bookPic
+                ),
+            ]
+            care = FieldLoc(
+                en: "Get trained help even if the block comes out. You can swell later.",
+                es: "Consigue ayuda entrenada aunque salga el bloqueo. Puedes hincharte después."
+            )
+        case .pregnant:
+            body = [
+                step(
+                    "If they can cough or speak, let them cough. Nothing in the mouth.",
+                    "Si pueden toser o hablar, déjalos toser. Nada en la boca.",
+                    "Say: cough it out. I will not hit the belly.",
+                    "Di: tóselo. No voy a golpear el vientre.",
+                    "Air can still move if they cough.",
+                    "El aire aún pasa si tosen.",
+                    "If they go silent, go to back blows, then chest thrusts.",
+                    "Si se callan, pasa a golpes en la espalda, luego empujes al pecho.",
+                    bookPic
+                ),
+                step(
+                    "Five hard back blows between the shoulders. Then five chest thrusts on the lower half of the breastbone, not the belly.",
+                    "Cinco golpes fuertes entre los hombros. Luego cinco empujes al pecho en la mitad baja del esternón, no el vientre.",
+                    "Say: I am going to the chest, not the belly. Count out loud.",
+                    "Di: voy al pecho, no al vientre. Cuenta en voz alta.",
+                    "A belly thrust on a pregnant belly hits the wrong thing.",
+                    "Un empuje al vientre en un embarazo pega donde no es.",
+                    "If they go down, start CPR a little higher on the chest. Roll them onto the left side if they breathe again.",
+                    "Si se caen, RCP un poco más arriba en el pecho. Gíralos al lado izquierdo si vuelven a respirar.",
+                    bookPic
+                ),
+                step(
+                    "If they go down: hard fast compressions, center of the chest, a little higher than usual. Let the chest come back up.",
+                    "Si se caen: compresiones fuertes y rápidas, centro del pecho, un poco más arriba. Deja que el pecho suba.",
+                    "Say the count. One person pushes. Keep the belly off the ground if you can pad it.",
+                    "Di la cuenta. Una persona empuja. El vientre fuera del piso si puedes acolcharlo.",
+                    "Blood still has to reach two bodies.",
+                    "La sangre tiene que llegar a dos cuerpos.",
+                    "Stop if they breathe or trained help takes over.",
+                    "Para si respiran o la ayuda entrenada toma el relevo.",
+                    picture(chapter, prefer: "cpr-compress.png"),
+                    bpm: 110
+                ),
+            ]
+            care = FieldLoc(
+                en: "Get trained help even if the block comes out. Two patients.",
+                es: "Consigue ayuda entrenada aunque salga el bloqueo. Dos pacientes."
+            )
+        case .hole:
+            body = [
+                step(
+                    "Sit them if they want to sit. Find the hole. Cover it with a palm, then plastic, tape, or a wrapper. Leave one side open so air can get out.",
+                    "Siéntalos si quieren sentarse. Encuentra el hueco. Cúbrelo con la palma, luego plástico, cinta o un envoltorio. Deja un lado abierto para que salga el aire.",
+                    "Say: I am covering the hole. Breathe. Palm first. Then the seal.",
+                    "Di: cubro el hueco. Respira. Primero la palma. Luego el sello.",
+                    "A sealed four-side patch can trap air and drop the lung. Three sides lets the bad air out.",
+                    "Un parche de cuatro lados atrapa aire y tira el pulmón. Tres lados dejan salir el aire malo.",
+                    "If they get worse after you seal it, lift a corner, then put it back.",
+                    "Si empeoran después del sello, levanta una esquina, luego ponlo otra vez.",
+                    bookPic
+                ),
+                step(
+                    "Keep the seal. Do not make them walk. Watch the chest. No food. No drink.",
+                    "Sigue el sello. No los hagas caminar. Mira el pecho. Sin comida. Sin bebida.",
+                    "Say: stay still. I have the hole. Sit next to them.",
+                    "Di: quieto. Tengo el hueco. Siéntate a su lado.",
+                    "Walking a sucking chest is how they collapse.",
+                    "Hacer caminar un pecho que chupa es cómo se caen.",
+                    "If the chest stops, start CPR. Keep the seal if you can.",
+                    "Si el pecho para, empieza RCP. Sigue el sello si puedes.",
+                    bookPic
+                ),
+                step(
+                    "If they fade: lay them on the injured side if they can breathe that way. If the chest stops, hard fast compressions.",
+                    "Si se apagan: acuéstalos del lado herido si pueden respirar así. Si el pecho para, compresiones fuertes y rápidas.",
+                    "One hand on the seal. One person pushes if it stops.",
+                    "Una mano en el sello. Una persona empuja si para.",
+                    "The injured side down keeps blood in the good lung.",
+                    "El lado herido abajo deja la sangre en el pulmón bueno.",
+                    "Stop compressions if they breathe or trained help takes over.",
+                    "Para las compresiones si respiran o la ayuda entrenada toma el relevo.",
+                    picture(chapter, prefer: "cpr-compress.png"),
+                    bpm: 110
+                ),
+            ]
+            care = FieldLoc(
+                en: "Get to trained help now. Keep the three-side seal on the way.",
+                es: "Llega a ayuda entrenada ya. Sigue el sello de tres lados en el camino."
+            )
+        case .sugar:
+            body = [
+                step(
+                    "If they can sit and swallow, give them sugar they already have: juice, gel, or four teaspoons of sugar. Do not force it.",
+                    "Si pueden sentarse y tragar, dales azúcar que ya tengan: jugo, gel o cuatro cucharaditas. No lo fuerces.",
+                    "Say: sip this. Hold the cup. Do not pour it down.",
+                    "Di: sorbe esto. Sostén el vaso. No lo viertas.",
+                    "A swallow they cannot control is how sugar becomes a choke.",
+                    "Un trago que no controlan es cómo el azúcar se ahoga.",
+                    "If they cannot swallow or will not wake, nothing in the mouth. Tap STAY.",
+                    "Si no tragan o no despiertan, nada en la boca. Toca STAY.",
+                    bookPic
+                ),
+                step(
+                    "Wait fifteen minutes. If they talk sense, another sip. No more insulin. No long walk.",
+                    "Espera quince minutos. Si hablan con sentido, otro sorbo. Sin más insulina. Sin caminata larga.",
+                    "Say: stay sitting. I am watching you. Count with them.",
+                    "Di: sigue sentado. Te estoy mirando. Cuenta con ellos.",
+                    "A second crash comes when they walk it off.",
+                    "Un segundo bajón viene cuando lo caminan.",
+                    "If they seize, tap SEIZURE. If the chest stops, tap CPR.",
+                    "Si convulsiónan, toca SEIZURE. Si el pecho para, toca CPR.",
+                    bookPic,
+                    tick: 15
+                ),
+                step(
+                    "If they will not wake: roll them onto their side. Nothing in the mouth. Watch the chest.",
+                    "Si no despiertan: gíralos de lado. Nada en la boca. Mira el pecho.",
+                    "Hands on the shoulder and the hip. Roll as one piece.",
+                    "Manos en el hombro y la cadera. Gira de una pieza.",
+                    "Gel in an unconscious mouth is a choke.",
+                    "Gel en una boca inconsciente es un ahogo.",
+                    "If the chest stops, tap CPR.",
+                    "Si el pecho para, toca CPR.",
+                    bookPic
+                ),
+            ]
+            care = FieldLoc(
+                en: "Get to trained help if they will not wake or cannot keep sugar down.",
+                es: "Llega a ayuda entrenada si no despiertan o no retienen el azúcar."
+            )
+        case .overdose:
+            body = [
+                step(
+                    "If they have their own naloxone, use it now. Nose spray or thigh, however that kit is built. Do not wait to see if they 'sleep it off'.",
+                    "Si tienen su naloxona, úsala ya. Nariz o muslo, como sea ese kit. No esperes a ver si 'se les pasa el sueño'.",
+                    "Say: I am giving your kit. Then roll them. Hands off the mouth.",
+                    "Di: te doy tu kit. Luego gíralos. Manos fuera de la boca.",
+                    "The kit is the first move. Waiting is how a chest stops.",
+                    "El kit es el primer movimiento. Esperar es cómo para el pecho.",
+                    "If there is no kit, skip to the side and watch the chest.",
+                    "Si no hay kit, pasa al lado y mira el pecho.",
+                    bookPic
+                ),
+                step(
+                    "Roll them onto their side. Tilt the head so the tongue is off the throat. Watch the chest for ten seconds.",
+                    "Gíralos de lado. Inclina la cabeza para que la lengua no tape la garganta. Mira el pecho diez segundos.",
+                    "Say: I am rolling you. Hands on the shoulder and the hip.",
+                    "Di: te giro. Manos en el hombro y la cadera.",
+                    "The side keeps vomit out of the airway.",
+                    "De lado el vómito no tapa el aire.",
+                    "If there is no normal breathing, start compressions.",
+                    "Si no hay respiración normal, empieza compresiones.",
+                    bookPic,
+                    tick: 10
+                ),
+                step(
+                    "If the chest has stopped: hard fast compressions in the center of the chest. A second naloxone after three minutes if they have it and they are still out.",
+                    "Si el pecho paró: compresiones fuertes y rápidas al centro. Una segunda naloxona a los tres minutos si tienen y siguen fuera.",
+                    "Say the count. One person pushes. Keep the kit with them.",
+                    "Di la cuenta. Una persona empuja. El kit va con ellos.",
+                    "A closed chest becomes no pulse. The kit still has to go with them.",
+                    "Un pecho cerrado se vuelve sin pulso. El kit tiene que ir con ellos.",
+                    "Stop if they breathe or trained help takes over.",
+                    "Para si respiran o la ayuda entrenada toma el relevo.",
+                    picture(chapter, prefer: "cpr-compress.png"),
+                    bpm: 110
+                ),
+            ]
+            care = FieldLoc(
+                en: "Get to trained help with the kit. They can stop again after they wake.",
+                es: "Llega a ayuda entrenada con el kit. Pueden parar otra vez después de despertar."
+            )
+        case .tight:
+            body = [
+                step(
+                    "A limb that still pours after pressure: windlass two to three inches above the wound, not on a joint. Twist until the bleed slows. Write the time on the skin.",
+                    "Una extremidad que chorrea después de la presión: torniquete cinco a siete centímetros arriba, no en una articulación. Gira hasta que afloje. Escribe la hora en la piel.",
+                    "Say: this will hurt. Hurting means it is working. Twist. Note the time out loud.",
+                    "Di: esto va a doler. El dolor significa que funciona. Gira. Di la hora en voz alta.",
+                    "A loose strap is jewelry. Tight enough that a finger cannot slip under.",
+                    "Una correa floja es adorno. Tan apretada que no quepa un dedo.",
+                    "Never on the neck. Never loosen it to check.",
+                    "Nunca en el cuello. Nunca lo aflojes para mirar.",
+                    picture(chapter, prefer: "bleed-tq.png")
+                ),
+                step(
+                    "If you have no windlass, a belt plus a stick. Same height. Twist. Hold the twist.",
+                    "Si no hay torniquete, un cinturón y un palo. Misma altura. Gira. Sostén el giro.",
+                    "Say: hold this twist. Do not let it unwind.",
+                    "Di: sostén este giro. Que no se suelte.",
+                    "An improvised strap that is not twisted does nothing.",
+                    "Una correa improvisada sin giro no hace nada.",
+                    "If the bleed is in the groin or armpit, you cannot tourniquet it. Pack and press. Tap BLEED.",
+                    "Si el sangrado es en la ingle o la axila, no hay torniquete. Tapa y presiona. Toca BLEED.",
+                    picture(chapter, prefer: "bleed-tq.png")
+                ),
+                step(
+                    "Keep the twist. Keep them warm. No food. Watch the chest.",
+                    "Sigue el giro. Mantenlos calientes. Sin comida. Mira el pecho.",
+                    "Say: I will not loosen it. Sit by the limb.",
+                    "Di: no lo voy a aflojar. Siéntate junto al miembro.",
+                    "Loosening to 'let blood in' is how they bleed out on the walk.",
+                    "Aflojar para 'dejar entrar sangre' es cómo se desangran en el camino.",
+                    "If they fade, tap SHOCK. If the chest stops, tap CPR.",
+                    "Si se apagan, toca SHOCK. Si el pecho para, toca CPR.",
+                    bleedPic
+                ),
+            ]
+            care = FieldLoc(
+                en: "Get to trained help with the time you wrote. Do not loosen it on the way.",
+                es: "Llega a ayuda entrenada con la hora que escribiste. No lo aflojes en el camino."
+            )
+        case .stuck:
+            body = [
+                step(
+                    "Leave the object where it is. Pack cloth around it so it cannot wobble. Do not pull it out.",
+                    "Deja el objeto donde está. Tapa con tela alrededor para que no se mueva. No lo saques.",
+                    "Say: do not pull it. Hold the cloth, not the object.",
+                    "Di: no lo saques. Sostén la tela, no el objeto.",
+                    "The object is the plug. Pulling it opens the vessel.",
+                    "El objeto es el tapón. Sacarlo abre el vaso.",
+                    "If it is in the chest and the chest sucks, tap HOLE and seal around it.",
+                    "Si está en el pecho y el pecho chupa, toca HOLE y sella alrededor.",
+                    bleedPic
+                ),
+                step(
+                    "Press around the object, not on it. Keep them still. No food. No drink.",
+                    "Presiona alrededor del objeto, no encima. Mantenlos quietos. Sin comida. Sin bebida.",
+                    "Say: stay still. I have the wound. Both hands on the cloth.",
+                    "Di: quieto. Tengo la herida. Las dos manos en la tela.",
+                    "Walking with a wobbling object tears more.",
+                    "Caminar con un objeto que se mueve rasga más.",
+                    "If they fade, tap SHOCK. If the chest stops, tap CPR.",
+                    "Si se apagan, toca SHOCK. Si el pecho para, toca CPR.",
+                    bleedPic
+                ),
+                step(
+                    "Carry them if you can. The object stays. Watch the chest.",
+                    "Cárgalos si puedes. El objeto se queda. Mira el pecho.",
+                    "One person holds the pack. One person moves the body.",
+                    "Uno sostiene el tapón. Otro mueve el cuerpo.",
+                    "A pulled object on the trail is a bleed you cannot put back.",
+                    "Un objeto sacado en el camino es un sangrado que no puedes devolver.",
+                    "Stop if trained help takes the wound.",
+                    "Para si la ayuda entrenada toma la herida.",
+                    bleedPic
+                ),
+            ]
+            care = FieldLoc(
+                en: "Get to trained help with the object still in. Do not wait on a number the glass cannot dial.",
+                es: "Llega a ayuda entrenada con el objeto aún dentro. No esperes un número que el visor no puede marcar."
+            )
         case .breath:
             body = [
                 step(
@@ -1252,14 +1628,18 @@ public enum FieldAskWalk {
         _ childEn: String, _ childEs: String,
         _ whyEn: String, _ whyEs: String,
         _ stopEn: String, _ stopEs: String,
-        _ image: String
+        _ image: String,
+        tick: Int? = nil,
+        bpm: Int? = nil
     ) -> FieldStep {
         FieldStep(
             do: FieldLoc(en: doEn, es: doEs),
             why: FieldLoc(en: whyEn, es: whyEs),
             child: FieldLoc(en: childEn, es: childEs),
             stop: FieldLoc(en: stopEn, es: stopEs),
-            image: image
+            image: image,
+            tickSeconds: tick,
+            metronomeBpm: bpm
         )
     }
 }

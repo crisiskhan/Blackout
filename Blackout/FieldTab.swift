@@ -294,6 +294,7 @@ struct FieldTab: View {
                     .foregroundStyle(Theme.silver.opacity(0.5))
                     .fixedSize(horizontal: false, vertical: true)
             }
+            causeChips(s)
 
             sectionLabel("DO")
             HUDGlassCard {
@@ -305,7 +306,7 @@ struct FieldTab: View {
                         Image(uiImage: ui)
                             .resizable()
                             .scaledToFit()
-                            .frame(maxHeight: 160)
+                            .frame(maxHeight: 120)
                             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                             .accessibilityHidden(true)
                     }
@@ -374,25 +375,6 @@ struct FieldTab: View {
                 }
                 .buttonStyle(HUDActionStyle(filled: false))
             }
-            if let links = s.card.links, !links.isEmpty {
-                sectionLabel("CAUSE")
-                LazyVGrid(
-                    columns: [GridItem(.adaptive(minimum: 108), spacing: 8)],
-                    alignment: .leading,
-                    spacing: 8
-                ) {
-                    ForEach(links) { link in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Button(link.label) { openLink(link) }
-                                .buttonStyle(HUDActionStyle(filled: false))
-                            Text(loc(link.when))
-                                .font(.system(size: 13, weight: .heavy))
-                                .foregroundStyle(Theme.silver)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                }
-            }
             if !runtime.speechChrome.isEmpty {
                 Text(runtime.speechChrome).font(.caption).foregroundStyle(Theme.warn)
             }
@@ -439,6 +421,29 @@ struct FieldTab: View {
         Text(title)
             .font(.system(size: 11, weight: .heavy))
             .foregroundStyle(Theme.silver.opacity(0.5))
+    }
+
+    @ViewBuilder
+    private func causeChips(_ s: StepperState) -> some View {
+        if let links = s.card.links, !links.isEmpty {
+            sectionLabel("CAUSE")
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: 108), spacing: 8)],
+                alignment: .leading,
+                spacing: 8
+            ) {
+                ForEach(links) { link in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Button(link.label) { openLink(link) }
+                            .buttonStyle(HUDActionStyle(filled: false))
+                        Text(loc(link.when))
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Theme.silver)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+        }
     }
 
     /// SEARCH is the menu. Empty is waiting, not a dump of the book. Hits

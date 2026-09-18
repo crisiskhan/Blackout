@@ -284,6 +284,26 @@ public enum FieldCorpus {
         ("comer esto", "unknown"),
         ("edible", "unknown"),
         ("food stuck", "choke"),
+        ("baby choking", "infant"),
+        ("infant choking", "infant"),
+        ("baby not breathing", "infant"),
+        ("choking on my own", "selfchoke"),
+        ("im choking alone", "selfchoke"),
+        ("pregnant choking", "pregnant"),
+        ("shes pregnant", "pregnant"),
+        ("sucking chest", "hole"),
+        ("hole in the chest", "hole"),
+        ("chest hole", "hole"),
+        ("low blood sugar", "sugar"),
+        ("blood sugar", "sugar"),
+        ("diabetic", "sugar"),
+        ("overdose", "overdose"),
+        ("narcan", "overdose"),
+        ("naloxone", "overdose"),
+        ("fentanyl", "overdose"),
+        ("tourniquet", "tight"),
+        ("impaled", "impaled"),
+        ("stuck in me", "impaled"),
         ("swallowed wrong", "choke"),
         ("se ahoga", "choke"),
         ("allergic", "allergy"),
@@ -472,6 +492,30 @@ public enum FieldCorpus {
                 && !qTokens.contains("neck")
                 && !qTokens.contains("fell")
                 && !qTokens.contains("fall")
+            {
+                continue
+            }
+            if expanded.contains("infant")
+                && (expanded.contains("choke")
+                    || expanded.contains("cpr")
+                    || expanded.contains("airway")
+                    || expanded.contains("selfchoke"))
+            {
+                continue
+            }
+            if expanded.contains("selfchoke") { continue }
+            if expanded.contains("pregnant")
+                && (expanded.contains("choke")
+                    || expanded.contains("cpr")
+                    || expanded.contains("airway"))
+            {
+                continue
+            }
+            if expanded.contains("sugar") { continue }
+            if expanded.contains("overdose") { continue }
+            if expanded.contains("impaled") { continue }
+            if expanded.contains("hole")
+                && (qTokens.contains("chest") || qTokens.contains("sucking") || qTokens.contains("puncture"))
             {
                 continue
             }
@@ -720,6 +764,12 @@ public enum FieldCorpus {
         "fell": ["spine"],
         "sick": ["ill"],
         "stay": ["stable"],
+        "infant": ["baby"],
+        "baby": ["infant"],
+        "selfchoke": ["choke"],
+        "pregnant": ["pregnancy"],
+        "sugar": ["diabetic"],
+        "overdose": ["narcan"],
     ]
 
     /// Card ids to raise when the query names a situation the title omitted.

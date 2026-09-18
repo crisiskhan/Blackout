@@ -233,6 +233,29 @@ def ask_book(cards: list[dict], query: str, locale: str = "en") -> list[dict]:
             and "fall" not in q_tokens
         ):
             continue
+        if "infant" in expanded and (
+            "choke" in expanded
+            or "cpr" in expanded
+            or "airway" in expanded
+            or "selfchoke" in expanded
+        ):
+            continue
+        if "selfchoke" in expanded:
+            continue
+        if "pregnant" in expanded and (
+            "choke" in expanded or "cpr" in expanded or "airway" in expanded
+        ):
+            continue
+        if "sugar" in expanded:
+            continue
+        if "overdose" in expanded:
+            continue
+        if "impaled" in expanded:
+            continue
+        if "hole" in expanded and (
+            "chest" in q_tokens or "sucking" in q_tokens or "puncture" in q_tokens
+        ):
+            continue
         if "sick" in expanded:
             continue
         if (
@@ -935,6 +958,47 @@ def _step(do_en: str, do_es: str, child_en: str, child_es: str, why_en: str, why
 
 
 def _walk_family(toks: set[str]) -> str:
+    if toks & {"infant", "baby", "newborn"} and toks & {
+        "choke",
+        "choking",
+        "airway",
+        "cpr",
+        "unresponsive",
+        "unconscious",
+        "collapsed",
+        "fainted",
+        "selfchoke",
+    }:
+        return "infant"
+    if toks & {"selfchoke"}:
+        return "selfchoke"
+    if toks & {"pregnant", "pregnancy"} and toks & {
+        "choke",
+        "choking",
+        "airway",
+        "cpr",
+        "unresponsive",
+        "unconscious",
+        "collapsed",
+        "fainted",
+    }:
+        return "pregnant"
+    if "sucking" in toks or (
+        toks & {"hole", "puncture"} and "chest" in toks
+    ):
+        return "hole"
+    if "impaled" in toks or (
+        "stuck" in toks
+        and toks & {"wound", "bleed", "chest"}
+        and not (toks & {"food", "throat", "choke"})
+    ):
+        return "stuck"
+    if toks & {"sugar", "diabetic", "glucose"}:
+        return "sugar"
+    if toks & {"overdose", "narcan", "fentanyl", "opioid"}:
+        return "overdose"
+    if toks & {"tourniquet", "windlass"}:
+        return "tight"
     if toks & {"bleed", "bleeding", "blood", "cut", "wound", "shot", "stab", "gash", "sangrando"} and not (
         toks & {"nose", "nosebleed"}
     ):
@@ -1019,6 +1083,14 @@ def grounded_ask(query: str, chapter: list[dict], pack_id: str | None, locale: s
         "breath",
         "hurt",
         "stay",
+        "infant",
+        "selfchoke",
+        "pregnant",
+        "hole",
+        "sugar",
+        "overdose",
+        "tight",
+        "stuck",
     }
     start = [] if family in urgent else [
         _step(
@@ -1905,6 +1977,302 @@ def grounded_ask(query: str, chapter: list[dict], pack_id: str | None, locale: s
             "Stay with them until a known voice reaches you. Do not wait on a number the glass cannot dial.",
             "Quédate hasta que una voz conocida te alcance. No esperes un número que el visor no puede marcar.",
         )
+    elif family == "infant":
+        body = [
+            _step(
+                "A baby. Face down on your forearm. Five hard back blows. Then look in the mouth.",
+                "Un bebé. Boca abajo en tu antebrazo. Cinco golpes en la espalda. Luego mira la boca.",
+                "Support the head. Hits go to the back, not the neck.",
+                "Sostén la cabeza. Golpes a la espalda, no al cuello.",
+                "A baby airway is short. Belly thrusts crush it.",
+                "La vía de un bebé es corta. Los empujes al vientre la aplastan.",
+                "If they cry, stop. If limp, chest thrusts.",
+                "Si lloran, para. Si quedan flojos, empujes al pecho.",
+                picture,
+            ),
+            _step(
+                "Face up. Two fingers in the center of the chest. Five chest thrusts, not the belly.",
+                "Boca arriba. Dos dedos al centro. Cinco empujes al pecho, no el vientre.",
+                "Say the count. Two fingers.",
+                "Di la cuenta. Dos dedos.",
+                "Chest thrusts move a block a belly thrust would lodge.",
+                "El pecho mueve un bloqueo que el vientre clavaría.",
+                "If limp, infant compressions.",
+                "Si quedan flojos, compresiones de bebé.",
+                picture,
+            ),
+            _step(
+                "If the chest has stopped: two fingers, one third deep, one hundred to one hundred twenty a minute.",
+                "Si el pecho paró: dos dedos, un tercio, cien a ciento veinte.",
+                "Say the count. Do not shake the baby.",
+                "Di la cuenta. No sacudas al bebé.",
+                "Two fingers. Not a palm.",
+                "Dos dedos. No la palma.",
+                "Stop if they cry or breathe.",
+                "Para si lloran o respiran.",
+                picture,
+            ),
+        ]
+        care = _loc("Get trained help even if they cry it out.", "Consigue ayuda aunque lloren el bloqueo.")
+    elif family == "selfchoke":
+        body = [
+            _step(
+                "If you can cough, keep coughing. Then fist above the navel. Bend over a chair back and drive in and up.",
+                "Si puedes toser, tose. Luego puño sobre el ombligo. Inclínate sobre un respaldo y empuja adentro y arriba.",
+                "Fist. Chair. Drive.",
+                "Puño. Silla. Empuja.",
+                "The chair is the other pair of hands.",
+                "La silla es el otro par de manos.",
+                "If you fade, get to the floor.",
+                "Si te apagas, al piso.",
+                picture,
+            ),
+            _step(
+                "Repeat until air moves. Do not put fingers in your mouth.",
+                "Repite hasta que pase el aire. No metas los dedos.",
+                "Drive. Count.",
+                "Empuja. Cuenta.",
+                "Air can still move if you cough.",
+                "El aire aún pasa si toses.",
+                "If someone is there and you go down, they start CPR.",
+                "Si hay alguien y te caes, ellos empiezan RCP.",
+                picture,
+            ),
+            _step(
+                "If air is moving, sit and watch your chest. Do not eat or drink.",
+                "Si el aire pasa, siéntate y mira tu pecho. No comas ni bebas.",
+                "Hands on your knees.",
+                "Manos en las rodillas.",
+                "A second swell can close what you just opened.",
+                "Una segunda hinchazón puede cerrar lo que abriste.",
+                "Stay visible.",
+                "Quédate visible.",
+                picture,
+            ),
+        ]
+        care = _loc("Get trained help even if the block comes out.", "Consigue ayuda aunque salga el bloqueo.")
+    elif family == "pregnant":
+        body = [
+            _step(
+                "If they can cough, let them. If silent: five back blows, then five chest thrusts, not the belly.",
+                "Si pueden toser, déjalos. Si silencio: cinco en la espalda, luego cinco en el pecho, no el vientre.",
+                "Chest, not the belly.",
+                "Pecho, no el vientre.",
+                "A belly thrust on a pregnant belly hits the wrong thing.",
+                "Un empuje al vientre en un embarazo pega donde no es.",
+                "If they go down, CPR a little higher on the chest.",
+                "Si se caen, RCP un poco más arriba.",
+                picture,
+            ),
+            _step(
+                "If they go down: hard fast compressions a little higher than usual.",
+                "Si se caen: compresiones un poco más arriba.",
+                "Say the count.",
+                "Di la cuenta.",
+                "Blood still has to reach two bodies.",
+                "La sangre tiene que llegar a dos cuerpos.",
+                "Stop if they breathe.",
+                "Para si respiran.",
+                picture,
+            ),
+            _step(
+                "If they breathe again, roll them onto the left side. Watch the chest.",
+                "Si vuelven a respirar, gíralos al lado izquierdo. Mira el pecho.",
+                "Left side. Watch.",
+                "Lado izquierdo. Vigila.",
+                "Left side keeps blood moving.",
+                "El lado izquierdo sigue la sangre.",
+                "If the chest stops again, go back to compressions.",
+                "Si el pecho para otra vez, vuelve a las compresiones.",
+                picture,
+            ),
+        ]
+        care = _loc("Get trained help. Two patients.", "Consigue ayuda. Dos pacientes.")
+    elif family == "hole":
+        body = [
+            _step(
+                "Sit them if they want. Cover the hole with a palm, then plastic. Leave one side open so air can get out.",
+                "Siéntalos si quieren. Cubre el hueco con la palma, luego plástico. Deja un lado abierto.",
+                "Palm first. Then the seal. Three sides.",
+                "Primero la palma. Luego el sello. Tres lados.",
+                "A four-side patch can trap air and drop the lung.",
+                "Un parche de cuatro lados atrapa aire y tira el pulmón.",
+                "If they get worse, lift a corner.",
+                "Si empeoran, levanta una esquina.",
+                picture,
+            ),
+            _step(
+                "Keep the seal. Do not make them walk. Watch the chest.",
+                "Sigue el sello. No los hagas caminar. Mira el pecho.",
+                "Stay still. I have the hole.",
+                "Quieto. Tengo el hueco.",
+                "Walking a sucking chest is how they collapse.",
+                "Caminar un pecho que chupa es cómo se caen.",
+                "If the chest stops, start CPR.",
+                "Si el pecho para, empieza RCP.",
+                picture,
+            ),
+            _step(
+                "If they fade, lay them on the injured side. Keep the three-side seal.",
+                "Si se apagan, acuéstalos del lado herido. Sigue el sello de tres lados.",
+                "Injured side down.",
+                "Lado herido abajo.",
+                "Injured side down keeps blood in the good lung.",
+                "El lado herido abajo deja la sangre en el pulmón bueno.",
+                "If the chest stops, start CPR.",
+                "Si el pecho para, empieza RCP.",
+                picture,
+            ),
+        ]
+        care = _loc("Get to trained help now. Keep the three-side seal.", "Llega a ayuda ya. Sigue el sello de tres lados.")
+    elif family == "sugar":
+        body = [
+            _step(
+                "If they can sit and swallow, give them sugar they already have: juice, gel, or four teaspoons. Do not force it.",
+                "Si pueden sentarse y tragar, dales azúcar: jugo, gel o cuatro cucharaditas. No lo fuerces.",
+                "Sip this. Hold the cup. Do not pour it down.",
+                "Sorbe esto. Sostén el vaso. No lo viertas.",
+                "A swallow they cannot control is a choke.",
+                "Un trago que no controlan es un ahogo.",
+                "If they cannot swallow, nothing in the mouth.",
+                "Si no tragan, nada en la boca.",
+                picture,
+            ),
+            _step(
+                "Wait. If they will not wake, roll them onto their side. Nothing in the mouth.",
+                "Espera. Si no despiertan, gíralos de lado. Nada en la boca.",
+                "Roll as one piece.",
+                "Gira de una pieza.",
+                "Gel in an unconscious mouth is a choke.",
+                "Gel en una boca inconsciente es un ahogo.",
+                "If the chest stops, tap CPR.",
+                "Si el pecho para, toca CPR.",
+                picture,
+            ),
+            _step(
+                "Stay with them. If they seize, tap SEIZURE. If the chest stops, tap CPR.",
+                "Quédate. Si convulsiónan, toca SEIZURE. Si el pecho para, toca CPR.",
+                "Watch the chest.",
+                "Mira el pecho.",
+                "A second crash comes when they walk it off.",
+                "Un segundo bajón viene cuando lo caminan.",
+                "Stop if trained help takes over.",
+                "Para si la ayuda entrenada toma el relevo.",
+                picture,
+            ),
+        ]
+        care = _loc("Get to trained help if they will not wake.", "Llega a ayuda si no despiertan.")
+    elif family == "overdose":
+        body = [
+            _step(
+                "If they have their own naloxone, use it now. Then roll them onto their side.",
+                "Si tienen su naloxona, úsala ya. Luego gíralos de lado.",
+                "Give the kit. Then roll.",
+                "Da el kit. Luego gira.",
+                "Waiting is how a chest stops.",
+                "Esperar es cómo para el pecho.",
+                "If no kit, side and watch the chest.",
+                "Si no hay kit, de lado y mira el pecho.",
+                picture,
+            ),
+            _step(
+                "Watch the chest for ten seconds. No normal breathing means hard fast compressions.",
+                "Mira el pecho diez segundos. Sin respiración normal, compresiones fuertes y rápidas.",
+                "Say the count.",
+                "Di la cuenta.",
+                "The kit still has to go with them.",
+                "El kit tiene que ir con ellos.",
+                "Stop if they breathe.",
+                "Para si respiran.",
+                picture,
+            ),
+            _step(
+                "A second naloxone after three minutes if they have it and they are still out. Keep the kit with them.",
+                "Una segunda naloxona a los tres minutos si tienen y siguen fuera. El kit va con ellos.",
+                "Keep the kit.",
+                "Quédate con el kit.",
+                "They can stop again after they wake.",
+                "Pueden parar otra vez después de despertar.",
+                "Stop if trained help takes over.",
+                "Para si la ayuda entrenada toma el relevo.",
+                picture,
+            ),
+        ]
+        care = _loc("Get to trained help with the kit.", "Llega a ayuda con el kit.")
+    elif family == "tight":
+        body = [
+            _step(
+                "Windlass two to three inches above the wound, not on a joint. Twist until the bleed slows. Write the time.",
+                "Torniquete cinco a siete centímetros arriba, no en articulación. Gira. Escribe la hora.",
+                "This will hurt. Twist. Note the time.",
+                "Va a doler. Gira. Di la hora.",
+                "A loose strap is jewelry.",
+                "Una correa floja es adorno.",
+                "Never on the neck. Never loosen it to check.",
+                "Nunca en el cuello. Nunca lo aflojes.",
+                picture,
+            ),
+            _step(
+                "Keep the twist. Keep them warm. No food.",
+                "Sigue el giro. Mantenlos calientes. Sin comida.",
+                "Do not let it unwind.",
+                "Que no se suelte.",
+                "Loosening is how they bleed out.",
+                "Aflojar es cómo se desangran.",
+                "If they fade, tap SHOCK.",
+                "Si se apagan, toca SHOCK.",
+                picture,
+            ),
+            _step(
+                "Never loosen it to check. Watch the chest.",
+                "Nunca lo aflojes para mirar. Mira el pecho.",
+                "Hold the twist.",
+                "Sostén el giro.",
+                "Checking is how they bleed out.",
+                "Mirar es cómo se desangran.",
+                "If the chest stops, tap CPR.",
+                "Si el pecho para, toca CPR.",
+                picture,
+            ),
+        ]
+        care = _loc("Get to trained help with the time you wrote.", "Llega a ayuda con la hora que escribiste.")
+    elif family == "stuck":
+        body = [
+            _step(
+                "Leave the object where it is. Pack cloth around it. Do not pull it out.",
+                "Deja el objeto. Tapa alrededor. No lo saques.",
+                "Do not pull it. Hold the cloth.",
+                "No lo saques. Sostén la tela.",
+                "The object is the plug.",
+                "El objeto es el tapón.",
+                "If the chest sucks, tap HOLE.",
+                "Si el pecho chupa, toca HOLE.",
+                picture,
+            ),
+            _step(
+                "Press around the object, not on it. Keep them still.",
+                "Presiona alrededor, no encima. Mantenlos quietos.",
+                "Stay still. I have the wound.",
+                "Quieto. Tengo la herida.",
+                "Pulling it opens the vessel.",
+                "Sacarlo abre el vaso.",
+                "If they fade, tap SHOCK.",
+                "Si se apagan, toca SHOCK.",
+                picture,
+            ),
+            _step(
+                "Carry them if you can. The object stays. Watch the chest.",
+                "Cárgalos si puedes. El objeto se queda. Mira el pecho.",
+                "Hold the pack. Move the body.",
+                "Sostén el tapón. Mueve el cuerpo.",
+                "A pulled object is a bleed you cannot put back.",
+                "Un objeto sacado es un sangrado que no puedes devolver.",
+                "Stop if trained help takes the wound.",
+                "Para si la ayuda entrenada toma la herida.",
+                picture,
+            ),
+        ]
+        care = _loc("Get to trained help with the object still in.", "Llega a ayuda con el objeto aún dentro.")
     else:
         body = [
             _step(
@@ -2011,28 +2379,44 @@ _FORK = {
     "NOSE": _link("live-nose", "NOSE", "Blood from the nose", "Sangre de la nariz", "nosebleed"),
     "SEIZURE": _link("live-seizure", "SEIZURE", "Shaking, not holding them", "Temblando, no los sujetes", "seizure"),
     "SIGNAL": _link("sig-mirror", "SIGNAL", "Need to be seen", "Hay que ser visto", "how do I get rescued"),
+    "INFANT": _link("live-infant", "INFANT", "Baby, under one year", "Bebé, menos de un año", "baby choking"),
+    "SELF": _link("live-selfchoke", "SELF", "You are the one choking", "Tú eres quien se ahoga", "choking on my own"),
+    "PREGNANT": _link("live-pregnant", "PREGNANT", "Belly you cannot reach around", "Vientre que no alcanzas", "pregnant choking"),
+    "TIGHT": _link("med-bleed-pack", "TIGHT", "Limb pouring, windlass next", "Extremidad que chorrea, torniquete", "tourniquet"),
+    "HOLE": _link("live-hole", "HOLE", "Chest sucking air", "Pecho que chupa aire", "sucking chest"),
+    "STUCK": _link("live-stuck", "STUCK", "Object still in the wound", "Objeto aún en la herida", "impaled"),
+    "DOSE": _link("live-overdose", "DOSE", "Pills or powder, very small pupils", "Pastillas o polvo, pupilas muy chicas", "overdose"),
+    "SUGAR": _link("live-sugar", "SUGAR", "Known diabetic, shaky, fading", "Diabético, temblor, se apaga", "low blood sugar"),
 }
 
 _BREATH_FORKS = ("CHOKE", "ALLERGY", "ASTHMA", "HEART", "SMOKE", "DROWN", "CPR", "STAY")
 _HURT_FORKS = ("BLEED", "BREATH", "CPR", "HEAD", "NECK", "BREAK", "BURN", "BITE", "STAY")
-_SICK_FORKS = ("HEAT", "COLD", "STROKE", "ALLERGY", "GUT", "POISON", "SEIZURE", "STAY")
+_SICK_FORKS = ("HEAT", "COLD", "STROKE", "ALLERGY", "SUGAR", "GUT", "POISON", "SEIZURE", "STAY")
 _FAMILY_FORKS = {
     "breath": _BREATH_FORKS,
     "hurt": _HURT_FORKS,
     "sick": _SICK_FORKS,
-    "stay": ("CPR",),
-    "choke": ("ALLERGY", "ASTHMA", "BREATH", "CPR", "STAY"),
+    "stay": ("CPR", "BLEED"),
+    "choke": ("INFANT", "SELF", "PREGNANT", "ALLERGY", "ASTHMA", "BREATH", "CPR", "STAY"),
+    "infant": ("CPR", "CHOKE", "STAY"),
+    "selfchoke": ("CHOKE", "CPR", "STAY"),
+    "pregnant": ("CPR", "ALLERGY", "STAY"),
     "cardiac": ("BREATH", "CPR", "STAY"),
     "allergy": ("BREATH", "CPR", "STAY"),
     "asthma": ("BREATH", "ALLERGY", "CPR", "STAY"),
-    "cpr": ("BREATH", "SEIZURE", "SHOCK", "STAY"),
-    "bleed": ("SHOCK", "HEAD", "NOSE", "STAY"),
+    "cpr": ("INFANT", "DOSE", "BREATH", "SEIZURE", "SHOCK", "STAY"),
+    "bleed": ("TIGHT", "HOLE", "SHOCK", "STUCK", "STAY"),
+    "tight": ("SHOCK", "HOLE", "STAY"),
+    "hole": ("CPR", "SHOCK", "STAY"),
+    "stuck": ("BLEED", "SHOCK", "STAY"),
     "shock": ("BLEED", "CPR", "STAY"),
     "drown": ("CPR", "STAY"),
     "stroke": ("CPR", "STAY"),
     "head": ("CPR", "BLEED", "NECK", "STAY"),
-    "poison": ("CPR", "STAY"),
-    "seizure": ("CPR", "STAY"),
+    "poison": ("DOSE", "CPR", "STAY"),
+    "overdose": ("CPR", "STAY"),
+    "sugar": ("SEIZURE", "STAY"),
+    "seizure": ("CPR", "SUGAR", "STAY"),
     "burn": ("BREATH", "STAY"),
     "heat": ("STROKE", "CPR", "STAY"),
     "cold": ("CPR", "STAY"),
@@ -2060,6 +2444,10 @@ def _presentation(toks: set[str]) -> str | None:
     if toks & {"cardiac", "chest"}:
         return None
     if toks & {"cpr", "unresponsive", "pulse", "unconscious", "collapsed", "fainted"}:
+        return None
+    if toks & {"infant", "baby", "newborn"}:
+        return None
+    if toks & {"selfchoke", "pregnant", "hole", "sugar", "overdose", "stuck"}:
         return None
     if toks & {"stable", "stabilize"}:
         return "stay"

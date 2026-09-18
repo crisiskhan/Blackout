@@ -48,6 +48,10 @@ public enum FieldTree {
         if !tokens.isDisjoint(with: ["cpr", "unresponsive", "pulse", "unconscious", "collapsed", "fainted"]) {
             return nil
         }
+        if !tokens.isDisjoint(with: ["infant", "baby", "newborn"]) { return nil }
+        if !tokens.isDisjoint(with: ["selfchoke", "pregnant", "hole", "sugar", "overdose", "stuck"]) {
+            return nil
+        }
         if !tokens.isDisjoint(with: ["stable", "stabilize"]) { return .stay }
         if !tokens.isDisjoint(with: ["stay"])
             && tokens.isDisjoint(with: ["cold", "heat", "warm", "cool"])
@@ -67,9 +71,9 @@ public enum FieldTree {
         case .hurt:
             return [bleed, breath, cpr, head, neck, brk, burn, bite, stay]
         case .sick:
-            return [heat, cold, stroke, allergy, gut, poison, seizure, stay]
+            return [heat, cold, stroke, allergy, sugar, gut, poison, seizure, stay]
         case .stay:
-            return [cpr]
+            return [cpr, bleed]
         }
     }
 
@@ -79,18 +83,26 @@ public enum FieldTree {
         case .hurt: return forks(forTree: .hurt)
         case .sick: return forks(forTree: .sick)
         case .stay: return forks(forTree: .stay)
-        case .choke: return [allergy, asthma, breath, cpr, stay]
+        case .choke: return [infant, selfChoke, pregnant, allergy, asthma, breath, cpr, stay]
+        case .infant: return [cpr, choke, stay]
+        case .selfChoke: return [choke, cpr, stay]
+        case .pregnant: return [cpr, allergy, stay]
         case .cardiac: return [breath, cpr, stay]
         case .allergy: return [breath, cpr, stay]
         case .asthma: return [breath, allergy, cpr, stay]
-        case .cpr: return [breath, seizure, shock, stay]
-        case .bleed: return [shock, head, nose, stay]
+        case .cpr: return [infant, dose, breath, seizure, shock, stay]
+        case .bleed: return [tight, hole, shock, stuck, stay]
+        case .tight: return [shock, hole, stay]
+        case .hole: return [cpr, shock, stay]
+        case .stuck: return [bleed, shock, stay]
         case .shock: return [bleed, cpr, stay]
         case .drown: return [cpr, stay]
         case .stroke: return [cpr, stay]
         case .head: return [cpr, bleed, neck, stay]
-        case .poison: return [cpr, stay]
-        case .seizure: return [cpr, stay]
+        case .poison: return [dose, cpr, stay]
+        case .overdose: return [cpr, stay]
+        case .sugar: return [seizure, stay]
+        case .seizure: return [cpr, sugar, stay]
         case .burn: return [breath, stay]
         case .heat: return [stroke, cpr, stay]
         case .cold: return [cpr, stay]
@@ -105,15 +117,14 @@ public enum FieldTree {
         case .avalanche: return [cpr, cold, stay]
         case .rip: return [drown, stay]
         case .start: return [bleed, breath, stay]
-        default: return [stay]
         }
     }
 
     private static func forks(forCard id: String) -> [FieldLink] {
         switch id {
-        case "med-airway": return [allergy, asthma, breath, cpr, stay]
-        case "med-cpr-adult": return [breath, seizure, shock, stay]
-        case "med-bleed-pack": return [shock, head, nose, stay]
+        case "med-airway": return [infant, selfChoke, pregnant, allergy, asthma, breath, cpr, stay]
+        case "med-cpr-adult": return [infant, dose, breath, seizure, shock, stay]
+        case "med-bleed-pack": return [tight, hole, shock, stuck, stay]
         case "med-burn": return [breath, stay]
         case "trauma-fracture": return [bleed, shock, stay]
         case "trauma-spine": return [cpr, head, stay]
@@ -147,6 +158,24 @@ public enum FieldTree {
         en: "Cannot cough or speak",
         es: "No puede toser ni hablar",
         ask: "choking"
+    )
+    private static let infant = link(
+        "live-infant", "INFANT",
+        en: "Baby, under one year",
+        es: "Bebé, menos de un año",
+        ask: "baby choking"
+    )
+    private static let selfChoke = link(
+        "live-selfchoke", "SELF",
+        en: "You are the one choking",
+        es: "Tú eres quien se ahoga",
+        ask: "choking on my own"
+    )
+    private static let pregnant = link(
+        "live-pregnant", "PREGNANT",
+        en: "Belly you cannot reach around",
+        es: "Vientre que no alcanzas",
+        ask: "pregnant choking"
     )
     private static let allergy = link(
         "live-allergy", "ALLERGY",
@@ -195,6 +224,24 @@ public enum FieldTree {
         en: "Blood you can see",
         es: "Sangre que se ve",
         ask: "bleeding out"
+    )
+    private static let tight = link(
+        "med-bleed-pack", "TIGHT",
+        en: "Limb pouring, windlass next",
+        es: "Extremidad que chorrea, torniquete",
+        ask: "tourniquet"
+    )
+    private static let hole = link(
+        "live-hole", "HOLE",
+        en: "Chest sucking air",
+        es: "Pecho que chupa aire",
+        ask: "sucking chest"
+    )
+    private static let stuck = link(
+        "live-stuck", "STUCK",
+        en: "Object still in the wound",
+        es: "Objeto aún en la herida",
+        ask: "impaled"
     )
     private static let breath = link(
         "live-breath", "BREATH",
@@ -261,6 +308,18 @@ public enum FieldTree {
         en: "Swallowed a bottle or plant",
         es: "Tragó una botella o planta",
         ask: "swallowed bleach"
+    )
+    private static let dose = link(
+        "live-overdose", "DOSE",
+        en: "Pills or powder, very small pupils",
+        es: "Pastillas o polvo, pupilas muy chicas",
+        ask: "overdose"
+    )
+    private static let sugar = link(
+        "live-sugar", "SUGAR",
+        en: "Known diabetic, shaky, fading",
+        es: "Diabético, temblor, se apaga",
+        ask: "low blood sugar"
     )
     private static let shock = link(
         "live-shock", "SHOCK",
