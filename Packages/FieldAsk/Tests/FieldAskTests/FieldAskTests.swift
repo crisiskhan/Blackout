@@ -125,6 +125,67 @@ final class FieldAskTests: XCTestCase {
         XCTAssertFalse(first.contains("compression"))
     }
 
+    func testCantBreatheOpensAConnectedTree() {
+        let live = FieldAsk.grounded(
+            query: "I can't breathe",
+            chapter: [],
+            packId: "tx-west",
+            locale: "en"
+        )
+        XCTAssertEqual(live.id, FieldAsk.liveID)
+        let first = live.steps[0].do.en.lowercased()
+        XCTAssertTrue(first.contains("sit"))
+        let labels = (live.links ?? []).map(\.label)
+        XCTAssertEqual(labels, ["CHOKE", "ALLERGY", "ASTHMA", "HEART", "SMOKE", "DROWN", "CPR", "STAY"])
+        let choke = FieldTree.openLink(
+            (live.links ?? []).first { $0.label == "CHOKE" } ?? FieldLink(
+                id: "med-airway",
+                label: "CHOKE",
+                when: FieldLoc(en: "", es: ""),
+                ask: "choking"
+            ),
+            chapter: [
+                FieldCard(
+                    schema: "1.4",
+                    id: "med-airway",
+                    category: "medical",
+                    states: ["TX"],
+                    title: FieldLoc(en: "Airway", es: "Via"),
+                    situation: FieldLoc(en: "block", es: "bloqueo"),
+                    stop_if: [],
+                    get_to_care: FieldLoc(en: "care", es: "cuidado"),
+                    speak: true,
+                    sendToParty: false,
+                    steps: [
+                        FieldStep(
+                            do: FieldLoc(en: "Back blows", es: "Golpes"),
+                            why: FieldLoc(en: "block", es: "bloqueo"),
+                            child: FieldLoc(en: "hands", es: "manos"),
+                            stop: FieldLoc(en: "stop", es: "para"),
+                            image: "airway.png"
+                        )
+                    ]
+                )
+            ],
+            packId: "tx-west",
+            locale: "en"
+        )
+        XCTAssertEqual(choke.id, "med-airway")
+        XCTAssertEqual((choke.links ?? []).map(\.label).first, "ALLERGY")
+    }
+
+    func testHurtWalkLooksForBleedAndBreath() {
+        let live = FieldAsk.grounded(
+            query: "I'm hurt",
+            chapter: [],
+            packId: "tx-west",
+            locale: "en"
+        )
+        let first = live.steps[0].do.en.lowercased()
+        XCTAssertTrue(first.contains("blood") || first.contains("chest"))
+        XCTAssertEqual((live.links ?? []).map(\.label).first, "BLEED")
+    }
+
     func testDrownWalkGetsThemOntoLandFirst() {
         let live = FieldAsk.grounded(
             query: "someone is drowning",

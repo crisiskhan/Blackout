@@ -8,7 +8,8 @@ public enum FieldAskWalk {
         case bleed, cardiac, allergy, choke, cpr, drown, shock, seizure
         case burn, heat, cold, flood, lightning, tornado
         case fracture, lost, eye, nose, animal
-        case stroke, head, poison, asthma, avalanche, rip, start
+        case stroke, head, poison, asthma, avalanche, rip
+        case breath, hurt, sick, stay, start
     }
 
     public static func family(for tokens: Set<String>) -> Family {
@@ -96,6 +97,18 @@ public enum FieldAskWalk {
         if !tokens.isDisjoint(with: ["rip", "undertow"]) {
             return .rip
         }
+        if !tokens.isDisjoint(with: ["breath", "breathe"]) {
+            return .breath
+        }
+        if !tokens.isDisjoint(with: ["hurt", "injured", "injury"]) {
+            return .hurt
+        }
+        if !tokens.isDisjoint(with: ["sick", "ill"]) {
+            return .sick
+        }
+        if !tokens.isDisjoint(with: ["stay", "stable"]) {
+            return .stay
+        }
         return .start
     }
 
@@ -113,6 +126,7 @@ public enum FieldAskWalk {
         let urgent: Set<Family> = [
             .bleed, .cardiac, .allergy, .choke, .cpr, .drown,
             .stroke, .poison, .asthma, .avalanche, .rip,
+            .breath, .hurt, .stay,
         ]
         let start: [FieldStep] = urgent.contains(family) ? [] : [
             step(
@@ -986,6 +1000,166 @@ public enum FieldAskWalk {
             care = FieldLoc(
                 en: "Stay on the sand until a known voice reaches you. Do not go back in.",
                 es: "Quédate en la arena hasta que una voz conocida te alcance. No vuelvas al agua."
+            )
+        case .breath:
+            body = [
+                step(
+                    "Sit them up if they can sit. If you are the one who cannot breathe, sit, hands on your knees. Look at the chest.",
+                    "Siéntalos si pueden sentarse. Si eres tú quien no puede respirar, siéntate, manos en las rodillas. Mira el pecho.",
+                    "Hands on their shoulders — or on your own knees. Watch the mouth.",
+                    "Manos en sus hombros — o en tus rodillas. Mira la boca.",
+                    "Sitting opens the chest. Lying flat steals the air they have left.",
+                    "Sentados abre el pecho. Acostados les roba el aire que les queda.",
+                    "If they collapse or the chest stops, tap CPR.",
+                    "Si se caen o el pecho para, toca CPR.",
+                    bookPic
+                ),
+                step(
+                    "Ask: can you cough? Can you say a word? If they cannot, tap CHOKE. Do not put fingers in the mouth.",
+                    "Pregunta: ¿puedes toser? ¿Puedes decir una palabra? Si no pueden, toca CHOKE. No metas los dedos en la boca.",
+                    "Listen. Watch the mouth. Hands off the throat.",
+                    "Escucha. Mira la boca. Manos fuera de la garganta.",
+                    "A person who can cough still has an open throat. A silent chest is the block.",
+                    "Quien puede toser aún tiene la garganta abierta. Un pecho silencioso es el bloqueo.",
+                    "If the face or tongue is swelling, tap ALLERGY now.",
+                    "Si la cara o la lengua hinchan, toca ALLERGY ya.",
+                    bookPic
+                ),
+                step(
+                    "Loosen the collar. Do not make them walk. Do not lay them flat if they are fighting for air. Wheeze and an inhaler: tap ASTHMA. Chest pain: tap HEART. Chest stopped: tap CPR.",
+                    "Afloja el cuello. No los hagas caminar. No los acuestes si pelean por aire. Silbido e inhalador: toca ASTHMA. Dolor de pecho: toca HEART. Pecho parado: toca CPR.",
+                    "Hands on the collar, not on a bottle. Stay next to them.",
+                    "Manos en el cuello, no en una botella. Quédate a su lado.",
+                    "Walking and lying flat both steal the air. The cause chips are the next move.",
+                    "Caminar y acostarse roban el aire. Las fichas de causa son el siguiente movimiento.",
+                    "If none of those is it and they still breathe, tap STAY.",
+                    "Si ninguna es y aún respiran, toca STAY.",
+                    bookPic
+                ),
+            ]
+            care = FieldLoc(
+                en: "Get to trained help. Stay sitting. Do not wait on a number the glass cannot dial.",
+                es: "Llega a ayuda entrenada. Sigue sentado. No esperes un número que el visor no puede marcar."
+            )
+        case .hurt:
+            body = [
+                step(
+                    "Look for blood you can see and whether the chest is moving. If fire, traffic, or falling rock will hit them, move them. Else stay.",
+                    "Busca sangre que se vea y si el pecho se mueve. Si el fuego, el tráfico o una roca los va a pegar, muévelos. Si no, quédate.",
+                    "Eyes on the body. Then one hand. Then the cause chips.",
+                    "Ojos en el cuerpo. Luego una mano. Luego las fichas de causa.",
+                    "Bleed and breath kill first. The rest can wait one look.",
+                    "Sangrado y aire matan primero. El resto puede esperar una mirada.",
+                    "If the scene is still hitting them, move, then look again.",
+                    "Si la escena aún los pega, muévete, luego mira otra vez.",
+                    bookPic
+                ),
+                step(
+                    "Blood you can see: tap BLEED and press now. Silent chest or no air: tap BREATH or CPR.",
+                    "Sangre que se ve: toca BLEED y presiona ya. Pecho silencioso o sin aire: toca BREATH o CPR.",
+                    "Hands on the cloth or on the shoulders. Not both at once.",
+                    "Manos en el paño o en los hombros. No las dos a la vez.",
+                    "A bleed that waits on a guess restarts. A silent chest becomes no pulse.",
+                    "Un sangrado que espera una duda vuelve. Un pecho silencioso se vuelve sin pulso.",
+                    "If they are talking and the blood is a trickle, keep looking.",
+                    "Si hablan y la sangre es un hilo, sigue mirando.",
+                    bleedPic
+                ),
+                step(
+                    "Head hit or knocked out: tap HEAD. Fell or the neck hurts: tap NECK. A bone that will not hold: tap BREAK. Burned skin: tap BURN. A bite or sting: tap BITE. None of those: tap STAY.",
+                    "Golpe en la cabeza o desmayo: toca HEAD. Cayó o duele el cuello: toca NECK. Un hueso que no sostiene: toca BREAK. Piel quemada: toca BURN. Mordida o picadura: toca BITE. Nada de eso: toca STAY.",
+                    "Name the next chip out loud. Then tap it.",
+                    "Di la ficha en voz alta. Luego tócala.",
+                    "The chips are the rest of the walk. Guessing past a bleed wastes the minute.",
+                    "Las fichas son el resto del camino. Adivinar pasado un sangrado gasta el minuto.",
+                    "If they fade, go back to BLEED or CPR.",
+                    "Si se apagan, vuelve a BLEED o CPR.",
+                    bookPic
+                ),
+            ]
+            care = FieldLoc(
+                en: "Get to trained help. Keep pressure and the airway on the way.",
+                es: "Llega a ayuda entrenada. Sigue la presión y la vía aérea en el camino."
+            )
+        case .sick:
+            body = [
+                step(
+                    "Sit them in shade. Loosen cloth. Ask: what hurts, and can they talk sense?",
+                    "Siéntalos a la sombra. Afloja la ropa. Pregunta: qué duele, y ¿hablan con sentido?",
+                    "Hands on the shoulders. Listen. Watch the face.",
+                    "Manos en los hombros. Escucha. Mira la cara.",
+                    "Sense and sweat tell heat from a stroke from a gut.",
+                    "El sentido y el sudor dicen calor, derrame o estómago.",
+                    "If they collapse, tap CPR.",
+                    "Si se caen, toca CPR.",
+                    bookPic
+                ),
+                step(
+                    "Hot and confused: tap HEAT. Wet and shaking: tap COLD. Face, arm, or speech gone: tap STROKE. Swell or sting: tap ALLERGY. Shaking they cannot stop: tap SEIZURE.",
+                    "Calor y confusión: toca HEAT. Mojado y temblando: toca COLD. Cara, brazo o habla rara: toca STROKE. Hincha o picadura: toca ALLERGY. Temblor que no para: toca SEIZURE.",
+                    "Name the chip. Then tap it. Stay next to them.",
+                    "Di la ficha. Luego tócala. Quédate a su lado.",
+                    "The first matching cause is the walk. Stacking causes skips the one that is killing them.",
+                    "La primera causa que cabe es el camino. Apilar causas se salta la que los mata.",
+                    "If they start to vomit, roll them and keep going.",
+                    "Si vomitan, gíralos y sigue.",
+                    bookPic
+                ),
+                step(
+                    "Throwing up: roll them onto their side. No food. Watch the chest. Gut pain or diarrhea: tap GUT. A bottle or plant they swallowed: tap POISON. None of those: tap STAY.",
+                    "Si vomitan: gíralos de lado. Sin comida. Mira el pecho. Dolor de panza o diarrea: toca GUT. Una botella o planta que tragaron: toca POISON. Nada de eso: toca STAY.",
+                    "Hands on the shoulder. Roll. Then sit.",
+                    "Manos en el hombro. Gira. Luego siéntate.",
+                    "A swallow they cannot control is how sick becomes a choke.",
+                    "Un trago que no controlan es cómo un enfermo se ahoga.",
+                    "If the chest stops, tap CPR.",
+                    "Si el pecho para, toca CPR.",
+                    bookPic
+                ),
+            ]
+            care = FieldLoc(
+                en: "Get to trained help if they will not wake, will not make sense, or cannot keep water down.",
+                es: "Llega a ayuda entrenada si no despiertan, no tienen sentido o no retienen agua."
+            )
+        case .stay:
+            body = [
+                step(
+                    "They are breathing. If they will not stay awake, roll them onto their side. Tilt the head so the tongue is off the throat.",
+                    "Están respirando. Si no se mantienen despiertos, gíralos de lado. Inclina la cabeza para que la lengua no tape la garganta.",
+                    "Hands on the shoulder and the hip. Roll as one piece.",
+                    "Manos en el hombro y la cadera. Gira de una pieza.",
+                    "The side keeps spit and the tongue out of the airway.",
+                    "De lado la saliva y la lengua no tapan el aire.",
+                    "If the chest stops, tap CPR.",
+                    "Si el pecho para, toca CPR.",
+                    bookPic
+                ),
+                step(
+                    "Jacket on the trunk. Shade or a windbreak. No food, no drink, no alcohol.",
+                    "Chaqueta en el tronco. Sombra o un rompeviento. Sin comida, sin bebida, sin alcohol.",
+                    "Cover the trunk. Hands off the bottle.",
+                    "Cubre el tronco. Manos fuera de la botella.",
+                    "A drink they cannot swallow is how a stable person chokes. Alcohol dumps the last heat.",
+                    "Una bebida que no pueden tragar es cómo un estable se ahoga. El alcohol tira el último calor.",
+                    "If they start to shake from cold, add a layer. If they overheat, shade and fan.",
+                    "Si tiemblan de frío, otra capa. Si se calientan, sombra y abanico.",
+                    bookPic
+                ),
+                step(
+                    "Watch the chest. If it stops, tap CPR. Stay visible. Yell in threes. Do not leave them.",
+                    "Mira el pecho. Si para, toca CPR. Quédate visible. Grita de a tres. No los dejes.",
+                    "Sit by the head. Count breaths out loud.",
+                    "Siéntate junto a la cabeza. Cuenta las respiraciones.",
+                    "A person left alone is the one who dies on the walk for help.",
+                    "Quien se queda solo es el que muere en el camino a pedir ayuda.",
+                    "Stop if trained help takes over.",
+                    "Para si la ayuda entrenada toma el relevo.",
+                    bookPic
+                ),
+            ]
+            care = FieldLoc(
+                en: "Stay with them until a known voice reaches you. Do not wait on a number the glass cannot dial.",
+                es: "Quédate hasta que una voz conocida te alcance. No esperes un número que el visor no puede marcar."
             )
         case .start:
             body = [

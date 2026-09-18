@@ -85,7 +85,10 @@ public enum FieldAsk {
         packId: String?,
         locale: String
     ) -> FieldCard {
-        FieldAskWalk.build(query: query, chapter: chapter, packId: packId, locale: locale)
+        FieldTree.decorate(
+            FieldAskWalk.build(query: query, chapter: chapter, packId: packId, locale: locale),
+            query: query
+        )
     }
 
     public static func answer(
@@ -186,19 +189,22 @@ public enum FieldAsk {
         if steps.isEmpty {
             return grounded(query: query, chapter: chapter, packId: packId, locale: "en")
         }
-        return FieldCard(
-            schema: "1.4",
-            id: liveID,
-            category: "ask",
-            states: ["TX", "NM"],
-            title: title,
-            situation: situation,
-            stop_if: stops,
-            get_to_care: care,
-            speak: true,
-            sendToParty: false,
-            steps: steps,
-            packs: packId.map { [$0] }
+        return FieldTree.decorate(
+            FieldCard(
+                schema: "1.4",
+                id: liveID,
+                category: "ask",
+                states: ["TX", "NM"],
+                title: title,
+                situation: situation,
+                stop_if: stops,
+                get_to_care: care,
+                speak: true,
+                sendToParty: false,
+                steps: steps,
+                packs: packId.map { [$0] }
+            ),
+            query: query
         )
     }
 

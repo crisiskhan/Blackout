@@ -17,6 +17,8 @@ struct FieldTab: View {
     @State private var fieldTrail: [String] = []
     @State private var fieldTrailTotal: Int = 0
     @State private var fieldTrailBook: String = ""
+    @State private var forkStack: [FieldCard] = []
+    @State private var fieldQuery = ""
     @State private var guess: VisionGuess?
     @State private var showVision = false
     @State private var sayFailed = false
@@ -274,6 +276,10 @@ struct FieldTab: View {
                     .font(.system(size: 18, weight: .heavy))
                     .foregroundStyle(Color.white)
                 Spacer(minLength: 8)
+                if !forkStack.isEmpty {
+                    Button("BACK") { backFork() }
+                        .buttonStyle(HUDOverlayChipStyle())
+                }
                 Button("ALL CARDS") { leaveCard() }
                     .buttonStyle(HUDOverlayChipStyle())
             }
@@ -367,6 +373,25 @@ struct FieldTab: View {
                     speakOpenStep(s.card, step: s.index)
                 }
                 .buttonStyle(HUDActionStyle(filled: false))
+            }
+            if let links = s.card.links, !links.isEmpty {
+                sectionLabel("CAUSE")
+                LazyVGrid(
+                    columns: [GridItem(.adaptive(minimum: 108), spacing: 8)],
+                    alignment: .leading,
+                    spacing: 8
+                ) {
+                    ForEach(links) { link in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Button(link.label) { openLink(link) }
+                                .buttonStyle(HUDActionStyle(filled: false))
+                            Text(loc(link.when))
+                                .font(.system(size: 13, weight: .heavy))
+                                .foregroundStyle(Theme.silver)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
             }
             if !runtime.speechChrome.isEmpty {
                 Text(runtime.speechChrome).font(.caption).foregroundStyle(Theme.warn)
@@ -509,6 +534,7 @@ struct FieldTab: View {
         if let first = listCards.first {
             sayFailed = false
             askFailed = false
+            fieldQuery = catalogQuery
             openRoute([first.id], speakFirst: true)
             return
         }
@@ -544,6 +570,7 @@ struct FieldTab: View {
         let now = catalogQuery
         if !now.isEmpty && now != expected { return }
         if let card {
+            fieldQuery = expected
             openLive(card)
         } else {
             askFailed = true
@@ -557,8 +584,9 @@ struct FieldTab: View {
         fieldTrail = []
         fieldTrailTotal = 1
         fieldTrailBook = "ASK · LIVE"
-        stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
-        speakOpenStep(card, step: 0)
+        let wired = FieldTree.decorate(card, query: fieldQuery)
+        stepper = StepperState(card: wired, index: 0, speaking: false, sentToParty: false)
+        speakOpenStep(wired, step: 0)
     }
 
     /// The map's hold card named the cards that answer the ground it held,
@@ -570,6 +598,8 @@ struct FieldTab: View {
     private func jump() {
         guard let route = runtime.fieldJump else { return }
         runtime.fieldJump = nil
+        fieldQuery = ""
+        forkStack = []
         openRoute(route)
     }
 
@@ -582,9 +612,10 @@ struct FieldTab: View {
         fieldTrail = Array(present.dropFirst())
         fieldTrailTotal = present.count
         fieldTrailBook = InspectField.bookLine(for: present) ?? ""
-        stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
+        let wired = FieldTree.decorate(card, query: fieldQuery)
+        stepper = StepperState(card: wired, index: 0, speaking: false, sentToParty: false)
         if speakFirst {
-            speakOpenStep(card, step: 0)
+            speakOpenStep(wired, step: 0)
         }
     }
 
@@ -600,9 +631,35 @@ struct FieldTab: View {
         fieldTrail = []
         fieldTrailTotal = 0
         fieldTrailBook = ""
+        forkStack = []
+        fieldQuery = ""
         askFailed = false
         askBusy = false
         stepper = nil
+    }
+
+    private func openLink(_ link: FieldLink) {
+        if let current = stepper?.card {
+            forkStack.append(current)
+        }
+        let chapter = FieldCorpus.chapter(cards, pack: runtime.packs?.active?.id)
+        let next = FieldTree.openLink(
+            link,
+            chapter: chapter,
+            packId: runtime.packs?.active?.id,
+            locale: runtime.locale
+        )
+        fieldQuery = link.ask
+        fieldTrail = []
+        fieldTrailTotal = 1
+        fieldTrailBook = link.label
+        stepper = StepperState(card: next, index: 0, speaking: false, sentToParty: false)
+        speakOpenStep(next, step: 0)
+    }
+
+    private func backFork() {
+        guard let prev = forkStack.popLast() else { return }
+        stepper = StepperState(card: prev, index: 0, speaking: false, sentToParty: false)
     }
 
     private func advanceTrail() {

@@ -1290,6 +1290,7 @@ def main() -> None:
     water_inspect()
     field_ask()
     survival_ask()
+    field_tree()
     phone_trim()
     cctv_stills()
     sys.exit(fail)
@@ -1484,6 +1485,20 @@ def survival_ask() -> None:
         bad(f"survival ASK contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
     ok("Done: survival ASK — timely first move, vision stills, ring 3")
+
+
+def field_tree() -> None:
+    """Cards connect: first move now, then the next likely cause."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_field_tree.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"FIELD tree contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: FIELD tree — CAUSE chips, BACK, stay alive")
 
 
 def water_inspect() -> None:
