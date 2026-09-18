@@ -620,11 +620,13 @@ struct ExpeditionTab: View {
     }
 }
 
-/// 44pt metal rail. Five color cells, not a system Slider. BLACK carries SOS.
+/// 44pt hit. Five color cells in a glass capsule, not a system Slider. BLACK carries SOS.
 struct HUDVitalsRail: View {
     let title: String
     @Binding var value: Double
     var editable: Bool = true
+
+    private static let capsuleHeight: CGFloat = 30
 
     var body: some View {
         let hit = BlackoutTokens.Chrome.mapChipHitPoints
@@ -632,43 +634,54 @@ struct HUDVitalsRail: View {
             Text(title)
                 .font(.system(size: 13, weight: .heavy))
                 .foregroundStyle(ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
             GeometryReader { geo in
                 let width = geo.size.width
                 let steps = PartyVitals.colorSteps
-                HStack(spacing: 1) {
-                    ForEach(Array(steps.enumerated()), id: \.offset) { _, step in
-                        let band = PartyVitals.band(of: step)
-                        let on = PartyVitals.band(of: PartyVitals.snap(value)) == band
-                        ZStack {
-                            Rectangle()
-                                .fill(plateInk(for: band))
-                            if band == .black {
-                                Text("SOS")
-                                    .font(.system(size: 10, weight: .heavy))
-                                    .foregroundStyle(Theme.accent)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(1)
+                let live = PartyVitals.snap(value)
+                ZStack {
+                    Capsule()
+                        .fill(Theme.void)
+                        .shadow(color: Theme.void.opacity(0.9), radius: 3, y: 2)
+                    HStack(spacing: 1) {
+                        ForEach(Array(steps.enumerated()), id: \.offset) { _, step in
+                            let band = PartyVitals.band(of: step)
+                            let filled = PartyVitals.load(of: step) <= PartyVitals.load(of: live)
+                            ZStack {
+                                Rectangle()
+                                    .fill(cellShine(for: band, filled: filled))
+                                if band == .black, filled {
+                                    Text("SOS")
+                                        .font(.system(size: 10, weight: .heavy))
+                                        .foregroundStyle(Theme.accent)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(1)
+                                }
                             }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                         }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .opacity(band == .black || on ? 1 : 0.5)
-                        .overlay(
-                            Rectangle()
-                                .strokeBorder(
-                                    on ? (band == .black ? Theme.accent : Theme.silver) : Color.clear,
-                                    lineWidth: Theme.strokeWidth(1.5)
-                                )
-                        )
                     }
+                    .clipShape(Capsule())
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Theme.metalHigh.opacity(0.40),
+                                    Color.clear,
+                                    Color.clear,
+                                    Theme.metalLow.opacity(0.42),
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .allowsHitTesting(false)
+                    Capsule()
+                        .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1.2))
                 }
-                .padding(1)
+                .frame(width: width, height: Self.capsuleHeight)
                 .frame(width: width, height: hit)
-                .background(Theme.metalLow)
-                .clipShape(Theme.plateRect())
-                .overlay(
-                    Theme.plateRect()
-                        .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
-                )
                 .contentShape(Rectangle())
                 .allowsHitTesting(editable)
                 .gesture(
@@ -716,5 +729,32 @@ struct HUDVitalsRail: View {
         case .red: return Theme.accent
         case .black: return Theme.void
         }
+    }
+
+    private func cellShine(for band: ConditionBand, filled: Bool) -> LinearGradient {
+        if !filled {
+            return LinearGradient(
+                colors: [Theme.metalLow.opacity(0.55), Theme.void],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
+        let ink = plateInk(for: band)
+        if band == .black {
+            return LinearGradient(
+                colors: [Theme.metalLow, Theme.void, Theme.void],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
+        return LinearGradient(
+            colors: [
+                Theme.metalHigh.opacity(0.46),
+                ink,
+                ink.opacity(0.72),
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
     }
 }
