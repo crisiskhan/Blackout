@@ -1,6 +1,8 @@
 import Foundation
 import Observation
 import BlackBox
+import CryptoParty
+import CryptoKit
 
 public enum LinkKind: String, Sendable { case none, bleTensOfMeters, dtnCarry, optionalLoRaBrick }
 
@@ -576,16 +578,20 @@ public final class MeshNet: @unchecked Sendable {
     }
 
     public func enqueue(_ env: MeshEnvelope) {
-        store.append(env)
+        var wire = env
+        if let key = partyKey, let sealed = try? PartySeal.wrap(env.body, key: key) {
+            wire.body = sealed
+        }
+        store.append(wire)
         if hasLiveLink, let radio {
-            radio.send(env)
+            radio.send(wire)
             box.log("mesh", "tx \(env.kind) \(env.id)")
         } else {
             chromeNet = "NO PEERS · LOGGED"
             box.log("mesh", "NO PEERS · LOGGED local write \(env.kind) \(env.id)")
         }
         if isSelfAddressed(env) {
-            receive(env)
+            receive(wire)
         }
     }
 
@@ -810,6 +816,12 @@ public final class MeshNet: @unchecked Sendable {
         return !hops.isEmpty
     }
 
+    private var partyKey: SymmetricKey? {
+        let code = partyCode.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !code.isEmpty else { return nil }
+        return PartySeal.key(code: code)
+    }
+
     private func make(from: String, kind: String, body: Data, to: String = "*") -> MeshEnvelope {
         MeshEnvelope(id: UUID().uuidString, from: from, to: to, kind: kind, body: body)
     }
@@ -839,13 +851,19 @@ public final class MeshNet: @unchecked Sendable {
     private func receive(_ env: MeshEnvelope) {
         if env.from == localID, !isSelfAddressed(env) { return }
         if inbox.contains(where: { $0.id == env.id }) { return }
-        inbox.append(env)
         if !store.contains(where: { $0.id == env.id }) {
             store.append(env)
         }
-        switch env.kind {
+        guard let plain = PartySeal.openBody(env.body, key: partyKey) else {
+            box.log("mesh", "rx sealed \(env.kind) from \(env.from)")
+            return
+        }
+        var shown = env
+        shown.body = plain
+        inbox.append(shown)
+        switch shown.kind {
         case "pos":
-            if let text = String(data: env.body, encoding: .utf8),
+            if let text = String(data: shown.body, encoding: .utf8),
                let parsed = MeshPOS.parse(text) {
                 if nearby.contains(env.from) {
                     upsertPip(
@@ -873,14 +891,14 @@ public final class MeshNet: @unchecked Sendable {
                 }
             }
         case "chip":
-            if let name = String(data: env.body, encoding: .utf8) {
+            if let name = String(data: shown.body, encoding: .utf8) {
                 inboundChips.append(name)
                 if inboundChips.count > 16 {
                     inboundChips.removeFirst(inboundChips.count - 16)
                 }
             }
         case "note":
-            if let text = String(data: env.body, encoding: .utf8) {
+            if let text = String(data: shown.body, encoding: .utf8) {
                 let note = PartyNote.clean(text)
                 if !note.isEmpty {
                     inboundChips.append(note)
@@ -890,9 +908,9 @@ public final class MeshNet: @unchecked Sendable {
                 }
             }
         case "red":
-            lastRedOn = String(data: env.body, encoding: .utf8) == "on"
+            lastRedOn = String(data: shown.body, encoding: .utf8) == "on"
         case "timer.set", "timer.done":
-            if let raw = String(data: env.body, encoding: .utf8) {
+            if let raw = String(data: shown.body, encoding: .utf8) {
                 let parsed = MeshTimerBody.parse(raw)
                 upsertTimer(MeshTimerEvent(id: env.id, from: env.from, task: parsed.task, done: env.kind == "timer.done"))
             }
@@ -902,7 +920,7 @@ public final class MeshNet: @unchecked Sendable {
             break
         }
         box.log("mesh", "rx \(env.kind) from \(env.from)")
-        onInbound?(env)
+        onInbound?(shown)
     }
 
     private func upsertPip(_ pip: MeshPip) {

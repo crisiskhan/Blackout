@@ -87,6 +87,7 @@ final class UpdateSocket {
         config.waitsForConnectivity = false
         config.allowsExpensiveNetworkAccess = true
         config.allowsConstrainedNetworkAccess = true
+        config.tlsMinimumSupportedProtocolVersion = .TLSv12
         let session = URLSession(configuration: config)
         self.session = session
         var off: [String] = []
@@ -210,7 +211,7 @@ final class UpdateSocket {
     }
 
     private func get(_ session: URLSession, _ raw: String) async -> Data? {
-        guard let url = URL(string: raw) else { return nil }
+        guard let url = URL(string: raw), url.scheme?.lowercased() == "https" else { return nil }
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.timeoutInterval = 8
@@ -273,7 +274,7 @@ final class UpdateSocket {
             let data = try? Data(contentsOf: url),
             let rows = try? JSONDecoder().decode([PackCam].self, from: data)
         else { return [] }
-        return rows.filter { !$0.id.isEmpty && $0.url.hasPrefix("http") }
+        return rows.filter { !$0.id.isEmpty && $0.url.hasPrefix("https://") }
     }
 
     /// Raw JPEG, or TxDOT JSON `{snippet: base64 jpeg}`. Nothing else.

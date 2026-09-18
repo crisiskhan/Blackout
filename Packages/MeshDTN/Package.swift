@@ -9,10 +9,11 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../BlackBox"),
+        .package(path: "../CryptoParty"),
     ],
     targets: [
-        .target(name: "MeshDTN", dependencies: ["BlackBox"]),
-        .testTarget(name: "MeshDTNTests", dependencies: ["MeshDTN"]),
+        .target(name: "MeshDTN", dependencies: ["BlackBox", "CryptoParty"]),
+        .testTarget(name: "MeshDTNTests", dependencies: ["MeshDTN", "CryptoParty"]),
 
     ]
 )
