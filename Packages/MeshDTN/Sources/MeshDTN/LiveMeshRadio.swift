@@ -331,12 +331,19 @@ extension LiveMeshRadio: CBCentralManagerDelegate, CBPeripheralManagerDelegate, 
         }
         let partyHit = serviceUUID.map { services.contains($0) } ?? false
         let hopHit = hopUUID.map { services.contains($0) } ?? false || name == "BO"
+        let tx = (advertisementData[CBAdvertisementDataTxPowerLevelKey] as? NSNumber)?.intValue
+        let link = (advertisementData[CBAdvertisementDataIsConnectable] as? NSNumber)?.boolValue
         if !partyHit {
             onHear?(
                 MeshHear(
                     id: id.uuidString,
+                    name: name,
                     kind: MeshPresence.classify(name: name, manufacturer: mfg, services: labels),
-                    rssi: RSSI.intValue
+                    rssi: RSSI.intValue,
+                    manufacturer: mfg,
+                    services: labels,
+                    txPower: tx,
+                    connectable: link
                 )
             )
         }

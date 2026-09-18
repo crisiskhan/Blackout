@@ -826,7 +826,8 @@ final class AppRuntime {
                 kinds: [],
                 placed: true,
                 last: parsed.last,
-                signal: mesh.chromeSignal
+                signal: mesh.chromeSignal,
+                radios: mesh.hears.map { MeshPresence.radio(from: $0) }
             )
             return
         }
@@ -838,7 +839,8 @@ final class AppRuntime {
             kinds: Array(Set(mesh.hears.map(\.kind.rawValue))),
             placed: false,
             last: false,
-            signal: mesh.chromeSignal
+            signal: mesh.chromeSignal,
+            radios: mesh.hears.map { MeshPresence.radio(from: $0) }
         )
     }
 
@@ -864,7 +866,8 @@ final class AppRuntime {
             kinds: mark.kinds,
             placed: mark.placed,
             last: mark.id.hasPrefix(NearMark.lastPrefix),
-            signal: mesh.chromeSignal
+            signal: mesh.chromeSignal,
+            radios: mark.radios
         )
     }
 
@@ -899,7 +902,8 @@ final class AppRuntime {
                 kinds: card.kinds,
                 placed: card.placed,
                 last: true,
-                signal: ""
+                signal: "",
+                radios: card.radios
             )
         }
     }

@@ -3,8 +3,13 @@ import Foundation
 /// A heard radio. Discovery is not a peer. Hop is a Blackout carry.
 public struct MeshHear: Equatable, Sendable, Identifiable {
     public var id: String
+    public var name: String
     public var kind: Kind
     public var rssi: Int
+    public var manufacturer: UInt16?
+    public var services: [String]
+    public var txPower: Int?
+    public var connectable: Bool?
     public var lat: Double?
     public var lon: Double?
     public var heardAt: Date
@@ -15,18 +20,66 @@ public struct MeshHear: Equatable, Sendable, Identifiable {
 
     public init(
         id: String,
+        name: String = "",
         kind: Kind,
         rssi: Int = 0,
+        manufacturer: UInt16? = nil,
+        services: [String] = [],
+        txPower: Int? = nil,
+        connectable: Bool? = nil,
         lat: Double? = nil,
         lon: Double? = nil,
         heardAt: Date = Date()
     ) {
         self.id = id
+        self.name = name
         self.kind = kind
         self.rssi = rssi
+        self.manufacturer = manufacturer
+        self.services = services
+        self.txPower = txPower
+        self.connectable = connectable
         self.lat = lat
         self.lon = lon
         self.heardAt = heardAt
+    }
+}
+
+/// One heard radio on the hold glass. Empty strings are omitted, never guessed.
+public struct NearRadio: Equatable, Sendable, Identifiable {
+    public var id: String
+    public var name: String
+    public var kind: String
+    public var rssi: String
+    public var reach: String
+    public var radio: String
+    public var maker: String
+    public var link: String
+    public var tx: String
+    public var hop: Bool
+
+    public init(
+        id: String,
+        name: String,
+        kind: String,
+        rssi: String = "",
+        reach: String = "",
+        radio: String = "",
+        maker: String = "",
+        link: String = "",
+        tx: String = "",
+        hop: Bool = false
+    ) {
+        self.id = id
+        self.name = name
+        self.kind = kind
+        self.rssi = rssi
+        self.reach = reach
+        self.radio = radio
+        self.maker = maker
+        self.link = link
+        self.tx = tx
+        self.hop = hop
     }
 }
 
@@ -64,6 +117,7 @@ public struct NearHold: Equatable, Sendable {
     public var placed: Bool
     public var last: Bool
     public var signal: String
+    public var radios: [NearRadio]
 
     public init(
         id: String,
@@ -73,7 +127,8 @@ public struct NearHold: Equatable, Sendable {
         kinds: [String],
         placed: Bool = true,
         last: Bool = false,
-        signal: String = ""
+        signal: String = "",
+        radios: [NearRadio] = []
     ) {
         self.id = id
         self.lat = lat
@@ -83,6 +138,7 @@ public struct NearHold: Equatable, Sendable {
         self.placed = placed
         self.last = last
         self.signal = signal
+        self.radios = radios
     }
 }
 
@@ -100,6 +156,7 @@ public enum MeshPresence {
         public var count: Int
         public var kinds: [String]
         public var placed: Bool
+        public var radios: [NearRadio]
 
         public init(
             id: String,
@@ -107,7 +164,8 @@ public enum MeshPresence {
             lon: Double,
             count: Int,
             kinds: [String],
-            placed: Bool = true
+            placed: Bool = true,
+            radios: [NearRadio] = []
         ) {
             self.id = id
             self.lat = lat
@@ -115,6 +173,7 @@ public enum MeshPresence {
             self.count = count
             self.kinds = kinds
             self.placed = placed
+            self.radios = radios
         }
     }
 
@@ -169,12 +228,86 @@ public enum MeshPresence {
         return UInt16(data[0]) | (UInt16(data[1]) << 8)
     }
 
+    public static func radioToken(_ id: String) -> String {
+        let compact = id.uppercased().filter { $0.isLetter || $0.isNumber }
+        if compact.count >= 4 {
+            return String(compact.suffix(4))
+        }
+        return compact.isEmpty ? "—" : compact
+    }
+
+    public static func makerWord(_ manufacturer: UInt16?) -> String {
+        guard let manufacturer else { return "" }
+        switch manufacturer {
+        case 0x004C:
+            return "APPLE"
+        case 0x0075:
+            return "SAMSUNG"
+        default:
+            return String(format: "%04X", manufacturer)
+        }
+    }
+
+    public static func kindWord(name: String, kind: MeshHear.Kind, services: [String]) -> String {
+        if accessory(name: name, services: services) {
+            return "ACCESSORY"
+        }
+        switch kind {
+        case .apple:
+            return "IPHONE"
+        case .samsung:
+            return "SAMSUNG"
+        case .hop:
+            return "HOP"
+        case .device:
+            return "DEVICE"
+        }
+    }
+
+    public static func rssiWord(_ rssi: Int) -> String {
+        guard rssi > -120, rssi < 0 else { return "" }
+        return "−\(abs(rssi))"
+    }
+
+    public static func radio(from hear: MeshHear) -> NearRadio {
+        let name = MeshPOS.nameToken(hear.name)
+        let rssi = rssiWord(hear.rssi)
+        let hop = hear.kind == .hop || hear.services.contains(where: { $0.lowercased() == "hop" })
+        var link = ""
+        if let connectable = hear.connectable {
+            link = connectable ? "CONNECTABLE" : "CLOSED"
+        }
+        var tx = ""
+        if let power = hear.txPower {
+            tx = power < 0 ? "−\(abs(power))" : "\(power)"
+        }
+        return NearRadio(
+            id: hear.id,
+            name: name.isEmpty ? "UNNAMED" : name,
+            kind: kindWord(name: hear.name, kind: hear.kind, services: hear.services),
+            rssi: rssi,
+            reach: rssi.isEmpty ? "" : "\(Int(reachMeters(rssi: hear.rssi).rounded())) M",
+            radio: radioToken(hear.id),
+            maker: makerWord(hear.manufacturer),
+            link: link,
+            tx: tx,
+            hop: hop
+        )
+    }
+
     public static func cluster(
         _ points: [(id: String, lat: Double, lon: Double, kind: String)],
         radiusMeters: Double = houseMeters
     ) -> [Mark] {
         cluster(
-            points.map { ($0.id, $0.lat, $0.lon, $0.kind, true) },
+            points.map {
+                (
+                    MeshHear(id: $0.id, kind: MeshHear.Kind(rawValue: $0.kind) ?? .device),
+                    lat: $0.lat,
+                    lon: $0.lon,
+                    placed: true
+                )
+            },
             radiusMeters: radiusMeters
         )
     }
@@ -183,12 +316,29 @@ public enum MeshPresence {
         _ points: [(id: String, lat: Double, lon: Double, kind: String, placed: Bool)],
         radiusMeters: Double = houseMeters
     ) -> [Mark] {
-        var leftover = points.sorted { $0.id < $1.id }
+        cluster(
+            points.map {
+                (
+                    MeshHear(id: $0.id, kind: MeshHear.Kind(rawValue: $0.kind) ?? .device),
+                    lat: $0.lat,
+                    lon: $0.lon,
+                    placed: $0.placed
+                )
+            },
+            radiusMeters: radiusMeters
+        )
+    }
+
+    public static func cluster(
+        _ points: [(MeshHear, lat: Double, lon: Double, placed: Bool)],
+        radiusMeters: Double = houseMeters
+    ) -> [Mark] {
+        var leftover = points.sorted { $0.0.id < $1.0.id }
         var out: [Mark] = []
         while !leftover.isEmpty {
             let seed = leftover.removeFirst()
             var bunch = [seed]
-            var kept: [(id: String, lat: Double, lon: Double, kind: String, placed: Bool)] = []
+            var kept: [(MeshHear, lat: Double, lon: Double, placed: Bool)] = []
             for point in leftover {
                 if meters(seed.lat, seed.lon, point.lat, point.lon) <= radiusMeters {
                     bunch.append(point)
@@ -200,8 +350,11 @@ public enum MeshPresence {
             let lat = bunch.map(\.lat).reduce(0, +) / Double(bunch.count)
             let lon = bunch.map(\.lon).reduce(0, +) / Double(bunch.count)
             var kinds: [String] = []
-            for point in bunch where !point.kind.isEmpty && !kinds.contains(point.kind) {
-                kinds.append(point.kind)
+            for point in bunch {
+                let kind = point.0.kind.rawValue
+                if !kind.isEmpty && !kinds.contains(kind) {
+                    kinds.append(kind)
+                }
             }
             out.append(
                 Mark(
@@ -210,7 +363,8 @@ public enum MeshPresence {
                     lon: lon,
                     count: bunch.count,
                     kinds: kinds,
-                    placed: bunch.allSatisfy(\.placed)
+                    placed: bunch.allSatisfy(\.placed),
+                    radios: bunch.map { radio(from: $0.0) }
                 )
             )
         }
@@ -267,14 +421,20 @@ public enum MeshPresence {
         you: (lat: Double, lon: Double)?,
         place: Bool = false
     ) -> [Mark] {
-        var placed: [(id: String, lat: Double, lon: Double, kind: String, placed: Bool)] = []
+        var placed: [(MeshHear, lat: Double, lon: Double, placed: Bool)] = []
         for hear in hears {
             if let lat = hear.lat, let lon = hear.lon, lat.isFinite, lon.isFinite {
-                placed.append((hear.id, lat, lon, hear.kind.rawValue, true))
+                placed.append((hear, lat, lon, true))
                 continue
             }
             if place, let you, you.lat.isFinite, you.lon.isFinite {
-                placed.append(placeHear(hear, you: you))
+                let dest = offset(
+                    lat: you.lat,
+                    lon: you.lon,
+                    meters: reachMeters(rssi: hear.rssi),
+                    bearingDegrees: bearingDegrees(id: hear.id)
+                )
+                placed.append((hear, dest.lat, dest.lon, false))
             }
         }
         return cluster(placed)

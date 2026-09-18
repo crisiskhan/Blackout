@@ -128,6 +128,38 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertTrue(net.lasts.isEmpty)
     }
 
+    func testHoldGlassNamesTheHeardRadio() {
+        let hear = MeshHear(
+            id: "AA-BB-CC-DD-EEFF",
+            name: "Crisis iPhone",
+            kind: .apple,
+            rssi: -60,
+            manufacturer: 0x004C,
+            connectable: true,
+            txPower: -12
+        )
+        let radio = MeshPresence.radio(from: hear)
+        XCTAssertEqual(radio.name, "CRISIS IPHONE")
+        XCTAssertEqual(radio.kind, "IPHONE")
+        XCTAssertEqual(radio.rssi, "−60")
+        XCTAssertEqual(radio.reach, "100 M")
+        XCTAssertEqual(radio.radio, "EEFF")
+        XCTAssertEqual(radio.maker, "APPLE")
+        XCTAssertEqual(radio.link, "CONNECTABLE")
+        XCTAssertEqual(radio.tx, "−12")
+        let unnamed = MeshPresence.radio(from: MeshHear(id: "pixel-1", kind: .device, rssi: -80))
+        XCTAssertEqual(unnamed.name, "UNNAMED")
+        XCTAssertEqual(unnamed.kind, "DEVICE")
+        XCTAssertTrue(unnamed.maker.isEmpty)
+        let marks = MeshPresence.marks(
+            hears: [hear],
+            you: (31.76190, -106.49000),
+            place: true
+        )
+        XCTAssertEqual(marks.first?.radios.first?.name, "CRISIS IPHONE")
+        XCTAssertEqual(marks.first?.radios.first?.rssi, "−60")
+    }
+
     func testReachMetersAndSpokeAreStable() {
         XCTAssertEqual(MeshPresence.reachMeters(rssi: -35), 50, accuracy: 0.01)
         XCTAssertEqual(MeshPresence.reachMeters(rssi: -70), 120, accuracy: 0.01)
