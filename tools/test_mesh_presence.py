@@ -139,6 +139,16 @@ def signal(was: int | None, now: int | None) -> str:
     return ""
 
 
+def hold_signal(was: int | None, now: int | None, held: str = "") -> str:
+    """A second prune of the same hear keeps LIVE. Silence clears it."""
+    nxt = signal(was, now)
+    if now is None:
+        return ""
+    if nxt:
+        return nxt
+    return held
+
+
 def lasts(
     remembered: list[dict],
     live: list[dict],
@@ -194,6 +204,10 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         self.assertEqual(signal(-80, -70), "NEAR · LOUDER")
         self.assertEqual(signal(-70, -80), "NEAR · QUIETER")
         self.assertEqual(signal(-70, -68), "")
+        live = hold_signal(None, -70)
+        self.assertEqual(live, "NEAR · LIVE")
+        self.assertEqual(hold_signal(-70, -70, live), "NEAR · LIVE")
+        self.assertEqual(hold_signal(-70, None, live), "")
 
     def test_last_hop_outlives_the_hear(self):
         live = [{"id": "NEAR·31.78000,-106.51000", "lat": 31.78000, "lon": -106.51000}]
@@ -259,6 +273,9 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         self.assertIn("ble, hop", mesh)
         self.assertIn("chromeNear", mesh)
         self.assertIn("chromeSignal", mesh)
+        prune = mesh.split("func pruneHears")[1].split("func presenceMarks")[0]
+        self.assertIn("if nowMax == nil", prune)
+        self.assertIn("else if !next.isEmpty", prune)
         self.assertIn("noteHear", mesh)
         self.assertIn("noteHop", mesh)
         self.assertIn("func startListen(", mesh)

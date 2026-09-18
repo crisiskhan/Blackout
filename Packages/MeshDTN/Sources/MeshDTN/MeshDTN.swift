@@ -732,7 +732,12 @@ public final class MeshNet: @unchecked Sendable {
         lasts.removeAll { now.timeIntervalSince($0.at) > MeshPresence.lastSeconds }
         chromeNear = MeshPresence.chrome(count: hears.count)
         let nowMax = hears.map(\.rssi).filter { $0 > -120 && $0 < 0 }.max()
-        chromeSignal = MeshPresence.signal(was: lastRSSI, now: nowMax)
+        let next = MeshPresence.signal(was: lastRSSI, now: nowMax)
+        if nowMax == nil {
+            chromeSignal = ""
+        } else if !next.isEmpty {
+            chromeSignal = next
+        }
         lastRSSI = nowMax
     }
 
