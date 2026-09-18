@@ -460,6 +460,7 @@ public final class MeshNet: @unchecked Sendable {
     public private(set) var chromeNear = ""
     public private(set) var chromeSignal = ""
     public private(set) var listening = false
+    public private(set) var placing = false
     public private(set) var lasts: [MeshPresence.LastFix] = []
     private var lastRSSI: Int?
     public var airplane = true
@@ -477,6 +478,15 @@ public final class MeshNet: @unchecked Sendable {
     }
 
     public func attach(_ radio: MeshRadio) { self.radio = radio }
+
+    public func startScan() {
+        placing = true
+        if listening {
+            refreshChrome()
+            return
+        }
+        startListen()
+    }
 
     public func startListen() {
         radio?.stop()
@@ -504,6 +514,7 @@ public final class MeshNet: @unchecked Sendable {
     }
 
     public func startLocal() {
+        placing = true
         radio?.stop()
         if airplane {
             box.log("mesh", "airplane: no sockets; radio is Bluetooth only")
@@ -553,6 +564,7 @@ public final class MeshNet: @unchecked Sendable {
         pips.removeAll()
         joined = false
         listening = false
+        placing = false
         refreshChrome()
         box.log("mesh", "radio stopped")
     }
@@ -743,7 +755,7 @@ public final class MeshNet: @unchecked Sendable {
 
     public func presenceMarks(you: (lat: Double, lon: Double)?) -> [MeshPresence.Mark] {
         pruneHears()
-        let live = MeshPresence.marks(hears: hears, you: you)
+        let live = MeshPresence.marks(hears: hears, you: you, place: placing)
         return live + MeshPresence.lasts(remembered: lasts, live: live)
     }
 

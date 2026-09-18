@@ -1498,6 +1498,8 @@ class CommsInstrumentTests(unittest.TestCase):
         self.assertIn("JOIN LOCAL NET", comms)
         self.assertIn("LISTEN", comms)
         self.assertIn("QUIET", comms)
+        self.assertIn('Button("SCAN")', comms)
+        self.assertNotIn('Button("SCA")', comms)
         self.assertNotIn("Whisper <10 m", comms)
 
     def test_call_is_a_hold_and_the_net_can_leave(self):
@@ -4784,11 +4786,17 @@ class MeshNearHUDTests(unittest.TestCase):
         self.assertIn("chromeNear", comms)
         self.assertIn("LISTEN", comms)
         self.assertIn("QUIET", comms)
+        self.assertIn('Button("SCAN")', comms)
+        self.assertIn("scanMesh", app)
+        self.assertIn("SCAN — NO FIX", app)
         self.assertIn("presence", app.split("func eyeCanvasPips")[1].split("func eyeTrails")[0])
         self.assertIn("NEAR ·", qa)
         self.assertIn("LOUDER", qa)
         self.assertIn("green", qa.lower())
         self.assertIn("house", qa.lower())
+        self.assertIn("SCAN or JOIN LOCAL NET", qa)
+        self.assertIn("SCAN — NO FIX", qa)
+        self.assertIn("WALK — NO PLACE", qa)
 
 
 if __name__ == "__main__":

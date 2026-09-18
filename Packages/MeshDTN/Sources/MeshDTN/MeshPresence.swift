@@ -99,13 +99,22 @@ public enum MeshPresence {
         public var lon: Double
         public var count: Int
         public var kinds: [String]
+        public var placed: Bool
 
-        public init(id: String, lat: Double, lon: Double, count: Int, kinds: [String]) {
+        public init(
+            id: String,
+            lat: Double,
+            lon: Double,
+            count: Int,
+            kinds: [String],
+            placed: Bool = true
+        ) {
             self.id = id
             self.lat = lat
             self.lon = lon
             self.count = count
             self.kinds = kinds
+            self.placed = placed
         }
     }
 
@@ -164,12 +173,22 @@ public enum MeshPresence {
         _ points: [(id: String, lat: Double, lon: Double, kind: String)],
         radiusMeters: Double = houseMeters
     ) -> [Mark] {
+        cluster(
+            points.map { ($0.id, $0.lat, $0.lon, $0.kind, true) },
+            radiusMeters: radiusMeters
+        )
+    }
+
+    public static func cluster(
+        _ points: [(id: String, lat: Double, lon: Double, kind: String, placed: Bool)],
+        radiusMeters: Double = houseMeters
+    ) -> [Mark] {
         var leftover = points.sorted { $0.id < $1.id }
         var out: [Mark] = []
         while !leftover.isEmpty {
             let seed = leftover.removeFirst()
             var bunch = [seed]
-            var kept: [(id: String, lat: Double, lon: Double, kind: String)] = []
+            var kept: [(id: String, lat: Double, lon: Double, kind: String, placed: Bool)] = []
             for point in leftover {
                 if meters(seed.lat, seed.lon, point.lat, point.lon) <= radiusMeters {
                     bunch.append(point)
@@ -190,24 +209,73 @@ public enum MeshPresence {
                     lat: lat,
                     lon: lon,
                     count: bunch.count,
-                    kinds: kinds
+                    kinds: kinds,
+                    placed: bunch.allSatisfy(\.placed)
                 )
             )
         }
         return out
     }
 
+    public static func reachMeters(rssi: Int) -> Double {
+        let clamped = max(-100, min(-35, rssi))
+        return 50.0 + Double((-35 - clamped) * 2)
+    }
+
+    public static func bearingDegrees(id: String) -> Double {
+        var hash: UInt32 = 2_166_132_261
+        for byte in id.utf8 {
+            hash ^= UInt32(byte)
+            hash = hash &* 16_777_619
+        }
+        return Double(hash % 36_000) / 100.0
+    }
+
+    public static func offset(
+        lat: Double,
+        lon: Double,
+        meters: Double,
+        bearingDegrees: Double
+    ) -> (lat: Double, lon: Double) {
+        let r = 6_371_000.0
+        let br = bearingDegrees * .pi / 180
+        let p1 = lat * .pi / 180
+        let ang = meters / r
+        let p2 = asin(sin(p1) * cos(ang) + cos(p1) * sin(ang) * cos(br))
+        let l2 = lon * .pi / 180 + atan2(
+            sin(br) * sin(ang) * cos(p1),
+            cos(ang) - sin(p1) * sin(p2)
+        )
+        return (p2 * 180 / .pi, l2 * 180 / .pi)
+    }
+
+    public static func placeHear(
+        _ hear: MeshHear,
+        you: (lat: Double, lon: Double)
+    ) -> (id: String, lat: Double, lon: Double, kind: String, placed: Bool) {
+        let dest = offset(
+            lat: you.lat,
+            lon: you.lon,
+            meters: reachMeters(rssi: hear.rssi),
+            bearingDegrees: bearingDegrees(id: hear.id)
+        )
+        return (hear.id, dest.lat, dest.lon, hear.kind.rawValue, false)
+    }
+
     public static func marks(
         hears: [MeshHear],
-        you: (lat: Double, lon: Double)?
+        you: (lat: Double, lon: Double)?,
+        place: Bool = false
     ) -> [Mark] {
-        _ = you
-        var placed: [(id: String, lat: Double, lon: Double, kind: String)] = []
+        var placed: [(id: String, lat: Double, lon: Double, kind: String, placed: Bool)] = []
         for hear in hears {
-            guard let lat = hear.lat, let lon = hear.lon, lat.isFinite, lon.isFinite else {
+            if let lat = hear.lat, let lon = hear.lon, lat.isFinite, lon.isFinite {
+                placed.append((hear.id, lat, lon, hear.kind.rawValue, true))
                 continue
             }
-            placed.append((hear.id, lat, lon, hear.kind.rawValue))
+            if place, let you, you.lat.isFinite, you.lon.isFinite {
+                placed.append(placeHear(hear, you: you))
+            }
         }
         return cluster(placed)
     }
@@ -252,7 +320,8 @@ public enum MeshPresence {
                 lat: point.lat,
                 lon: point.lon,
                 count: point.count,
-                kinds: point.kinds
+                kinds: point.kinds,
+                placed: true
             )
         }
     }

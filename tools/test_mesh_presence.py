@@ -58,6 +58,7 @@ def cluster(
                 "lon": lon,
                 "count": len(bunch),
                 "kinds": kinds,
+                "placed": all(p.get("placed", True) for p in bunch),
             }
         )
     return out
@@ -103,26 +104,75 @@ def should_probe(name: str, services: list[str]) -> bool:
     return not _accessory(name, services)
 
 
+def reach_meters(rssi: int) -> float:
+    """Loud is closer. Floor is one house so a mall is a ring, not a fake house on YOU."""
+    clamped = max(-100, min(-35, rssi))
+    return 50.0 + ((-35 - clamped) * 2.0)
+
+
+def bearing_deg(radio_id: str) -> float:
+    """Stable 0..360 spoke from the radio id. Same id, same spoke."""
+    h = 2166136261
+    for byte in radio_id.encode("utf-8"):
+        h ^= byte
+        h = (h * 16777619) & 0xFFFFFFFF
+    return (h % 36000) / 100.0
+
+
+def offset(
+    lat: float, lon: float, meters: float, bearing: float
+) -> tuple[float, float]:
+    r = 6_371_000.0
+    br = math.radians(bearing)
+    p1 = math.radians(lat)
+    ang = meters / r
+    p2 = math.asin(
+        math.sin(p1) * math.cos(ang) + math.cos(p1) * math.sin(ang) * math.cos(br)
+    )
+    l2 = math.radians(lon) + math.atan2(
+        math.sin(br) * math.sin(ang) * math.cos(p1),
+        math.cos(ang) - math.sin(p1) * math.sin(p2),
+    )
+    return (math.degrees(p2), math.degrees(l2))
+
+
+def place_hear(
+    hear: dict, you: tuple[float, float]
+) -> dict:
+    meters = reach_meters(int(hear.get("rssi") or 0))
+    dest = offset(you[0], you[1], meters, bearing_deg(str(hear["id"])))
+    return {
+        "id": hear["id"],
+        "lat": dest[0],
+        "lon": dest[1],
+        "kind": hear.get("kind") or "",
+        "placed": False,
+    }
+
+
 def marks(
     hears: list[dict],
     you: tuple[float, float] | None,
+    place: bool = False,
 ) -> list[dict]:
-    """Only a real fix paints. YOU is not a house of strangers."""
-    _ = you
+    """A real hop POS paints on its fix. SCAN / JOIN place no-fix hears around YOU."""
     placed: list[dict] = []
     for hear in hears:
         lat = hear.get("lat")
         lon = hear.get("lon")
-        if lat is None or lon is None:
+        if lat is not None and lon is not None:
+            placed.append(
+                {
+                    "id": hear["id"],
+                    "lat": lat,
+                    "lon": lon,
+                    "kind": hear.get("kind") or "",
+                    "placed": True,
+                }
+            )
             continue
-        placed.append(
-            {
-                "id": hear["id"],
-                "lat": lat,
-                "lon": lon,
-                "kind": hear.get("kind") or "",
-            }
-        )
+        if place and you is not None:
+            placed.append(place_hear(hear, you))
     return cluster(placed)
 
 
@@ -197,6 +247,55 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         ]
         self.assertEqual(marks(hears, you=None), [])
         self.assertEqual(marks(hears, you=(31.76, -106.49)), [])
+        self.assertEqual(marks(hears, you=(31.76, -106.49), place=False), [])
+        self.assertEqual(marks(hears, you=None, place=True), [])
+
+    def test_scan_places_no_fix_hears_around_you(self):
+        you = (31.76190, -106.49000)
+        hears = [
+            {"id": "iphone-1", "kind": "apple", "rssi": -60},
+            {"id": "pixel-2", "kind": "device", "rssi": -80},
+        ]
+        out = marks(hears, you=you, place=True)
+        self.assertEqual(sum(m["count"] for m in out), 2)
+        self.assertTrue(all(m["placed"] is False for m in out))
+        for mark in out:
+            dist = _haversine_m(you, (mark["lat"], mark["lon"]))
+            self.assertGreaterEqual(dist, 45.0)
+            self.assertLessEqual(dist, 200.0)
+        again = marks(hears, you=you, place=True)
+        self.assertEqual(
+            [(m["lat"], m["lon"], m["count"]) for m in out],
+            [(m["lat"], m["lon"], m["count"]) for m in again],
+        )
+        hop = marks(
+            [{"id": "hop-1", "kind": "hop", "rssi": -50, "lat": 31.78000, "lon": -106.51000}],
+            you=you,
+            place=True,
+        )
+        self.assertEqual(len(hop), 1)
+        self.assertTrue(hop[0]["placed"])
+        self.assertAlmostEqual(hop[0]["lat"], 31.78000, places=5)
+
+    def test_reach_is_a_ring_and_clusters_are_civilization(self):
+        self.assertAlmostEqual(reach_meters(-35), 50.0)
+        self.assertAlmostEqual(reach_meters(-70), 120.0)
+        self.assertAlmostEqual(reach_meters(-100), 180.0)
+        self.assertLess(reach_meters(-40), reach_meters(-90))
+        you = (31.76190, -106.49000)
+        mall = [
+            {"id": f"mall-{i}", "kind": "device", "rssi": -70} for i in range(12)
+        ]
+        out = marks(mall, you=you, place=True)
+        self.assertEqual(sum(m["count"] for m in out), 12)
+        self.assertTrue(all(m["placed"] is False for m in out))
+        self.assertGreaterEqual(len(out), 2)
+        self.assertGreaterEqual(max(m["count"] for m in out), 1)
+        first = place_hear(mall[0], you)
+        second = place_hear(mall[0], you)
+        self.assertEqual((first["lat"], first["lon"]), (second["lat"], second["lon"]))
+        other = place_hear(mall[1], you)
+        self.assertNotEqual((first["lat"], first["lon"]), (other["lat"], other["lon"]))
 
     def test_signal_names_louder_and_quieter(self):
         self.assertEqual(signal(None, None), "")
@@ -270,6 +369,17 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         self.assertIn("NEAR · LOUDER", presence)
         self.assertIn("func signal(", presence)
         self.assertIn("func lasts(", presence)
+        self.assertIn("func reachMeters", presence)
+        self.assertIn("func bearingDegrees", presence)
+        self.assertIn("func placeHear", presence)
+        self.assertIn("place: placing", mesh)
+        self.assertIn("func startScan(", mesh)
+        self.assertIn("placing = true", mesh)
+        self.assertIn("placing = false", mesh)
+        self.assertIn('Button("SCAN")', comms)
+        self.assertIn("scanMesh", app)
+        self.assertIn("SCAN — NO FIX", app)
+        self.assertIn("placed: mark.placed", app)
         self.assertIn("ble, hop", mesh)
         self.assertIn("chromeNear", mesh)
         self.assertIn("chromeSignal", mesh)
@@ -288,6 +398,10 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         self.assertIn("shouldProbe", live)
         self.assertIn("probedClosed", live)
         self.assertIn("testHearIsNotAPeer", tests)
+        self.assertIn("testScanPlacesNoFixHearAroundYou", tests)
+        self.assertIn("testJoinPlacesWithoutAParty", tests)
+        self.assertIn("testScanDoesNotLeaveALiveParty", tests)
+        self.assertIn("testReachMetersAndSpokeAreStable", tests)
         self.assertIn("testHopCarriesStore", tests)
         self.assertIn("static func presence(", art)
         self.assertIn("presence", app.split("func eyeCanvasPips")[1].split("func eyeTrails")[0])

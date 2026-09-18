@@ -829,6 +829,8 @@ def mesh() -> None:
         bad("mesh missing NEAR / hop carry")
     elif "func startListen(" not in src or "chromeSignal" not in src:
         bad("mesh missing listen / signal chrome")
+    elif "func startScan(" not in src or "place: placing" not in src:
+        bad("mesh missing SCAN place")
     else:
         ok("mesh hears radios and hops store")
 
@@ -844,7 +846,7 @@ def mesh_presence() -> None:
     if contracts.returncode != 0:
         bad(f"mesh presence contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
-    ok("Done: mesh NEAR dots — house cluster, hop carry, no fake civ")
+    ok("Done: mesh NEAR dots — SCAN place, house cluster, hop carry, no fake civ")
 
 
 def tip57_map() -> None:
