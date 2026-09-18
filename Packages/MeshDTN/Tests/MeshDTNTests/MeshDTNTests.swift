@@ -28,6 +28,51 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertEqual(net.nearby.count, 0)
     }
 
+    func testScanPlacesNoFixHearAroundYou() {
+        let net = MeshNet(box: EventLog())
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.startScan()
+        XCTAssertTrue(net.placing)
+        XCTAssertTrue(net.listening)
+        XCTAssertFalse(net.joined)
+        radio.appearHear(MeshHear(id: "iphone-1", kind: .apple, rssi: -60))
+        XCTAssertEqual(net.chromeNear, "NEAR · 1")
+        XCTAssertTrue(net.presenceMarks(you: nil).isEmpty)
+        let marks = net.presenceMarks(you: (31.76190, -106.49000))
+        XCTAssertEqual(marks.count, 1)
+        XCTAssertEqual(try XCTUnwrap(marks.first).placed, false)
+        let d = MeshPresence.meters(
+            31.76190, -106.49000,
+            try XCTUnwrap(marks.first).lat,
+            try XCTUnwrap(marks.first).lon
+        )
+        XCTAssertGreaterThanOrEqual(d, 45)
+        XCTAssertLessThanOrEqual(d, 200)
+        let again = net.presenceMarks(you: (31.76190, -106.49000))
+        XCTAssertEqual(try XCTUnwrap(marks.first).lat, try XCTUnwrap(again.first).lat, accuracy: 1e-9)
+        net.stopLocal()
+        XCTAssertFalse(net.placing)
+        XCTAssertTrue(net.presenceMarks(you: (31.76190, -106.49000)).isEmpty)
+    }
+
+    func testJoinPlacesWithoutAParty() {
+        let net = MeshNet(box: EventLog())
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.startLocal()
+        XCTAssertTrue(net.placing)
+        XCTAssertFalse(net.joined)
+        radio.appearHear(MeshHear(id: "pixel-1", kind: .device, rssi: -80))
+        let marks = net.presenceMarks(you: (31.76190, -106.49000))
+        XCTAssertEqual(marks.count, 1)
+        XCTAssertEqual(try XCTUnwrap(marks.first).placed, false)
+        net.stopParty()
+        XCTAssertTrue(net.placing)
+        XCTAssertTrue(net.listening)
+        XCTAssertEqual(net.presenceMarks(you: (31.76190, -106.49000)).count, 1)
+    }
+
     func testHearIsNotAPeer() {
         let net = MeshNet(box: EventLog())
         let radio = LoopbackRadio(path: .ble)
@@ -67,6 +112,25 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertFalse(net.listening)
         XCTAssertTrue(net.hears.isEmpty)
         XCTAssertTrue(net.lasts.isEmpty)
+    }
+
+    func testReachMetersAndSpokeAreStable() {
+        XCTAssertEqual(MeshPresence.reachMeters(rssi: -35), 50, accuracy: 0.01)
+        XCTAssertEqual(MeshPresence.reachMeters(rssi: -70), 120, accuracy: 0.01)
+        XCTAssertEqual(MeshPresence.reachMeters(rssi: -100), 180, accuracy: 0.01)
+        XCTAssertLessThan(MeshPresence.reachMeters(rssi: -40), MeshPresence.reachMeters(rssi: -90))
+        let hear = MeshHear(id: "iphone-1", kind: .apple, rssi: -60)
+        let you = (lat: 31.76190, lon: -106.49000)
+        let a = MeshPresence.placeHear(hear, you: you)
+        let b = MeshPresence.placeHear(hear, you: you)
+        XCTAssertEqual(a.lat, b.lat, accuracy: 1e-12)
+        XCTAssertEqual(a.lon, b.lon, accuracy: 1e-12)
+        XCTAssertFalse(a.placed)
+        let other = MeshPresence.placeHear(
+            MeshHear(id: "pixel-2", kind: .device, rssi: -60),
+            you: you
+        )
+        XCTAssertNotEqual(a.lat, other.lat, accuracy: 1e-9)
     }
 
     func testSignalNamesLouderAndQuieter() {

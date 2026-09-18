@@ -119,6 +119,8 @@ struct CommsTab: View {
                 }
             }
             .buttonStyle(HUDActionStyle(filled: !runtime.mesh.joined))
+            Button("SCAN") { runtime.scanMesh() }
+                .buttonStyle(HUDActionStyle(filled: runtime.mesh.placing))
             Button(runtime.mesh.listening ? "QUIET" : "LISTEN") {
                 if runtime.mesh.listening {
                     runtime.quietRadio()
@@ -127,6 +129,12 @@ struct CommsTab: View {
                 }
             }
             .buttonStyle(HUDActionStyle(filled: runtime.mesh.listening && !runtime.mesh.joined))
+            if !runtime.commsChrome.isEmpty {
+                Text(runtime.commsChrome)
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.warn)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             if !runtime.mesh.chromeNear.isEmpty {
                 Text(runtime.mesh.chromeNear)
                     .font(.system(size: 13, weight: .heavy))
@@ -263,8 +271,11 @@ struct CommsTab: View {
                 return "1:1 · \(runtime.mesh.chromeNet)"
             }
         }
-        let bits = [runtime.mesh.chromeNet, runtime.mesh.chromeNear, runtime.mesh.chromeSignal]
+        var bits = [runtime.mesh.chromeNet, runtime.mesh.chromeNear, runtime.mesh.chromeSignal]
             .filter { !$0.isEmpty }
+        if runtime.commsChrome == "SCAN — NO FIX" {
+            bits.insert(runtime.commsChrome, at: 0)
+        }
         return bits.joined(separator: " · ")
     }
 

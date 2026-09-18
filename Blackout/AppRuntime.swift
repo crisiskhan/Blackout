@@ -269,6 +269,13 @@ final class AppRuntime {
         mesh.startListen()
     }
 
+    func scanMesh() {
+        mesh.airplane = true
+        if mesh.radio == nil { mesh.attach(LiveMeshRadio()) }
+        mesh.startScan()
+        commsChrome = fieldYou == nil ? "SCAN — NO FIX" : ""
+    }
+
     func quietRadio() {
         clipTask?.cancel()
         clipTask = nil
@@ -289,6 +296,9 @@ final class AppRuntime {
         persistPartyCode()
         if mesh.radio == nil { mesh.attach(LiveMeshRadio()) }
         mesh.startLocal()
+        if fieldYou == nil, commsChrome.isEmpty {
+            commsChrome = "SCAN — NO FIX"
+        }
     }
 
     func leaveNet() {
@@ -852,7 +862,7 @@ final class AppRuntime {
             lon: mark.lon,
             count: mark.count,
             kinds: mark.kinds,
-            placed: true,
+            placed: mark.placed,
             last: mark.id.hasPrefix(NearMark.lastPrefix),
             signal: mesh.chromeSignal
         )
@@ -1382,6 +1392,9 @@ final class AppRuntime {
         chromeAwake = true
         hudFocus = .none
         mesh.pruneHears()
+        if mesh.placing, fieldYou != nil, commsChrome == "SCAN — NO FIX" {
+            commsChrome = ""
+        }
         refreshHeldNear()
         pulseTask?.cancel()
         pulseTask = Task { @MainActor in
