@@ -164,8 +164,8 @@ final class MeshDTNTests: XCTestCase {
             kind: .apple,
             rssi: -60,
             manufacturer: 0x004C,
-            connectable: true,
-            txPower: -12
+            txPower: -12,
+            connectable: true
         )
         let radio = MeshPresence.radio(from: hear)
         XCTAssertEqual(radio.name, "CRISIS IPHONE")
