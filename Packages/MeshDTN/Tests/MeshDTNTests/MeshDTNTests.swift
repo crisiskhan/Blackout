@@ -41,16 +41,14 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertTrue(net.presenceMarks(you: nil).isEmpty)
         let marks = net.presenceMarks(you: (31.76190, -106.49000))
         XCTAssertEqual(marks.count, 1)
-        XCTAssertEqual(try XCTUnwrap(marks.first).placed, false)
-        let d = MeshPresence.meters(
-            31.76190, -106.49000,
-            try XCTUnwrap(marks.first).lat,
-            try XCTUnwrap(marks.first).lon
-        )
+        guard let mark = marks.first else { return }
+        XCTAssertEqual(mark.placed, false)
+        let d = MeshPresence.meters(31.76190, -106.49000, mark.lat, mark.lon)
         XCTAssertGreaterThanOrEqual(d, 45)
         XCTAssertLessThanOrEqual(d, 200)
         let again = net.presenceMarks(you: (31.76190, -106.49000))
-        XCTAssertEqual(try XCTUnwrap(marks.first).lat, try XCTUnwrap(again.first).lat, accuracy: 1e-9)
+        guard let next = again.first else { return }
+        XCTAssertEqual(mark.lat, next.lat, accuracy: 1e-9)
         net.stopLocal()
         XCTAssertFalse(net.placing)
         XCTAssertTrue(net.presenceMarks(you: (31.76190, -106.49000)).isEmpty)
@@ -81,7 +79,7 @@ final class MeshDTNTests: XCTestCase {
         radio.appearHear(MeshHear(id: "pixel-1", kind: .device, rssi: -80))
         let marks = net.presenceMarks(you: (31.76190, -106.49000))
         XCTAssertEqual(marks.count, 1)
-        XCTAssertEqual(try XCTUnwrap(marks.first).placed, false)
+        XCTAssertEqual(marks.first?.placed, false)
         net.stopParty()
         XCTAssertTrue(net.placing)
         XCTAssertTrue(net.listening)
