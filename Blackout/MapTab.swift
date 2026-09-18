@@ -71,6 +71,7 @@ struct MapTab: View {
                     held: runtime.held.map { (lat: $0.lat, lon: $0.lon) }
                         ?? runtime.heldAddress.map { (lat: $0.lat, lon: $0.lon) }
                         ?? runtime.heldCam.map { (lat: $0.lat, lon: $0.lon) }
+                        ?? runtime.heldNear.map { (lat: $0.lat, lon: $0.lon) }
                         ?? runtime.markDraft.map { (lat: $0.lat, lon: $0.lon) },
                     fitToken: runtime.fitPackToken,
                     trackUser: true,
@@ -136,7 +137,7 @@ struct MapTab: View {
                 hud(packName: pack.name, offPack: offPack)
                     .padding(hudReserve)
             }
-            if runtime.tab == .map, runtime.godsEye, runtime.heldParty == nil, runtime.held == nil, runtime.heldCam == nil, runtime.markDraft == nil, let tap = runtime.eyeTap {
+            if runtime.tab == .map, runtime.godsEye, runtime.heldParty == nil, runtime.held == nil, runtime.heldCam == nil, runtime.heldNear == nil, runtime.markDraft == nil, let tap = runtime.eyeTap {
                 EyeTapStrip(
                     person: tap,
                     onCall: { runtime.callEyeTap() },
@@ -179,6 +180,15 @@ struct MapTab: View {
             } else if runtime.tab == .map, let cam = runtime.heldCam {
                 CamHoldCard(runtime: runtime, cam: cam)
                     .padding(hudReserve)
+            } else if runtime.tab == .map, let near = runtime.heldNear {
+                NearHoldCard(
+                    hold: near,
+                    bearing: runtime.nearCourse(lat: near.lat, lon: near.lon),
+                    coordinates: runtime.nearFix(lat: near.lat, lon: near.lon),
+                    onWalk: { runtime.walkHeldNear() },
+                    onClose: { runtime.closeHold() }
+                )
+                .padding(hudReserve)
             } else if runtime.tab == .map, let address = runtime.heldAddress {
                 AddressHoldCard(
                     address: address,
@@ -206,6 +216,7 @@ struct MapTab: View {
         .animation(Theme.Motion.heavy, value: runtime.heldParty)
         .animation(Theme.Motion.heavy, value: runtime.heldAddress)
         .animation(Theme.Motion.heavy, value: runtime.heldCam)
+        .animation(Theme.Motion.heavy, value: runtime.heldNear)
         .animation(Theme.Motion.heavy, value: runtime.pickingEmblem)
         .animation(Theme.Motion.heavy, value: runtime.markDraft)
         .animation(Theme.Motion.heavy, value: runtime.showSpeakTurns)
@@ -216,6 +227,7 @@ struct MapTab: View {
             || runtime.heldParty != nil
             || runtime.heldAddress != nil
             || runtime.heldCam != nil
+            || runtime.heldNear != nil
             || runtime.markDraft != nil
             || runtime.heldMark != nil
     }
@@ -424,7 +436,7 @@ struct MapTab: View {
         let lines = MapFieldChrome.lines(
             lock: runtime.lockChrome,
             route: runtime.routeChrome,
-            tool: runtime.toolChrome,
+            tool: MapFieldChrome.joined([runtime.toolChrome, runtime.mesh.chromeNear]),
             dest: dest,
             you: you,
             speak: runtime.speechChrome

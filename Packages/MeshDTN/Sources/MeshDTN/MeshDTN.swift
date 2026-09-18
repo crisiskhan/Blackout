@@ -4,7 +4,7 @@ import BlackBox
 
 public enum LinkKind: String, Sendable { case none, bleTensOfMeters, dtnCarry, optionalLoRaBrick }
 
-public enum RadioPath: String, Sendable, Equatable { case none, mpc, ble }
+public enum RadioPath: String, Sendable, Equatable { case none, mpc, ble, hop }
 
 public struct MeshEnvelope: Codable, Equatable, Sendable {
     public var id: String
@@ -304,6 +304,9 @@ public final class LoopbackRadio: MeshRadio {
     private var onPeer: ((String) -> Void)?
     private var onLost: ((String) -> Void)?
     private var onEnvelope: ((MeshEnvelope) -> Void)?
+    public var onHear: ((MeshHear) -> Void)?
+    public var onHop: ((String) -> Void)?
+    public var onHopLost: ((String) -> Void)?
 
     public init(path: RadioPath = .ble) { livePath = path }
 
@@ -329,8 +332,22 @@ public final class LoopbackRadio: MeshRadio {
         onPeer?(name)
     }
 
+    public func appearHop(_ name: String = "hop") {
+        path = .hop
+        onHop?(name)
+    }
+
+    public func appearHear(_ hear: MeshHear) {
+        onHear?(hear)
+    }
+
     public func losePeer(_ name: String) {
         onLost?(name)
+    }
+
+    public func loseHop(_ name: String) {
+        onHopLost?(name)
+        if path == .hop { path = .none }
     }
 
     public func deliver(_ env: MeshEnvelope) { onEnvelope?(env) }
@@ -343,6 +360,14 @@ public enum PartyMeshUUID {
 
     public static func characteristic(for partyCode: String) -> UUID {
         fnvUUID(seed: "blackout.mesh.char.v1.\(partyCode.uppercased())")
+    }
+
+    public static func hopService() -> UUID {
+        fnvUUID(seed: "blackout.mesh.hop.v1")
+    }
+
+    public static func hopCharacteristic() -> UUID {
+        fnvUUID(seed: "blackout.mesh.hop.char.v1")
     }
 
     private static func fnvUUID(seed: String) -> UUID {
@@ -416,6 +441,8 @@ public enum BLEEnvelopeCodec {
 public final class MeshNet: @unchecked Sendable {
     public private(set) var joined = false
     public private(set) var nearby: [String] = []
+    public private(set) var hops: [String] = []
+    public private(set) var hears: [MeshHear] = []
     public private(set) var store: [MeshEnvelope] = []
     public private(set) var inbox: [MeshEnvelope] = []
     public private(set) var pips: [MeshPip] = []
@@ -423,6 +450,7 @@ public final class MeshNet: @unchecked Sendable {
     public private(set) var inboundTimers: [MeshTimerEvent] = []
     public private(set) var lastRedOn: Bool?
     public private(set) var chromeNet = "NET · NONE"
+    public private(set) var chromeNear = ""
     public private(set) var listening = false
     public var airplane = true
     public var loRaBrickPresent = false
@@ -446,6 +474,9 @@ public final class MeshNet: @unchecked Sendable {
             box.log("mesh", "airplane: no sockets; radio is Bluetooth only")
         }
         nearby = []
+        hops = []
+        hears = []
+        chromeNear = ""
         joined = false
         listening = false
         refreshChrome()
@@ -454,6 +485,7 @@ public final class MeshNet: @unchecked Sendable {
             return
         }
         listening = true
+        bindRadioHooks()
         radio.start(partyCode: partyCode, onPeer: { [weak self] peer in
             self?.heardPeer(peer)
         }, onLost: { [weak self] peer in
@@ -467,6 +499,9 @@ public final class MeshNet: @unchecked Sendable {
     public func stopLocal() {
         radio?.stop()
         nearby = []
+        hops = []
+        hears = []
+        chromeNear = ""
         pips.removeAll()
         joined = false
         listening = false
@@ -614,10 +649,70 @@ public final class MeshNet: @unchecked Sendable {
         return .none
     }
 
+    public func noteHear(_ hear: MeshHear) {
+        if nearby.contains(hear.id) { return }
+        if let i = hears.firstIndex(where: { $0.id == hear.id }) {
+            var next = hear
+            if next.lat == nil { next.lat = hears[i].lat }
+            if next.lon == nil { next.lon = hears[i].lon }
+            hears[i] = next
+        } else {
+            hears.append(hear)
+        }
+        pruneHears()
+    }
+
+    public func noteHop(_ peer: String) {
+        if !hops.contains(peer) { hops.append(peer) }
+        refreshChrome()
+        replayCarry()
+        onPeersChanged?()
+    }
+
+    public func lostHop(_ peer: String) {
+        hops.removeAll { $0 == peer }
+        hears.removeAll { $0.id == peer && $0.kind == .hop }
+        refreshChrome()
+        onPeersChanged?()
+    }
+
+    public func pruneHears(now: Date = Date()) {
+        hears.removeAll { now.timeIntervalSince($0.heardAt) > MeshPresence.hearSeconds }
+        chromeNear = MeshPresence.chrome(count: hears.count)
+    }
+
+    public func presenceMarks(you: (lat: Double, lon: Double)?) -> [MeshPresence.Mark] {
+        pruneHears()
+        return MeshPresence.marks(hears: hears, you: you)
+    }
+
+    private func bindRadioHooks() {
+        if let live = radio as? LiveMeshRadio {
+            live.onHear = { [weak self] hear in self?.noteHear(hear) }
+            live.onHop = { [weak self] peer in self?.noteHop(peer) }
+            live.onHopLost = { [weak self] peer in self?.lostHop(peer) }
+            live.carry = { [weak self] in
+                Array((self?.store ?? []).filter { $0.kind != "voice" }.suffix(24))
+            }
+        }
+        if let loop = radio as? LoopbackRadio {
+            loop.onHear = { [weak self] hear in self?.noteHear(hear) }
+            loop.onHop = { [weak self] peer in self?.noteHop(peer) }
+            loop.onHopLost = { [weak self] peer in self?.lostHop(peer) }
+        }
+    }
+
+    private func replayCarry() {
+        guard let radio, !hops.isEmpty else { return }
+        for env in store where env.kind != "voice" {
+            radio.send(env)
+        }
+    }
+
     private var hasLiveLink: Bool {
-        guard let radio else { return false }
-        if radio.path == .none { return false }
-        return !nearby.isEmpty
+        guard radio != nil else { return false }
+        if !nearby.isEmpty, radio?.path != .none { return true }
+        return !hops.isEmpty
     }
 
     private func make(from: String, kind: String, body: Data, to: String = "*") -> MeshEnvelope {
@@ -632,6 +727,7 @@ public final class MeshNet: @unchecked Sendable {
 
     private func heardPeer(_ peer: String) {
         if !nearby.contains(peer) { nearby.append(peer) }
+        hears.removeAll { $0.id == peer }
         refreshChrome()
         box.log("mesh", "peer \(peer) \(chromeNet)")
         onPeersChanged?()
@@ -656,18 +752,29 @@ public final class MeshNet: @unchecked Sendable {
         case "pos":
             if let text = String(data: env.body, encoding: .utf8),
                let parsed = MeshPOS.parse(text) {
-                upsertPip(
-                    MeshPip(
-                        from: env.from,
-                        lat: parsed.lat,
-                        lon: parsed.lon,
-                        headingDeg: parsed.headingDeg,
-                        emblem: parsed.emblem,
-                        name: parsed.name,
-                        status: parsed.status,
-                        vitals: parsed.vitals
+                if nearby.contains(env.from) {
+                    upsertPip(
+                        MeshPip(
+                            from: env.from,
+                            lat: parsed.lat,
+                            lon: parsed.lon,
+                            headingDeg: parsed.headingDeg,
+                            emblem: parsed.emblem,
+                            name: parsed.name,
+                            status: parsed.status,
+                            vitals: parsed.vitals
+                        )
                     )
-                )
+                } else {
+                    noteHear(
+                        MeshHear(
+                            id: env.from,
+                            kind: .hop,
+                            lat: parsed.lat,
+                            lon: parsed.lon
+                        )
+                    )
+                }
             }
         case "chip":
             if let name = String(data: env.body, encoding: .utf8) {
@@ -720,9 +827,22 @@ public final class MeshNet: @unchecked Sendable {
 
     private func refreshChrome() {
         let path = radio?.path ?? .none
-        if nearby.isEmpty || path == .none {
+        if nearby.isEmpty && hops.isEmpty {
             joined = false
             chromeNet = "NET · NONE"
+            chromeNear = MeshPresence.chrome(count: hears.count)
+            return
+        }
+        if nearby.isEmpty {
+            joined = false
+            chromeNet = "NET · HOP"
+            chromeNear = MeshPresence.chrome(count: hears.count)
+            return
+        }
+        if path == .none {
+            joined = false
+            chromeNet = "NET · NONE"
+            chromeNear = MeshPresence.chrome(count: hears.count)
             return
         }
         joined = true
@@ -734,6 +854,9 @@ public final class MeshNet: @unchecked Sendable {
             chromeNet = "NET · MPC"
         case .ble:
             chromeNet = "NET · BLE"
+        case .hop:
+            chromeNet = "NET · HOP"
         }
+        chromeNear = MeshPresence.chrome(count: hears.count)
     }
 }

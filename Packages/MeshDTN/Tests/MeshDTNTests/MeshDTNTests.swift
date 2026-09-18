@@ -28,6 +28,54 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertEqual(net.nearby.count, 0)
     }
 
+    func testHearIsNotAPeer() {
+        let net = MeshNet(box: EventLog())
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.startLocal()
+        radio.appearHear(MeshHear(id: "iphone-1", kind: .apple, rssi: -60))
+        XCTAssertEqual(net.hears.count, 1)
+        XCTAssertEqual(net.nearby.count, 0)
+        XCTAssertFalse(net.joined)
+        XCTAssertEqual(net.chromeNet, "NET · NONE")
+        XCTAssertEqual(net.chromeNear, "NEAR · 1")
+        XCTAssertTrue(net.pips.isEmpty)
+        XCTAssertEqual(net.presenceMarks(you: (31.76, -106.49)).first?.count, 1)
+    }
+
+    func testHopCarriesStore() {
+        let net = MeshNet(box: EventLog())
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.startLocal()
+        net.sendChip(from: net.localID, chip: "rally")
+        XCTAssertTrue(radio.sent.isEmpty)
+        radio.appearHop("hop-1")
+        XCTAssertEqual(net.chromeNet, "NET · HOP")
+        XCTAssertFalse(net.joined)
+        net.sendChip(from: net.localID, chip: "down")
+        XCTAssertFalse(radio.sent.isEmpty)
+        XCTAssertTrue(radio.sent.contains { $0.kind == "chip" })
+    }
+
+    func testHouseClusterIsOneDot() {
+        let marks = MeshPresence.cluster([
+            ("a", 31.76190, -106.49000, "apple"),
+            ("b", 31.76191, -106.49001, "samsung"),
+            ("c", 31.78000, -106.51000, "hop"),
+        ])
+        XCTAssertEqual(marks.count, 2)
+        XCTAssertEqual(marks.first { $0.count == 2 }?.count, 2)
+        XCTAssertTrue(marks.contains { $0.id.hasPrefix("NEAR·") })
+        XCTAssertEqual(MeshPresence.classify(name: "AirPods Pro", manufacturer: 0x004C, services: []), .device)
+        XCTAssertEqual(MeshPresence.classify(name: "Crisis iPhone", manufacturer: 0x004C, services: []), .apple)
+        XCTAssertEqual(MeshPresence.classify(name: "Galaxy S24", manufacturer: 0x0075, services: []), .samsung)
+        XCTAssertEqual(MeshPresence.classify(name: "Pixel 8", manufacturer: nil, services: []), .device)
+        XCTAssertEqual(MeshPresence.classify(name: "", manufacturer: nil, services: ["hop"]), .hop)
+        XCTAssertTrue(MeshPresence.shouldProbe(name: "Pixel 8", services: []))
+        XCTAssertFalse(MeshPresence.shouldProbe(name: "AirPods Pro", services: []))
+    }
+
     func testListeningIsNotAFakePeer() {
         let net = MeshNet(box: EventLog())
         let radio = LoopbackRadio(path: .ble)

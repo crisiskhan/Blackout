@@ -105,6 +105,8 @@ public struct PartyBody: Equatable, Sendable {
     public var overdue: Bool
     public var markKind: String
     public var rangeMeters: Double?
+    public var presence: Bool
+    public var count: Int
 
     public init(
         id: String,
@@ -120,7 +122,9 @@ public struct PartyBody: Equatable, Sendable {
         ghost: Bool = false,
         overdue: Bool = false,
         markKind: String = "",
-        rangeMeters: Double? = nil
+        rangeMeters: Double? = nil,
+        presence: Bool = false,
+        count: Int = 1
     ) {
         self.id = id
         self.lat = lat
@@ -136,6 +140,8 @@ public struct PartyBody: Equatable, Sendable {
         self.overdue = overdue
         self.markKind = markKind
         self.rangeMeters = rangeMeters
+        self.presence = presence
+        self.count = max(count, 1)
     }
 }
 
@@ -171,6 +177,8 @@ public enum PartyPips {
                 || a.ghost != b.ghost
                 || a.overdue != b.overdue
                 || a.markKind != b.markKind
+                || a.presence != b.presence
+                || a.count != b.count
             {
                 return true
             }

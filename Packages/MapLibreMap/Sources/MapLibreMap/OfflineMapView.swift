@@ -939,6 +939,13 @@ public struct OfflineMapView: UIViewRepresentable {
             }
             if bake {
                 for pip in pips {
+                    if pip.presence {
+                        style.setImage(
+                            PersonCompassArt.presence(count: pip.count),
+                            forName: PartyPips.markImageName(id: pip.id)
+                        )
+                        continue
+                    }
                     let place = PlaceMark.parse(pip.id) != nil
                     style.setImage(
                         PersonCompassArt.mark(
@@ -1954,6 +1961,33 @@ enum PersonCompassArt {
             if kid {
                 cg.setFillColor(UIColor(red: 46.0 / 255.0, green: 230.0 / 255.0, blue: 122.0 / 255.0, alpha: 1).cgColor)
                 cg.fillEllipse(in: CGRect(x: size - 10, y: 2, width: 8, height: 8))
+            }
+        }
+    }
+
+    static func presence(count: Int) -> UIImage {
+        let size: CGFloat = 22
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
+        return renderer.image { ctx in
+            let cg = ctx.cgContext
+            let well = CGRect(x: 2, y: 2, width: size - 4, height: size - 4)
+            cg.setFillColor(UIColor(red: 46.0 / 255.0, green: 230.0 / 255.0, blue: 122.0 / 255.0, alpha: 1).cgColor)
+            cg.fillEllipse(in: well)
+            cg.setStrokeColor(UIColor.black.cgColor)
+            cg.setLineWidth(2)
+            cg.strokeEllipse(in: well.insetBy(dx: 1, dy: 1))
+            if count > 1 {
+                let text = min(count, 99) as NSNumber
+                let label = "\(text)" as NSString
+                let attrs: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.systemFont(ofSize: count > 9 ? 8 : 10, weight: .heavy),
+                    .foregroundColor: UIColor.black,
+                ]
+                let sizeText = label.size(withAttributes: attrs)
+                label.draw(
+                    at: CGPoint(x: (size - sizeText.width) / 2, y: (size - sizeText.height) / 2),
+                    withAttributes: attrs
+                )
             }
         }
     }

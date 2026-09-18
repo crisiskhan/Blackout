@@ -119,6 +119,12 @@ struct CommsTab: View {
                 }
             }
             .buttonStyle(HUDActionStyle(filled: !runtime.mesh.listening))
+            if !runtime.mesh.chromeNear.isEmpty {
+                Text(runtime.mesh.chromeNear)
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.fix)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             HStack(spacing: 1) {
                 Button("ALL") { runtime.comms.setChannel("ALL") }
                     .buttonStyle(HUDDockStyle())
@@ -243,7 +249,11 @@ struct CommsTab: View {
                 return "1:1 · \(runtime.mesh.chromeNet)"
             }
         }
-        return runtime.mesh.chromeNet
+        let near = runtime.mesh.chromeNear
+        if near.isEmpty {
+            return runtime.mesh.chromeNet
+        }
+        return "\(runtime.mesh.chromeNet) · \(near)"
     }
 
     private var pageTone: HUDStatusTone {

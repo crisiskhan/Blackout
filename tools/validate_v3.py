@@ -825,6 +825,24 @@ def mesh() -> None:
         bad("RED/timer not wired to mesh")
     else:
         ok("RALLY/DOWN chips and RED/timer mesh wiring")
+    if "chromeNear" not in src or "noteHear" not in src or "ble, hop" not in src:
+        bad("mesh missing NEAR / hop carry")
+    else:
+        ok("mesh hears radios and hops store")
+
+
+def mesh_presence() -> None:
+    """Heard phones cluster. Discovery is not a peer. Hop carries store."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_mesh_presence.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"mesh presence contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: mesh NEAR dots — house cluster, hop carry, no fake civ")
 
 
 def tip57_map() -> None:
@@ -1254,6 +1272,7 @@ def main() -> None:
     packs()
     vision()
     mesh()
+    mesh_presence()
     vessel()
     archive_bundle_id()
     l10n()

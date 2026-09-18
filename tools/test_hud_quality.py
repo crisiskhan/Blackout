@@ -1034,6 +1034,7 @@ class HUDSyncTests(unittest.TestCase):
             "EmblemPickCard.swift",
             "AddressHoldCard.swift",
             "CamHoldCard.swift",
+            "NearHoldCard.swift",
             "SOSHold.swift",
             "InstrumentsView.swift",
             "RootChrome.swift",
@@ -2557,6 +2558,7 @@ class HUDSeductionTests(unittest.TestCase):
             "EmblemPickCard.swift",
             "AddressHoldCard.swift",
             "CamHoldCard.swift",
+            "NearHoldCard.swift",
             "CommsTab.swift",
             "FieldTab.swift",
             "ExpeditionTab.swift",
@@ -4292,6 +4294,7 @@ class GlassCardHonestyTests(unittest.TestCase):
         "PlaceMarkCard.swift",
         "EmblemPickCard.swift",
         "CamHoldCard.swift",
+        "NearHoldCard.swift",
     )
 
     def test_overlay_cards_share_hold_glass(self):
@@ -4367,6 +4370,7 @@ class FacetedMetalHUDTests(unittest.TestCase):
         "AddressHoldCard.swift",
         "EmblemPickCard.swift",
         "CamHoldCard.swift",
+        "NearHoldCard.swift",
         "SpeakTurnCard.swift",
         "SOSHold.swift",
         "InstrumentsView.swift",
@@ -4472,6 +4476,10 @@ class FacetedMetalHUDTests(unittest.TestCase):
         self.assertIn("HoldGlassShell(", address)
         cam = read("Blackout", "CamHoldCard.swift")
         self.assertIn("HoldGlassShell(", cam)
+        near = read("Blackout", "NearHoldCard.swift")
+        self.assertIn("HoldGlassShell(", near)
+        self.assertIn("WALK", near)
+        self.assertNotIn("tel://", near)
         pick = read("Blackout", "EmblemPickCard.swift")
         self.assertIn("HoldGlassShell(", pick)
         turns = read("Blackout", "SpeakTurnCard.swift")
@@ -4687,6 +4695,9 @@ class MapHoldScrollAndPlateRailTests(unittest.TestCase):
         cam = read("Blackout", "CamHoldCard.swift")
         self.assertIn("ScrollView", cam)
         self.assertLess(cam.find("actions"), cam.find("ScrollView"))
+        near = read("Blackout", "NearHoldCard.swift")
+        self.assertIn("ScrollView", near)
+        self.assertLess(near.find("actions"), near.find("ScrollView"))
         party = read("Blackout", "PartyHoldCard.swift")
         self.assertIn("scrollBounceBehavior", party)
         mark = read("Blackout", "PlaceMarkCard.swift")
@@ -4743,6 +4754,29 @@ class MapHoldScrollAndPlateRailTests(unittest.TestCase):
         self.assertIn("plate", pages.lower())
         self.assertNotIn("best in class", inst.lower())
         self.assertNotIn(".spring(", inst)
+
+
+class MeshNearHUDTests(unittest.TestCase):
+    """Heard radios are green/black NEAR dots. Discovery is not a peer."""
+
+    def test_near_card_and_chrome_are_on_the_glass(self):
+        card = read("Blackout", "NearHoldCard.swift")
+        tab = read("Blackout", "MapTab.swift")
+        comms = read("Blackout", "CommsTab.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("struct NearHoldCard", card)
+        self.assertIn("NEAR", card)
+        self.assertIn("DEVICE", card)
+        self.assertIn("WALK", card)
+        self.assertNotIn("tel://", card)
+        self.assertIn("NearHoldCard", tab)
+        self.assertIn("heldNear", tab)
+        self.assertIn("chromeNear", comms)
+        self.assertIn("presence", app.split("func eyeCanvasPips")[1].split("func eyeTrails")[0])
+        self.assertIn("NEAR ·", qa)
+        self.assertIn("green", qa.lower())
+        self.assertIn("house", qa.lower())
 
 
 if __name__ == "__main__":

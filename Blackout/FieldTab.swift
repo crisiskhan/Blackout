@@ -412,7 +412,11 @@ struct FieldTab: View {
                 runtime.sendFieldToParty(cardID: s.card.id)
             }
             .buttonStyle(HUDActionStyle(filled: false))
-            Text(runtime.mesh.chromeNet).font(.caption).foregroundStyle(Theme.warn)
+            Text(
+                [runtime.mesh.chromeNet, runtime.mesh.chromeNear]
+                    .filter { !$0.isEmpty }
+                    .joined(separator: " · ")
+            ).font(.caption).foregroundStyle(Theme.warn)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
