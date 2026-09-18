@@ -15,6 +15,20 @@ public struct FieldLoc: Codable, Equatable, Sendable {
     }
 }
 
+public struct FieldLink: Codable, Equatable, Sendable, Identifiable {
+    public var id: String
+    public var label: String
+    public var when: FieldLoc
+    public var ask: String
+
+    public init(id: String, label: String, when: FieldLoc, ask: String = "") {
+        self.id = id
+        self.label = label
+        self.when = when
+        self.ask = ask
+    }
+}
+
 public struct FieldStep: Codable, Equatable, Sendable {
     public var `do`: FieldLoc
     public var why: FieldLoc
@@ -62,6 +76,8 @@ public struct FieldCard: Codable, Equatable, Sendable, Identifiable {
     /// East Texas woodland is not the west javelina chapter; a photographed
     /// javelina still opens the west card because the loaded book stays whole.
     public var packs: [String]?
+    /// Next likely causes. Absent on packed book JSON; ASK and FIELD attach them.
+    public var links: [FieldLink]?
 
     public init(
         schema: String,
@@ -75,7 +91,8 @@ public struct FieldCard: Codable, Equatable, Sendable, Identifiable {
         speak: Bool,
         sendToParty: Bool,
         steps: [FieldStep],
-        packs: [String]? = nil
+        packs: [String]? = nil,
+        links: [FieldLink]? = nil
     ) {
         self.schema = schema
         self.id = id
@@ -89,6 +106,7 @@ public struct FieldCard: Codable, Equatable, Sendable, Identifiable {
         self.sendToParty = sendToParty
         self.steps = steps
         self.packs = packs
+        self.links = links
     }
 }
 
@@ -184,8 +202,26 @@ public enum FieldCorpus {
         ("wont wake", "cpr"),
         ("unconscious", "cpr"),
         ("no respira", "cpr"),
-        ("cant breathe", "choke"),
-        ("cannot breathe", "choke"),
+        ("cant breathe", "breath"),
+        ("cannot breathe", "breath"),
+        ("hard to breathe", "breath"),
+        ("short of breath", "breath"),
+        ("cant catch my breath", "breath"),
+        ("no puedo respirar", "breath"),
+        ("im hurt", "hurt"),
+        ("theyre hurt", "hurt"),
+        ("injured", "hurt"),
+        ("im injured", "hurt"),
+        ("help me", "hurt"),
+        ("help them", "hurt"),
+        ("ayudame", "hurt"),
+        ("im sick", "sick"),
+        ("theyre sick", "sick"),
+        ("dont feel good", "sick"),
+        ("estoy enfermo", "sick"),
+        ("keep them stable", "stay"),
+        ("keep them alive", "stay"),
+        ("stabilize", "stay"),
         ("me ahogo", "choke"),
         ("choking", "choke"),
         ("choke", "choke"),
@@ -248,6 +284,26 @@ public enum FieldCorpus {
         ("comer esto", "unknown"),
         ("edible", "unknown"),
         ("food stuck", "choke"),
+        ("baby choking", "infant"),
+        ("infant choking", "infant"),
+        ("baby not breathing", "infant"),
+        ("choking on my own", "selfchoke"),
+        ("im choking alone", "selfchoke"),
+        ("pregnant choking", "pregnant"),
+        ("shes pregnant", "pregnant"),
+        ("sucking chest", "hole"),
+        ("hole in the chest", "hole"),
+        ("chest hole", "hole"),
+        ("low blood sugar", "sugar"),
+        ("blood sugar", "sugar"),
+        ("diabetic", "sugar"),
+        ("overdose", "overdose"),
+        ("narcan", "overdose"),
+        ("naloxone", "overdose"),
+        ("fentanyl", "overdose"),
+        ("tourniquet", "tight"),
+        ("impaled", "impaled"),
+        ("stuck in me", "impaled"),
         ("swallowed wrong", "choke"),
         ("se ahoga", "choke"),
         ("allergic", "allergy"),
@@ -265,6 +321,11 @@ public enum FieldCorpus {
         ("drink this", "thirst"),
         ("head wound", "bleed"),
         ("me cai", "spine"),
+        ("i fell", "spine"),
+        ("they fell", "spine"),
+        ("neck hurts", "spine"),
+        ("my neck", "spine"),
+        ("su cuello", "spine"),
         ("chest hurts", "cardiac"),
         ("chest pain", "cardiac"),
         ("heart attack", "cardiac"),
@@ -415,6 +476,63 @@ public enum FieldCorpus {
             if expanded.contains("asthma") { continue }
             if expanded.contains("avalanche") { continue }
             if expanded.contains("rip") { continue }
+            if expanded.contains("breath")
+                && !expanded.contains("choke")
+                && !expanded.contains("cpr")
+            {
+                continue
+            }
+            if expanded.contains("hurt")
+                && !expanded.contains("fracture")
+                && !expanded.contains("bleed")
+                && !expanded.contains("burn")
+                && !expanded.contains("bite")
+                && !expanded.contains("sting")
+                && !expanded.contains("spine")
+                && !qTokens.contains("neck")
+                && !qTokens.contains("fell")
+                && !qTokens.contains("fall")
+            {
+                continue
+            }
+            if expanded.contains("infant")
+                && (expanded.contains("choke")
+                    || expanded.contains("cpr")
+                    || expanded.contains("airway")
+                    || expanded.contains("selfchoke"))
+            {
+                continue
+            }
+            if expanded.contains("selfchoke") { continue }
+            if expanded.contains("pregnant")
+                && (expanded.contains("choke")
+                    || expanded.contains("cpr")
+                    || expanded.contains("airway"))
+            {
+                continue
+            }
+            if expanded.contains("sugar") { continue }
+            if expanded.contains("overdose") { continue }
+            if expanded.contains("impaled") { continue }
+            if expanded.contains("hole")
+                && (qTokens.contains("chest") || qTokens.contains("sucking") || qTokens.contains("puncture"))
+            {
+                continue
+            }
+            if expanded.contains("sick") { continue }
+            // "keep them stable" is the live stay walk. "stay warm" /
+            // "stay cool" still have to hit the cold and heat book.
+            if expanded.contains("stay")
+                && (qTokens.contains("stable")
+                    || qTokens.contains("stabilize")
+                    || qTokens.contains("alive"))
+                && !expanded.contains("cold")
+                && !expanded.contains("heat")
+                && !qTokens.contains("warm")
+                && !qTokens.contains("cool")
+            {
+                continue
+            }
             if expanded.contains("head")
                 && !expanded.contains("bleed")
                 && !qTokens.contains("wound")
@@ -640,6 +758,18 @@ public enum FieldCorpus {
         "asthma": ["inhaler", "wheeze"],
         "avalanche": ["snow", "bury"],
         "thunderstorm": ["lightning", "thunder"],
+        "breath": ["breathe"],
+        "hurt": ["injured"],
+        "neck": ["spine"],
+        "fell": ["spine"],
+        "sick": ["ill"],
+        "stay": ["stable"],
+        "infant": ["baby"],
+        "baby": ["infant"],
+        "selfchoke": ["choke"],
+        "pregnant": ["pregnancy"],
+        "sugar": ["diabetic"],
+        "overdose": ["narcan"],
     ]
 
     /// Card ids to raise when the query names a situation the title omitted.

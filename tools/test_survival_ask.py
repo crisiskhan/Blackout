@@ -123,7 +123,16 @@ LIVE_FIRST = (
     ("avalanche", ("mark", "face", "dig")),
     ("asthma", ("sit", "inhaler", "flat")),
     ("hit my head", ("neck", "vomit", "roll")),
-    ("help me", ("stop", "look")),
+    ("help me", ("blood", "bleed", "chest")),
+    ("I can't breathe", ("sit", "cough", "speak")),
+    ("I'm hurt", ("blood", "bleed", "chest")),
+    ("I'm sick", ("shade", "sense", "hurt")),
+    ("keep them stable", ("side", "breath", "food")),
+    ("baby choking", ("back", "chest", "belly")),
+    ("choking on my own", ("chair", "fist", "navel")),
+    ("sucking chest", ("seal", "plastic", "open")),
+    ("low blood sugar", ("sugar", "swallow", "juice")),
+    ("overdose", ("naloxone", "side", "kit")),
 )
 
 
@@ -273,6 +282,10 @@ class SurvivalAskSourceTests(unittest.TestCase):
             "asthma",
             "avalanche",
             "rip",
+            "breath",
+            "hurt",
+            "sick",
+            "stay",
         ):
             self.assertIn(name, walk, name)
 
