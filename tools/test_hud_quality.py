@@ -1199,6 +1199,13 @@ class ExpeditionHUDTests(unittest.TestCase):
         self.assertNotIn("Slider(", exped)
         self.assertIn("PartyVitals.snap", exped)
         self.assertIn("struct HUDVitalsRail", exped)
+        rail = exped.split("struct HUDVitalsRail")[1]
+        self.assertIn("Capsule()", rail)
+        self.assertIn("LinearGradient", rail)
+        self.assertIn("Theme.metalHigh", rail)
+        self.assertIn("Theme.metalStroke", rail)
+        self.assertIn("PartyVitals.load(of:", rail)
+        self.assertNotIn("Slider(", rail)
         self.assertIn("static let yellowAt", vitals)
         self.assertIn("static let orangeAt", vitals)
         self.assertIn("static let redAt", vitals)
