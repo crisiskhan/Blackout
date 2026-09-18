@@ -835,6 +835,20 @@ def mesh() -> None:
         ok("mesh hears radios and hops store")
 
 
+def party_seal() -> None:
+    """Party bodies are AES-GCM when a code exists. SNAP is HTTPS only."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_party_seal.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"party seal contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: party seal — AES-GCM bodies, HTTPS SNAP, no new chrome")
+
+
 def mesh_presence() -> None:
     """Heard phones cluster. Discovery is not a peer. Hop carries store."""
     contracts = subprocess.run(
@@ -1277,6 +1291,7 @@ def main() -> None:
     vision()
     mesh()
     mesh_presence()
+    party_seal()
     vessel()
     archive_bundle_id()
     l10n()

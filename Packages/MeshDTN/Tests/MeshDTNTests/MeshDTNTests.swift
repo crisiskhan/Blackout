@@ -1,5 +1,6 @@
 import XCTest
 import BlackBox
+import CryptoParty
 @testable import MeshDTN
 
 final class MeshDTNTests: XCTestCase {
@@ -126,6 +127,34 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertFalse(net.listening)
         XCTAssertTrue(net.hears.isEmpty)
         XCTAssertTrue(net.lasts.isEmpty)
+    }
+
+    func testPartySealsChipAndStillReadsPlaintext() throws {
+        let net = MeshNet(box: EventLog())
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.partyCode = "abc123"
+        net.startLocal()
+        radio.appearPeer("peer-1")
+        net.sendChip(from: net.localID, chip: "rally")
+        let wire = try XCTUnwrap(radio.sent.last)
+        XCTAssertEqual(wire.kind, "chip")
+        XCTAssertTrue(PartySeal.isSealed(wire.body))
+        XCTAssertNotEqual(String(data: wire.body, encoding: .utf8), "rally")
+        radio.deliver(
+            MeshEnvelope(id: "old", from: "peer-1", to: "*", kind: "chip", body: Data("down".utf8))
+        )
+        XCTAssertEqual(net.inboundChips, ["down"])
+        let sealed = try PartySeal.wrap(Data("water".utf8), key: PartySeal.key(code: "ABC123"))
+        radio.deliver(
+            MeshEnvelope(id: "new", from: "peer-1", to: "*", kind: "chip", body: sealed)
+        )
+        XCTAssertEqual(net.inboundChips, ["down", "water"])
+        let listen = MeshNet(box: EventLog())
+        listen.attach(LoopbackRadio(path: .ble))
+        listen.startListen()
+        listen.sendChip(from: listen.localID, chip: "rally")
+        XCTAssertFalse(PartySeal.isSealed(listen.store.last?.body ?? Data()))
     }
 
     func testHoldGlassNamesTheHeardRadio() {
