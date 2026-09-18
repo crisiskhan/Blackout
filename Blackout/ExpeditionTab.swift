@@ -16,7 +16,7 @@ private struct KitAssignPerson: Identifiable {
 }
 
 private enum ExpeditionPlate: String, CaseIterable {
-    case condition, roster, timers, inventory, diary
+    case condition, roster, timers, inventory
 
     var title: String {
         switch self {
@@ -24,7 +24,6 @@ private enum ExpeditionPlate: String, CaseIterable {
         case .roster: return "ROSTER"
         case .timers: return "TIMERS"
         case .inventory: return "INVENTORY"
-        case .diary: return "DIARY"
         }
     }
 }
@@ -85,8 +84,6 @@ struct ExpeditionTab: View {
             timersPlate
         case .inventory:
             inventoryPlate
-        case .diary:
-            diaryPlate
         }
     }
 
@@ -137,6 +134,68 @@ struct ExpeditionTab: View {
                         navChrome = runtime.seatNav() == nil ? nil : "NAV · SEATED"
                     }
                     .buttonStyle(HUDActionStyle(filled: false))
+                }
+            }
+            sectionLabel("DIARY")
+            HUDGlassCard {
+                VStack(alignment: .leading, spacing: 8) {
+                    HUDField("TODAY",
+                        text: $diaryDraft,
+                        id: "exped.diary",
+                        submit: "LOG",
+                        onSubmit: logToday
+                    )
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        Text(context.date.formatted(date: .abbreviated, time: .shortened))
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Theme.silver)
+                    }
+                    Button("LOG") {
+                        if diaryDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            diaryChrome = "WRITE TODAY"
+                            return
+                        }
+                        logToday()
+                    }
+                    .buttonStyle(HUDActionStyle(filled: false))
+                    if let diaryChrome {
+                        Text(diaryChrome)
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Theme.warn)
+                            .textCase(.uppercase)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
+                    }
+                    ForEach(runtime.diary.feed()) { line in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(line.name.uppercased())
+                                .font(.system(size: 13, weight: .heavy))
+                                .foregroundStyle(Theme.silver)
+                            Text(line.at.formatted(date: .abbreviated, time: .shortened))
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(Theme.silver.opacity(0.7))
+                            Text(line.text)
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Theme.silver)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+            }
+            sectionLabel("PAPER")
+            Button("EXPORT PAPER") {
+                let text = PaperGen.export(diary: runtime.diary, roster: runtime.paperRoster(), packName: runtime.packs?.active?.name ?? "")
+                paperText = text
+                runtime.box.log("paper", text)
+            }
+            .buttonStyle(HUDActionStyle(filled: false))
+            if !paperText.isEmpty {
+                HUDGlassCard {
+                    Text(paperText)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Theme.silver)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
@@ -252,81 +311,6 @@ struct ExpeditionTab: View {
                             .font(.caption.weight(.bold))
                             .foregroundStyle(Theme.accent)
                     }
-                }
-            }
-        }
-    }
-
-    private var diaryPlate: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            sectionLabel("DIARY")
-            HUDGlassCard {
-                VStack(alignment: .leading, spacing: 8) {
-                    HUDField("TODAY",
-                        text: $diaryDraft,
-                        id: "exped.diary",
-                        submit: "LOG",
-                        onSubmit: logToday
-                    )
-                    TimelineView(.periodic(from: .now, by: 1)) { context in
-                        Text(context.date.formatted(date: .abbreviated, time: .shortened))
-                            .font(.system(size: 13, weight: .heavy))
-                            .foregroundStyle(Theme.silver)
-                    }
-                    Button("LOG") {
-                        if diaryDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            diaryChrome = "WRITE TODAY"
-                            return
-                        }
-                        logToday()
-                    }
-                    .buttonStyle(HUDActionStyle(filled: false))
-                    if let diaryChrome {
-                        Text(diaryChrome)
-                            .font(.system(size: 13, weight: .heavy))
-                            .foregroundStyle(Theme.warn)
-                            .textCase(.uppercase)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.8)
-                    }
-                    sectionLabel("ATTENDANCE")
-                    ForEach(runtime.diaryAttend) { row in
-                        let mark = row.mark == .here ? "HERE" : "SILENT"
-                        Text("\(row.name) · \(mark)")
-                            .font(.system(size: 13, weight: .heavy))
-                            .foregroundStyle(row.mark == .here ? Theme.silver : Theme.silver.opacity(0.55))
-                            .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
-                    }
-                    ForEach(runtime.diary.feed()) { line in
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(line.name.uppercased())
-                                .font(.system(size: 13, weight: .heavy))
-                                .foregroundStyle(Theme.silver)
-                            Text(line.at.formatted(date: .abbreviated, time: .shortened))
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(Theme.silver.opacity(0.7))
-                            Text(line.text)
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(Theme.silver)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
-            }
-            sectionLabel("PAPER")
-            Button("EXPORT PAPER") {
-                let text = PaperGen.export(diary: runtime.diary, roster: runtime.paperRoster(), packName: runtime.packs?.active?.name ?? "")
-                paperText = text
-                runtime.box.log("paper", text)
-            }
-            .buttonStyle(HUDActionStyle(filled: false))
-            if !paperText.isEmpty {
-                HUDGlassCard {
-                    Text(paperText)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(Theme.silver)
-                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
@@ -519,6 +503,7 @@ struct ExpeditionTab: View {
 
     private func rosterRow(_ row: LiveRosterRow) -> some View {
         let hit = BlackoutTokens.Chrome.mapChipHitPoints
+        let attend = rosterAttend(row)
         return HStack(spacing: 10) {
             rosterFace(row)
             VStack(alignment: .leading, spacing: 2) {
@@ -536,6 +521,13 @@ struct ExpeditionTab: View {
                     .minimumScaleFactor(0.7)
                     .accessibilityLabel("STATUS")
                     .accessibilityValue(row.statusTitle)
+                Text(attend)
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(attend == "HERE" ? Theme.silver : Theme.silver.opacity(0.55))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .accessibilityLabel("DIARY")
+                    .accessibilityValue(attend)
             }
             Spacer(minLength: 8)
             Button(row.role.title) {
@@ -546,6 +538,10 @@ struct ExpeditionTab: View {
             .accessibilityValue(row.role.title)
         }
         .frame(maxWidth: .infinity, minHeight: hit, alignment: .leading)
+    }
+
+    private func rosterAttend(_ row: LiveRosterRow) -> String {
+        runtime.diaryAttend.first(where: { $0.id == row.id })?.mark == .here ? "HERE" : "SILENT"
     }
 
     private func rosterFace(_ row: LiveRosterRow) -> some View {

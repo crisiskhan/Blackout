@@ -79,24 +79,36 @@ class DiaryGlassTests(unittest.TestCase):
             "TripBriefTests",
             "TripBriefTests.swift",
         )
-        self.assertIn('case condition, roster, timers, inventory, diary', exped)
-        self.assertIn('case .diary: return "DIARY"', exped)
-        self.assertIn('sectionLabel("DIARY")', exped)
+        self.assertIn("case condition, roster, timers, inventory", exped)
+        self.assertNotIn("case .diary", exped)
+        self.assertNotIn('return "DIARY"', exped)
+        roster = exped.split("private var rosterPlate")[1].split("private var timersPlate")[0]
+        self.assertIn("runtime.liveRoster", roster)
+        self.assertIn('sectionLabel("DIARY")', roster)
+        self.assertGreater(
+            roster.find("runtime.liveRoster"),
+            -1,
+        )
+        self.assertGreater(
+            roster.find('sectionLabel("DIARY")'),
+            roster.find("runtime.liveRoster"),
+            "DIARY sits under the members, not on its own plate",
+        )
         self.assertNotIn('sectionLabel("TRIP")', exped)
         self.assertNotIn('return "TRIP"', exped)
         self.assertNotIn("dueBack", exped)
         self.assertNotIn("DUE ", exped)
         self.assertNotIn("overdue()", exped)
-        self.assertIn('HUDField("TODAY"', exped)
-        self.assertIn('submit: "LOG"', exped)
-        self.assertIn("WRITE TODAY", exped)
-        self.assertIn("ATTENDANCE", exped)
+        self.assertIn('HUDField("TODAY"', roster)
+        self.assertIn('submit: "LOG"', roster)
+        self.assertIn("WRITE TODAY", roster)
         self.assertIn("HERE", exped)
         self.assertIn("SILENT", exped)
-        self.assertIn("runtime.diary.feed()", exped)
+        self.assertIn("rosterAttend", exped)
+        self.assertIn("runtime.diary.feed()", roster)
         self.assertIn("runtime.diaryAttend", exped)
         self.assertIn("logDiary", exped)
-        self.assertIn("TimelineView", exped.split("diaryPlate")[1].split("statusTone")[0])
+        self.assertIn("TimelineView", roster)
         self.assertIn("struct DiaryLine", brief)
         self.assertIn("struct DiaryLog", brief)
         self.assertIn("func feed(", brief)
@@ -152,14 +164,19 @@ class DiaryGlassTests(unittest.TestCase):
     def test_solo_qa_names_diary(self):
         qa = read("docs", "SOLO_QA.md")
         hud = next(line for line in qa.splitlines() if "HUD keyboard rises" in line)
+        roster = next(line for line in qa.splitlines() if "Roster is the live party" in line)
         kit = next(line for line in qa.splitlines() if "INVENTORY names and counts" in line)
         self.assertIn("TODAY", hud)
         self.assertNotIn("BRIEF", hud)
-        self.assertIn("DIARY", kit)
-        self.assertIn("HERE", kit)
-        self.assertIn("SILENT", kit)
+        self.assertIn("DIARY", roster)
+        self.assertIn("HERE", roster)
+        self.assertIn("SILENT", roster)
+        self.assertIn("not its own plate", roster)
+        self.assertIn("under the members", roster)
         self.assertNotIn("TRIP brief", kit)
+        self.assertNotIn("DIARY", kit)
         self.assertNotIn("due", kit.lower())
+        self.assertNotIn("due", roster.lower())
 
 
 if __name__ == "__main__":

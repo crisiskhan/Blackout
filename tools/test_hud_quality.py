@@ -1770,7 +1770,7 @@ class PartyPlaceMarkTests(unittest.TestCase):
         self.assertIn('HUDField("ITEM"', exped)
         self.assertNotIn("TextField(", exped)
         self.assertIn('Button("ADD")', exped)
-        inv = exped.split('sectionLabel("INVENTORY")')[1].split('sectionLabel("DIARY")')[0]
+        inv = exped.split("private var inventoryPlate")[1].split("private var statusTone")[0]
         self.assertIn("NAME ITEM", inv)
         self.assertIn("kitChrome", inv)
         item = inv.split('HUDField("ITEM"')[1].split(")")[0]
