@@ -828,7 +828,7 @@ def mesh() -> None:
     if "chromeNear" not in src or "noteHear" not in src or "ble, hop" not in src:
         bad("mesh missing NEAR / hop carry")
     else:
-        ok("mesh hears phones and hops store")
+        ok("mesh hears radios and hops store")
 
 
 def mesh_presence() -> None:

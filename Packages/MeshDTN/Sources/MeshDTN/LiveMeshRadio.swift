@@ -9,8 +9,8 @@ import CoreBluetooth
 
 /// Party-scoped mesh: MPC session + BLE GATT write/notify on the same party UUID.
 /// A fixed hop UUID carries store through any Blackout phone. Open scan hears
-/// Apple and Samsung advertisements. Discovery-only scan is not a peer.
-/// LoRa never required.
+/// every radio and probes ones that can answer hop GATT.
+/// Discovery-only scan is not a peer. LoRa never required.
 public final class LiveMeshRadio: NSObject, MeshRadio {
     public private(set) var path: RadioPath = .none
     public static let serviceType = "blackoutmesh"
@@ -50,6 +50,7 @@ public final class LiveMeshRadio: NSObject, MeshRadio {
     private var hopChars: [UUID: CBCharacteristic] = [:]
     private var connecting: Set<UUID> = []
     private var hopConnecting: Set<UUID> = []
+    private var probedClosed: Set<UUID> = []
     private var rxPeripheral = [UUID: BLEEnvelopeCodec.Assembler]()
     private var rxCentral = [UUID: BLEEnvelopeCodec.Assembler]()
     #endif
@@ -100,6 +101,7 @@ public final class LiveMeshRadio: NSObject, MeshRadio {
         hopChars = [:]
         connecting = []
         hopConnecting = []
+        probedClosed = []
         rxPeripheral = [:]
         rxCentral = [:]
         #endif
@@ -321,11 +323,11 @@ extension LiveMeshRadio: CBCentralManagerDelegate, CBPeripheralManagerDelegate, 
         }
         let partyHit = serviceUUID.map { services.contains($0) } ?? false
         let hopHit = hopUUID.map { services.contains($0) } ?? false || name == "BO"
-        if !partyHit, let kind = MeshPresence.classify(name: name, manufacturer: mfg, services: labels) {
+        if !partyHit {
             onHear?(
                 MeshHear(
                     id: id.uuidString,
-                    kind: kind,
+                    kind: MeshPresence.classify(name: name, manufacturer: mfg, services: labels),
                     rssi: RSSI.intValue
                 )
             )
@@ -338,6 +340,21 @@ extension LiveMeshRadio: CBCentralManagerDelegate, CBPeripheralManagerDelegate, 
             return
         }
         if hopHit, hopRemotes[id] == nil, hopChars[id] == nil, !hopConnecting.contains(id), !partyHit {
+            hopConnecting.insert(id)
+            hopRemotes[id] = peripheral
+            peripheral.delegate = self
+            central.connect(peripheral, options: nil)
+            return
+        }
+        let probing = MeshPresence.shouldProbe(name: name, services: labels)
+            && !probedClosed.contains(id)
+            && hopRemotes[id] == nil
+            && hopChars[id] == nil
+            && !hopConnecting.contains(id)
+            && remotes[id] == nil
+            && !connecting.contains(id)
+            && hopConnecting.count < MeshPresence.probeCap
+        if probing {
             hopConnecting.insert(id)
             hopRemotes[id] = peripheral
             peripheral.delegate = self
@@ -358,6 +375,7 @@ extension LiveMeshRadio: CBCentralManagerDelegate, CBPeripheralManagerDelegate, 
         hopConnecting.remove(peripheral.identifier)
         remotes.removeValue(forKey: peripheral.identifier)
         hopRemotes.removeValue(forKey: peripheral.identifier)
+        probedClosed.insert(peripheral.identifier)
     }
 
     public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
@@ -375,13 +393,24 @@ extension LiveMeshRadio: CBCentralManagerDelegate, CBPeripheralManagerDelegate, 
     }
 
     public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        var found = false
         if let serviceUUID, let svc = peripheral.services?.first(where: { $0.uuid == serviceUUID }) {
+            found = true
             remotes[peripheral.identifier] = peripheral
             if let charUUID { peripheral.discoverCharacteristics([charUUID], for: svc) }
         }
         if let hopUUID, let svc = peripheral.services?.first(where: { $0.uuid == hopUUID }) {
+            found = true
             hopRemotes[peripheral.identifier] = peripheral
             if let hopCharUUID { peripheral.discoverCharacteristics([hopCharUUID], for: svc) }
+        }
+        if !found {
+            probedClosed.insert(peripheral.identifier)
+            hopConnecting.remove(peripheral.identifier)
+            connecting.remove(peripheral.identifier)
+            hopRemotes.removeValue(forKey: peripheral.identifier)
+            remotes.removeValue(forKey: peripheral.identifier)
+            central?.cancelPeripheralConnection(peripheral)
         }
     }
 

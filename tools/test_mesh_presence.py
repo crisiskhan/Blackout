@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""NEAR dots are heard phones, clustered. A hop carries store. Discovery is not a peer.
+"""NEAR dots are heard radios, clustered. A hop carries store. Discovery is not a peer.
 
-Airplane + Bluetooth. Random iPhones and Samsungs cannot relay packets unless
-they run Blackout. The glass never invents a house from silence.
+Airplane + Bluetooth. A stranger's radio cannot relay packets unless it runs
+Blackout or answers the hop GATT. The glass never invents a house from silence.
 """
 from __future__ import annotations
 
@@ -63,8 +63,11 @@ def cluster(
     return out
 
 
-def classify(name: str, manufacturer: int | None, services: list[str]) -> str | None:
+def _accessory(name: str, services: list[str]) -> bool:
     n = name.lower()
+    phones = ("iphone", "ipad", "galaxy", "samsung", "pixel", "motorola")
+    if any(word in n for word in phones):
+        return False
     accessories = (
         "airpods",
         "watch",
@@ -74,25 +77,30 @@ def classify(name: str, manufacturer: int | None, services: list[str]) -> str | 
         "buds",
         "pixel buds",
     )
-    if any(word in n for word in accessories) and not any(
-        word in n for word in ("iphone", "ipad", "galaxy", "samsung")
-    ):
-        return None
-    if "1812" in {s.lower() for s in services} and not any(
-        word in n for word in ("iphone", "ipad", "galaxy", "samsung")
-    ):
-        return None
+    if any(word in n for word in accessories):
+        return True
+    return "1812" in {s.lower() for s in services}
+
+
+def classify(name: str, manufacturer: int | None, services: list[str]) -> str:
+    n = name.lower()
     if any(s.lower() == "hop" for s in services):
         return "hop"
     if "iphone" in n or "ipad" in n:
         return "apple"
     if "galaxy" in n or "samsung" in n or n.startswith("sm-"):
         return "samsung"
-    if manufacturer == 0x004C:
+    if manufacturer == 0x004C and not _accessory(name, services):
         return "apple"
-    if manufacturer == 0x0075:
+    if manufacturer == 0x0075 and not _accessory(name, services):
         return "samsung"
-    return None
+    return "device"
+
+
+def should_probe(name: str, services: list[str]) -> bool:
+    if any(s.lower() == "hop" for s in services):
+        return True
+    return not _accessory(name, services)
 
 
 def marks(
@@ -143,14 +151,24 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         self.assertEqual(out[0]["count"], 2)
         self.assertAlmostEqual(out[0]["lat"], 31.76, places=4)
 
-    def test_airpods_are_not_civilization(self):
-        self.assertIsNone(classify("AirPods Pro", 0x004C, []))
-        self.assertIsNone(classify("Watch", 0x004C, []))
+    def test_every_device_is_heard(self):
         self.assertEqual(classify("Crisis iPhone", 0x004C, []), "apple")
         self.assertEqual(classify("Galaxy S24", 0x0075, []), "samsung")
         self.assertEqual(classify("SM-S921U", None, []), "samsung")
+        self.assertEqual(classify("Pixel 8", None, []), "device")
+        self.assertEqual(classify("Motorola", None, []), "device")
+        self.assertEqual(classify("AirPods Pro", 0x004C, []), "device")
+        self.assertEqual(classify("Watch", 0x004C, []), "device")
+        self.assertEqual(classify("", 0x00E0, []), "device")
         self.assertEqual(classify("", None, ["hop"]), "hop")
-        self.assertIsNone(classify("", 0x004C, ["1812"]))
+        self.assertEqual(classify("", 0x004C, ["1812"]), "device")
+        self.assertTrue(should_probe("Pixel 8", []))
+        self.assertTrue(should_probe("Crisis iPhone", []))
+        self.assertTrue(should_probe("", ["hop"]))
+        self.assertTrue(should_probe("", [""]))
+        self.assertFalse(should_probe("AirPods Pro", []))
+        self.assertFalse(should_probe("Watch", []))
+        self.assertFalse(should_probe("", ["1812"]))
 
     def test_swift_cluster_and_radio_exist(self):
         presence = read(
@@ -172,6 +190,9 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         self.assertIn("enum MeshPresence", presence)
         self.assertIn("static func cluster(", presence)
         self.assertIn("houseMeters", presence)
+        self.assertIn("hop, device", presence)
+        self.assertIn("shouldProbe", presence)
+        self.assertIn("probeCap", presence)
         self.assertIn("NEAR·", presence)
         self.assertIn("ble, hop", mesh)
         self.assertIn("chromeNear", mesh)
@@ -181,6 +202,8 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         self.assertIn("scanForPeripherals", live)
         self.assertIn("hopUUID", live)
         self.assertIn("onHear", live)
+        self.assertIn("shouldProbe", live)
+        self.assertIn("probedClosed", live)
         self.assertIn("testHearIsNotAPeer", tests)
         self.assertIn("testHopCarriesStore", tests)
         self.assertIn("static func presence(", art)
@@ -188,6 +211,7 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         self.assertIn("heldNear", app)
         self.assertIn("NearHoldCard", tab)
         self.assertIn("NEAR", card)
+        self.assertIn("DEVICE", card)
         self.assertIn("WALK", card)
         self.assertNotIn("tel://", card)
         self.assertIn("chromeNear", comms)

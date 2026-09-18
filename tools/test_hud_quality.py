@@ -4757,7 +4757,7 @@ class MapHoldScrollAndPlateRailTests(unittest.TestCase):
 
 
 class MeshNearHUDTests(unittest.TestCase):
-    """Heard phones are green/black NEAR dots. Discovery is not a peer."""
+    """Heard radios are green/black NEAR dots. Discovery is not a peer."""
 
     def test_near_card_and_chrome_are_on_the_glass(self):
         card = read("Blackout", "NearHoldCard.swift")
@@ -4767,6 +4767,7 @@ class MeshNearHUDTests(unittest.TestCase):
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("struct NearHoldCard", card)
         self.assertIn("NEAR", card)
+        self.assertIn("DEVICE", card)
         self.assertIn("WALK", card)
         self.assertNotIn("tel://", card)
         self.assertIn("NearHoldCard", tab)

@@ -67,10 +67,13 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertEqual(marks.count, 2)
         XCTAssertEqual(marks.first { $0.count == 2 }?.count, 2)
         XCTAssertTrue(marks.contains { $0.id.hasPrefix("NEAR·") })
-        XCTAssertNil(MeshPresence.classify(name: "AirPods Pro", manufacturer: 0x004C, services: []))
+        XCTAssertEqual(MeshPresence.classify(name: "AirPods Pro", manufacturer: 0x004C, services: []), .device)
         XCTAssertEqual(MeshPresence.classify(name: "Crisis iPhone", manufacturer: 0x004C, services: []), .apple)
         XCTAssertEqual(MeshPresence.classify(name: "Galaxy S24", manufacturer: 0x0075, services: []), .samsung)
+        XCTAssertEqual(MeshPresence.classify(name: "Pixel 8", manufacturer: nil, services: []), .device)
         XCTAssertEqual(MeshPresence.classify(name: "", manufacturer: nil, services: ["hop"]), .hop)
+        XCTAssertTrue(MeshPresence.shouldProbe(name: "Pixel 8", services: []))
+        XCTAssertFalse(MeshPresence.shouldProbe(name: "AirPods Pro", services: []))
     }
 
     func testListeningIsNotAFakePeer() {

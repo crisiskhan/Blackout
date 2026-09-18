@@ -1,6 +1,6 @@
 import Foundation
 
-/// A heard phone. Discovery is not a peer. Hop is a Blackout carry.
+/// A heard radio. Discovery is not a peer. Hop is a Blackout carry.
 public struct MeshHear: Equatable, Sendable, Identifiable {
     public var id: String
     public var kind: Kind
@@ -10,7 +10,7 @@ public struct MeshHear: Equatable, Sendable, Identifiable {
     public var heardAt: Date
 
     public enum Kind: String, Sendable {
-        case apple, samsung, hop
+        case apple, samsung, hop, device
     }
 
     public init(
@@ -65,10 +65,11 @@ public struct NearHold: Equatable, Sendable {
     }
 }
 
-/// House-sized clusters of heard phones. Green/black on the field.
+/// House-sized clusters of heard radios. Green/black on the field.
 public enum MeshPresence {
     public static let houseMeters = 45.0
     public static let hearSeconds: TimeInterval = 25
+    public static let probeCap = 3
 
     public struct Mark: Equatable, Sendable, Identifiable {
         public var id: String
@@ -90,17 +91,9 @@ public enum MeshPresence {
         name: String,
         manufacturer: UInt16?,
         services: [String]
-    ) -> MeshHear.Kind? {
+    ) -> MeshHear.Kind {
         let n = name.lowercased()
-        let accessories = ["airpods", "watch", "pencil", "keyboard", "mouse", "buds"]
-        let phones = ["iphone", "ipad", "galaxy", "samsung"]
-        if accessories.contains(where: { n.contains($0) }) && !phones.contains(where: { n.contains($0) }) {
-            return nil
-        }
         let svc = Set(services.map { $0.lowercased() })
-        if svc.contains("1812") && !phones.contains(where: { n.contains($0) }) {
-            return nil
-        }
         if svc.contains("hop") {
             return .hop
         }
@@ -110,9 +103,34 @@ public enum MeshPresence {
         if n.contains("galaxy") || n.contains("samsung") || n.hasPrefix("sm-") {
             return .samsung
         }
-        if manufacturer == 0x004C { return .apple }
-        if manufacturer == 0x0075 { return .samsung }
-        return nil
+        if manufacturer == 0x004C && !accessory(name: name, services: services) {
+            return .apple
+        }
+        if manufacturer == 0x0075 && !accessory(name: name, services: services) {
+            return .samsung
+        }
+        return .device
+    }
+
+    /// Closed accessories still paint. They cannot carry hop, so they are not probed.
+    public static func shouldProbe(name: String, services: [String]) -> Bool {
+        if services.contains(where: { $0.lowercased() == "hop" }) {
+            return true
+        }
+        return !accessory(name: name, services: services)
+    }
+
+    public static func accessory(name: String, services: [String]) -> Bool {
+        let n = name.lowercased()
+        let phones = ["iphone", "ipad", "galaxy", "samsung", "pixel", "motorola"]
+        if phones.contains(where: { n.contains($0) }) {
+            return false
+        }
+        let accessories = ["airpods", "watch", "pencil", "keyboard", "mouse", "buds"]
+        if accessories.contains(where: { n.contains($0) }) {
+            return true
+        }
+        return services.contains(where: { $0.lowercased() == "1812" })
     }
 
     public static func manufacturerID(_ data: Data?) -> UInt16? {

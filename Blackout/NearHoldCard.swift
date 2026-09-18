@@ -2,7 +2,7 @@ import SwiftUI
 import MeshDTN
 import Tokens
 
-/// Heard phones on the field. Not a party body. WALK is the street path.
+/// Heard radios on the field. Not a party body. WALK is the street path.
 /// There is no phone number here and never will be.
 struct NearHoldCard: View {
     let hold: NearHold
@@ -46,7 +46,7 @@ struct NearHoldCard: View {
     }
 
     private var countLine: String {
-        hold.count == 1 ? "1 PHONE" : "\(hold.count) PHONES"
+        hold.count == 1 ? "1 DEVICE" : "\(hold.count) DEVICES"
     }
 
     private var kindsLine: String {
@@ -94,6 +94,8 @@ struct NearHoldCard: View {
             return "SAMSUNG"
         case "hop":
             return "HOP"
+        case "device":
+            return "DEVICE"
         default:
             return raw.uppercased()
         }
