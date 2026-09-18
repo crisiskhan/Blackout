@@ -7,7 +7,7 @@ public enum FieldAskWalk {
     public enum Family: String, Sendable {
         case bleed, cardiac, allergy, choke, cpr, drown, shock, seizure
         case burn, heat, cold, flood, lightning, tornado
-        case fracture, lost, eye, nose, animal
+        case fracture, lost, people, eye, nose, animal
         case stroke, head, poison, asthma, avalanche, rip
         case breath, hurt, sick, stay, start
         case infant, selfChoke, pregnant, hole, sugar, overdose, tight, stuck
@@ -109,6 +109,9 @@ public enum FieldAskWalk {
         if !tokens.isDisjoint(with: ["lost", "gps", "separated"]) {
             return .lost
         }
+        if !tokens.isDisjoint(with: ["people", "civilization", "anyone", "radio", "phone"]) {
+            return .people
+        }
         if !tokens.isDisjoint(with: ["eye"]) {
             return .eye
         }
@@ -174,6 +177,7 @@ public enum FieldAskWalk {
             .stroke, .poison, .asthma, .avalanche, .rip,
             .breath, .hurt, .stay,
             .infant, .selfChoke, .pregnant, .hole, .sugar, .overdose, .tight, .stuck,
+            .people,
         ]
         let start: [FieldStep] = urgent.contains(family) ? [] : [
             step(
@@ -705,6 +709,46 @@ public enum FieldAskWalk {
             care = FieldLoc(
                 en: "Carry them if you can. Get to trained help. Do not wait on a number the glass cannot dial.",
                 es: "Cárgalos si puedes. Llega a ayuda entrenada. No esperes un número que el visor no puede marcar."
+            )
+        case .people:
+            body = [
+                step(
+                    "Open COMMS LISTEN. Face the radio. Walk toward NEAR · LOUDER. A louder radio is closer. Silence is not a house.",
+                    "Abre COMMS LISTEN. Enfrenta la radio. Camina hacia NEAR · LOUDER. Una radio más fuerte está más cerca. El silencio no es una casa.",
+                    "Tap LISTEN. Walk toward louder. Do not invent a house.",
+                    "Toca LISTEN. Camina hacia más fuerte. No inventes una casa.",
+                    "The glass cannot place a closed phone. Louder is closer. A quiet radio is farther, not gone.",
+                    "El visor no coloca un teléfono cerrado. Más fuerte es más cerca. Una radio quieta está más lejos, no desapareció.",
+                    "Stop if the path is a cliff, fire, or water you cannot cross.",
+                    "Para si el camino es un acantilado, fuego o agua que no puedes cruzar.",
+                    bookPic
+                ),
+                step(
+                    "If a LAST hop mark sits on the field, walk that street. If the hold says NO PLACE, stay visible and tap SIGNAL. Do not invent a house from a quiet radio.",
+                    "Si un LAST hop está en el campo, camina esa calle. Si el hold dice NO PLACE, quédate visible y toca SIGNAL. No inventes una casa desde una radio quieta.",
+                    "Walk the LAST mark. If there is no place, sit where people can see you.",
+                    "Camina la marca LAST. Si no hay lugar, siéntate donde te vean.",
+                    "A hop POS is the last place a Blackout phone told. RSSI is not a map pin.",
+                    "Un hop POS es el último sitio que un teléfono Blackout dijo. RSSI no es un pin.",
+                    "Stop if moving would put you in a wash, fire, or night cold you cannot survive.",
+                    "Para si moverte te mete en un arroyo, fuego o frío de noche que no sobrevives.",
+                    bookPic
+                ),
+                step(
+                    "From that spot, yell in threes and wave a bright cloth. Keep LISTEN on. Tap SIGNAL when you need to be seen.",
+                    "Desde ese sitio, grita de a tres y agita un paño brillante. Deja LISTEN encendido. Toca SIGNAL cuando hay que ser visto.",
+                    "Three yells. Then listen. Then three more.",
+                    "Tres gritos. Luego escucha. Luego tres más.",
+                    "A pattern is how people know you are a person. The radio keeps listening while you stay put.",
+                    "Un patrón es cómo saben que eres una persona. La radio sigue escuchando mientras te quedas.",
+                    "Stop yelling if you need that breath to stay warm.",
+                    "Deja de gritar si necesitas ese aire para no enfriar.",
+                    bookPic
+                ),
+            ]
+            care = FieldLoc(
+                en: "Stay visible. Keep LISTEN on. Do not wait on a number the glass cannot dial.",
+                es: "Quédate visible. Deja LISTEN encendido. No esperes un número que el visor no puede marcar."
             )
         case .lost:
             body = [

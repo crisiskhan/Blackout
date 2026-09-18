@@ -111,16 +111,30 @@ struct CommsTab: View {
     private var netPlate: some View {
         VStack(alignment: .leading, spacing: 16) {
             sectionLabel("NET")
-            Button(runtime.mesh.listening ? "LEAVE NET" : "JOIN LOCAL NET") {
-                if runtime.mesh.listening {
+            Button(runtime.mesh.joined ? "LEAVE NET" : "JOIN LOCAL NET") {
+                if runtime.mesh.joined {
                     runtime.leaveNet()
                 } else {
                     runtime.joinNet()
                 }
             }
-            .buttonStyle(HUDActionStyle(filled: !runtime.mesh.listening))
+            .buttonStyle(HUDActionStyle(filled: !runtime.mesh.joined))
+            Button(runtime.mesh.listening ? "QUIET" : "LISTEN") {
+                if runtime.mesh.listening {
+                    runtime.quietRadio()
+                } else {
+                    runtime.listenNet()
+                }
+            }
+            .buttonStyle(HUDActionStyle(filled: runtime.mesh.listening && !runtime.mesh.joined))
             if !runtime.mesh.chromeNear.isEmpty {
                 Text(runtime.mesh.chromeNear)
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.fix)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if !runtime.mesh.chromeSignal.isEmpty {
+                Text(runtime.mesh.chromeSignal)
                     .font(.system(size: 13, weight: .heavy))
                     .foregroundStyle(Theme.fix)
                     .fixedSize(horizontal: false, vertical: true)
@@ -249,11 +263,9 @@ struct CommsTab: View {
                 return "1:1 · \(runtime.mesh.chromeNet)"
             }
         }
-        let near = runtime.mesh.chromeNear
-        if near.isEmpty {
-            return runtime.mesh.chromeNet
-        }
-        return "\(runtime.mesh.chromeNet) · \(near)"
+        let bits = [runtime.mesh.chromeNet, runtime.mesh.chromeNear, runtime.mesh.chromeSignal]
+            .filter { !$0.isEmpty }
+        return bits.joined(separator: " · ")
     }
 
     private var pageTone: HUDStatusTone {

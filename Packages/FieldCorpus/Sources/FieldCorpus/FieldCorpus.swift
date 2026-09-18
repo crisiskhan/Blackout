@@ -315,6 +315,12 @@ public enum FieldCorpus {
         ("where is camp", "lost"),
         ("cant find camp", "lost"),
         ("find camp", "lost"),
+        ("find people", "people"),
+        ("find civilization", "people"),
+        ("anyone out there", "people"),
+        ("civilization", "people"),
+        ("otras personas", "people"),
+        ("gente", "people"),
         ("dehydration", "thirst"),
         ("dehydrated", "thirst"),
         ("deshidratacion", "thirst"),
@@ -520,6 +526,13 @@ public enum FieldCorpus {
                 continue
             }
             if expanded.contains("sick") { continue }
+            // Find people is the live listen walk. Find water still
+            // has to hit the water book.
+            if !expanded.isDisjoint(with: ["people", "civilization", "anyone", "radio", "phone"])
+                && expanded.isDisjoint(with: ["water", "thirst", "choke", "bleed", "hurt"])
+            {
+                continue
+            }
             // "keep them stable" is the live stay walk. "stay warm" /
             // "stay cool" still have to hit the cold and heat book.
             if expanded.contains("stay")

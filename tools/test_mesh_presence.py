@@ -107,14 +107,14 @@ def marks(
     hears: list[dict],
     you: tuple[float, float] | None,
 ) -> list[dict]:
+    """Only a real fix paints. YOU is not a house of strangers."""
+    _ = you
     placed: list[dict] = []
     for hear in hears:
         lat = hear.get("lat")
         lon = hear.get("lon")
         if lat is None or lon is None:
-            if you is None:
-                continue
-            lat, lon = you
+            continue
         placed.append(
             {
                 "id": hear["id"],
@@ -124,6 +124,46 @@ def marks(
             }
         )
     return cluster(placed)
+
+
+def signal(was: int | None, now: int | None) -> str:
+    """Higher RSSI is louder. Six dB is a step. Empty when nobody is heard."""
+    if now is None:
+        return ""
+    if was is None:
+        return "NEAR · LIVE"
+    if now - was >= 6:
+        return "NEAR · LOUDER"
+    if was - now >= 6:
+        return "NEAR · QUIETER"
+    return ""
+
+
+def lasts(
+    remembered: list[dict],
+    live: list[dict],
+    now_s: float,
+    keep_s: float = 1800.0,
+) -> list[dict]:
+    """Hop POS outlives the 25 s hear. A live house replaces a last."""
+    kept = [p for p in remembered if now_s - float(p.get("at") or 0) <= keep_s]
+    out: list[dict] = []
+    for point in kept:
+        if any(
+            _haversine_m((point["lat"], point["lon"]), (m["lat"], m["lon"])) <= 45.0
+            for m in live
+        ):
+            continue
+        out.append(
+            {
+                "id": f"LAST·{point['lat']:.5f},{point['lon']:.5f}",
+                "lat": point["lat"],
+                "lon": point["lon"],
+                "count": int(point.get("count") or 1),
+                "kinds": list(point.get("kinds") or ["hop"]),
+            }
+        )
+    return out
 
 
 class MeshPresenceBatteryTests(unittest.TestCase):
@@ -140,16 +180,34 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         lone = next(m for m in out if m["count"] == 1)
         self.assertEqual(lone["kinds"], ["hop"])
 
-    def test_hears_without_a_fix_sit_on_you(self):
+    def test_hears_without_a_fix_stay_off_the_canvas(self):
         hears = [
             {"id": "p1", "kind": "apple"},
             {"id": "p2", "kind": "apple"},
         ]
         self.assertEqual(marks(hears, you=None), [])
-        out = marks(hears, you=(31.76, -106.49))
+        self.assertEqual(marks(hears, you=(31.76, -106.49)), [])
+
+    def test_signal_names_louder_and_quieter(self):
+        self.assertEqual(signal(None, None), "")
+        self.assertEqual(signal(None, -70), "NEAR · LIVE")
+        self.assertEqual(signal(-80, -70), "NEAR · LOUDER")
+        self.assertEqual(signal(-70, -80), "NEAR · QUIETER")
+        self.assertEqual(signal(-70, -68), "")
+
+    def test_last_hop_outlives_the_hear(self):
+        live = [{"id": "NEAR·31.78000,-106.51000", "lat": 31.78000, "lon": -106.51000}]
+        remembered = [
+            {"lat": 31.76190, "lon": -106.49000, "at": 10.0, "count": 1, "kinds": ["hop"]},
+            {"lat": 31.78000, "lon": -106.51000, "at": 10.0, "count": 1, "kinds": ["hop"]},
+            {"lat": 31.70, "lon": -106.40, "at": -4000.0, "count": 1, "kinds": ["hop"]},
+        ]
+        out = lasts(remembered, live, now_s=20.0, keep_s=1800.0)
         self.assertEqual(len(out), 1)
-        self.assertEqual(out[0]["count"], 2)
-        self.assertAlmostEqual(out[0]["lat"], 31.76, places=4)
+        self.assertTrue(out[0]["id"].startswith("LAST·"))
+        self.assertAlmostEqual(out[0]["lat"], 31.76190, places=4)
+        gone = lasts(remembered, live, now_s=2000.0, keep_s=1800.0)
+        self.assertEqual(gone, [])
 
     def test_every_device_is_heard(self):
         self.assertEqual(classify("Crisis iPhone", 0x004C, []), "apple")
@@ -194,10 +252,18 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         self.assertIn("shouldProbe", presence)
         self.assertIn("probeCap", presence)
         self.assertIn("NEAR·", presence)
+        self.assertIn("LAST·", presence)
+        self.assertIn("NEAR · LOUDER", presence)
+        self.assertIn("func signal(", presence)
+        self.assertIn("func lasts(", presence)
         self.assertIn("ble, hop", mesh)
         self.assertIn("chromeNear", mesh)
+        self.assertIn("chromeSignal", mesh)
         self.assertIn("noteHear", mesh)
         self.assertIn("noteHop", mesh)
+        self.assertIn("func startListen(", mesh)
+        self.assertIn("func stopParty(", mesh)
+        self.assertIn("join: false", mesh)
         self.assertIn("Discovery-only scan is not a peer", live)
         self.assertIn("scanForPeripherals", live)
         self.assertIn("hopUUID", live)
@@ -209,13 +275,21 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         self.assertIn("static func presence(", art)
         self.assertIn("presence", app.split("func eyeCanvasPips")[1].split("func eyeTrails")[0])
         self.assertIn("heldNear", app)
+        self.assertIn("listenNet", app)
+        self.assertIn("quietRadio", app)
         self.assertIn("NearHoldCard", tab)
         self.assertIn("NEAR", card)
         self.assertIn("DEVICE", card)
         self.assertIn("WALK", card)
+        self.assertIn("NO PLACE", card)
         self.assertNotIn("tel://", card)
         self.assertIn("chromeNear", comms)
+        self.assertIn("LISTEN", comms)
+        self.assertIn("QUIET", comms)
+        field = read("Blackout", "FieldTab.swift")
+        self.assertIn("chromeSignal", field)
         self.assertIn("NEAR ·", qa)
+        self.assertIn("LOUDER", qa)
         self.assertIn("green", qa.lower())
         for blob, name in (
             (presence, "MeshPresence"),

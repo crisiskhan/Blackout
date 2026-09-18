@@ -114,7 +114,7 @@ struct ExpeditionTab: View {
                                 .font(.system(size: 13, weight: .heavy))
                                 .foregroundStyle(Theme.silver)
                             Text(
-                                [runtime.mesh.chromeNet, runtime.mesh.chromeNear]
+                                [runtime.mesh.chromeNet, runtime.mesh.chromeNear, runtime.mesh.chromeSignal]
                                     .filter { !$0.isEmpty }
                                     .joined(separator: " · ")
                             )

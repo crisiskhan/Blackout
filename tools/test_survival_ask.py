@@ -133,6 +133,9 @@ LIVE_FIRST = (
     ("sucking chest", ("seal", "plastic", "open")),
     ("low blood sugar", ("sugar", "swallow", "juice")),
     ("overdose", ("naloxone", "side", "kit")),
+    ("find people", ("listen", "louder", "radio")),
+    ("civilization", ("listen", "louder", "radio")),
+    ("anyone out there", ("listen", "louder", "radio")),
 )
 
 

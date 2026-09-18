@@ -40,7 +40,68 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertEqual(net.chromeNet, "NET · NONE")
         XCTAssertEqual(net.chromeNear, "NEAR · 1")
         XCTAssertTrue(net.pips.isEmpty)
-        XCTAssertEqual(net.presenceMarks(you: (31.76, -106.49)).first?.count, 1)
+        XCTAssertTrue(net.presenceMarks(you: (31.76, -106.49)).isEmpty)
+    }
+
+    func testListenWithoutAPartyHearsRadios() {
+        let net = MeshNet(box: EventLog())
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.startListen()
+        XCTAssertTrue(net.listening)
+        XCTAssertFalse(net.joined)
+        XCTAssertEqual(radio.startedCode, "")
+        XCTAssertEqual(net.chromeNet, "NET · NONE")
+        radio.appearHear(
+            MeshHear(id: "pixel-1", kind: .device, rssi: -70, lat: 31.76190, lon: -106.49000)
+        )
+        XCTAssertEqual(net.hears.count, 1)
+        XCTAssertEqual(net.presenceMarks(you: nil).count, 1)
+        XCTAssertEqual(net.chromeSignal, "NEAR · LIVE")
+        net.stopParty()
+        XCTAssertTrue(net.listening)
+        XCTAssertFalse(net.joined)
+        net.stopLocal()
+        XCTAssertFalse(net.listening)
+        XCTAssertTrue(net.hears.isEmpty)
+        XCTAssertTrue(net.lasts.isEmpty)
+    }
+
+    func testSignalNamesLouderAndQuieter() {
+        XCTAssertEqual(MeshPresence.signal(was: nil, now: -70), "NEAR · LIVE")
+        XCTAssertEqual(MeshPresence.signal(was: -80, now: -70), "NEAR · LOUDER")
+        XCTAssertEqual(MeshPresence.signal(was: -70, now: -80), "NEAR · QUIETER")
+        XCTAssertEqual(MeshPresence.signal(was: -72, now: -70), "")
+        XCTAssertEqual(MeshPresence.signal(was: -70, now: nil), "")
+    }
+
+    func testLastHopOutlivesTheHear() {
+        let now = Date()
+        let remembered = [
+            MeshPresence.LastFix(
+                lat: 31.76190, lon: -106.49000, count: 1, kinds: ["hop"],
+                at: now.addingTimeInterval(-400)
+            ),
+            MeshPresence.LastFix(
+                lat: 31.80000, lon: -106.52000, count: 1, kinds: ["hop"],
+                at: now.addingTimeInterval(-4000)
+            ),
+        ]
+        let lasts = MeshPresence.lasts(remembered: remembered, live: [], now: now)
+        XCTAssertEqual(lasts.count, 1)
+        XCTAssertTrue(lasts[0].id.hasPrefix("LAST·"))
+        let live = MeshPresence.marks(
+            hears: [
+                MeshHear(
+                    id: "h", kind: .hop, rssi: -50,
+                    lat: 31.76190, lon: -106.49000, heardAt: now
+                ),
+            ],
+            you: nil
+        )
+        XCTAssertTrue(
+            MeshPresence.lasts(remembered: remembered, live: live, now: now).isEmpty
+        )
     }
 
     func testHopCarriesStore() {

@@ -254,6 +254,23 @@ class FieldTreeBatteryTests(unittest.TestCase):
         cid, card = _open("impaled", book)
         self.assertIn("leave the object", _blob(card))
 
+    def test_find_people_is_listen_and_louder(self):
+        book = load_book()
+        for query in ("find people", "civilization", "anyone out there"):
+            hits = ask_book(book, query, "en")
+            self.assertFalse(hits, f"{query!r} must not steal a book card")
+            cid, card = _open(query, book)
+            self.assertEqual(cid, LIVE_ID, query)
+            blob = _blob(card)
+            first = _first_do(card).lower()
+            self.assertTrue(
+                any(n in first or n in blob for n in ("listen", "louder", "radio")),
+                first,
+            )
+            self.assertIn("SIGNAL", _labels(card))
+            self.assertIn("STAY", _labels(card))
+            self.assertNotIn("tel://", blob)
+
 
 class FieldTreeSourceTests(unittest.TestCase):
     """The glass shows CAUSE chips. The source never phones out."""
@@ -277,6 +294,8 @@ class FieldTreeSourceTests(unittest.TestCase):
         self.assertIn("case .stay", walk)
         self.assertIn("case .infant", walk)
         self.assertIn("case .selfChoke", walk)
+        self.assertIn("case .people", walk)
+        self.assertIn("case .people:", tree)
         self.assertIn("case .hole", walk)
         self.assertIn("case .sugar", walk)
         self.assertIn("FieldTree.decorate(", ask)
@@ -314,6 +333,8 @@ class FieldTreeSourceTests(unittest.TestCase):
         self.assertIn('expanded.contains("breath")', skip)
         self.assertIn('expanded.contains("hurt")', skip)
         self.assertIn('expanded.contains("sick")', skip)
+        self.assertIn('"people"', skip)
+        self.assertIn('"civilization"', skip)
 
     def test_solo_qa_scores_the_connected_card(self):
         qa = read("docs", "SOLO_QA.md")

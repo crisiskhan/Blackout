@@ -33,19 +33,25 @@ public struct MeshHear: Equatable, Sendable, Identifiable {
 /// Canvas id for a clustered NEAR mark.
 public enum NearMark {
     public static let idPrefix = "NEAR·"
+    public static let lastPrefix = "LAST·"
 
     public static func canvasID(lat: Double, lon: Double) -> String {
         String(format: "NEAR·%.5f,%.5f", lat, lon)
     }
 
-    public static func parse(_ raw: String) -> (lat: Double, lon: Double)? {
-        guard raw.hasPrefix(idPrefix) else { return nil }
-        let rest = String(raw.dropFirst(idPrefix.count))
+    public static func lastID(lat: Double, lon: Double) -> String {
+        String(format: "LAST·%.5f,%.5f", lat, lon)
+    }
+
+    public static func parse(_ raw: String) -> (lat: Double, lon: Double, last: Bool)? {
+        let last = raw.hasPrefix(lastPrefix)
+        guard raw.hasPrefix(idPrefix) || last else { return nil }
+        let rest = String(raw.dropFirst(last ? lastPrefix.count : idPrefix.count))
         let parts = rest.split(separator: ",")
         guard parts.count == 2, let lat = Double(parts[0]), let lon = Double(parts[1]) else {
             return nil
         }
-        return (lat, lon)
+        return (lat, lon, last)
     }
 }
 
@@ -55,13 +61,28 @@ public struct NearHold: Equatable, Sendable {
     public var lon: Double
     public var count: Int
     public var kinds: [String]
+    public var placed: Bool
+    public var last: Bool
+    public var signal: String
 
-    public init(id: String, lat: Double, lon: Double, count: Int, kinds: [String]) {
+    public init(
+        id: String,
+        lat: Double,
+        lon: Double,
+        count: Int,
+        kinds: [String],
+        placed: Bool = true,
+        last: Bool = false,
+        signal: String = ""
+    ) {
         self.id = id
         self.lat = lat
         self.lon = lon
         self.count = count
         self.kinds = kinds
+        self.placed = placed
+        self.last = last
+        self.signal = signal
     }
 }
 
@@ -69,7 +90,8 @@ public struct NearHold: Equatable, Sendable {
 public enum MeshPresence {
     public static let houseMeters = 45.0
     public static let hearSeconds: TimeInterval = 25
-    public static let probeCap = 3
+    public static let lastSeconds: TimeInterval = 1800
+    public static let probeCap = 6
 
     public struct Mark: Equatable, Sendable, Identifiable {
         public var id: String
@@ -179,22 +201,60 @@ public enum MeshPresence {
         hears: [MeshHear],
         you: (lat: Double, lon: Double)?
     ) -> [Mark] {
+        _ = you
         var placed: [(id: String, lat: Double, lon: Double, kind: String)] = []
         for hear in hears {
-            let lat: Double
-            let lon: Double
-            if let hLat = hear.lat, let hLon = hear.lon, hLat.isFinite, hLon.isFinite {
-                lat = hLat
-                lon = hLon
-            } else if let you {
-                lat = you.lat
-                lon = you.lon
-            } else {
+            guard let lat = hear.lat, let lon = hear.lon, lat.isFinite, lon.isFinite else {
                 continue
             }
             placed.append((hear.id, lat, lon, hear.kind.rawValue))
         }
         return cluster(placed)
+    }
+
+    public static func signal(was: Int?, now: Int?) -> String {
+        guard let now else { return "" }
+        guard let was else { return "NEAR · LIVE" }
+        if now - was >= 6 { return "NEAR · LOUDER" }
+        if was - now >= 6 { return "NEAR · QUIETER" }
+        return ""
+    }
+
+    public struct LastFix: Equatable, Sendable {
+        public var lat: Double
+        public var lon: Double
+        public var count: Int
+        public var kinds: [String]
+        public var at: Date
+
+        public init(lat: Double, lon: Double, count: Int, kinds: [String], at: Date = Date()) {
+            self.lat = lat
+            self.lon = lon
+            self.count = count
+            self.kinds = kinds
+            self.at = at
+        }
+    }
+
+    public static func lasts(
+        remembered: [LastFix],
+        live: [Mark],
+        now: Date = Date(),
+        keep: TimeInterval = lastSeconds
+    ) -> [Mark] {
+        remembered.compactMap { point in
+            if now.timeIntervalSince(point.at) > keep { return nil }
+            if live.contains(where: { meters(point.lat, point.lon, $0.lat, $0.lon) <= houseMeters }) {
+                return nil
+            }
+            return Mark(
+                id: NearMark.lastID(lat: point.lat, lon: point.lon),
+                lat: point.lat,
+                lon: point.lon,
+                count: point.count,
+                kinds: point.kinds
+            )
+        }
     }
 
     public static func chrome(count: Int) -> String {

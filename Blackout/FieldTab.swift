@@ -413,7 +413,7 @@ struct FieldTab: View {
             }
             .buttonStyle(HUDActionStyle(filled: false))
             Text(
-                [runtime.mesh.chromeNet, runtime.mesh.chromeNear]
+                [runtime.mesh.chromeNet, runtime.mesh.chromeNear, runtime.mesh.chromeSignal]
                     .filter { !$0.isEmpty }
                     .joined(separator: " · ")
             ).font(.caption).foregroundStyle(Theme.warn)
