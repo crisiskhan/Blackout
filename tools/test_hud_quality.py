@@ -4780,7 +4780,21 @@ class MeshNearHUDTests(unittest.TestCase):
         self.assertIn("NEAR", card)
         self.assertIn("DEVICE", card)
         self.assertIn("WALK", card)
+        self.assertIn("NAME", card)
+        self.assertIn("RSSI", card)
+        self.assertIn("REACH", card)
+        self.assertIn("RADIO", card)
+        self.assertIn("UNNAMED", card)
         self.assertNotIn("tel://", card)
+        self.assertNotIn("Whisper", card)
+        art = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        presence_art = art.split("static func presence(count: Int)")[1].split(
+            "static func pin("
+        )[0]
+        self.assertIn("let disc: CGFloat = 10", presence_art)
+        self.assertNotIn("let size: CGFloat = 22", presence_art)
         self.assertIn("NearHoldCard", tab)
         self.assertIn("heldNear", tab)
         self.assertIn("chromeNear", comms)

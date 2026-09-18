@@ -715,6 +715,11 @@ public final class MeshNet: @unchecked Sendable {
             var next = hear
             if next.lat == nil { next.lat = hears[i].lat }
             if next.lon == nil { next.lon = hears[i].lon }
+            if next.name.isEmpty { next.name = hears[i].name }
+            if next.manufacturer == nil { next.manufacturer = hears[i].manufacturer }
+            if next.services.isEmpty { next.services = hears[i].services }
+            if next.txPower == nil { next.txPower = hears[i].txPower }
+            if next.connectable == nil { next.connectable = hears[i].connectable }
             hears[i] = next
         } else {
             hears.append(hear)

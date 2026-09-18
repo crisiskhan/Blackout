@@ -28,13 +28,15 @@ struct NearHoldCard: View {
         }
     }
 
+    private var radios: [NearRadio] { hold.radios }
+
     private var headline: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(hold.last ? "LAST HEARD" : "NEAR")
+            Text(titleLine)
                 .font(.system(size: 20, weight: .heavy))
                 .foregroundStyle(Color.white)
-                .lineLimit(1)
-                .minimumScaleFactor(1)
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
             Text(countLine)
                 .font(.system(size: 12, weight: .heavy))
                 .foregroundStyle(Theme.fix)
@@ -43,6 +45,12 @@ struct NearHoldCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
+    }
+
+    private var titleLine: String {
+        if hold.last { return "LAST HEARD" }
+        if radios.count == 1 { return radios[0].name }
+        return "NEAR"
     }
 
     private var countLine: String {
@@ -57,12 +65,48 @@ struct NearHoldCard: View {
     private var rows: some View {
         VStack(alignment: .leading, spacing: 8) {
             row(key: "COUNT", value: countLine)
-            row(key: "KIND", value: kindsLine)
+            if radios.isEmpty {
+                row(key: "KIND", value: kindsLine)
+            }
             if !hold.signal.isEmpty {
                 row(key: "SIGNAL", value: hold.signal)
             }
+            ForEach(Array(radios.enumerated()), id: \.element.id) { index, radio in
+                if radios.count > 1 || titleLine != radio.name {
+                    Text(radio.name)
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(Theme.silver)
+                        .padding(.top, index == 0 ? 4 : 8)
+                }
+                radioRows(radio)
+            }
             row(key: "COORDINATES", value: hold.placed ? coordinates : "NO PLACE")
             row(key: "BEARING", value: hold.placed ? bearing : "NO PLACE")
+        }
+    }
+
+    @ViewBuilder
+    private func radioRows(_ radio: NearRadio) -> some View {
+        row(key: "NAME", value: radio.name.isEmpty ? "UNNAMED" : radio.name)
+        row(key: "KIND", value: radio.kind)
+        if !radio.rssi.isEmpty {
+            row(key: "RSSI", value: radio.rssi)
+        }
+        if !radio.reach.isEmpty {
+            row(key: "REACH", value: radio.reach)
+        }
+        row(key: "RADIO", value: radio.radio)
+        if !radio.maker.isEmpty {
+            row(key: "MAKER", value: radio.maker)
+        }
+        if !radio.link.isEmpty {
+            row(key: "LINK", value: radio.link)
+        }
+        if !radio.tx.isEmpty {
+            row(key: "TX", value: radio.tx)
+        }
+        if radio.hop {
+            row(key: "CARRY", value: "HOP")
         }
     }
 

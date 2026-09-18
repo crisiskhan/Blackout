@@ -59,6 +59,7 @@ def cluster(
                 "count": len(bunch),
                 "kinds": kinds,
                 "placed": all(p.get("placed", True) for p in bunch),
+                "radios": [radio_from_hear(p) for p in bunch],
             }
         )
     return out
@@ -136,18 +137,109 @@ def offset(
     return (math.degrees(p2), math.degrees(l2))
 
 
+def name_token(raw: str) -> str:
+    kept = "".join(ch for ch in raw.upper() if ch.isalnum() or ch == " ")
+    collapsed = " ".join(kept.split())
+    return collapsed[:16]
+
+
+def radio_token(radio_id: str) -> str:
+    compact = "".join(ch for ch in radio_id.upper() if ch.isalnum())
+    if len(compact) >= 4:
+        return compact[-4:]
+    return compact or "—"
+
+
+def maker_word(manufacturer: int | None) -> str:
+    if manufacturer is None:
+        return ""
+    if manufacturer == 0x004C:
+        return "APPLE"
+    if manufacturer == 0x0075:
+        return "SAMSUNG"
+    return f"{manufacturer:04X}"
+
+
+def kind_word(hear: dict) -> str:
+    name = str(hear.get("name") or "")
+    services = list(hear.get("services") or [])
+    if _accessory(name, services):
+        return "ACCESSORY"
+    kind = hear.get("kind") or classify(name, hear.get("manufacturer"), services)
+    return {
+        "apple": "IPHONE",
+        "samsung": "SAMSUNG",
+        "hop": "HOP",
+        "device": "DEVICE",
+    }.get(kind, str(kind).upper())
+
+
+def rssi_word(rssi: int | None) -> str:
+    if rssi is None or rssi <= -120 or rssi >= 0:
+        return ""
+    return f"−{abs(int(rssi))}"
+
+
+def radio_from_hear(hear: dict) -> dict:
+    rssi = hear.get("rssi")
+    rssi_n = int(rssi) if rssi is not None else None
+    rows = {
+        "id": str(hear.get("id") or ""),
+        "name": name_token(str(hear.get("name") or "")) or "UNNAMED",
+        "kind": kind_word(hear),
+        "radio": radio_token(str(hear.get("id") or "")),
+        "maker": maker_word(hear.get("manufacturer")),
+        "rssi": rssi_word(rssi_n),
+        "reach": "",
+        "link": "",
+        "tx": "",
+        "hop": (hear.get("kind") == "hop")
+        or any(s.lower() == "hop" for s in hear.get("services") or []),
+    }
+    if rows["rssi"]:
+        rows["reach"] = f"{int(round(reach_meters(int(rssi_n))))} M"
+    if hear.get("connectable") is True:
+        rows["link"] = "CONNECTABLE"
+    elif hear.get("connectable") is False:
+        rows["link"] = "CLOSED"
+    if hear.get("txPower") is not None:
+        tx = int(hear["txPower"])
+        rows["tx"] = f"−{abs(tx)}" if tx < 0 else str(tx)
+    return rows
+
+
+def radio_rows(hear: dict) -> dict:
+    radio = radio_from_hear(hear)
+    rows = {
+        "NAME": radio["name"],
+        "KIND": radio["kind"],
+        "RADIO": radio["radio"],
+    }
+    if radio["rssi"]:
+        rows["RSSI"] = radio["rssi"]
+        rows["REACH"] = radio["reach"]
+    if radio["maker"]:
+        rows["MAKER"] = radio["maker"]
+    if radio["link"]:
+        rows["LINK"] = radio["link"]
+    if radio["tx"]:
+        rows["TX"] = radio["tx"]
+    if radio["hop"]:
+        rows["CARRY"] = "HOP"
+    return rows
+
+
 def place_hear(
     hear: dict, you: tuple[float, float]
 ) -> dict:
     meters = reach_meters(int(hear.get("rssi") or 0))
     dest = offset(you[0], you[1], meters, bearing_deg(str(hear["id"])))
-    return {
-        "id": hear["id"],
-        "lat": dest[0],
-        "lon": dest[1],
-        "kind": hear.get("kind") or "",
-        "placed": False,
-    }
+    placed = dict(hear)
+    placed["lat"] = dest[0]
+    placed["lon"] = dest[1]
+    placed["kind"] = hear.get("kind") or ""
+    placed["placed"] = False
+    return placed
 
 
 def marks(
@@ -161,15 +253,12 @@ def marks(
         lat = hear.get("lat")
         lon = hear.get("lon")
         if lat is not None and lon is not None:
-            placed.append(
-                {
-                    "id": hear["id"],
-                    "lat": lat,
-                    "lon": lon,
-                    "kind": hear.get("kind") or "",
-                    "placed": True,
-                }
-            )
+            kept = dict(hear)
+            kept["lat"] = lat
+            kept["lon"] = lon
+            kept["kind"] = hear.get("kind") or ""
+            kept["placed"] = True
+            placed.append(kept)
             continue
         if place and you is not None:
             placed.append(place_hear(hear, you))
@@ -322,6 +411,73 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         gone = lasts(remembered, live, now_s=2000.0, keep_s=1800.0)
         self.assertEqual(gone, [])
 
+    def test_hold_glass_lists_everything_the_radio_said(self):
+        rows = radio_rows(
+            {
+                "id": "AA-BB-CC-DD-EEFF",
+                "name": "Crisis iPhone",
+                "kind": "apple",
+                "rssi": -60,
+                "manufacturer": 0x004C,
+                "connectable": True,
+                "txPower": -12,
+            }
+        )
+        self.assertEqual(rows["NAME"], "CRISIS IPHONE")
+        self.assertEqual(rows["KIND"], "IPHONE")
+        self.assertEqual(rows["RSSI"], "−60")
+        self.assertEqual(rows["REACH"], "100 M")
+        self.assertEqual(rows["RADIO"], "EEFF")
+        self.assertEqual(rows["MAKER"], "APPLE")
+        self.assertEqual(rows["LINK"], "CONNECTABLE")
+        self.assertEqual(rows["TX"], "−12")
+        self.assertNotIn("MAC", rows)
+        unnamed = radio_rows({"id": "pixel-1", "kind": "device", "rssi": -80})
+        self.assertEqual(unnamed["NAME"], "UNNAMED")
+        self.assertEqual(unnamed["KIND"], "DEVICE")
+        self.assertEqual(unnamed["RSSI"], "−80")
+        self.assertEqual(unnamed["REACH"], "140 M")
+        self.assertNotIn("MAKER", unnamed)
+        hop = radio_rows(
+            {"id": "hop-1", "name": "BO", "kind": "hop", "rssi": -50, "services": ["hop"]}
+        )
+        self.assertEqual(hop["KIND"], "HOP")
+        self.assertEqual(hop["CARRY"], "HOP")
+        buds = radio_rows(
+            {
+                "id": "buds-1",
+                "name": "AirPods Pro",
+                "kind": "device",
+                "rssi": -70,
+                "manufacturer": 0x004C,
+            }
+        )
+        self.assertEqual(buds["KIND"], "ACCESSORY")
+        self.assertEqual(buds["MAKER"], "APPLE")
+        silent = radio_rows({"id": "x", "kind": "device"})
+        self.assertEqual(silent["NAME"], "UNNAMED")
+        self.assertNotIn("RSSI", silent)
+        self.assertNotIn("REACH", silent)
+
+    def test_marks_carry_the_heard_radios(self):
+        you = (31.76190, -106.49000)
+        hears = [
+            {
+                "id": "iphone-1",
+                "name": "Crisis iPhone",
+                "kind": "apple",
+                "rssi": -60,
+                "manufacturer": 0x004C,
+            }
+        ]
+        out = marks(hears, you=you, place=True)
+        self.assertEqual(len(out), 1)
+        radios = out[0]["radios"]
+        self.assertEqual(len(radios), 1)
+        self.assertEqual(radios[0]["name"], "CRISIS IPHONE")
+        self.assertEqual(radios[0]["rssi"], "−60")
+        self.assertEqual(radios[0]["radio"], "ONE1")
+
     def test_every_device_is_heard(self):
         self.assertEqual(classify("Crisis iPhone", 0x004C, []), "apple")
         self.assertEqual(classify("Galaxy S24", 0x0075, []), "samsung")
@@ -402,8 +558,23 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         self.assertIn("testJoinPlacesWithoutAParty", tests)
         self.assertIn("testScanDoesNotLeaveALiveParty", tests)
         self.assertIn("testReachMetersAndSpokeAreStable", tests)
+        self.assertIn("testHoldGlassNamesTheHeardRadio", tests)
         self.assertIn("testHopCarriesStore", tests)
         self.assertIn("static func presence(", art)
+        presence_art = art.split("static func presence(count: Int)")[1].split(
+            "static func pin("
+        )[0]
+        self.assertIn("let pad: CGFloat = 44", presence_art)
+        self.assertIn("let disc: CGFloat = 10", presence_art)
+        self.assertNotIn("let size: CGFloat = 22", presence_art)
+        self.assertIn("struct NearRadio", presence)
+        self.assertIn("func radio(from", presence)
+        self.assertIn("radios:", presence)
+        self.assertIn("name:", presence)
+        self.assertIn("public var name: String", presence)
+        self.assertIn("manufacturer", presence)
+        self.assertIn("connectable", presence)
+        self.assertIn("txPower", presence)
         self.assertIn("presence", app.split("func eyeCanvasPips")[1].split("func eyeTrails")[0])
         self.assertIn("heldNear", app)
         self.assertIn("listenNet", app)
@@ -413,7 +584,19 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         self.assertIn("DEVICE", card)
         self.assertIn("WALK", card)
         self.assertIn("NO PLACE", card)
+        self.assertIn("NAME", card)
+        self.assertIn("RSSI", card)
+        self.assertIn("REACH", card)
+        self.assertIn("RADIO", card)
+        self.assertIn("MAKER", card)
+        self.assertIn("UNNAMED", card)
         self.assertNotIn("tel://", card)
+        self.assertNotIn("MAC", card)
+        self.assertNotIn("Whisper", card)
+        hear_init = live.split("onHear?(")[1].split("if partyHit")[0]
+        self.assertIn("name:", hear_init)
+        self.assertIn("manufacturer:", hear_init)
+        self.assertIn("radios: mark.radios", app)
         self.assertIn("chromeNear", comms)
         self.assertIn("LISTEN", comms)
         self.assertIn("QUIET", comms)
