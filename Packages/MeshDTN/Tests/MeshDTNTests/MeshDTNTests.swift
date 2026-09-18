@@ -58,6 +58,8 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertEqual(net.hears.count, 1)
         XCTAssertEqual(net.presenceMarks(you: nil).count, 1)
         XCTAssertEqual(net.chromeSignal, "NEAR · LIVE")
+        XCTAssertEqual(net.presenceMarks(you: nil).count, 1)
+        XCTAssertEqual(net.chromeSignal, "NEAR · LIVE")
         net.stopParty()
         XCTAssertTrue(net.listening)
         XCTAssertFalse(net.joined)
