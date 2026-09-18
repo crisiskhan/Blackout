@@ -93,6 +93,8 @@ final class AppRuntime {
     var heldAddress: HeldAddress?
     /// A packed CCTV still. Mutually exclusive with ground, party, and doors.
     var heldCam: HeldCam?
+    /// Clustered heard phones. Not a party body.
+    var heldNear: NearHold?
     /// Packed cameras for the open extract. Empty is honest (NM).
     var packCams: [PackCam] = []
     /// Party place composer. NAME / NOTE / FACE live here until DROP.
@@ -446,6 +448,7 @@ final class AppRuntime {
         heldParty = nil
         heldAddress = nil
         heldCam = nil
+        heldNear = nil
         let pref = MeshMarkBody.clean(name ?? "")
         let unnamed = pref.isEmpty || pref == Inspect.unnamed
         if let existing = marks.first(where: { MarkDrop.sameCoord(($0.lat, $0.lon), (lat, lon)) }) {
@@ -534,6 +537,7 @@ final class AppRuntime {
         heldParty = nil
         heldAddress = nil
         heldCam = nil
+        heldNear = nil
         heldMark = mark
         markDraft = MapMarkDraft(
             lat: mark.lat,
@@ -561,6 +565,7 @@ final class AppRuntime {
         heldParty = nil
         heldAddress = nil
         heldCam = nil
+        heldNear = nil
         let id = packs?.active?.id
         let index = id.flatMap { watersByPack[$0] } ?? (waterPackID == id ? waterCache : nil)
         held = HeldPoint(
@@ -585,6 +590,7 @@ final class AppRuntime {
         heldParty = nil
         heldAddress = nil
         heldCam = nil
+        heldNear = nil
         pickingEmblem = false
         eyeTap = nil
         pulse()
@@ -600,6 +606,7 @@ final class AppRuntime {
         held = nil
         heldParty = nil
         heldAddress = nil
+        heldNear = nil
         eyeTap = nil
         let packed = packCams.first { $0.id == id }
         let named = packed?.name.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
@@ -623,6 +630,7 @@ final class AppRuntime {
         held = nil
         heldParty = nil
         heldCam = nil
+        heldNear = nil
         let what = hit.what.trimmingCharacters(in: .whitespacesAndNewlines)
         heldAddress = HeldAddress(
             name: hit.name,
@@ -718,6 +726,11 @@ final class AppRuntime {
         held = nil
         heldAddress = nil
         heldCam = nil
+        heldNear = nil
+        if NearMark.parse(id) != nil {
+            holdNear(id: id, lat: lat, lon: lon)
+            return
+        }
         if id == UserPuck.title {
             let you = fieldYou
             heldParty = HeldPerson(
@@ -748,6 +761,88 @@ final class AppRuntime {
             isYou: false,
             vitals: PartyVitals.fromPOS(pip?.vitals)
         )
+    }
+
+    func holdNear(id: String, lat: Double, lon: Double) {
+        guard lat.isFinite, lon.isFinite else { return }
+        pulse()
+        pickingEmblem = false
+        closeSpeakTurns()
+        markDraft = nil
+        heldMark = nil
+        held = nil
+        heldParty = nil
+        heldAddress = nil
+        heldCam = nil
+        let marks = mesh.presenceMarks(you: fieldYou)
+        if let mark = marks.first(where: { $0.id == id }) {
+            heldNear = NearHold(
+                id: mark.id,
+                lat: mark.lat,
+                lon: mark.lon,
+                count: mark.count,
+                kinds: mark.kinds
+            )
+            return
+        }
+        if let mark = marks.min(by: {
+            MeshPresence.meters(lat, lon, $0.lat, $0.lon)
+                < MeshPresence.meters(lat, lon, $1.lat, $1.lon)
+        }), MeshPresence.meters(lat, lon, mark.lat, mark.lon) <= MeshPresence.houseMeters {
+            heldNear = NearHold(
+                id: mark.id,
+                lat: mark.lat,
+                lon: mark.lon,
+                count: mark.count,
+                kinds: mark.kinds
+            )
+            return
+        }
+        heldNear = NearHold(id: id, lat: lat, lon: lon, count: 1, kinds: [])
+    }
+
+    func walkHeldNear() {
+        guard let near = heldNear else { return }
+        pickDestination(lat: near.lat, lon: near.lon)
+        Task { @MainActor in
+            closeHold()
+            navigate(mode: .walk)
+        }
+    }
+
+    func nearCourse(lat: Double, lon: Double) -> String {
+        addressCourse(lat: lat, lon: lon)
+    }
+
+    func nearFix(lat: Double, lon: Double) -> String {
+        addressFix(lat: lat, lon: lon)
+    }
+
+    private func refreshHeldNear() {
+        guard let card = heldNear else { return }
+        let marks = mesh.presenceMarks(you: fieldYou)
+        if let next = marks.first(where: { $0.id == card.id }) {
+            heldNear = NearHold(
+                id: next.id,
+                lat: next.lat,
+                lon: next.lon,
+                count: next.count,
+                kinds: next.kinds
+            )
+            return
+        }
+        if let next = marks.min(by: {
+            MeshPresence.meters(card.lat, card.lon, $0.lat, $0.lon)
+                < MeshPresence.meters(card.lat, card.lon, $1.lat, $1.lon)
+        }), MeshPresence.meters(card.lat, card.lon, next.lat, next.lon) <= MeshPresence.houseMeters {
+            heldNear = NearHold(
+                id: next.id,
+                lat: next.lat,
+                lon: next.lon,
+                count: next.count,
+                kinds: next.kinds
+            )
+        }
     }
 
     func setYouName(_ raw: String) {
@@ -1237,11 +1332,13 @@ final class AppRuntime {
     func pulse() {
         chromeAwake = true
         hudFocus = .none
+        mesh.pruneHears()
+        refreshHeldNear()
         pulseTask?.cancel()
         pulseTask = Task { @MainActor in
             try? await Task.sleep(for: .seconds(BlackoutTokens.Chrome.chromeIdleSeconds))
             if Task.isCancelled { return }
-            if hudCrisis || incoming != nil || hudLayoutMode || held != nil || heldParty != nil || heldAddress != nil || heldCam != nil || markDraft != nil || heldMark != nil { return }
+            if hudCrisis || incoming != nil || hudLayoutMode || held != nil || heldParty != nil || heldAddress != nil || heldCam != nil || heldNear != nil || markDraft != nil || heldMark != nil { return }
             hudFocus = .none
             chromeAwake = false
         }
@@ -1719,6 +1816,7 @@ final class AppRuntime {
             }
         case "pos":
             refreshHeldParty()
+            refreshHeldNear()
             notePipFix(env.from)
         case "roster":
             if let raw = String(data: env.body, encoding: .utf8),
@@ -1870,6 +1968,7 @@ final class AppRuntime {
         loadFieldBookIDs()
         loadPackCams()
         heldCam = nil
+        heldNear = nil
     }
 
     func applyMapKeepAwake() {
@@ -2093,6 +2192,7 @@ final class AppRuntime {
         }
         sendPOSIfPossible()
         refreshHeldParty()
+        refreshHeldNear()
         applyLiveGuide()
         pulse()
         if godsEye, red.isRed, eyeFollowID == nil, let id = redFrameID() {
@@ -2142,6 +2242,17 @@ final class AppRuntime {
                 )
             }
         bodies.append(contentsOf: marks.map(PlaceMark.body))
+        bodies.append(
+            contentsOf: mesh.presenceMarks(you: fieldYou).map { mark in
+                PartyBody(
+                    id: mark.id,
+                    lat: mark.lat,
+                    lon: mark.lon,
+                    presence: true,
+                    count: mark.count
+                )
+            }
+        )
         let stacked = EyeDesk.stacked(bodies.map { (id: $0.id, lat: $0.lat, lon: $0.lon) })
         return bodies.map { body in
             var next = body

@@ -113,7 +113,11 @@ struct ExpeditionTab: View {
                             Text("ROSTER \(runtime.roster.code)")
                                 .font(.system(size: 13, weight: .heavy))
                                 .foregroundStyle(Theme.silver)
-                            Text(runtime.mesh.chromeNet)
+                            Text(
+                                [runtime.mesh.chromeNet, runtime.mesh.chromeNear]
+                                    .filter { !$0.isEmpty }
+                                    .joined(separator: " · ")
+                            )
                                 .font(.caption.weight(.bold))
                                 .foregroundStyle(Theme.warn)
                         }

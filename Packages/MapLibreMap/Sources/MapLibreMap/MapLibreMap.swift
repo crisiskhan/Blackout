@@ -1567,7 +1567,7 @@ public enum PersonMarkPaint: Sendable {
     public static func pipKey(_ pips: [PartyBody]) -> String {
         pips.map { pip in
             let heading = quantizedHeading(pip.ghost ? nil : pip.headingDeg)
-            return "\(pip.id)|\(pip.emblem)|\(pip.condition)|\(heading)|\(pip.markKind)|\(pip.lead)|\(pip.kid)"
+            return "\(pip.id)|\(pip.emblem)|\(pip.condition)|\(heading)|\(pip.markKind)|\(pip.lead)|\(pip.kid)|\(pip.presence)|\(pip.count)"
         }
         .joined(separator: ";")
     }
