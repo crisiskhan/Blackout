@@ -1,10 +1,10 @@
-"""Packed KHAN EYE ground: OSM houses, trees, signals, lamps, and signs.
+"""Packed KHAN EYE ground: OSM trees, signals, lamps, and signs.
 
 Airplane only. This is build-time Overpass, the same extract the street archive
-already uses. The phone never asks the network. There is no photo mesh: a house
-is the footprint OSM recorded, stood up to a height OSM recorded or a class
-default. A tree is a mapped tree, not a guessed orchard. Empty desert stays
-empty.
+already uses. The phone never asks the network. There is no photo mesh. House
+footprints stay in the archive so a restyle can read them, but the desk does
+not extrude grey masses over the photo — the photo is the building. A tree is
+a mapped tree, not a guessed orchard. Empty desert stays empty.
 """
 
 from __future__ import annotations
@@ -416,48 +416,7 @@ def style_source() -> dict:
 
 def style_layers() -> list[dict]:
     hidden = {"visibility": "none"}
-    building_color = [
-        "match",
-        ["get", "kind"],
-        "tree",
-        TREE_INK,
-        "wood",
-        WOOD_INK,
-        "house",
-        HOUSE_INK,
-        "detached",
-        HOUSE_INK,
-        "apartments",
-        APARTMENT_INK,
-        "residential",
-        APARTMENT_INK,
-        "industrial",
-        INDUSTRIAL_INK,
-        "warehouse",
-        INDUSTRIAL_INK,
-        "retail",
-        RETAIL_INK,
-        "commercial",
-        RETAIL_INK,
-        BLOCK_INK,
-    ]
     return [
-        {
-            "id": KHAN_BUILDINGS_ID,
-            "type": "fill-extrusion",
-            "source": KHAN_SOURCE_ID,
-            "source-layer": KHAN_BUILDING_LAYER,
-            "minzoom": 11,
-            "filter": ["!", ["in", ["get", "kind"], ["literal", ["tree", "wood"]]]],
-            "layout": dict(hidden),
-            "paint": {
-                "fill-extrusion-color": building_color,
-                "fill-extrusion-height": ["to-number", ["get", "height_m"]],
-                "fill-extrusion-base": 0,
-                "fill-extrusion-opacity": 1.0,
-                "fill-extrusion-vertical-gradient": True,
-            },
-        },
         {
             "id": KHAN_TREES_ID,
             "type": "fill-extrusion",

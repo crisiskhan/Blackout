@@ -362,7 +362,7 @@ final class MapLibreMapTests: XCTestCase {
         let khanURL = (sources?["khan"] as? [String: Any])?["url"] as? String ?? ""
         XCTAssertTrue(khanURL.hasPrefix("pmtiles://file://"), khanURL)
         XCTAssertTrue(khanURL.hasSuffix("khan.pmtiles"), khanURL)
-        XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.khanBuildingsLayerID && $0["type"] as? String == "fill-extrusion" })
+        XCTAssertFalse(layers.contains { $0["id"] as? String == PackStyle.khanBuildingsLayerID })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.khanTreesLayerID && $0["type"] as? String == "fill-extrusion" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.khanSignalsLayerID && $0["type"] as? String == "circle" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.khanLampsLayerID && $0["type"] as? String == "circle" })
@@ -376,11 +376,7 @@ final class MapLibreMapTests: XCTestCase {
         let landIndex = layerIDs.firstIndex(of: PackStyle.landFillLayerID)
         let aerialIndex = layerIDs.firstIndex(of: PackStyle.aerialLayerID)
         XCTAssertEqual(aerialIndex, landIndex.map { $0 + 1 })
-        let houses = layers.first { $0["id"] as? String == PackStyle.khanBuildingsLayerID }
-        XCTAssertEqual(houses?["source"] as? String, PackStyle.khanSourceID)
-        XCTAssertEqual(houses?["source-layer"] as? String, PackStyle.khanBuildingSourceLayer)
-        XCTAssertEqual((houses?["layout"] as? [String: Any])?["visibility"] as? String, "none")
-        XCTAssertEqual(houses?["minzoom"] as? Int, 11)
+        XCTAssertNil(layers.first { $0["id"] as? String == PackStyle.khanBuildingsLayerID })
         let trees = layers.first { $0["id"] as? String == PackStyle.khanTreesLayerID }
         XCTAssertEqual(trees?["source-layer"] as? String, PackStyle.khanBuildingSourceLayer)
         XCTAssertEqual(trees?["minzoom"] as? Int, 11)

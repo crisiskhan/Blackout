@@ -3295,7 +3295,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("groundWorkedFillLayerID", swift)
         self.assertIn("groundWorkedLineLayerID", swift)
         self.assertNotIn("edible", swift.lower())
-        self.assertIn("resolverVersion = 14", swift)
+        self.assertIn("resolverVersion = 15", swift)
 
     def test_a_hold_asks_the_overlay_source_and_the_glass_holds_real_sheets(self):
         """Faint fill and walking-zoom are for the eye. The hold still has to
