@@ -878,6 +878,19 @@ final class AppRuntime {
                 < MeshPresence.meters(card.lat, card.lon, $1.lat, $1.lon)
         }), MeshPresence.meters(card.lat, card.lon, next.lat, next.lon) <= MeshPresence.houseMeters {
             heldNear = hold(from: next)
+            return
+        }
+        if !card.last || !card.signal.isEmpty {
+            heldNear = NearHold(
+                id: card.id,
+                lat: card.lat,
+                lon: card.lon,
+                count: card.count,
+                kinds: card.kinds,
+                placed: card.placed,
+                last: true,
+                signal: ""
+            )
         }
     }
 

@@ -1633,20 +1633,6 @@ public struct OfflineMapView: UIViewRepresentable {
                 }
             }
 
-            let casing: MLNLineStyleLayer
-            if let existing = style.layer(withIdentifier: RouteLine.casingLayerID) as? MLNLineStyleLayer {
-                casing = existing
-            } else {
-                let layer = MLNLineStyleLayer(identifier: RouteLine.casingLayerID, source: source)
-                if let fill = style.layer(withIdentifier: RouteLine.layerID) {
-                    style.insertLayer(layer, below: fill)
-                } else {
-                    style.addLayer(layer)
-                }
-                casing = layer
-            }
-            stroke(casing, color: casingInk, width: RouteLine.casingWidth, dashed: false)
-
             let fill: MLNLineStyleLayer
             if let existing = style.layer(withIdentifier: RouteLine.layerID) as? MLNLineStyleLayer {
                 fill = existing
@@ -1656,6 +1642,20 @@ public struct OfflineMapView: UIViewRepresentable {
                 fill = layer
             }
             stroke(fill, color: silver, width: RouteLine.fillWidth, dashed: false)
+
+            let casing: MLNLineStyleLayer
+            if let existing = style.layer(withIdentifier: RouteLine.casingLayerID) as? MLNLineStyleLayer {
+                casing = existing
+            } else {
+                let layer = MLNLineStyleLayer(identifier: RouteLine.casingLayerID, source: source)
+                if let fill = style.layer(withIdentifier: RouteLine.layerID) {
+                    style.insertLayer(layer, below: fill)
+                } else {
+                    insertUnderMarks(layer, on: style)
+                }
+                casing = layer
+            }
+            stroke(casing, color: casingInk, width: RouteLine.casingWidth, dashed: false)
 
             let core: MLNLineStyleLayer
             if let existing = style.layer(withIdentifier: RouteLine.coreLayerID) as? MLNLineStyleLayer {

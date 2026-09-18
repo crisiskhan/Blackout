@@ -506,6 +506,20 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertIn("applyMapKeepAwake", app)
         self.assertIn("isIdleTimerDisabled", app)
 
+    def test_route_casing_stays_under_dest_pins(self):
+        """First WALK used to addLayer the void halo after dest, so the
+        pin vanished under 12.5pt black casing. Fill first, then casing
+        below fill. Never addLayer casing on top of marks.
+        """
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        paint = offline.split("func paintRoute(")[1].split("func partyShape")[0]
+        self.assertLess(paint.find("let fill:"), paint.find("let casing:"))
+        casing = paint.split("let casing:")[1].split("let core:")[0]
+        self.assertNotIn("style.addLayer(layer)", casing)
+        self.assertIn("insertLayer(layer, below: fill)", casing)
+
 
 class WalkingZoomNameContracts(unittest.TestCase):
     def test_resolved_style_keeps_the_local_glyph_template_literal(self):
