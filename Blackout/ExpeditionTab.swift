@@ -2,6 +2,7 @@ import SwiftUI
 import Vitals
 import TimerSync
 import PaperGen
+import TripBrief
 import Tokens
 import MapLibreMap
 import KitStore
@@ -15,7 +16,7 @@ private struct KitAssignPerson: Identifiable {
 }
 
 private enum ExpeditionPlate: String, CaseIterable {
-    case condition, roster, timers, inventory, trip
+    case condition, roster, timers, inventory, diary
 
     var title: String {
         switch self {
@@ -23,7 +24,7 @@ private enum ExpeditionPlate: String, CaseIterable {
         case .roster: return "ROSTER"
         case .timers: return "TIMERS"
         case .inventory: return "INVENTORY"
-        case .trip: return "TRIP"
+        case .diary: return "DIARY"
         }
     }
 }
@@ -37,6 +38,8 @@ struct ExpeditionTab: View {
     @State private var timerChrome: String?
     @State private var itemDraft = ""
     @State private var kitChrome: String?
+    @State private var diaryDraft = ""
+    @State private var diaryChrome: String?
     @State private var assigningID: String?
     @State private var plate: ExpeditionPlate = .condition
 
@@ -82,8 +85,8 @@ struct ExpeditionTab: View {
             timersPlate
         case .inventory:
             inventoryPlate
-        case .trip:
-            tripPlate
+        case .diary:
+            diaryPlate
         }
     }
 
@@ -254,26 +257,66 @@ struct ExpeditionTab: View {
         }
     }
 
-    private var tripPlate: some View {
+    private var diaryPlate: some View {
         VStack(alignment: .leading, spacing: 16) {
-            sectionLabel("TRIP")
+            sectionLabel("DIARY")
             HUDGlassCard {
                 VStack(alignment: .leading, spacing: 8) {
-                    HUDField("BRIEF",
-                        text: Binding(
-                            get: { runtime.trip.brief },
-                            set: { runtime.trip.brief = $0 }
-                        ),
-                        id: "exped.brief"
+                    HUDField("TODAY",
+                        text: $diaryDraft,
+                        id: "exped.diary",
+                        submit: "LOG",
+                        onSubmit: logToday
                     )
-                    Text("DUE \(dueClock)")
-                        .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(runtime.trip.overdue() ? Theme.accent : Theme.silver)
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        Text(context.date.formatted(date: .abbreviated, time: .shortened))
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Theme.silver)
+                    }
+                    Button("LOG") {
+                        if diaryDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            diaryChrome = "WRITE TODAY"
+                            return
+                        }
+                        logToday()
+                    }
+                    .buttonStyle(HUDActionStyle(filled: false))
+                    if let diaryChrome {
+                        Text(diaryChrome)
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Theme.warn)
+                            .textCase(.uppercase)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
+                    }
+                    sectionLabel("ATTENDANCE")
+                    ForEach(runtime.diaryAttend) { row in
+                        let mark = row.mark == .here ? "HERE" : "SILENT"
+                        Text("\(row.name) · \(mark)")
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(row.mark == .here ? Theme.silver : Theme.silver.opacity(0.55))
+                            .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
+                    }
+                    ForEach(runtime.diary.feed()) { line in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(line.name.uppercased())
+                                .font(.system(size: 13, weight: .heavy))
+                                .foregroundStyle(Theme.silver)
+                            Text(line.at.formatted(date: .abbreviated, time: .shortened))
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(Theme.silver.opacity(0.7))
+                            Text(line.text)
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Theme.silver)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                 }
             }
             sectionLabel("PAPER")
             Button("EXPORT PAPER") {
-                let text = PaperGen.export(trip: runtime.trip, roster: runtime.paperRoster(), packName: runtime.packs?.active?.name ?? "")
+                let text = PaperGen.export(diary: runtime.diary, roster: runtime.paperRoster(), packName: runtime.packs?.active?.name ?? "")
                 paperText = text
                 runtime.box.log("paper", text)
             }
@@ -560,14 +603,20 @@ struct ExpeditionTab: View {
         itemDraft = ""
     }
 
+    private func logToday() {
+        if runtime.logDiary(diaryDraft) {
+            diaryChrome = runtime.mesh.chromeNet == "NO PEERS · LOGGED" ? "NO PEERS · LOGGED" : nil
+            diaryDraft = ""
+            runtime.hudKeys.close()
+        } else {
+            diaryChrome = "WRITE TODAY"
+        }
+    }
+
     private func sectionLabel(_ title: String) -> some View {
         Text(title)
             .font(.system(size: 11, weight: .heavy))
             .foregroundStyle(Theme.silver.opacity(0.5))
-    }
-
-    private var dueClock: String {
-        runtime.trip.dueBack.formatted(date: .abbreviated, time: .shortened)
     }
 
     private func slider(_ title: String, _ value: Binding<Double>) -> some View {

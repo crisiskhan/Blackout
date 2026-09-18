@@ -12,7 +12,7 @@ Score every row `[ ] PASS` / FAIL / N/A. Write the exact chrome string or behavi
 
 ## HUD KEYBOARD
 
-- [ ] PASS / FAIL / N/A — Tap SEARCH, NOTE, NAME, TIME, ITEM, BRIEF, or PARTY CODE. The HUD keyboard rises on glass, 44pt keys. SPACE, BACK, SHIFT, 123 / ABC. Digit pad is 3-wide (`-` `0` `.` and comma) so `31.76190, -106.49000` is one line. Red submit plate (`DONE` / `SEARCH` / `SEND`). NAME / ITEM / PARTY CODE stay caps. SEARCH / NOTE / BRIEF mix case. TIME opens the digit pad. SAY is still a chip. Tap the dim field, submit, change tab, or DISARM to close. No iPhone keyboard.
+- [ ] PASS / FAIL / N/A — Tap SEARCH, NOTE, NAME, TIME, ITEM, TODAY, or PARTY CODE. The HUD keyboard rises on glass, 44pt keys. SPACE, BACK, SHIFT, 123 / ABC. Digit pad is 3-wide (`-` `0` `.` and comma) so `31.76190, -106.49000` is one line. Red submit plate (`DONE` / `SEARCH` / `SEND` / `LOG`). NAME / ITEM / PARTY CODE stay caps. SEARCH / NOTE / TODAY mix case. TIME opens the digit pad. SAY is still a chip. Tap the dim field, submit, change tab, or DISARM to close. No iPhone keyboard.
 
 ## MAP STILL — tip 60 score bar (five only)
 
@@ -86,7 +86,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — No APPLY RED BAND under CONDITION. HUD RED plate (`RED`, not a system title) still shows on BLACK CONDITION / SOS / mesh RED. CANCEL RED clears it. Solo send chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — NAME + TIME + SET puts a named timer on the whole group. TIME sits under the name bar. TIME is minutes (`1`, `30`, `120`) or hours (`2H`). Presets are `30 MIN` / `1 HR` / `2 HRS` (not 1 MIN / 5 MIN / 2H). Empty or unparseable TIME + SET chromes `SET TIME`, not a dead tap. After the duration chrome includes `OVERDUE` plus the task. DONE is one row per timer id. That person's profile glass shows the same timer and remaining bar. Solo set/done chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — Roster is the live party. YOU is the first row (NAME, FACE, ROLE, STATUS) even solo. Mesh peers are more rows. One person is one row. Roles are LEAD / MEDIC / NAV / TAIL / GUEST. Unique seats are one each; guests can repeat. JOIN NAV seats YOU as NAV. A second JOIN NAV is `NAV · SEATED`, not a dead tap. Roster QR is visible. JOIN LOCAL NET is not required to see the QR.
-- [ ] PASS / FAIL / N/A — INVENTORY names and counts. Default inventory is Water at 0. Empty ITEM + ADD chromes `NAME ITEM`. `+1` / `−1` stay in sync on mesh when using equipment. Hold an item to ASSIGN it to a party member (`NONE` clears it). Assigned gear shows in INVENTORY on that person's profile glass, with the same `+1` / `−1`. Plates still toggle OK / FAILED and show the hazard. TRIP brief is on the glass. EXPORT PAPER shows the paper on the glass (still logs).
+- [ ] PASS / FAIL / N/A — INVENTORY names and counts. Default inventory is Water at 0. Empty ITEM + ADD chromes `NAME ITEM`. `+1` / `−1` stay in sync on mesh when using equipment. Hold an item to ASSIGN it to a party member (`NONE` clears it). Assigned gear shows in INVENTORY on that person's profile glass, with the same `+1` / `−1`. Plates still toggle OK / FAILED and show the hazard. DIARY is the party day feed. TODAY + LOG stamps the current time. Empty LOG chromes `WRITE TODAY`. Same joined group only — a SCAN hear cannot read it. Lines populate newest first. ATTENDANCE is `HERE` or `SILENT` for the local day. EXPORT PAPER shows the paper on the glass (still logs).
 - [ ] PASS / FAIL / N/A — No SOS disk on EXPEDITION.
 
 ## INSTRUMENTS

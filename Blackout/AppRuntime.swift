@@ -39,7 +39,7 @@ final class AppRuntime {
     var timerSeq = 0
     var kitSeq = 0
     var roster = PartyRoster.create(lead: "Lead")
-    var trip = TripFactory.make(brief: "", hours: 2)
+    var diary = DiaryLog()
     var kit = KitBag(items: [
         GearItem(id: "water", name: "Water", working: true, count: 0),
     ])
@@ -189,6 +189,7 @@ final class AppRuntime {
         youEmblem = PersonEmblem.load()
         youName = MeshPOS.nameToken(UserDefaults.standard.string(forKey: "you.name") ?? "")
         youStatus = PartyStatus.parse(UserDefaults.standard.string(forKey: "you.status"))
+        loadDiary()
         godsEye = EyeDesk.load()
         eyeLayers = EyeDesk.loadLayers()
         eyePalette = EyeDesk.loadPalette()
@@ -317,6 +318,40 @@ final class AppRuntime {
 
     func persistPartyCode() {
         UserDefaults.standard.set(roster.code, forKey: "party.code")
+        loadDiary()
+    }
+
+    var diaryAttend: [DiaryAttend] {
+        diary.attend(roster: liveRoster.map { ($0.id, $0.name) })
+    }
+
+    /// Log a day line. Empty LOG chromes `WRITE TODAY` and returns false.
+    @discardableResult
+    func logDiary(_ raw: String, now: Date = Date()) -> Bool {
+        let text = DiaryLine.clean(raw)
+        guard !text.isEmpty else { return false }
+        let line = DiaryLine(from: mesh.localID, name: displayYouName, text: text, at: now)
+        diary.upsert(line)
+        persistDiary()
+        mesh.sendDiary(from: line.from, name: line.name, text: line.text, at: line.at, id: line.id)
+        return true
+    }
+
+    func persistDiary() {
+        let code = roster.code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        guard !code.isEmpty, let data = try? JSONEncoder().encode(diary) else { return }
+        UserDefaults.standard.set(data, forKey: "diary.v1.\(code)")
+    }
+
+    private func loadDiary() {
+        let code = roster.code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        if let data = UserDefaults.standard.data(forKey: "diary.v1.\(code)"),
+           let log = try? JSONDecoder().decode(DiaryLog.self, from: data)
+        {
+            diary = log
+        } else {
+            diary = DiaryLog()
+        }
     }
 
     var displayYouName: String {
@@ -1906,6 +1941,21 @@ final class AppRuntime {
                 } else if !note.isEmpty {
                     raiseIncoming(from: env, kind: .message)
                 }
+            }
+        case "diary":
+            if let raw = String(data: env.body, encoding: .utf8),
+               let parsed = MeshDiaryBody.parse(raw)
+            {
+                diary.upsert(
+                    DiaryLine(
+                        id: parsed.id,
+                        from: parsed.from,
+                        name: parsed.name,
+                        text: parsed.text,
+                        at: parsed.at
+                    )
+                )
+                persistDiary()
             }
         default:
             break

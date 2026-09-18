@@ -1746,9 +1746,10 @@ class PartyPlaceMarkTests(unittest.TestCase):
         exped = read("Blackout", "ExpeditionTab.swift")
         self.assertIn('sectionLabel("INVENTORY")', exped)
         self.assertNotIn('sectionLabel("KIT")', exped)
-        self.assertIn('sectionLabel("TRIP")', exped)
+        self.assertIn('sectionLabel("DIARY")', exped)
+        self.assertNotIn('sectionLabel("TRIP")', exped)
         self.assertIn("runtime.kit", exped)
-        self.assertIn("runtime.trip.brief", exped)
+        self.assertIn("runtime.diary", exped)
         self.assertIn('Button("EXPORT PAPER")', exped)
         self.assertIn("paperText", exped)
         self.assertIn("PaperGen.export", exped)
@@ -1769,7 +1770,7 @@ class PartyPlaceMarkTests(unittest.TestCase):
         self.assertIn('HUDField("ITEM"', exped)
         self.assertNotIn("TextField(", exped)
         self.assertIn('Button("ADD")', exped)
-        inv = exped.split('sectionLabel("INVENTORY")')[1].split('sectionLabel("TRIP")')[0]
+        inv = exped.split('sectionLabel("INVENTORY")')[1].split('sectionLabel("DIARY")')[0]
         self.assertIn("NAME ITEM", inv)
         self.assertIn("kitChrome", inv)
         item = inv.split('HUDField("ITEM"')[1].split(")")[0]
@@ -4599,7 +4600,7 @@ class HUDKeyboardTests(unittest.TestCase):
         self.assertIn('HUDField("TIME"', exped)
         self.assertIn("digits: true", exped)
         self.assertIn('HUDField("ITEM"', exped)
-        self.assertIn('HUDField("BRIEF"', exped)
+        self.assertIn('HUDField("TODAY"', exped)
         comms = read("Blackout", "CommsTab.swift")
         self.assertIn('HUDField("NOTE"', comms)
         self.assertIn('submit: "SEND"', comms)
