@@ -191,6 +191,7 @@ class StyleAndResolverTests(unittest.TestCase):
         self.assertIn('khanFurnitureSourceLayer = "furniture"', swift)
         eye = offline.split("public static func applyEyeLayers")[1].split("public static func applyEyePalette")[0]
         self.assertIn('id.hasPrefix("khan-")', eye)
+        self.assertIn("!coversPhoto(id)", eye)
         self.assertIn("layer.isVisible = true", eye)
         self.assertIn("layer.isVisible = aerial", eye)
         self.assertIn("!godsEye || EyeDesk.layerOn(.aerial, in: layers)", eye)
@@ -370,6 +371,18 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         covers = eye.split("func coversPhoto")[1].split("func holdsKhanDetail")[0]
         self.assertIn("landFillLayerID", covers)
         self.assertIn("tracks", covers)
+        self.assertIn("khanTreesLayerID", covers)
+        self.assertIn("water-fill", covers)
+        self.assertIn("groundWorkedFillLayerID", covers)
+        self.assertIn("groundWorkedLineLayerID", covers)
+        self.assertIn("!coversPhoto(id)", eye)
+        desk = OFFLINE.read_text().split("func setDeskChrome")[1].split("private func installDeskChromeIfNeeded")[0]
+        self.assertIn("packStamp.isHidden = true", desk)
+        self.assertNotIn("packStamp.isHidden = !godsEye", desk)
+        layout = OFFLINE.read_text().split("private func layoutDeskChrome")[1].split("final class HiddenUserLocationView")[0]
+        self.assertIn("creditBottomInset", layout)
+        self.assertNotIn("maxY - 96", layout)
+        self.assertIn("insertUnderMarks", OFFLINE.read_text())
 
     def test_planted_marks_are_pins_not_you_roses(self):
         offline = OFFLINE.read_text()
@@ -511,6 +524,8 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         )[0]
         covers = eye.split("func coversPhoto")[1].split("func holdsKhanDetail")[0]
         self.assertIn("landFillLayerID", covers)
+        self.assertIn("khanTreesLayerID", covers)
+        self.assertIn("water-fill", covers)
         self.assertNotIn("aerial ? 0", eye)
         for name, pt, z in (
             ("Vinton", vinton, 16),

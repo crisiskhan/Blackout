@@ -1245,6 +1245,7 @@ final class MapLibreMapTests: XCTestCase {
         EyeDesk.saveScenes(EyeDesk.upsertScene(scene, into: []), defaults: suite)
         XCTAssertEqual(EyeDesk.loadScenes(defaults: suite).first?.name, "CAMP")
         XCTAssertEqual(EyeDesk.khanShadeOpacity, 0.94, accuracy: 0.001)
+        XCTAssertEqual(EyeDesk.creditBottomInset, 156, accuracy: 0.001)
         XCTAssertEqual(EyeDesk.khanLandOpacity, 0.14, accuracy: 0.001)
         XCTAssertEqual(EyeDesk.khanShadeContrast, 0.48, accuracy: 0.001)
         XCTAssertEqual(EyeDesk.khanContourOpacity, 0.9, accuracy: 0.001)

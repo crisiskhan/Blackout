@@ -1092,7 +1092,7 @@ public struct OfflineMapView: UIViewRepresentable {
                     forConstantValue: UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.72)
                 )
                 layer.lineWidth = NSExpression(forConstantValue: 2)
-                style.addLayer(layer)
+                insertUnderMarks(layer, on: style)
             }
 
             var ringFeatures: [[String: Any]] = []
@@ -1129,7 +1129,7 @@ public struct OfflineMapView: UIViewRepresentable {
                     forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 0.85)
                 )
                 layer.lineWidth = NSExpression(forConstantValue: 2)
-                style.addLayer(layer)
+                insertUnderMarks(layer, on: style)
             }
         }
 
@@ -1587,6 +1587,25 @@ public struct OfflineMapView: UIViewRepresentable {
             }
         }
 
+        /// Live lines stay under YOU, DEST, HOLD, party, and CCTV so a walk
+        /// or a tail cannot cover the pin it is walking to.
+        func insertUnderMarks(_ layer: MLNStyleLayer, on style: MLNStyle) {
+            let marks = [
+                DestinationPin.ringLayerID,
+                HoldPin.ringLayerID,
+                CctvMarks.layerID,
+                PartyPips.markLayerID,
+                UserPuck.markLayerID,
+            ]
+            for id in marks {
+                if let existing = style.layer(withIdentifier: id) {
+                    style.insertLayer(layer, below: existing)
+                    return
+                }
+            }
+            style.addLayer(layer)
+        }
+
         /// Void casing, silver fill, scarce accent core. Streets at walking zoom
         /// are silver with a void or red casing; a single silver stroke of the
         /// same width disappears into them. WALK dashes only the core so the
@@ -1633,7 +1652,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 fill = existing
             } else {
                 let layer = MLNLineStyleLayer(identifier: RouteLine.layerID, source: source)
-                style.addLayer(layer)
+                insertUnderMarks(layer, on: style)
                 fill = layer
             }
             stroke(fill, color: silver, width: RouteLine.fillWidth, dashed: false)
@@ -1643,7 +1662,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 core = existing
             } else {
                 let layer = MLNLineStyleLayer(identifier: RouteLine.coreLayerID, source: source)
-                style.addLayer(layer)
+                insertUnderMarks(layer, on: style)
                 core = layer
             }
             stroke(core, color: accent, width: RouteLine.coreWidth, dashed: true)
@@ -1821,7 +1840,7 @@ final class FillingMapView: MLNMapView {
     func setDeskChrome(godsEye: Bool, offAerial: Bool) {
         installDeskChromeIfNeeded()
         osmCredit.isHidden = !godsEye
-        packStamp.isHidden = !godsEye
+        packStamp.isHidden = true
         aerialStamp.isHidden = !(godsEye && offAerial)
         layoutDeskChrome()
     }
@@ -1850,10 +1869,10 @@ final class FillingMapView: MLNMapView {
         osmCredit.sizeToFit()
         packStamp.sizeToFit()
         aerialStamp.sizeToFit()
-        let left = bounds.minX + 12
-        let bottom = bounds.maxY - 96
-        osmCredit.frame.origin = CGPoint(x: left, y: bottom - osmCredit.bounds.height)
-        packStamp.frame.origin = CGPoint(x: left + osmCredit.bounds.width + 8, y: osmCredit.frame.minY)
+        let inset = CGFloat(EyeDesk.creditBottomInset)
+        let x = max(12, bounds.maxX - 12 - osmCredit.bounds.width)
+        let y = bounds.maxY - inset - osmCredit.bounds.height
+        osmCredit.frame.origin = CGPoint(x: x, y: y)
         aerialStamp.frame.origin = CGPoint(
             x: bounds.midX - aerialStamp.bounds.width / 2,
             y: bounds.minY + 88
@@ -2353,7 +2372,7 @@ extension PackStyle {
             if godsEye, holdsKhanDetail(id) {
                 layer.minimumZoomLevel = Float(PackCamera.minZoom)
             }
-            if id.hasPrefix("khan-") {
+            if id.hasPrefix("khan-"), !coversPhoto(id) {
                 layer.isVisible = true
             }
             if let symbol = layer as? MLNSymbolStyleLayer,
@@ -2365,10 +2384,14 @@ extension PackStyle {
         }
     }
 
-    /// Schematic fills and casings that sit on the photo. Hide them on walking
-    /// MAP and KHAN EYE while packed NAIP is the ground so yards read. Labels stay.
+    /// Schematic fills, casings, and 3D masses that sit on the photo. Hide
+    /// them on walking MAP and KHAN EYE while packed NAIP is the ground so
+    /// yards and roofs read. Labels, water dots, and street furniture stay.
     private static func coversPhoto(_ id: String) -> Bool {
         if id == landFillLayerID { return true }
+        if id == khanTreesLayerID || id == khanBuildingsLayerID { return true }
+        if id == "water-fill" { return true }
+        if id == groundWorkedFillLayerID || id == groundWorkedLineLayerID { return true }
         if id == "tracks" || id == "wild-roads" || id == "contours" { return true }
         if id == "public-land-fill" || id == "public-land-line" || id == "flood-fill" {
             return true
