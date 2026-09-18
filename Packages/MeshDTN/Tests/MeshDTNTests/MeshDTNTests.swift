@@ -56,6 +56,21 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertTrue(net.presenceMarks(you: (31.76190, -106.49000)).isEmpty)
     }
 
+    func testScanDoesNotLeaveALiveParty() {
+        let net = MeshNet(box: EventLog())
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.startLocal()
+        radio.appearPeer("peer-1")
+        XCTAssertTrue(net.joined)
+        XCTAssertEqual(net.chromeNet, "NET · BLE")
+        net.startScan()
+        XCTAssertTrue(net.placing)
+        XCTAssertTrue(net.joined)
+        XCTAssertEqual(net.nearby, ["peer-1"])
+        XCTAssertEqual(net.chromeNet, "NET · BLE")
+    }
+
     func testJoinPlacesWithoutAParty() {
         let net = MeshNet(box: EventLog())
         let radio = LoopbackRadio(path: .ble)

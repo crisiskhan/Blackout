@@ -481,7 +481,7 @@ public final class MeshNet: @unchecked Sendable {
 
     public func startScan() {
         placing = true
-        if listening, !joined {
+        if listening {
             refreshChrome()
             return
         }

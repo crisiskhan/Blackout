@@ -400,6 +400,7 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         self.assertIn("testHearIsNotAPeer", tests)
         self.assertIn("testScanPlacesNoFixHearAroundYou", tests)
         self.assertIn("testJoinPlacesWithoutAParty", tests)
+        self.assertIn("testScanDoesNotLeaveALiveParty", tests)
         self.assertIn("testReachMetersAndSpokeAreStable", tests)
         self.assertIn("testHopCarriesStore", tests)
         self.assertIn("static func presence(", art)
