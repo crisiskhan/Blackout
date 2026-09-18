@@ -1249,7 +1249,7 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(EyeDesk.khanLandOpacity, 0.14, accuracy: 0.001)
         XCTAssertEqual(EyeDesk.khanShadeContrast, 0.48, accuracy: 0.001)
         XCTAssertEqual(EyeDesk.khanContourOpacity, 0.9, accuracy: 0.001)
-        XCTAssertEqual(PackStyle.resolverVersion, 14)
+        XCTAssertEqual(PackStyle.resolverVersion, 15)
         XCTAssertEqual(EyeDesk.soloMeters, 160)
         XCTAssertEqual(EyeDesk.sceneNames, ["CAMP", "RIDGE", "TRUCK"])
         XCTAssertEqual(EyeDesk.liveDeskLayers, [.aerial, .water, .party, .marks, .tails])

@@ -263,15 +263,18 @@ class PackedArchiveTests(unittest.TestCase):
             self.assertEqual(style["sources"]["aerial"]["url"], "pmtiles://aerial.pmtiles")
             self.assertEqual(style["sources"]["aerial"]["type"], "raster")
             ids = [layer["id"] for layer in style["layers"]]
-            self.assertIn(khan.KHAN_BUILDINGS_ID, ids)
+            self.assertNotIn(khan.KHAN_BUILDINGS_ID, ids)
             self.assertIn("aerial", ids)
+            self.assertIn(khan.KHAN_TREES_ID, ids)
             self.assertEqual(ids.index("aerial"), ids.index("land-fill") + 1)
-            self.assertLess(ids.index("aerial"), ids.index(khan.KHAN_BUILDINGS_ID))
+            self.assertLess(ids.index("aerial"), ids.index(khan.KHAN_TREES_ID))
             self.assertEqual(style["light"]["intensity"], 0.7)
             paints = {item["id"]: item for item in style["layers"]}
             self.assertEqual(paints[khan.KHAN_TREES_ID]["minzoom"], 11)
             self.assertEqual(paints[khan.KHAN_SIGNS_ID]["minzoom"], 12)
-            self.assertIn(khan.HOUSE_INK, json.dumps(paints[khan.KHAN_BUILDINGS_ID]))
+            for item in style["layers"]:
+                if item.get("type") == "fill-extrusion":
+                    self.assertEqual(item.get("id"), khan.KHAN_TREES_ID, pid)
 
     def test_downtown_el_paso_has_houses(self):
         archive = PACK_ROOT / "tx-west" / "khan.pmtiles"
