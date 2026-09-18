@@ -596,6 +596,40 @@ class MeshPresenceBatteryTests(unittest.TestCase):
         hear_init = live.split("onHear?(")[1].split("if partyHit")[0]
         self.assertIn("name:", hear_init)
         self.assertIn("manufacturer:", hear_init)
+        # 35362150844: Swift 6 requires MeshHear.init labels in declaration order.
+        hear_decl = presence.split("public struct MeshHear")[1].split("public enum Kind")[0]
+        self.assertLess(hear_decl.find("txPower: Int?"), hear_decl.find("connectable: Bool?"))
+        for rel in (
+            ("Packages", "MeshDTN", "Sources", "MeshDTN", "LiveMeshRadio.swift"),
+            ("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift"),
+            ("Packages", "MeshDTN", "Tests", "MeshDTNTests", "MeshDTNTests.swift"),
+        ):
+            blob = read(*rel)
+            start = 0
+            while True:
+                at = blob.find("MeshHear(", start)
+                if at < 0:
+                    break
+                depth = 0
+                end = at
+                for i, ch in enumerate(blob[at:]):
+                    if ch == "(":
+                        depth += 1
+                    elif ch == ")":
+                        depth -= 1
+                        if depth == 0:
+                            end = at + i
+                            break
+                call = blob[at:end]
+                tx = call.find("txPower:")
+                link = call.find("connectable:")
+                if tx >= 0 and link >= 0:
+                    self.assertLess(
+                        tx,
+                        link,
+                        f"{'/'.join(rel)} MeshHear call has connectable before txPower",
+                    )
+                start = end + 1
         self.assertIn("radios: mark.radios", app)
         self.assertIn("chromeNear", comms)
         self.assertIn("LISTEN", comms)
