@@ -1054,8 +1054,8 @@ public enum FieldAskWalk {
         case .infant:
             body = [
                 step(
-                    "A baby. Face down on your forearm, head lower than the chest. Five hard back blows between the shoulders. Then look in the mouth. Only sweep what you can see.",
-                    "Un bebé. Boca abajo en tu antebrazo, cabeza más baja que el pecho. Cinco golpes fuertes entre los hombros. Luego mira la boca. Solo saca lo que ves.",
+                    "A baby. Face down on your forearm, head lower than the chest. Five hard back blows between the shoulders. Then look in the mouth. Only sweep what you can see. Not the belly.",
+                    "Un bebé. Boca abajo en tu antebrazo, cabeza más baja que el pecho. Cinco golpes fuertes entre los hombros. Luego mira la boca. Solo saca lo que ves. No el vientre.",
                     "Say: I have you. Support the head. Hits go to the back, not the neck.",
                     "Di: te tengo. Sostén la cabeza. Los golpes van a la espalda, no al cuello.",
                     "A baby airway is short. Belly thrusts crush it.",
