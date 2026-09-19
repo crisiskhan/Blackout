@@ -69,6 +69,7 @@ public enum SearchHUDWord: Sendable {
     case coordinates
     case mark
     case address
+    case pack
 
     public var title: String {
         switch self {
@@ -88,6 +89,7 @@ public enum SearchHUDWord: Sendable {
         case .coordinates: return "COORDINATES"
         case .mark: return "MARK"
         case .address: return "ADDRESS"
+        case .pack: return "PACK"
         }
     }
 
@@ -125,6 +127,8 @@ public enum SearchHUDWord: Sendable {
             return .mark
         case "address":
             return .address
+        case "pack":
+            return .pack
         default:
             return .place
         }

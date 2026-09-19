@@ -107,6 +107,49 @@ final class PackIOTests: XCTestCase {
         XCTAssertEqual(store.homeCoordinate()?.lon, -106.46)
     }
 
+    func testWalkablePackFindsTheMetroUnderAnOverviewTap() throws {
+        let states = PackManifest(
+            id: "states",
+            name: "STATES",
+            state: "TX",
+            bytes: 1,
+            banners: [],
+            center: .init(lat: 31.4, lon: -101.3),
+            bbox: .init(south: 25.5, west: -109.45, north: 37.35, east: -93.15),
+            walkable: false,
+            overview: true
+        )
+        let west = PackManifest(
+            id: "tx-west",
+            name: "TX WEST",
+            state: "TX",
+            bytes: 2,
+            banners: [],
+            center: .init(lat: 32.05, lon: -106.475),
+            bbox: .init(south: 30.95, west: -107.6, north: 33.15, east: -105.35)
+        )
+        let east = PackManifest(
+            id: "tx-east",
+            name: "TX EAST",
+            state: "TX",
+            bytes: 3,
+            banners: [],
+            center: .init(lat: 30.275, lon: -97.575),
+            bbox: .init(south: 30.05, west: -97.95, north: 30.5, east: -97.2)
+        )
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent("packio-states-\(UUID().uuidString)")
+        try fm.createDirectory(at: root, withIntermediateDirectories: true)
+        try JSONEncoder().encode(PackCatalog(states: ["TX", "NM"], packs: [west, east, states]))
+            .write(to: root.appendingPathComponent("catalog.json"))
+        let store = try PackStore(root: root, box: EventLog())
+        XCTAssertEqual(store.walkablePack(at: 31.76, lon: -106.49)?.id, "tx-west")
+        XCTAssertEqual(store.walkablePack(at: 30.27, lon: -97.74)?.id, "tx-east")
+        XCTAssertNil(store.walkablePack(at: 29.76, lon: -95.37))
+        XCTAssertTrue(store.catalog.packs.contains(where: { $0.overview && $0.id == "states" }))
+        XCTAssertTrue(states.bbox.contains(lat: 35.08, lon: -106.65))
+    }
+
     func testGraphProbeRejectsEmptyAndAcceptsOneEdgeBytes() {
         XCTAssertFalse(GraphProbe.isUsable(byteCount: 0))
         XCTAssertFalse(GraphProbe.isUsable(byteCount: 13))

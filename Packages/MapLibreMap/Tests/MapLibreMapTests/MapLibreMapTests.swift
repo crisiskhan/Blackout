@@ -1053,6 +1053,9 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(PackCamera.godsEyeMaxZoom, 17.5)
         XCTAssertEqual(PackCamera.holdMaxZoom(godsEye: false), PackCamera.maxZoom)
         XCTAssertEqual(PackCamera.holdMaxZoom(godsEye: true), PackCamera.godsEyeMaxZoom)
+        XCTAssertEqual(PackCamera.holdMinZoom(godsEye: false, overview: true), PackCamera.overviewMinZoom)
+        XCTAssertEqual(PackCamera.holdMaxZoom(godsEye: true, overview: true), PackCamera.overviewMaxZoom)
+        XCTAssertLessThan(PackCamera.overviewMinZoom, PackCamera.minZoom)
         XCTAssertLessThan(PackCamera.minZoom, PackCamera.streetNameMinZoom)
         XCTAssertLessThanOrEqual(PackCamera.openZoom, PackCamera.maxZoom)
     }
@@ -1082,6 +1085,8 @@ final class MapLibreMapTests: XCTestCase {
     func testPackCameraHoldsGodsEyeOverDestAndYou() {
         XCTAssertTrue(PackCamera.shouldHoldPack(godsEye: true))
         XCTAssertFalse(PackCamera.shouldHoldPack(godsEye: false))
+        XCTAssertTrue(PackCamera.shouldHoldPack(godsEye: false, overview: true))
+        XCTAssertFalse(PackCamera.shouldLeavePack(wasHolding: true, godsEye: false, overview: true))
         XCTAssertTrue(PackCamera.shouldLeavePack(wasHolding: true, godsEye: false))
         XCTAssertFalse(PackCamera.shouldLeavePack(wasHolding: true, godsEye: true))
         XCTAssertFalse(PackCamera.shouldLeavePack(wasHolding: false, godsEye: false))
@@ -1157,6 +1162,9 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(PackCamera.godsEyeFlySeconds, 2)
         XCTAssertEqual(PackCamera.holdPitch(godsEye: true), 45)
         XCTAssertEqual(PackCamera.holdPitch(godsEye: false), 55)
+        XCTAssertEqual(PackCamera.holdPitch(godsEye: true, overview: true), 0)
+        XCTAssertEqual(PackCamera.overviewPitch, 0)
+        XCTAssertFalse(PackCamera.allowsTilt(godsEye: true, overview: true))
         XCTAssertEqual(PackCamera.walkPitch, 55)
         XCTAssertEqual(
             PackCamera.followHeading(lockOn: true, godsEye: false, youHeading: 312),

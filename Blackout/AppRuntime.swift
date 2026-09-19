@@ -2056,11 +2056,19 @@ final class AppRuntime {
         return dest == mesh.localID
     }
 
+    func enterOverviewPack(lat: Double, lon: Double) -> Bool {
+        guard packs?.active?.overview == true else { return false }
+        guard let pack = packs?.walkablePack(at: lat, lon: lon) else { return false }
+        switchPack(pack.id)
+        return true
+    }
+
     func switchPack(_ id: String) {
         try? packs?.switchTo(id)
         UserDefaults.standard.set(id, forKey: "pack.id")
         routeTarget = nil
         clearRoute(plan: "", chrome: "")
+        fitPackToken += 1
         relabelMarksForActivePack()
         graphCache = graphsByPack[id]
         graphPackID = id

@@ -115,7 +115,7 @@ struct InstrumentsView: View {
                     runtime.switchPack(p.id)
                 } label: {
                     HStack {
-                        Text("\(p.name) · \(max(p.bytes / 1_000_000, 1)) MB")
+                        Text("\(p.name) · \(p.bytes >= 1_000_000 ? "\(p.bytes / 1_000_000) MB" : "<1 MB")")
                         Spacer()
                         if runtime.packs?.active?.id == p.id {
                             Text("PACK")

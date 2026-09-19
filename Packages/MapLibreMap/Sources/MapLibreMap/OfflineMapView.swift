@@ -53,6 +53,8 @@ public struct OfflineMapView: UIViewRepresentable {
     public var lockOn: Bool
     /// KHAN EYE holds the pack in frame. Exclusive with LOCK-ON.
     public var godsEye: Bool
+    /// STATES chart. Flat fit of both outlines; no walking photo floor.
+    public var overview: Bool
     /// WALK dashes the accent core. DRIVE keeps it solid. Chrome already
     /// says which; the line has to match.
     public var travelMode: TravelMode
@@ -99,6 +101,7 @@ public struct OfflineMapView: UIViewRepresentable {
         onPulse: (() -> Void)? = nil,
             lockOn: Bool = false,
             godsEye: Bool = false,
+            overview: Bool = false,
             travelMode: TravelMode = .walk,
         sun: Bool = false,
         eyeLayers: [EyeDesk.Layer] = EyeDesk.Layer.allCases,
@@ -141,6 +144,7 @@ public struct OfflineMapView: UIViewRepresentable {
         self.onPulse = onPulse
         self.lockOn = lockOn
         self.godsEye = godsEye
+        self.overview = overview
         self.travelMode = travelMode
         self.sun = sun
         self.eyeLayers = eyeLayers
@@ -176,12 +180,12 @@ public struct OfflineMapView: UIViewRepresentable {
         if CLLocationCoordinate2DIsValid(home) {
             view.setCenter(
                 home,
-                zoomLevel: PackCamera.openZoom,
+                zoomLevel: overview ? PackCamera.overviewMinZoom : PackCamera.openZoom,
                 direction: PackCamera.godsEyeHeading,
                 animated: false
             )
             let cam = view.camera
-            cam.pitch = CGFloat(PackCamera.holdPitch(godsEye: godsEye))
+            cam.pitch = CGFloat(PackCamera.holdPitch(godsEye: godsEye, overview: overview))
             cam.heading = PackCamera.godsEyeHeading
             view.camera = cam
         }
@@ -253,11 +257,11 @@ public struct OfflineMapView: UIViewRepresentable {
         // Packed 3D neighborhood desk: pinch, pan, orbit, and tilt.
         view.allowsRotating = PackCamera.allowsOrbit(godsEye: godsEye)
         view.isScrollEnabled = PackCamera.allowsPan(godsEye: godsEye)
-        view.allowsTilting = PackCamera.allowsTilt(godsEye: godsEye)
+        view.allowsTilting = PackCamera.allowsTilt(godsEye: godsEye, overview: overview)
         view.minimumPitch = CGFloat(PackCamera.holdMinPitch(godsEye: godsEye))
-        view.maximumPitch = CGFloat(PackCamera.holdMaxPitch(godsEye: godsEye))
-        view.minimumZoomLevel = PackCamera.holdMinZoom(godsEye: godsEye)
-        view.maximumZoomLevel = PackCamera.holdMaxZoom(godsEye: godsEye)
+        view.maximumPitch = CGFloat(PackCamera.holdMaxPitch(godsEye: godsEye, overview: overview))
+        view.minimumZoomLevel = PackCamera.holdMinZoom(godsEye: godsEye, overview: overview)
+        view.maximumZoomLevel = PackCamera.holdMaxZoom(godsEye: godsEye, overview: overview)
         view.preferredFramesPerSecond = interactive
             ? MLNMapViewPreferredFramesPerSecond.default
             : MLNMapViewPreferredFramesPerSecond(rawValue: 1)
@@ -295,6 +299,7 @@ public struct OfflineMapView: UIViewRepresentable {
             homeLon: centerLon,
             lockOn: lockOn,
             godsEye: godsEye,
+            overview: overview,
             travelMode: travelMode,
             sun: sun,
             eyeLayers: eyeLayers,
@@ -329,6 +334,7 @@ public struct OfflineMapView: UIViewRepresentable {
             var homeLon: Double
             var lockOn: Bool
             var godsEye: Bool
+            var overview: Bool
             var travelMode: TravelMode
             var sun: Bool
             var eyeLayers: [EyeDesk.Layer]
@@ -1155,7 +1161,12 @@ public struct OfflineMapView: UIViewRepresentable {
         func applyCamera(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
             guard view.bounds.width > 1, view.bounds.height > 1 else { return }
             defer {
-                if !spec.godsEye {
+                if spec.overview {
+                    let cam = view.camera
+                    cam.pitch = CGFloat(PackCamera.overviewPitch)
+                    cam.heading = PackCamera.godsEyeHeading
+                    view.camera = cam
+                } else if !spec.godsEye {
                     let cam = view.camera
                     cam.pitch = CGFloat(PackCamera.holdPitch(godsEye: false))
                     if let heading = PackCamera.followHeading(
@@ -1176,7 +1187,7 @@ public struct OfflineMapView: UIViewRepresentable {
             storedShowYou = spec.showYou
             if spec.fitToken != fittedFitToken {
                 fittedFitToken = spec.fitToken
-                if PackCamera.shouldHoldPack(godsEye: spec.godsEye) {
+                if PackCamera.shouldHoldPack(godsEye: spec.godsEye, overview: spec.overview) {
                     fitPack(spec, on: view, fly: true)
                     fittedPack = pack
                     fittedSize = size
@@ -1186,7 +1197,7 @@ public struct OfflineMapView: UIViewRepresentable {
                     return
                 }
             }
-            if PackCamera.shouldHoldPack(godsEye: spec.godsEye) {
+            if PackCamera.shouldHoldPack(godsEye: spec.godsEye, overview: spec.overview) {
                 storedGodsEye = true
                 storedLockOn = spec.lockOn
                 followedPuck = nil
@@ -1208,7 +1219,11 @@ public struct OfflineMapView: UIViewRepresentable {
                 }
                 return
             }
-            if PackCamera.shouldLeavePack(wasHolding: storedGodsEye, godsEye: spec.godsEye) {
+            if PackCamera.shouldLeavePack(
+                wasHolding: storedGodsEye,
+                godsEye: spec.godsEye,
+                overview: spec.overview
+            ) {
                 storedGodsEye = false
                 let walkPitch = CGFloat(PackCamera.holdPitch(godsEye: false))
                 if puckOK {
@@ -1365,6 +1380,29 @@ public struct OfflineMapView: UIViewRepresentable {
                 north: spec.packNorth,
                 east: spec.packEast
             )
+            if spec.overview {
+                let bounds = MLNCoordinateBoundsMake(
+                    CLLocationCoordinate2D(latitude: packBox.south, longitude: packBox.west),
+                    CLLocationCoordinate2D(latitude: packBox.north, longitude: packBox.east)
+                )
+                let pad = UIEdgeInsets(
+                    top: CGFloat(PackCamera.packPaddingPoints),
+                    left: CGFloat(PackCamera.packSidePaddingPoints),
+                    bottom: CGFloat(PackCamera.packPaddingPoints),
+                    right: CGFloat(PackCamera.packSidePaddingPoints)
+                )
+                view.setVisibleCoordinateBounds(
+                    bounds,
+                    edgePadding: pad,
+                    animated: false,
+                    completionHandler: nil
+                )
+                let cam = view.camera
+                cam.pitch = CGFloat(PackCamera.overviewPitch)
+                cam.heading = PackCamera.godsEyeHeading
+                view.setCamera(cam, animated: false)
+                return
+            }
             let mid = PackCamera.packCenter(
                 south: packBox.south,
                 west: packBox.west,

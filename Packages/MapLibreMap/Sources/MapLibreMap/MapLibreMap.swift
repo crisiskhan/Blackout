@@ -560,6 +560,10 @@ public enum PackCamera {
     /// Archive floor (`tools/v3/tiles.py` MIN_ZOOM). KHAN EYE pinch floor so
     /// the packed extract fits the glass.
     public static let minZoom: Double = 6
+    /// STATES chart. Both outlines have to fit; walking photo floor would hide them.
+    public static let overviewMinZoom: Double = 3.5
+    public static let overviewMaxZoom: Double = 8.5
+    public static let overviewPitch: Double = 0
     /// Style overzoom ceiling. Packed streets do not get sharper past this.
     public static let maxZoom: Double = 16
     /// KHAN EYE may pinch one more zoom so packed photo and houses still read.
@@ -659,8 +663,9 @@ public enum PackCamera {
         max(radiusMeters, 1) * godsEyeRangeFactor
     }
 
-    public static func holdPitch(godsEye: Bool) -> Double {
-        godsEye ? godsEyePitch : walkPitch
+    public static func holdPitch(godsEye: Bool, overview: Bool = false) -> Double {
+        if overview { return overviewPitch }
+        return godsEye ? godsEyePitch : walkPitch
     }
 
     /// LOCK-ON walking is course-up. EYE stays north. A dead compass stays put.
@@ -675,16 +680,18 @@ public enum PackCamera {
         0
     }
 
-    public static func holdMaxPitch(godsEye _: Bool) -> Double {
-        godsEyeMaxPitch
+    public static func holdMaxPitch(godsEye _: Bool, overview: Bool = false) -> Double {
+        overview ? overviewPitch : godsEyeMaxPitch
     }
 
-    public static func holdMinZoom(godsEye: Bool) -> Double {
-        godsEye ? minZoom : photoMinZoom
+    public static func holdMinZoom(godsEye: Bool, overview: Bool = false) -> Double {
+        if overview { return overviewMinZoom }
+        return godsEye ? minZoom : photoMinZoom
     }
 
-    public static func holdMaxZoom(godsEye: Bool) -> Double {
-        godsEye ? godsEyeMaxZoom : maxZoom
+    public static func holdMaxZoom(godsEye: Bool, overview: Bool = false) -> Double {
+        if overview { return overviewMaxZoom }
+        return godsEye ? godsEyeMaxZoom : maxZoom
     }
 
     public static func allowsOrbit(godsEye _: Bool) -> Bool {
@@ -697,8 +704,8 @@ public enum PackCamera {
         true
     }
 
-    public static func allowsTilt(godsEye _: Bool) -> Bool {
-        true
+    public static func allowsTilt(godsEye _: Bool, overview: Bool = false) -> Bool {
+        !overview
     }
 
     public static func cameraStaysOnPack(
@@ -766,12 +773,13 @@ public enum PackCamera {
         return RouteLine.needsReapply(stored: stored, route: route)
     }
 
-    public static func shouldHoldPack(godsEye: Bool) -> Bool {
-        godsEye
+    public static func shouldHoldPack(godsEye: Bool, overview: Bool = false) -> Bool {
+        godsEye || overview
     }
 
-    public static func shouldLeavePack(wasHolding: Bool, godsEye: Bool) -> Bool {
-        wasHolding && !godsEye
+    public static func shouldLeavePack(wasHolding: Bool, godsEye: Bool, overview: Bool = false) -> Bool {
+        if overview { return false }
+        return wasHolding && !godsEye
     }
 
     /// Overlay camera holds are exclusive. GODS EYE wins if both flags are set.
