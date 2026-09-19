@@ -1373,36 +1373,46 @@ public struct OfflineMapView: UIViewRepresentable {
             return CLLocationCoordinate2DIsValid(coord) ? coord : nil
         }
 
-        func fitPack(_ spec: OverlaySpec, on view: MLNMapView, fly _: Bool) {
+        func fitOverview(_ spec: OverlaySpec, on view: MLNMapView) {
             let packBox = PackCamera.bounds(
                 south: spec.packSouth,
                 west: spec.packWest,
                 north: spec.packNorth,
                 east: spec.packEast
             )
+            let bounds = MLNCoordinateBoundsMake(
+                CLLocationCoordinate2D(latitude: packBox.south, longitude: packBox.west),
+                CLLocationCoordinate2D(latitude: packBox.north, longitude: packBox.east)
+            )
+            let pad = UIEdgeInsets(
+                top: CGFloat(PackCamera.packPaddingPoints),
+                left: CGFloat(PackCamera.packSidePaddingPoints),
+                bottom: CGFloat(PackCamera.packPaddingPoints),
+                right: CGFloat(PackCamera.packSidePaddingPoints)
+            )
+            view.setVisibleCoordinateBounds(
+                bounds,
+                edgePadding: pad,
+                animated: false,
+                completionHandler: nil
+            )
+            let cam = view.camera
+            cam.pitch = CGFloat(PackCamera.overviewPitch)
+            cam.heading = PackCamera.godsEyeHeading
+            view.setCamera(cam, animated: false)
+        }
+
+        func fitPack(_ spec: OverlaySpec, on view: MLNMapView, fly _: Bool) {
             if spec.overview {
-                let bounds = MLNCoordinateBoundsMake(
-                    CLLocationCoordinate2D(latitude: packBox.south, longitude: packBox.west),
-                    CLLocationCoordinate2D(latitude: packBox.north, longitude: packBox.east)
-                )
-                let pad = UIEdgeInsets(
-                    top: CGFloat(PackCamera.packPaddingPoints),
-                    left: CGFloat(PackCamera.packSidePaddingPoints),
-                    bottom: CGFloat(PackCamera.packPaddingPoints),
-                    right: CGFloat(PackCamera.packSidePaddingPoints)
-                )
-                view.setVisibleCoordinateBounds(
-                    bounds,
-                    edgePadding: pad,
-                    animated: false,
-                    completionHandler: nil
-                )
-                let cam = view.camera
-                cam.pitch = CGFloat(PackCamera.overviewPitch)
-                cam.heading = PackCamera.godsEyeHeading
-                view.setCamera(cam, animated: false)
+                fitOverview(spec, on: view)
                 return
             }
+            let packBox = PackCamera.bounds(
+                south: spec.packSouth,
+                west: spec.packWest,
+                north: spec.packNorth,
+                east: spec.packEast
+            )
             let mid = PackCamera.packCenter(
                 south: packBox.south,
                 west: packBox.west,

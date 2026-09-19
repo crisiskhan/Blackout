@@ -233,7 +233,7 @@ def dropped_regions() -> None:
 
 def packs() -> None:
     cat = json.loads((ROOT / "Resources" / "Packs" / "catalog.json").read_text())
-    need = {"tx-west", "tx-east", "nm"}
+    need = {"tx-west", "tx-east", "nm", "states"}
     have = {p["id"] for p in cat["packs"]}
     if have != need:
         bad(f"pack set {have}")
