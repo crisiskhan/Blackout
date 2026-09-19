@@ -22,8 +22,7 @@ struct NearHoldCard: View {
                 ScrollView {
                     rows
                 }
-                .scrollIndicators(.hidden)
-                .scrollBounceBehavior(.basedOnSize)
+                .holdScroll()
             }
         }
     }

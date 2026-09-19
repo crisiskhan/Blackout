@@ -22,8 +22,7 @@ struct AddressHoldCard: View {
                 ScrollView {
                     rows
                 }
-                .scrollIndicators(.hidden)
-                .scrollBounceBehavior(.basedOnSize)
+                .holdScroll()
             }
         }
     }

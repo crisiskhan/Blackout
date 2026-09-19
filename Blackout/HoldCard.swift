@@ -134,6 +134,9 @@ struct HoldGlassShell<Content: View>: View {
         VStack(alignment: .leading, spacing: 10) {
             grabber
             content
+                // minHeight 0 lets a tall body shrink under the 50% cap so
+                // the ScrollView is bounded and can actually move.
+                .frame(maxWidth: .infinity, minHeight: 0, alignment: .top)
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -147,6 +150,7 @@ struct HoldGlassShell<Content: View>: View {
                 .frame(height: 2)
         }
         .clipShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: corner, style: .continuous)
                 .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
@@ -164,6 +168,17 @@ struct HoldGlassShell<Content: View>: View {
             .contentShape(Rectangle())
             .gesture(dismissDrag)
             .accessibilityHidden(true)
+    }
+}
+
+extension View {
+    /// Hold-card body scroll. The 50% cap must bound this view or the
+    /// card clips mid-rail and the thumb has nowhere to go.
+    func holdScroll() -> some View {
+        self
+            .scrollIndicators(.hidden)
+            .scrollBounceBehavior(.basedOnSize)
+            .frame(minHeight: 0)
     }
 }
 
@@ -192,8 +207,7 @@ struct HoldCardView: View {
                 ScrollView {
                     rows
                 }
-                .scrollIndicators(.hidden)
-                .scrollBounceBehavior(.basedOnSize)
+                .holdScroll()
             }
         }
     }

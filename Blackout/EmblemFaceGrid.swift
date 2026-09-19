@@ -16,7 +16,7 @@ struct EmblemFaceGrid: View {
         if compact {
             rail.frame(height: plate)
         } else {
-            rail.frame(maxHeight: .infinity)
+            rail.frame(minHeight: 0, maxHeight: .infinity)
         }
     }
 
@@ -49,7 +49,7 @@ struct EmblemFaceGrid: View {
                 }
             }
         }
-        .scrollIndicators(.hidden)
+        .holdScroll()
     }
 
     private func thumb(_ emblem: PersonEmblem, lit: Bool) -> some View {
