@@ -580,6 +580,29 @@ final class AppRuntime {
         closeMark()
     }
 
+    /// Planted pin only. A new composer has nothing to take off the glass.
+    func deleteMark() {
+        guard let draft = markDraft else { return }
+        let existing = marks.first {
+            $0.id == draft.existingID
+                || MarkDrop.sameCoord(($0.lat, $0.lon), (draft.lat, draft.lon))
+        }
+        guard let mark = existing else {
+            closeMark()
+            return
+        }
+        MarkGone.remember(mark.id)
+        marks = MarkDrop.removing(marks, id: mark.id, lat: mark.lat, lon: mark.lon)
+        MarkStore.save(marks)
+        mesh.sendMarkGone(
+            from: mesh.localID,
+            id: mark.id,
+            lat: mark.lat,
+            lon: mark.lon
+        )
+        closeMark()
+    }
+
     func closeMark() {
         markDraft = nil
         heldMark = nil
@@ -1786,6 +1809,7 @@ final class AppRuntime {
                let parsed = MeshMarkBody.parse(raw),
                parsed.lat.isFinite,
                parsed.lon.isFinite {
+                if MarkGone.contains(parsed.id) { break }
                 let pack = packs?.active
                 let bbox = pack.map { ($0.bbox.south, $0.bbox.west, $0.bbox.north, $0.bbox.east) }
                 let fallback = PackChrome.markLabel(
@@ -1807,6 +1831,23 @@ final class AppRuntime {
                 )
                 marks = MarkDrop.upsert(marks, mark: mark)
                 MarkStore.save(marks)
+            }
+        case "mark.gone":
+            if let raw = String(data: env.body, encoding: .utf8),
+               let parsed = MeshMarkGoneBody.parse(raw) {
+                MarkGone.remember(parsed.id)
+                marks = MarkDrop.removing(
+                    marks,
+                    id: parsed.id,
+                    lat: parsed.lat,
+                    lon: parsed.lon
+                )
+                MarkStore.save(marks)
+                if let held = heldMark,
+                   held.id == parsed.id
+                    || MarkDrop.sameCoord((held.lat, held.lon), (parsed.lat, parsed.lon)) {
+                    closeMark()
+                }
             }
         case "voice":
             if let pcm = OpusLite.decode(env.body) {

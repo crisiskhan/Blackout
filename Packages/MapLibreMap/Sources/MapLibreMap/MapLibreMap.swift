@@ -215,6 +215,51 @@ public enum MarkDrop {
         }
         return marks + [mark]
     }
+
+    /// Id or same coord takes the pin off the list. Missing id is a no-op.
+    public static func removing(
+        _ marks: [MapMark],
+        id: String? = nil,
+        lat: Double? = nil,
+        lon: Double? = nil
+    ) -> [MapMark] {
+        marks.filter { mark in
+            if let id, !id.isEmpty, mark.id == id { return false }
+            if let lat, let lon, lat.isFinite, lon.isFinite,
+               sameCoord((mark.lat, mark.lon), (lat, lon)) {
+                return false
+            }
+            return true
+        }
+    }
+}
+
+/// Deleted place ids. A late hop `mark` with a remembered id stays gone.
+public enum MarkGone {
+    public static let key = "map.marks.gone"
+    public static let cap = 64
+
+    public static func remember(_ id: String, defaults: UserDefaults = .standard) {
+        let clean = id.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !clean.isEmpty else { return }
+        var ids = load(defaults: defaults).filter { $0 != clean }
+        ids.insert(clean, at: 0)
+        if ids.count > cap {
+            ids = Array(ids.prefix(cap))
+        }
+        defaults.set(ids, forKey: key)
+        defaults.synchronize()
+    }
+
+    public static func contains(_ id: String, defaults: UserDefaults = .standard) -> Bool {
+        let clean = id.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !clean.isEmpty else { return false }
+        return load(defaults: defaults).contains(clean)
+    }
+
+    public static func load(defaults: UserDefaults = .standard) -> [String] {
+        defaults.stringArray(forKey: key) ?? []
+    }
 }
 
 /// What a mark's label is made of.

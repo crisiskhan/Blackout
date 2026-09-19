@@ -649,4 +649,25 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertTrue(other.inboundDiary.isEmpty)
         XCTAssertFalse(other.inbox.contains(where: { $0.kind == "diary" }))
     }
+
+    func testMarkGoneBodyRoundtripAndSendLogsWhenSolo() {
+        let packed = MeshMarkGoneBody.encode(id: "cache", lat: 31.8705, lon: -106.5973)
+        let parsed = MeshMarkGoneBody.parse(packed)
+        XCTAssertEqual(parsed?.id, "cache")
+        XCTAssertEqual(parsed?.lat ?? 0, 31.8705, accuracy: 0.0001)
+        XCTAssertEqual(parsed?.lon ?? 0, -106.5973, accuracy: 0.0001)
+        XCTAssertNil(MeshMarkGoneBody.parse(""))
+        XCTAssertNil(MeshMarkGoneBody.parse("only-id"))
+        XCTAssertNil(MeshMarkGoneBody.parse("\t31.8\t-106.5"))
+        let box = EventLog()
+        let net = MeshNet(box: box)
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.startLocal()
+        net.sendMarkGone(from: net.localID, id: "cache", lat: 31.8705, lon: -106.5973)
+        XCTAssertTrue(radio.sent.isEmpty)
+        XCTAssertTrue(net.store.contains(where: { $0.kind == "mark.gone" }))
+        net.sendMarkGone(from: net.localID, id: "", lat: 31.8705, lon: -106.5973)
+        XCTAssertEqual(net.store.filter { $0.kind == "mark.gone" }.count, 1)
+    }
 }
