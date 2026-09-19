@@ -670,4 +670,26 @@ final class MeshDTNTests: XCTestCase {
         net.sendMarkGone(from: net.localID, id: "", lat: 31.8705, lon: -106.5973)
         XCTAssertEqual(net.store.filter { $0.kind == "mark.gone" }.count, 1)
     }
+
+    func testMarkBodyCarriesInkAndKeepsLegacySeven() {
+        let packed = MeshMarkBody.encode(
+            id: "well",
+            lat: 31.8705,
+            lon: -106.5973,
+            name: "WELL",
+            note: "full",
+            emblem: "owl",
+            label: "TX WEST",
+            ink: "BLUE"
+        )
+        let parsed = MeshMarkBody.parse(packed)
+        XCTAssertEqual(parsed?.id, "well")
+        XCTAssertEqual(parsed?.name, "WELL")
+        XCTAssertEqual(parsed?.emblem, "owl")
+        XCTAssertEqual(parsed?.ink, "BLUE")
+        let legacy = ["cache", "31.87", "-106.59", "CACHE", "", "wolf", "TX WEST"].joined(separator: "\t")
+        XCTAssertEqual(MeshMarkBody.parse(legacy)?.ink, "")
+        XCTAssertEqual(MeshMarkBody.parse(legacy)?.name, "CACHE")
+        XCTAssertNil(MeshMarkBody.parse("short"))
+    }
 }

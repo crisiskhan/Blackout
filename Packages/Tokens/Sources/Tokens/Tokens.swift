@@ -109,6 +109,8 @@ public enum BlackoutTokens: Sendable {
         public static let nightRed = RGBA(r: 1, g: 0.07, b: 0.02, a: 1)
         /// Live GNSS lamp. COORDINATES chip. Not SOS, not caution brass.
         public static let fix = RGBA(r: 46.0 / 255.0, g: 230.0 / 255.0, b: 122.0 / 255.0, a: 1)
+        /// MARK pin. Ice lamp, not GNSS green, not SOS, not brass.
+        public static let ice = RGBA(r: 46.0 / 255.0, g: 158.0 / 255.0, b: 245.0 / 255.0, a: 1)
         /// Outdoor glare field. Pale paper, not white, not invert.
         public static let sunField = RGBA(r: 0.90, g: 0.89, b: 0.85, a: 1)
         /// Outdoor glare ink. Near-black roads, type, icons.
@@ -124,6 +126,7 @@ public enum BlackoutTokens: Sendable {
         public static let sunInkHex = "#141414"
         public static let fixHex = "#2EE67A"
         public static let heatHex = "#ED510A"
+        public static let iceHex = "#2E9EF5"
         public static let roadLabelMinZoom: Double = 12
         public static let roadLabelWalkingSize: Double = 19
         public static let roadLabelCloseWalkSize: Double = 22

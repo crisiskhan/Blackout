@@ -1,6 +1,7 @@
 import SwiftUI
 import Tokens
 import NightRed
+import MapLibreMap
 
 enum Theme {
     static var lamp: HUDLamp = .off
@@ -37,6 +38,18 @@ enum Theme {
     static var heat: Color { Color(rgba: BlackoutTokens.Color.heat) }
     static var nightRed: Color { Color(rgba: BlackoutTokens.Color.nightRed) }
     static var fix: Color { Color(rgba: BlackoutTokens.Color.fix) }
+    static var markBlue: Color { Color(rgba: BlackoutTokens.Color.ice) }
+
+    static func markInk(_ ink: MarkInk) -> Color {
+        switch ink {
+        case .silver: return Color(rgba: BlackoutTokens.Color.silver)
+        case .green: return fix
+        case .yellow: return caution
+        case .orange: return heat
+        case .red: return accent
+        case .blue: return markBlue
+        }
+    }
     static var metalHigh: Color {
         switch lamp {
         case .sun: return Color(rgba: BlackoutTokens.Color.sunInk)

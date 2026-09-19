@@ -2,7 +2,7 @@ import SwiftUI
 import MapLibreMap
 import Tokens
 
-/// Glass composer for a party place. NAME, NOTE, and FACE stay here until DROP.
+/// Glass composer for a party place. NAME, NOTE, COLOR, and FACE stay here until DROP.
 struct PlaceMarkCard: View {
     @Bindable var runtime: AppRuntime
 
@@ -30,6 +30,10 @@ struct PlaceMarkCard: View {
 
     private var selected: PersonEmblem {
         PersonEmblem.resolved(runtime.markDraft?.emblem)
+    }
+
+    private var selectedInk: MarkInk {
+        MarkInk.resolved(ink: runtime.markDraft?.ink)
     }
 
     var body: some View {
@@ -66,6 +70,7 @@ struct PlaceMarkCard: View {
                             ink: Color.white,
                             onOpen: { runtime.pulse() }
                         )
+                        colorRail
                         faceGrid
                         row(key: "COORDINATES", value: coordinates)
                     }
@@ -93,6 +98,44 @@ struct PlaceMarkCard: View {
         .accessibilityElement(children: .combine)
     }
 
+    private var colorRail: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("COLOR")
+                .font(.system(size: 11, weight: .heavy))
+                .foregroundStyle(Theme.silver.opacity(0.75))
+            HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                ForEach(MarkInk.allCases, id: \.self) { ink in
+                    Button {
+                        pickInk(ink)
+                    } label: {
+                        VStack(spacing: 4) {
+                            Circle()
+                                .fill(Theme.markInk(ink))
+                                .frame(width: 28, height: 28)
+                                .overlay(
+                                    Circle().strokeBorder(
+                                        selectedInk == ink ? Theme.accent : Theme.silver.opacity(0.35),
+                                        lineWidth: selectedInk == ink ? 2.4 : 1
+                                    )
+                                )
+                            Text(ink.title)
+                                .font(.system(size: 11, weight: .heavy))
+                                .foregroundStyle(Theme.silver)
+                                .lineLimit(1)
+                                .minimumScaleFactor(1)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .frame(
+                        minWidth: BlackoutTokens.Chrome.mapChipHitPoints,
+                        minHeight: BlackoutTokens.Chrome.mapChipHitPoints
+                    )
+                    .accessibilityLabel(ink.title)
+                }
+            }
+        }
+    }
+
     private var faceGrid: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("FACE")
@@ -114,6 +157,13 @@ struct PlaceMarkCard: View {
     private func pick(_ emblem: PersonEmblem) {
         guard var draft = runtime.markDraft else { return }
         draft.emblem = emblem.rawValue
+        runtime.markDraft = draft
+        runtime.pulse()
+    }
+
+    private func pickInk(_ ink: MarkInk) {
+        guard var draft = runtime.markDraft else { return }
+        draft.ink = ink.rawValue
         runtime.markDraft = draft
         runtime.pulse()
     }

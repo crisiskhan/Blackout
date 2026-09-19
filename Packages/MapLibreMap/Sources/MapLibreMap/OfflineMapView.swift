@@ -930,7 +930,7 @@ public struct OfflineMapView: UIViewRepresentable {
                         PersonCompassArt.mark(
                             emblemID: pip.emblem,
                             headingDeg: pip.ghost ? nil : pip.headingDeg,
-                            tint: EyeLook.tint(pip.condition),
+                            tint: place ? EyeLook.markTint(pip.ink) : EyeLook.tint(pip.condition),
                             ghost: pip.ghost,
                             overdue: pip.overdue,
                             place: place,
@@ -2527,5 +2527,10 @@ enum EyeLook {
         case .red:
             return UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
         }
+    }
+
+    static func markTint(_ ink: String) -> UIColor {
+        let lamp = MarkInk.resolved(ink: ink)
+        return UIColor(red: lamp.rgba.r, green: lamp.rgba.g, blue: lamp.rgba.b, alpha: 1)
     }
 }
