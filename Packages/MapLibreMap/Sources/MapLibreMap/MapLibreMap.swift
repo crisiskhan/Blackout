@@ -557,16 +557,16 @@ public enum PackCamera {
     /// Walking MAP pinch floor. Packed NAIP is sharp here; below this, LOCKED
     /// walking would drop into schematic streets.
     public static let photoMinZoom: Double = 14
-    /// Archive floor (`tools/v3/tiles.py` MIN_ZOOM). KHAN EYE pinch floor so
-    /// the packed extract fits the glass.
+    /// Archive floor (`tools/v3/tiles.py` MIN_ZOOM). STATES can sit here;
+    /// walking pinch stays on `photoMinZoom`.
     public static let minZoom: Double = 6
     /// STATES chart. Both outlines have to fit; walking photo floor would hide them.
     public static let overviewMinZoom: Double = 3.5
     public static let overviewMaxZoom: Double = 8.5
     public static let overviewPitch: Double = 0
-    /// Style overzoom ceiling. Packed streets do not get sharper past this.
-    public static let maxZoom: Double = 16
-    /// KHAN EYE may pinch one more zoom so packed photo and houses still read.
+    /// Walking pinch ceiling. Packed NAIP and furniture still read here.
+    public static let maxZoom: Double = 17.5
+    /// Same as walking. The old extract camera is gone; one desk.
     public static let godsEyeMaxZoom: Double = 17.5
 
     public static func opensOnStreetNames(openZoom: Double = openZoom, labelMinZoom: Double = streetNameMinZoom) -> Bool {
@@ -574,14 +574,14 @@ public enum PackCamera {
     }
 
     /// First GNSS after a dark puck. DEST already picked keeps the camera on
-    /// that pin; LOCK-ON is how YOU takes the glass back. GODS EYE holds the pack.
+    /// that pin; LOCK-ON is how YOU takes the glass back. STATES holds both outlines.
     public static func shouldOpenOnYou(
         showYou: Bool,
         wasShowingYou: Bool,
         hasDest: Bool,
-        godsEye: Bool = false
+        godsEye _: Bool = false
     ) -> Bool {
-        !godsEye && showYou && !wasShowingYou && !hasDest
+        showYou && !wasShowingYou && !hasDest
     }
 
     /// Search / MARK dest off the glass. Canvas taps are already under the thumb.
@@ -589,9 +589,9 @@ public enum PackCamera {
         lockOn: Bool,
         destChanged: Bool,
         destVisible: Bool,
-        godsEye: Bool = false
+        godsEye _: Bool = false
     ) -> Bool {
-        !godsEye && !lockOn && destChanged && !destVisible
+        !lockOn && destChanged && !destVisible
     }
 
     /// HUD search and dock cover the edges, so a pin in that pad is not on glass.
@@ -623,8 +623,8 @@ public enum PackCamera {
     public static let godsEyePitch: Double = 45
     /// Walking MAP is the 3D neighborhood desk. Pitch reads house walls on the photo.
     public static let walkPitch: Double = 55
-    /// Viewing distance is this times the packed-extract radius so KHAN EYE
-    /// lifts to the whole archive, not a 160m neighborhood desk.
+    /// Viewing distance is this times the packed-extract radius so STATES
+    /// lifts to both outlines, not a 160m neighborhood desk.
     public static let godsEyeRangeFactor: Double = 1.15
     public static let godsEyeHeading: Double = 0
     public static let godsEyeFlySeconds: Double = 2
@@ -663,14 +663,14 @@ public enum PackCamera {
         max(radiusMeters, 1) * godsEyeRangeFactor
     }
 
-    public static func holdPitch(godsEye: Bool, overview: Bool = false) -> Double {
+    public static func holdPitch(godsEye _: Bool = false, overview: Bool = false) -> Double {
         if overview { return overviewPitch }
-        return godsEye ? godsEyePitch : walkPitch
+        return walkPitch
     }
 
-    /// LOCK-ON walking is course-up. EYE stays north. A dead compass stays put.
-    public static func followHeading(lockOn: Bool, godsEye: Bool, youHeading: Double?) -> Double? {
-        guard !godsEye, lockOn, let heading = youHeading, heading >= 0, heading.isFinite else {
+    /// LOCK-ON walking is course-up. A dead compass stays put.
+    public static func followHeading(lockOn: Bool, godsEye _: Bool = false, youHeading: Double?) -> Double? {
+        guard lockOn, let heading = youHeading, heading >= 0, heading.isFinite else {
             return nil
         }
         return heading
@@ -684,21 +684,21 @@ public enum PackCamera {
         overview ? overviewPitch : godsEyeMaxPitch
     }
 
-    public static func holdMinZoom(godsEye: Bool, overview: Bool = false) -> Double {
+    public static func holdMinZoom(godsEye _: Bool = false, overview: Bool = false) -> Double {
         if overview { return overviewMinZoom }
-        return godsEye ? minZoom : photoMinZoom
+        return photoMinZoom
     }
 
-    public static func holdMaxZoom(godsEye: Bool, overview: Bool = false) -> Double {
+    public static func holdMaxZoom(godsEye _: Bool = false, overview: Bool = false) -> Double {
         if overview { return overviewMaxZoom }
-        return godsEye ? godsEyeMaxZoom : maxZoom
+        return maxZoom
     }
 
     public static func allowsOrbit(godsEye _: Bool) -> Bool {
         true
     }
 
-    /// Walking MAP can pan. GODS EYE can pan too, but only while the look
+    /// Walking MAP can pan. STATES can pan too, but only while the look
     /// stays on the packed area.
     public static func allowsPan(godsEye _: Bool) -> Bool {
         true
@@ -709,15 +709,16 @@ public enum PackCamera {
     }
 
     public static func cameraStaysOnPack(
-        godsEye: Bool,
+        godsEye _: Bool = false,
         lat: Double,
         lon: Double,
         south: Double,
         west: Double,
         north: Double,
-        east: Double
+        east: Double,
+        overview: Bool = false
     ) -> Bool {
-        if !godsEye { return true }
+        if !overview { return true }
         let box = bounds(south: south, west: west, north: north, east: east)
         return lat >= box.south && lat <= box.north && lon >= box.west && lon <= box.east
     }
@@ -753,9 +754,9 @@ public enum PackCamera {
         wasLocked: Bool,
         lastFollow: (lat: Double, lon: Double)?,
         puck: (lat: Double, lon: Double),
-        godsEye: Bool = false
+        godsEye _: Bool = false
     ) -> Bool {
-        guard !godsEye, lockOn else { return false }
+        guard lockOn else { return false }
         if !wasLocked { return true }
         guard let lastFollow else { return true }
         return GraphRouter.haversine(lastFollow.lat, lastFollow.lon, puck.lat, puck.lon) >= followMeters
@@ -766,30 +767,28 @@ public enum PackCamera {
         lockOn: Bool,
         stored: [(lat: Double, lon: Double)]?,
         route: [(lat: Double, lon: Double)],
-        godsEye: Bool = false
+        godsEye _: Bool = false
     ) -> Bool {
-        guard !godsEye, !lockOn else { return false }
+        guard !lockOn else { return false }
         guard RouteLine.shouldDraw(route) else { return false }
         return RouteLine.needsReapply(stored: stored, route: route)
     }
 
-    public static func shouldHoldPack(godsEye: Bool, overview: Bool = false) -> Bool {
-        godsEye || overview
+    public static func shouldHoldPack(godsEye _: Bool = false, overview: Bool = false) -> Bool {
+        overview
     }
 
-    public static func shouldLeavePack(wasHolding: Bool, godsEye: Bool, overview: Bool = false) -> Bool {
+    public static func shouldLeavePack(wasHolding: Bool, godsEye _: Bool = false, overview: Bool = false) -> Bool {
         if overview { return false }
-        return wasHolding && !godsEye
+        return wasHolding
     }
 
-    /// Overlay camera holds are exclusive. GODS EYE wins if both flags are set.
-    public static func liveLockOn(lockOn: Bool, godsEye: Bool) -> Bool {
-        lockOn && !godsEye
+    public static func liveLockOn(lockOn: Bool, godsEye _: Bool = false) -> Bool {
+        lockOn
     }
 
-    public static func liveGodsEye(lockOn: Bool, godsEye: Bool) -> Bool {
-        _ = lockOn
-        return godsEye
+    public static func liveGodsEye(lockOn _: Bool = false, godsEye _: Bool = false) -> Bool {
+        false
     }
 }
 
@@ -1091,7 +1090,7 @@ public enum PackStyle {
         }
     }
 
-    /// Packed USGS NAIP photo. Ground on the walking 3D desk and on KHAN EYE.
+    /// Packed USGS NAIP photo. Ground on the walking 3D desk.
     /// Not a live feed. Archives may be sharded under GitHub's 100 MB file cap.
     public static func attachAerialLayers(
         _ sources: inout [String: Any],

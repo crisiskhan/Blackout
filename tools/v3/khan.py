@@ -1,4 +1,4 @@
-"""Packed KHAN EYE ground: OSM trees, signals, lamps, and signs.
+"""Packed walking-desk ground: OSM trees, signals, lamps, and signs.
 
 Airplane only. This is build-time Overpass, the same extract the street archive
 already uses. The phone never asks the network. There is no photo mesh. House

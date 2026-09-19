@@ -549,7 +549,7 @@ def _khan_building_zoom(props: dict) -> int:
 
 
 def read_khan_layers(pack: Path) -> dict[str, Layer]:
-    """Houses and street furniture for the KHAN EYE desk, not the walking map."""
+    """Houses and street furniture for the walking desk."""
     building = Layer(khan.KHAN_BUILDING_LAYER)
     furniture = Layer(khan.KHAN_FURNITURE_LAYER)
     khan_path = pack / "khan.geojson"
@@ -597,7 +597,7 @@ def read_khan_layers(pack: Path) -> dict[str, Layer]:
 
 
 def build_khan(pack: Path, bbox: dict, name: str) -> dict:
-    """Write `khan.pmtiles` — 3D houses and furniture for the walking desk and KHAN EYE."""
+    """Write `khan.pmtiles` — street furniture for the walking desk."""
     layers = read_khan_layers(pack)
     out = pack / "khan.pmtiles"
     tiles = 0
@@ -627,7 +627,7 @@ def build_khan(pack: Path, bbox: dict, name: str) -> dict:
                 "center_lat_e7": int((bbox["south"] + bbox["north"]) / 2 * 1e7),
             },
             {
-                "name": f"{name} KHAN EYE",
+                "name": f"{name} walking furniture",
                 "format": "pbf",
                 "attribution": "© OpenStreetMap contributors",
                 "vector_layers": [
