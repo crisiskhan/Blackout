@@ -37,7 +37,7 @@ public struct OfflineMapView: UIViewRepresentable {
     public var onPersonTap: ((String, Double, Double) -> Void)?
     /// Unused. The extract camera is gone; MapLibre pinch / double-zoom stay.
     public var onPersonDoubleTap: ((String, Double, Double) -> Void)?
-    /// Unused. MARK kinds live on the INSTRUMENTS MAP plate.
+    /// Unused. NAME lives on the MARK glass as you plant.
     public var onEmptyDoubleTap: ((Double, Double) -> Void)?
     /// Boot preview must not ask for GPS. The live MAP still does.
     public var trackUser: Bool

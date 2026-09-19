@@ -1234,7 +1234,7 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertNil(EyeDesk.parseVoice("khan eye on"))
         XCTAssertNil(EyeDesk.parseVoice("eye off"))
         XCTAssertNil(EyeDesk.parseVoice("khan eye off"))
-        XCTAssertEqual(EyeDesk.parseVoice("mark water"), .markWater)
+        XCTAssertNil(EyeDesk.parseVoice("mark water"))
         XCTAssertEqual(EyeDesk.parseVoice("frame wolf"), .frame(name: "wolf"))
         XCTAssertEqual(EyeDesk.noCard, "NO CARD · DON'T GUESS")
         XCTAssertEqual(EyeDesk.rallyTitle, "RALLY")

@@ -117,7 +117,6 @@ public enum EyeDesk {
     }
 
     public enum Voice: Equatable, Sendable {
-        case markWater
         case frame(name: String)
     }
 
@@ -377,7 +376,6 @@ public enum EyeDesk {
 
     public static func parseVoice(_ raw: String) -> Voice? {
         let key = raw.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        if key == "mark water" { return .markWater }
         if key.hasPrefix("frame ") {
             let name = String(key.dropFirst(6)).trimmingCharacters(in: .whitespaces)
             if !name.isEmpty { return .frame(name: name) }

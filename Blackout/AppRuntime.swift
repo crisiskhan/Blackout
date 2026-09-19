@@ -563,7 +563,7 @@ final class AppRuntime {
             note: note,
             emblem: emblem,
             from: mesh.localID,
-            kind: existing?.kind ?? ""
+            kind: EyeDesk.MarkKind.parse(named == Inspect.unnamed ? "" : named)?.rawValue ?? ""
         )
         marks = MarkDrop.upsert(marks, mark: mark)
         MarkStore.save(marks)
@@ -1115,49 +1115,9 @@ final class AppRuntime {
         pulse()
     }
 
-    func plantEyeMark(kind: EyeDesk.MarkKind, lat: Double, lon: Double) {
-        guard lat.isFinite, lon.isFinite else { return }
-        let pack = packs?.active
-        let bbox = pack.map { ($0.bbox.south, $0.bbox.west, $0.bbox.north, $0.bbox.east) }
-        let coords = PackChrome.markLabel(
-            lat: lat,
-            lon: lon,
-            packName: pack?.name ?? "mark",
-            bbox: bbox
-        )
-        let mark = MapMark(
-            id: UUID().uuidString,
-            lat: lat,
-            lon: lon,
-            label: "\(kind.title) · \(coords)",
-            name: kind.title,
-            note: "",
-            emblem: PersonEmblem.fallback.rawValue,
-            from: mesh.localID,
-            kind: kind.rawValue
-        )
-        marks = MarkDrop.upsert(marks, mark: mark)
-        MarkStore.save(marks)
-        mesh.sendMark(
-            from: mesh.localID,
-            id: mark.id,
-            lat: mark.lat,
-            lon: mark.lon,
-            name: mark.name,
-            note: mark.note,
-            emblem: mark.emblem,
-            label: mark.label
-        )
-        pulse()
-    }
-
     func applyEyeVoice(_ spoken: String) -> Bool {
         guard let cmd = EyeDesk.parseVoice(spoken) else { return false }
         switch cmd {
-        case .markWater:
-            if let you = fieldYou {
-                plantEyeMark(kind: .water, lat: you.lat, lon: you.lon)
-            }
         case .frame(let name):
             if let pip = mesh.pips.first(where: {
                 MeshPOS.nameToken($0.name ?? "").lowercased() == name.lowercased()
