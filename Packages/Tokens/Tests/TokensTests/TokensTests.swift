@@ -91,7 +91,6 @@ final class TokensTests: XCTestCase {
         XCTAssertEqual(BlackoutTokens.MapOverlay.lockOnTitle, "LOCK-ON")
         XCTAssertEqual(BlackoutTokens.MapOverlay.lockTitle(locked: false), "LOCK-ON")
         XCTAssertEqual(BlackoutTokens.MapOverlay.lockTitle(locked: true), "LOCKED")
-        XCTAssertEqual(BlackoutTokens.MapOverlay.godsEyeTitle, "KHAN EYE")
         XCTAssertEqual(BlackoutTokens.MapOverlay.updateTitle, "UPDATE")
         XCTAssertEqual(
             BlackoutTokens.MapDock.allCases.map(\.title),

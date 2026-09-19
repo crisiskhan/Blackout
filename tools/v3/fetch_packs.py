@@ -1533,7 +1533,7 @@ def build_tiles(dest: Path, pack: dict) -> dict:
 
 
 def fetch_aerial_pack(pack: dict, dest: Path) -> None:
-    """Cut packed NAIP photo for the KHAN EYE desk. Extract fill plus walk yards."""
+    """Cut packed NAIP photo for the walking desk. Extract fill plus walk yards."""
     dest.mkdir(parents=True, exist_ok=True)
     info = aerial.build_aerial(dest, pack)
     if info.get("present"):
@@ -1552,7 +1552,7 @@ def aerial_packs(ids: list[str] | None = None) -> None:
 
 
 def build_khan_tiles(dest: Path, pack: dict) -> dict:
-    """Cut OSM houses and street furniture for the KHAN EYE desk."""
+    """Cut OSM houses and street furniture for the walking desk."""
     info = tiles.build_khan(dest, union_bbox(pack["slices"]), pack["name"])
     print(f"  khan tiled {pack['id']} {info['tiles']:,} tiles {info['bytes'] / 1e6:.1f} MB", flush=True)
     return info

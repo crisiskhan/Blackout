@@ -1,4 +1,4 @@
-"""Packed KHAN EYE photo: USGS NAIP over each pack extract, build-time only.
+"""Packed walking-desk photo: USGS NAIP over each pack extract, build-time only.
 
 Airplane. The phone never asks the network. Street-scale NAIP covers the
 whole packed extract; walking zoom is yard-scale on the walkable ground.
@@ -407,7 +407,7 @@ def _write_one_shard(
                 "center_lat_e7": int((bbox["south"] + bbox["north"]) / 2 * 1e7),
             },
             {
-                "name": f"{pack['name']} KHAN EYE photo",
+                "name": f"{pack['name']} walking photo",
                 "format": "jpg",
                 "attribution": NAIP_CREDIT,
             },

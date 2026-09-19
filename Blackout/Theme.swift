@@ -243,7 +243,7 @@ struct HUDDockStyle: ButtonStyle {
     }
 }
 
-/// Overlay chip that keeps its whole word. Used for INSTRUMENTS, LOCK-ON, KHAN EYE.
+/// Overlay chip that keeps its whole word. Used for INSTRUMENTS, LOCK-ON, UPDATE.
 struct HUDOverlayChipStyle: ButtonStyle {
     var filled: Bool = false
 

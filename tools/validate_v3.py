@@ -1358,6 +1358,7 @@ def main() -> None:
     address_search()
     cesium_globe()
     hud_quality()
+    khan_eye()
     water_inspect()
     field_ask()
     survival_ask()
@@ -1514,6 +1515,20 @@ def cctv_stills() -> None:
         bad(f"CCTV stills contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
     ok("Done: packed CCTV dots + SNAP stills")
+
+
+def khan_eye() -> None:
+    """Walking desk keeps packed NAIP + furniture. No KHAN EYE mode."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_khan_eye.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"walking photo desk contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: walking photo desk — packed NAIP, no extract camera")
 
 
 def hud_quality() -> None:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""KHAN EYE paints packed USGS NAIP photo, then packed OSM furniture.
+"""Walking MAP paints packed USGS NAIP photo, then packed OSM furniture.
 
 Airplane. No live photo mesh. The desk reads `aerial.pmtiles` and
 `khan.pmtiles` built at pack time. Walking MAP is the 3D photo desk.
@@ -204,17 +204,18 @@ class StyleAndResolverTests(unittest.TestCase):
         self.assertNotIn("GlobeView(", tab)
         self.assertNotIn("eyeDeskRail", tab)
         self.assertNotIn("HUDGlassCard", tab)
-        desk = inst.split("private var eyeDeskPlate")[1].split("private func eyeDeskCaption")[0]
-        self.assertIn("HUDGlassCard", desk)
-        self.assertIn("eyeDeskCaption", desk)
-        self.assertIn("LAYERS", desk)
-        self.assertIn("LOOK", desk)
-        self.assertIn("MARK", desk)
-        self.assertIn("SCENE", desk)
+        self.assertNotIn("eyeDeskPlate", inst)
+        mapping = inst.split("private var mapPlate")[1].split("private var bodyPlate")[0]
+        self.assertIn("EyeDesk.noFix", mapping)
+        self.assertIn('sectionLabel("MARK")', mapping)
+        self.assertIn("EyeDesk.MarkKind", mapping)
+        self.assertNotIn("LAYERS", mapping)
+        self.assertNotIn("LOOK", mapping)
+        self.assertNotIn("SCENE", mapping)
         self.assertNotIn("padding(.top, 52)", tab)
         hud = tab.split("private func hud")[1].split("private var overlayRail")[0]
         self.assertIn("overlayRail", hud)
-        self.assertIn("if !runtime.godsEye", hud)
+        self.assertNotIn("runtime.godsEye", hud)
         self.assertNotIn("eyeDeskRail", hud)
         self.assertEqual(tab.count("runtime.hudLayout.overlay"), 2)
         self.assertIn("layers[index] = layer", swift.split("func attachKhanLayers")[1].split("func attachWaterLayers")[0])
@@ -227,6 +228,8 @@ class StyleAndResolverTests(unittest.TestCase):
             / "MapLibreMapTests.swift"
         ).read_text()
         self.assertIn("PackStyle.khanBuildingsLayerID", tests)
+        self.assertNotIn("cameraStaysOnPack(\n                overview:", tests)
+        self.assertIn("cameraStaysOnPack(\n                lat:", tests)
         count = 0
         for path in ROOT.joinpath("Packages", "MapLibreMap", "Tests").rglob("*.swift"):
             import re
@@ -316,7 +319,7 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
     """141 stills: EYE was Hatch-to-Tularosa black; walking casings buried yards."""
 
     def test_eye_looks_at_the_packed_extract(self):
-        """4:21 still: KHAN EYE sat on a 160m WSMR desk. Tap EYE → whole pack."""
+        """STATES still fits both outlines. Walking no longer lifts to the extract."""
         offline = OFFLINE.read_text()
         fit = offline.split("func fitPack")[1].split("func fitRoute")[0]
         self.assertIn("acrossDistance: gev", fit)
@@ -363,6 +366,7 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
             self.assertIn("Marks are pins, not a second YOU", blob)
             self.assertIn("MAP footer is the pack name", blob)
             self.assertIn("sits on the overlay with LOCK-ON", blob)
+            self.assertNotIn("KHAN EYE", blob)
         covers = eye.split("func coversPhoto")[1].split("func holdsKhanDetail")[0]
         self.assertIn("landFillLayerID", covers)
         self.assertIn("tracks", covers)
@@ -393,7 +397,10 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         self.assertIn("PersonCompassArt.pin", mark)
         self.assertIn("func visiblePips", offline)
         vis = offline.split("func visiblePips")[1].split("func paintPersonMarks")[0]
-        self.assertIn("PlaceMark.parse", vis)
+        self.assertIn("spec.pips", vis)
+        self.assertNotIn("godsEye", vis)
+        paint = offline.split("func paintPersonMarks")[1].split("func partyShape")[0]
+        self.assertIn("PlaceMark.parse", paint)
         party = offline.split("func partyShape")[1].split("func emptyOverlayShape")[0]
         self.assertIn("PlaceMark.parse", party)
         self.assertIn('"bottom"', party)
@@ -409,9 +416,11 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         live = tab.split("private func dockLive")[1].split("private func canvasFooter")[0]
         self.assertNotIn("lampRail", hud)
         self.assertNotIn("private var lampRail", tab)
-        self.assertIn("godsEyeTitle", overlay)
-        self.assertLess(overlay.find("lockTitle"), overlay.find("godsEyeTitle"))
-        self.assertLess(overlay.find("godsEyeTitle"), overlay.find("updateTitle"))
+        self.assertNotIn("godsEyeTitle", overlay)
+        self.assertIn("instrumentsTitle", overlay)
+        self.assertIn("lockTitle", overlay)
+        self.assertIn("updateTitle", overlay)
+        self.assertLess(overlay.find("lockTitle"), overlay.find("updateTitle"))
         self.assertIn("HUDDockStyle(filled:", dock)
         self.assertIn("dockLive(cell)", dock)
         self.assertIn("travelMode == .walk", live)
@@ -426,9 +435,9 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         self.assertIn("static let minZoom: Double = 6", cam)
         self.assertIn("static func holdMinZoom", cam)
         hold = cam.split("static func holdMinZoom")[1].split("static func holdMaxZoom")[0]
-        self.assertIn("godsEye ? minZoom : photoMinZoom", hold)
+        self.assertIn("return photoMinZoom", hold)
         self.assertIn("overviewMinZoom", hold)
-        self.assertNotIn("godsEye _", hold)
+        self.assertNotIn("godsEye ? minZoom", hold)
         interact = OFFLINE.read_text().split("private func applyInteraction")[1].split(
             "public final class Coordinator"
         )[0]
@@ -442,8 +451,9 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
             (ROOT / "docs" / "DEVICE.md").read_text(),
         ):
             self.assertIn("Walking pinch-out stays on packed photo", blob)
-            self.assertIn("KHAN EYE pinches out to the entire packed extract", blob)
+            self.assertIn("Walking pinch-in reaches yard zoom", blob)
             self.assertIn("pack diamond on black is a FAIL", blob)
+            self.assertNotIn("KHAN EYE", blob)
 
     def test_walk_hillshade_paints_the_floor_off_photo(self):
         """6:47 still: looking north off the Oleaster stamp was void, not ground."""

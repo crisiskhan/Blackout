@@ -50,13 +50,13 @@ class NativeMapTests(unittest.TestCase):
         self.assertIn("OSMCredit.line", offline)
         self.assertNotIn("OSMCredit.line", tab)
         self.assertIn("BlackoutTokens.MapOverlay.updateTitle", tab)
-        self.assertIn("BlackoutTokens.MapOverlay.godsEyeTitle", tab)
+        self.assertNotIn("BlackoutTokens.MapOverlay.godsEyeTitle", tab)
         self.assertNotIn("private var lampRail", tab)
         overlay = tab.split("private var overlayRail")[1].split("private var hitList")[0]
         self.assertIn("instrumentsTitle", overlay)
         self.assertIn("lockTitle", overlay)
         self.assertIn("updateTitle", overlay)
-        self.assertIn("godsEyeTitle", overlay)
+        self.assertNotIn("godsEyeTitle", overlay)
         self.assertNotIn("NIGHT", overlay)
         self.assertNotIn("SUN", overlay)
         inst = read("Blackout", "InstrumentsView.swift")
@@ -257,7 +257,7 @@ class NativeMapTests(unittest.TestCase):
         self.assertIn("ForEach(BlackoutTab.allCases)", root)
         self.assertNotIn("case .watch", tokens)
         self.assertIn('updateTitle = "UPDATE"', tokens)
-        self.assertIn('godsEyeTitle = "KHAN EYE"', tokens)
+        self.assertNotIn("godsEyeTitle", tokens)
 
 
 if __name__ == "__main__":

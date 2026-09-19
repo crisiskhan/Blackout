@@ -22,7 +22,7 @@ public struct OfflineMapView: UIViewRepresentable {
     public var destination: (lat: Double, lon: Double)?
     /// The point the inspect card is about, marked so the card never hides it.
     public var held: (lat: Double, lon: Double)?
-    /// Bumped by KHAN EYE. Every other value change leaves the camera where the thumb left it.
+    /// Bumped when STATES fits both outlines. Every other value change leaves the camera where the thumb left it.
     public var fitToken: Int
     /// UIKit `MLNMapView` ignores SwiftUI `allowsHitTesting`. This is the
     /// value that has to live on the Metal view.
@@ -33,11 +33,11 @@ public struct OfflineMapView: UIViewRepresentable {
     public var onMapHold: ((Double, Double, [String: String], Double) -> Void)?
     /// A thumb held still on YOU or a party emblem. Id is `YOU` or the peer.
     public var onPersonHold: ((String, Double, Double) -> Void)?
-    /// Tap a coin in EYE. Walking MAP still uses empty-map dest taps.
+    /// Tap a party coin. Opens the hold card. Walking dest taps stay on empty ground.
     public var onPersonTap: ((String, Double, Double) -> Void)?
-    /// Double-tap a coin in EYE: lock-follow that contact.
+    /// Unused. The extract camera is gone; MapLibre pinch / double-zoom stay.
     public var onPersonDoubleTap: ((String, Double, Double) -> Void)?
-    /// Double-tap empty ground in EYE: plant RALLY.
+    /// Unused. MARK kinds live on the INSTRUMENTS MAP plate.
     public var onEmptyDoubleTap: ((Double, Double) -> Void)?
     /// Boot preview must not ask for GPS. The live MAP still does.
     public var trackUser: Bool
@@ -51,7 +51,7 @@ public struct OfflineMapView: UIViewRepresentable {
     public var onPulse: (() -> Void)?
     /// LOCK-ON follows YOU. Off, the thumb owns the camera.
     public var lockOn: Bool
-    /// KHAN EYE holds the pack in frame. Exclusive with LOCK-ON.
+    /// Unused. Walking desk owns the camera; STATES uses `overview`.
     public var godsEye: Bool
     /// STATES chart. Flat fit of both outlines; no walking photo floor.
     public var overview: Bool
@@ -271,9 +271,9 @@ public struct OfflineMapView: UIViewRepresentable {
         for rec in view.gestureRecognizers ?? [] {
             guard let tap = rec as? UITapGestureRecognizer, tap.numberOfTapsRequired == 2 else { continue }
             if tap.delegate is Coordinator {
-                tap.isEnabled = godsEye
+                tap.isEnabled = false
             } else if tap.delegate === nil {
-                tap.isEnabled = !godsEye
+                tap.isEnabled = true
             }
         }
     }
@@ -391,7 +391,7 @@ public struct OfflineMapView: UIViewRepresentable {
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             guard interactive, gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
             let point = gesture.location(in: view)
-            if spec?.godsEye == true, let mark = personMark(at: point, on: view) {
+            if let mark = personMark(at: point, on: view) {
                 guard CLLocationCoordinate2DIsValid(mark.coordinate) else { return }
                 onPersonTap?(mark.memberID, mark.coordinate.latitude, mark.coordinate.longitude)
                 onPulse?()
@@ -402,7 +402,6 @@ public struct OfflineMapView: UIViewRepresentable {
                 onPulse?()
                 return
             }
-            if spec?.godsEye == true { return }
             let coord = view.convert(point, toCoordinateFrom: view)
             guard CLLocationCoordinate2DIsValid(coord) else { return }
             onMapTap?(coord.latitude, coord.longitude)
@@ -410,19 +409,7 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         @objc func handleDoubleTap(_ gesture: UITapGestureRecognizer) {
-            guard interactive, gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
-            guard spec?.godsEye == true else { return }
-            let point = gesture.location(in: view)
-            if let mark = personMark(at: point, on: view) {
-                guard CLLocationCoordinate2DIsValid(mark.coordinate) else { return }
-                onPersonDoubleTap?(mark.memberID, mark.coordinate.latitude, mark.coordinate.longitude)
-                onPulse?()
-                return
-            }
-            let coord = view.convert(point, toCoordinateFrom: view)
-            guard CLLocationCoordinate2DIsValid(coord) else { return }
-            onEmptyDoubleTap?(coord.latitude, coord.longitude)
-            onPulse?()
+            _ = gesture
         }
 
         @objc func handleHold(_ gesture: UILongPressGestureRecognizer) {
@@ -433,18 +420,14 @@ public struct OfflineMapView: UIViewRepresentable {
                 holdTick.impactOccurred()
                 onPersonHold?(mark.memberID, mark.coordinate.latitude, mark.coordinate.longitude)
                 onPulse?()
-                if spec?.godsEye != true {
-                    liftIntoView(point, on: view)
-                }
+                liftIntoView(point, on: view)
                 return
             }
             if let cam = cctvMark(at: point, on: view) {
                 holdTick.impactOccurred()
                 onCctvHold?(cam.id, cam.lat, cam.lon)
                 onPulse?()
-                if spec?.godsEye != true {
-                    liftIntoView(point, on: view)
-                }
+                liftIntoView(point, on: view)
                 return
             }
             let coord = view.convert(point, toCoordinateFrom: view)
@@ -452,9 +435,7 @@ public struct OfflineMapView: UIViewRepresentable {
             holdTick.impactOccurred()
             onMapHold?(coord.latitude, coord.longitude, record(under: point, on: view), view.zoomLevel)
             onPulse?()
-            if spec?.godsEye != true {
-                liftIntoView(point, on: view)
-            }
+            liftIntoView(point, on: view)
         }
 
         /// YOU and party emblems win over the ground record under the same thumb.
@@ -894,15 +875,7 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         func visiblePips(_ spec: OverlaySpec) -> [PartyBody] {
-            spec.pips.filter { pip in
-                if spec.godsEye {
-                    if PlaceMark.parse(pip.id) != nil {
-                        return EyeDesk.layerOn(.marks, in: spec.eyeLayers)
-                    }
-                    return EyeDesk.layerOn(.party, in: spec.eyeLayers)
-                }
-                return true
-            }
+            spec.pips
         }
 
         func paintPersonMarks(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
@@ -1064,7 +1037,7 @@ public struct OfflineMapView: UIViewRepresentable {
 
         func syncEyeOverlays(on view: MLNMapView, spec: OverlaySpec) {
             guard let style = view.style else { return }
-            let showTails = spec.godsEye && EyeDesk.layerOn(.tails, in: spec.eyeLayers)
+            let showTails = !spec.trails.isEmpty
             let tailShape: MLNShape
             if showTails, !spec.trails.isEmpty {
                 let features: [[String: Any]] = spec.trails.compactMap { line in
@@ -1102,19 +1075,17 @@ public struct OfflineMapView: UIViewRepresentable {
             }
 
             var ringFeatures: [[String: Any]] = []
-            if spec.godsEye {
-                for ring in spec.rings {
-                    let pts = EyeDesk.ringPoints(lat: ring.lat, lon: ring.lon, meters: ring.meters)
-                    guard pts.count >= 8 else { continue }
-                    ringFeatures.append([
-                        "type": "Feature",
-                        "properties": ["overdue": ring.overdue],
-                        "geometry": [
-                            "type": "LineString",
-                            "coordinates": pts.map { [$0.lon, $0.lat] },
-                        ],
-                    ])
-                }
+            for ring in spec.rings {
+                let pts = EyeDesk.ringPoints(lat: ring.lat, lon: ring.lon, meters: ring.meters)
+                guard pts.count >= 8 else { continue }
+                ringFeatures.append([
+                    "type": "Feature",
+                    "properties": ["overdue": ring.overdue],
+                    "geometry": [
+                        "type": "LineString",
+                        "coordinates": pts.map { [$0.lon, $0.lat] },
+                    ],
+                ])
             }
             let ringBlob: [String: Any] = ["type": "FeatureCollection", "features": ringFeatures]
             let ringShape: MLNShape
@@ -1804,13 +1775,13 @@ public struct OfflineMapView: UIViewRepresentable {
             _ = oldCamera
             guard let spec else { return true }
             return PackCamera.cameraStaysOnPack(
-                godsEye: spec.godsEye,
                 lat: newCamera.centerCoordinate.latitude,
                 lon: newCamera.centerCoordinate.longitude,
                 south: spec.packSouth,
                 west: spec.packWest,
                 north: spec.packNorth,
-                east: spec.packEast
+                east: spec.packEast,
+                overview: spec.overview
             )
         }
 
@@ -1887,9 +1858,9 @@ final class FillingMapView: MLNMapView {
 
     func setDeskChrome(godsEye: Bool, offAerial: Bool) {
         installDeskChromeIfNeeded()
-        osmCredit.isHidden = !godsEye
+        osmCredit.isHidden = true
         packStamp.isHidden = true
-        aerialStamp.isHidden = !(godsEye && offAerial)
+        aerialStamp.isHidden = !offAerial
         layoutDeskChrome()
     }
 
@@ -2395,8 +2366,8 @@ extension PackStyle {
         }
         let aerial = aerialWanted && hasAerial
         // USGS 3DEP hillshade is the pack floor. Walking keeps it under NAIP
-        // so ground outside the photo is not void. EYE keeps it too: below
-        // packed z12 the extract camera would otherwise be black.
+        // so ground outside the photo is not void. Below packed z12 the
+        // extract would otherwise be black.
         let shade = !godsEye || EyeDesk.layerOn(.shade, in: layers) || aerialWanted
         let water = !godsEye || EyeDesk.layerOn(.water, in: layers)
         for layer in style.layers {
@@ -2439,8 +2410,8 @@ extension PackStyle {
     }
 
     /// Schematic fills, casings, and 3D masses that sit on the photo. Hide
-    /// them on walking MAP and KHAN EYE while packed NAIP is the ground so
-    /// yards and roofs read. Labels, water dots, and street furniture stay.
+    /// them on walking MAP while packed NAIP is the ground so yards and
+    /// roofs read. Labels, water dots, and street furniture stay.
     private static func coversPhoto(_ id: String) -> Bool {
         if id == landFillLayerID { return true }
         if id == khanTreesLayerID || id == khanBuildingsLayerID { return true }

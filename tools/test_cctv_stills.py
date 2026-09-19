@@ -100,7 +100,9 @@ class HudAndSnapTests(unittest.TestCase):
         self.assertIn("func cctvMark(at", offline)
         tap = offline.split("func handleTap")[1].split("func handleDoubleTap")[0]
         self.assertIn("cctvMark(at:", tap)
-        self.assertLess(tap.find("cctvMark(at:"), tap.find("godsEye == true { return }"))
+        self.assertNotIn("godsEye == true", tap)
+        self.assertLess(tap.find("personMark(at:"), tap.find("cctvMark(at:"))
+        self.assertLess(tap.find("cctvMark(at:"), tap.find("onMapTap"))
         hold = offline.split("func handleHold")[1].split("func personMark")[0]
         self.assertIn("cctvMark(at:", hold)
         self.assertIn("CctvMarks.layerID", read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "Inspect.swift"))

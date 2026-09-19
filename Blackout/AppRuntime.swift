@@ -59,15 +59,9 @@ final class AppRuntime {
     var leftHand = false
     var tab: BlackoutTab = .map
     var lockOn = false
-    /// KHAN EYE holds the desk over our people. Exclusive with LOCK-ON.
-    var godsEye = false
     var eyeLayers: [EyeDesk.Layer] = EyeDesk.liveDeskLayers
     var eyePalette: EyeDesk.Palette = .streets
     var eyeGround: EyeDesk.Ground = .hybrid
-    var eyeFollowID: String?
-    var eyeTap: HeldPerson?
-    var eyeScenes: [EyeDesk.Scene] = []
-    var eyeJump: (lat: Double, lon: Double)?
     var showInstruments = false
     var updateSocket = UpdateSocket()
     var chromeAwake = true
@@ -141,7 +135,7 @@ final class AppRuntime {
     private var liveSpokenTurn = ""
     private var liveArrived = false
     private var lastLiveRerouteAt: TimeInterval = 0
-    /// Bumped by KHAN EYE. The canvas otherwise opens on YOU at walking zoom.
+    /// Bumped when the open pack changes so STATES can refit.
     var fitPackToken = 0
     var canRouteOnGraph: Bool { packs?.hasUsableGraph() ?? false }
     /// Last WALK or DRIVE tap. Drops a stale plot so it cannot speak over a newer one.
@@ -190,11 +184,9 @@ final class AppRuntime {
         youName = MeshPOS.nameToken(UserDefaults.standard.string(forKey: "you.name") ?? "")
         youStatus = PartyStatus.parse(UserDefaults.standard.string(forKey: "you.status"))
         loadDiary()
-        godsEye = EyeDesk.load()
         eyeLayers = EyeDesk.loadLayers()
         eyePalette = EyeDesk.loadPalette()
         eyeGround = EyeDesk.loadGround()
-        eyeScenes = EyeDesk.loadScenes()
         UIDevice.current.isBatteryMonitoringEnabled = true
         if let raw = UserDefaults.standard.string(forKey: "hud.lamp"),
            let saved = HUDLamp(rawValue: raw)
@@ -658,7 +650,6 @@ final class AppRuntime {
         heldCam = nil
         heldNear = nil
         pickingEmblem = false
-        eyeTap = nil
         pulse()
     }
 
@@ -673,7 +664,6 @@ final class AppRuntime {
         heldParty = nil
         heldAddress = nil
         heldNear = nil
-        eyeTap = nil
         let packed = packCams.first { $0.id == id }
         let named = packed?.name.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         heldCam = HeldCam(
@@ -1071,16 +1061,7 @@ final class AppRuntime {
 
     func toggleLockOn() {
         touch(.overlay)
-        if godsEye, eyeFollowID != nil {
-            eyeFollowID = nil
-            return
-        }
         lockOn.toggle()
-        if lockOn {
-            godsEye = false
-            EyeDesk.save(false)
-            eyeFollowID = nil
-        }
         if !lockOn {
             lockChrome = ""
             return
@@ -1091,25 +1072,6 @@ final class AppRuntime {
         let hasGraph = packs?.hasUsableGraph() ?? false
         lockChrome = LockOnChrome.banner(hasGPS: hasGPS, hasGraph: hasGraph)
         sendPOSIfPossible()
-    }
-
-    func toggleGodsEye() {
-        touch(.overlay)
-        if godsEye {
-            godsEye = false
-            eyeFollowID = nil
-            eyeTap = nil
-            EyeDesk.save(false)
-            return
-        }
-        godsEye = true
-        lockOn = false
-        lockChrome = ""
-        EyeDesk.save(true)
-        if red.isRed, let id = redFrameID() {
-            eyeFollowID = id
-        }
-        fitPack()
     }
 
     func toggleEyeLayer(_ layer: EyeDesk.Layer) {
@@ -1128,34 +1090,6 @@ final class AppRuntime {
         eyeGround = ground
         EyeDesk.saveGround(ground)
         pulse()
-    }
-
-    func followEyeContact(_ id: String) {
-        eyeFollowID = id
-        eyeTap = nil
-        fitPack()
-    }
-
-    func tapEyeContact(id: String, lat: Double, lon: Double) {
-        holdParty(id: id, lat: lat, lon: lon)
-        if let person = heldParty {
-            eyeTap = person
-            heldParty = nil
-        }
-    }
-
-    func callEyeTap() {
-        guard let person = eyeTap else { return }
-        heldParty = person
-        callHeldParty()
-        eyeTap = nil
-    }
-
-    func messageEyeTap() {
-        guard let person = eyeTap else { return }
-        heldParty = person
-        messageHeldParty()
-        eyeTap = nil
     }
 
     func plantEyeMark(kind: EyeDesk.MarkKind, lat: Double, lon: Double) {
@@ -1191,48 +1125,12 @@ final class AppRuntime {
             emblem: mark.emblem,
             label: mark.label
         )
-        if kind == .lostKid {
-            eyeFollowID = PlaceMark.canvasID(mark.id)
-        }
         pulse()
-    }
-
-    func saveEyeScene(_ name: String) {
-        guard let you = fieldYou else { return }
-        let scene = EyeDesk.Scene(
-            name: name,
-            lat: you.lat,
-            lon: you.lon,
-            layers: eyeLayers.map(\.rawValue),
-            palette: eyePalette.rawValue
-        )
-        eyeScenes = EyeDesk.upsertScene(scene, into: eyeScenes)
-        EyeDesk.saveScenes(eyeScenes)
-        pulse()
-    }
-
-    func jumpEyeScene(_ name: String) {
-        guard let scene = eyeScenes.first(where: { $0.name == name }) else { return }
-        godsEye = true
-        lockOn = false
-        EyeDesk.save(true)
-        eyeLayers = scene.layers.compactMap(EyeDesk.Layer.init(rawValue:))
-        if eyeLayers.isEmpty { eyeLayers = EyeDesk.liveDeskLayers }
-        EyeDesk.saveLayers(eyeLayers)
-        eyePalette = EyeDesk.Palette(rawValue: scene.palette) ?? .streets
-        EyeDesk.savePalette(eyePalette)
-        eyeFollowID = nil
-        eyeJump = (scene.lat, scene.lon)
-        fitPack()
     }
 
     func applyEyeVoice(_ spoken: String) -> Bool {
         guard let cmd = EyeDesk.parseVoice(spoken) else { return false }
         switch cmd {
-        case .eyeOn:
-            if !godsEye { toggleGodsEye() }
-        case .eyeOff:
-            if godsEye { toggleGodsEye() }
         case .markWater:
             if let you = fieldYou {
                 plantEyeMark(kind: .water, lat: you.lat, lon: you.lon)
@@ -1241,8 +1139,7 @@ final class AppRuntime {
             if let pip = mesh.pips.first(where: {
                 MeshPOS.nameToken($0.name ?? "").lowercased() == name.lowercased()
             }) {
-                if !godsEye { toggleGodsEye() }
-                followEyeContact(pip.from)
+                holdParty(id: pip.from, lat: pip.lat, lon: pip.lon)
             }
         }
         return true
@@ -2319,10 +2216,6 @@ final class AppRuntime {
         refreshHeldNear()
         applyLiveGuide()
         pulse()
-        if godsEye, red.isRed, eyeFollowID == nil, let id = redFrameID() {
-            eyeFollowID = id
-            fitPack()
-        }
     }
 
     func notePipFix(_ id: String) {
@@ -2415,7 +2308,6 @@ final class AppRuntime {
 
     func eyeFrameWater() -> [(lat: Double, lon: Double)] {
         var extra: [(lat: Double, lon: Double)] = []
-        if let jump = eyeJump { extra.append(jump) }
         let you = fieldYou
         let id = packs?.active?.id
         let index = id.flatMap { watersByPack[$0] } ?? (waterPackID == id ? waterCache : nil)
