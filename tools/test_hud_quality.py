@@ -1495,19 +1495,65 @@ class FieldInstrumentTests(unittest.TestCase):
 
 
 class CommsInstrumentTests(unittest.TestCase):
-    """Party chips that already exist in L10n belong on the rail."""
+    """The ten field words sit on the rail. SOS and I AM OK do not."""
 
     def test_party_chip_rail_is_complete(self):
         comms = read("Blackout", "CommsTab.swift")
         state = read("Packages", "CommsUI", "Sources", "CommsUI", "CommsUI.swift")
-        self.assertIn('L10n.t("form.up"', comms)
-        self.assertIn('L10n.t("lost.kid"', comms)
-        self.assertIn('L10n.t("chip.wait"', comms)
-        self.assertIn('L10n.t("chip.water"', comms)
-        self.assertIn('L10n.t("chip.rally"', comms)
-        self.assertIn('L10n.t("chip.down"', comms)
+        l10n = read("Blackout", "L10n.swift")
+        plate = comms.split("private var chipsPlate")[1].split("private var pageStatus")[0]
+        self.assertIn("ForEach(Chip.rail", plate)
+        self.assertNotIn("Chip.allCases", plate)
+        self.assertNotIn("sendPartyChip(.formUp)", comms)
+        self.assertNotIn("sendPartyChip(.lostKid)", comms)
+        self.assertNotIn("sendPartyChip(.sos)", comms)
+        self.assertNotIn("sendPartyChip(.ok)", comms)
+        self.assertNotIn('ok.chip', plate)
+        self.assertIn("static let rail", state)
+        for word in (
+            ".here",
+            ".wait",
+            ".moving",
+            ".come",
+            ".rally",
+            ".down",
+            ".hurt",
+            ".water",
+            ".lost",
+            ".found",
+        ):
+            self.assertIn(word, state)
+        for key in (
+            "chip.here",
+            "chip.wait",
+            "chip.moving",
+            "chip.come",
+            "chip.rally",
+            "chip.down",
+            "chip.hurt",
+            "chip.water",
+            "chip.lost",
+            "chip.found",
+        ):
+            self.assertIn(f'"{key}"', l10n)
+        self.assertIn('"HERE"', l10n)
+        self.assertIn('"AQUÍ"', l10n)
+        self.assertIn('"MOVING"', l10n)
+        self.assertIn('"MARCHA"', l10n)
+        self.assertIn('"COME"', l10n)
+        self.assertIn('"VEN"', l10n)
+        self.assertIn('"HURT"', l10n)
+        self.assertIn('"HERIDO"', l10n)
+        self.assertIn('"LOST"', l10n)
+        self.assertIn('"PERDIDO"', l10n)
+        self.assertIn('"FOUND"', l10n)
+        self.assertIn('"HALLADO"', l10n)
+        self.assertIn("formUp", state)
+        self.assertIn("lostKid", state)
         self.assertIn("func wait()", state)
         self.assertIn("func water()", state)
+        self.assertIn("func here()", state)
+        self.assertIn("func found()", state)
         self.assertIn("HOLD PTT", comms)
         self.assertIn("JOIN LOCAL NET", comms)
         self.assertIn("LISTEN", comms)
@@ -1552,6 +1598,13 @@ class CommsInstrumentTests(unittest.TestCase):
     def test_solo_qa_scores_form_up_and_lost_kid(self):
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("WRITE NOTE", qa)
+        self.assertIn("HERE", qa)
+        self.assertIn("MOVING", qa)
+        self.assertIn("COME", qa)
+        self.assertIn("HURT", qa)
+        self.assertIn("LOST", qa)
+        self.assertIn("FOUND", qa)
+        self.assertIn("Ten whole words on the rail", qa)
         self.assertIn("FORM UP", qa)
         self.assertIn("LOST KID", qa)
         self.assertIn("LEAVE NET", qa)
