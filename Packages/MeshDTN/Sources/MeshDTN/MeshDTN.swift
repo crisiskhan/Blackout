@@ -227,7 +227,8 @@ public enum MeshMarkBody {
         name: String,
         note: String,
         emblem: String,
-        label: String
+        label: String,
+        ink: String = ""
     ) -> String {
         [
             id,
@@ -237,6 +238,7 @@ public enum MeshMarkBody {
             clean(note),
             emblem,
             clean(label),
+            clean(ink),
         ].joined(separator: "\t")
     }
 
@@ -247,12 +249,14 @@ public enum MeshMarkBody {
         name: String,
         note: String,
         emblem: String,
-        label: String
+        label: String,
+        ink: String
     )? {
         let parts = raw.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
         guard parts.count >= 7 else { return nil }
         guard let lat = Double(parts[1]), let lon = Double(parts[2]) else { return nil }
-        return (parts[0], lat, lon, parts[3], parts[4], parts[5], parts[6])
+        let ink = parts.count >= 8 ? parts[7] : ""
+        return (parts[0], lat, lon, parts[3], parts[4], parts[5], parts[6], ink)
     }
 
     public static func clean(_ raw: String) -> String {
@@ -744,7 +748,8 @@ public final class MeshNet: @unchecked Sendable {
         name: String,
         note: String,
         emblem: String,
-        label: String
+        label: String,
+        ink: String = ""
     ) {
         guard lat.isFinite, lon.isFinite else { return }
         let body = MeshMarkBody.encode(
@@ -754,7 +759,8 @@ public final class MeshNet: @unchecked Sendable {
             name: name,
             note: note,
             emblem: emblem,
-            label: label
+            label: label,
+            ink: ink
         )
         enqueue(make(from: from, kind: "mark", body: Data(body.utf8)))
     }

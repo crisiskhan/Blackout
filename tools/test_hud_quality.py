@@ -1657,10 +1657,13 @@ class PartyPlaceMarkTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 180)
+        self.assertEqual(count, 181)
         self.assertIn("var name: String", marks)
         self.assertIn("var note: String", marks)
         self.assertIn("var emblem: String", marks)
+        self.assertIn("var ink: String", marks)
+        self.assertIn("enum MarkInk", marks)
+        self.assertIn("case blue = \"BLUE\"", marks)
         self.assertIn("decodeIfPresent", marks)
         self.assertIn("enum PlaceMark", marks)
         self.assertIn('idPrefix = "MARK·"', marks)
@@ -1683,11 +1686,15 @@ class PartyPlaceMarkTests(unittest.TestCase):
         self.assertIn("MarkGone.contains", app)
         self.assertIn("dropMark()", app)
         self.assertIn("PlaceMarkCard(", tab)
+        self.assertIn("Theme.markInk(", tab)
         self.assertIn("runtime.eyeCanvasPips()", tab)
         self.assertIn("PlaceMark.body", app)
         self.assertIn("EmblemFaceGrid(", card)
         self.assertIn('HUDField("NAME"', card)
         self.assertIn('HUDField("NOTE"', card)
+        self.assertIn('Text("COLOR")', card)
+        self.assertIn("MarkInk.allCases", card)
+        self.assertLess(card.find('Text("COLOR")'), card.find("EmblemFaceGrid("))
         self.assertNotIn("MarkKind.allCases", card)
         self.assertNotIn('Button("RALLY")', card)
         self.assertNotIn('Button("DOWN")', card)
@@ -1716,11 +1723,14 @@ class PartyPlaceMarkTests(unittest.TestCase):
         )
         self.assertIn("NAME", mark_line)
         self.assertIn("NOTE", mark_line)
+        self.assertIn("COLOR", mark_line)
+        self.assertIn("SILVER / GREEN / YELLOW / ORANGE / RED / BLUE", mark_line)
         self.assertIn("FACE", mark_line)
         self.assertIn("DROP", mark_line)
         self.assertIn("DELETE", mark_line)
         self.assertIn("DELETE takes the pin off the glass", qa)
         self.assertIn("NAME the pin on the MARK glass as you plant", qa)
+        self.assertIn("pin takes that ink", qa)
         self.assertNotIn("MARK kinds live on the MAP plate", qa)
         self.assertIn("emblem", mark_line.lower())
         self.assertIn("party", mark_line.lower())
@@ -1730,7 +1740,14 @@ class PartyPlaceMarkTests(unittest.TestCase):
         commit = app.split("func commitMark(")[1].split("func deleteMark(")[0]
         self.assertIn("EyeDesk.MarkKind.parse", commit)
         self.assertIn("named == Inspect.unnamed", commit)
+        self.assertIn("MarkInk.resolved", commit)
+        self.assertIn("ink: mark.ink", commit)
         self.assertNotIn("plantEyeMark", commit)
+        offline = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift")
+        self.assertIn("EyeLook.markTint(pip.ink)", offline)
+        self.assertIn("static func markTint", offline)
+        self.assertIn("parts.count >= 8", mesh)
+        self.assertIn("clean(ink)", mesh)
 
     def test_mark_names_a_dest_for_the_party_not_the_fix_or_a_hold(self):
         app = read("Blackout", "AppRuntime.swift")
@@ -2845,7 +2862,7 @@ class PartyHoldCardTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 180)
+        self.assertEqual(count, 181)
         self.assertIn("var onPersonHold", offline)
         self.assertIn("onPersonHold:", tab)
         self.assertIn("func personMark(at:", offline)
@@ -3840,7 +3857,7 @@ class AddressHoldCardTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 180)
+        self.assertEqual(count, 181)
         self.assertIn("struct HeldAddress", hold)
         self.assertIn("struct AddressHoldCard", card)
         self.assertIn("var heldAddress", app)
@@ -4247,7 +4264,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         count = 0
         for path in ROOT.joinpath("Packages", "MapLibreMap", "Tests").rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 180)
+        self.assertEqual(count, 181)
         self.assertIn("testPackCameraHoldsGodsEyeOverDestAndYou", tests)
         self.assertNotIn("if !runtime.godsEye", tab)
         self.assertIn("khanShadeOpacity", desk)
@@ -4306,6 +4323,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("No grey 3D house or tree masses on the photo", qa)
         self.assertIn("packed USGS NAIP", qa)
         self.assertIn("NAME the pin on the MARK glass as you plant", qa)
+        self.assertIn("pin takes that ink", qa)
         self.assertNotIn("MARK kinds live on the MAP plate", qa)
         self.assertIn("frames the packed extract", qa)
         self.assertIn("north-up", qa)
@@ -4343,6 +4361,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("No grey 3D house or tree masses on the photo", device)
         self.assertIn("packed USGS NAIP", device)
         self.assertIn("NAME the pin on the MARK glass as you plant", device)
+        self.assertIn("pin takes that ink", device)
         self.assertNotIn("MARK kinds live on the MAP plate", device)
         self.assertIn("Walking pinch-in reaches yard zoom", device)
         self.assertIn("runtime.eyeCanvasPips()", tab)

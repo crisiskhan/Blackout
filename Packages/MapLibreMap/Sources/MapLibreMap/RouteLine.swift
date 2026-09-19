@@ -104,6 +104,7 @@ public struct PartyBody: Equatable, Sendable {
     public var ghost: Bool
     public var overdue: Bool
     public var markKind: String
+    public var ink: String
     public var rangeMeters: Double?
     public var presence: Bool
     public var count: Int
@@ -122,6 +123,7 @@ public struct PartyBody: Equatable, Sendable {
         ghost: Bool = false,
         overdue: Bool = false,
         markKind: String = "",
+        ink: String = "",
         rangeMeters: Double? = nil,
         presence: Bool = false,
         count: Int = 1
@@ -139,6 +141,7 @@ public struct PartyBody: Equatable, Sendable {
         self.ghost = ghost
         self.overdue = overdue
         self.markKind = markKind
+        self.ink = ink
         self.rangeMeters = rangeMeters
         self.presence = presence
         self.count = max(count, 1)
@@ -177,6 +180,7 @@ public enum PartyPips {
                 || a.ghost != b.ghost
                 || a.overdue != b.overdue
                 || a.markKind != b.markKind
+                || a.ink != b.ink
                 || a.presence != b.presence
                 || a.count != b.count
             {

@@ -91,7 +91,7 @@ final class AppRuntime {
     var heldNear: NearHold?
     /// Packed cameras for the open extract. Empty is honest (NM).
     var packCams: [PackCam] = []
-    /// Party place composer. NAME / NOTE / FACE live here until DROP.
+    /// Party place composer. NAME / NOTE / COLOR / FACE live here until DROP.
     var markDraft: MapMarkDraft?
     /// Planted place the thumb is holding. Mutually exclusive with ground and party.
     var heldMark: MapMark?
@@ -518,6 +518,7 @@ final class AppRuntime {
                 name: named,
                 note: existing.note,
                 emblem: existing.emblem,
+                ink: MarkInk.resolved(ink: existing.ink, kind: existing.kind).rawValue,
                 existingID: existing.id
             )
             pulse()
@@ -530,6 +531,7 @@ final class AppRuntime {
             name: unnamed ? "" : pref,
             note: "",
             emblem: PersonEmblem.fallback.rawValue,
+            ink: MarkInk.fallback.rawValue,
             existingID: nil
         )
         pulse()
@@ -554,6 +556,7 @@ final class AppRuntime {
         let existing = marks.first {
             $0.id == draft.existingID || MarkDrop.sameCoord(($0.lat, $0.lon), (draft.lat, draft.lon))
         }
+        let kind = EyeDesk.MarkKind.parse(named == Inspect.unnamed ? "" : named)?.rawValue ?? ""
         let mark = MapMark(
             id: existing?.id ?? draft.existingID ?? UUID().uuidString,
             lat: draft.lat,
@@ -563,7 +566,8 @@ final class AppRuntime {
             note: note,
             emblem: emblem,
             from: mesh.localID,
-            kind: EyeDesk.MarkKind.parse(named == Inspect.unnamed ? "" : named)?.rawValue ?? ""
+            kind: kind,
+            ink: MarkInk.resolved(ink: draft.ink, kind: kind).rawValue
         )
         marks = MarkDrop.upsert(marks, mark: mark)
         MarkStore.save(marks)
@@ -575,7 +579,8 @@ final class AppRuntime {
             name: mark.name,
             note: mark.note,
             emblem: mark.emblem,
-            label: mark.label
+            label: mark.label,
+            ink: mark.ink
         )
         closeMark()
     }
@@ -626,6 +631,7 @@ final class AppRuntime {
             name: mark.name,
             note: mark.note,
             emblem: mark.emblem,
+            ink: MarkInk.resolved(ink: mark.ink, kind: mark.kind).rawValue,
             existingID: mark.id
         )
         pulse()
@@ -1778,6 +1784,7 @@ final class AppRuntime {
                     packName: pack?.name ?? "mark",
                     bbox: bbox
                 )
+                let kind = EyeDesk.MarkKind.parse(parsed.name)?.rawValue ?? ""
                 let mark = MapMark(
                     id: parsed.id.isEmpty ? UUID().uuidString : parsed.id,
                     lat: parsed.lat,
@@ -1787,7 +1794,8 @@ final class AppRuntime {
                     note: parsed.note,
                     emblem: PersonEmblem.resolved(parsed.emblem).rawValue,
                     from: env.from,
-                    kind: EyeDesk.MarkKind.parse(parsed.name)?.rawValue ?? ""
+                    kind: kind,
+                    ink: MarkInk.resolved(ink: parsed.ink, kind: kind).rawValue
                 )
                 marks = MarkDrop.upsert(marks, mark: mark)
                 MarkStore.save(marks)

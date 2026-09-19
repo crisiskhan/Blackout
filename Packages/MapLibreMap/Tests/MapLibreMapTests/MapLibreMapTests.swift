@@ -29,6 +29,8 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(back.first?.name, "")
         XCTAssertEqual(back.first?.note, "")
         XCTAssertEqual(back.first?.emblem, PersonEmblem.fallback.rawValue)
+        XCTAssertEqual(back.first?.ink, "")
+        XCTAssertEqual(PlaceMark.body(marks[0]).ink, "GREEN")
         XCTAssertEqual(PlaceMark.parse(PlaceMark.canvasID("m1")), "m1")
         XCTAssertEqual(PlaceMark.setDest, "SET DEST")
         XCTAssertNil(PlaceMark.parse("peer-1"))
@@ -1339,6 +1341,40 @@ final class MapLibreMapTests: XCTestCase {
         )
         XCTAssertTrue(lost.kid)
         XCTAssertEqual(lost.markKind, "LOST KID")
+    }
+
+    func testMarkInkIsChosenLampNotAPresetKind() {
+        XCTAssertEqual(
+            MarkInk.allCases.map(\.title),
+            ["SILVER", "GREEN", "YELLOW", "ORANGE", "RED", "BLUE"]
+        )
+        XCTAssertEqual(MarkInk.fallback, .green)
+        XCTAssertEqual(MarkInk.parse("blue"), .blue)
+        XCTAssertEqual(MarkInk.parse("YELLOW"), .yellow)
+        XCTAssertNil(MarkInk.parse("nope"))
+        XCTAssertEqual(MarkInk.resolved(ink: "", kind: ""), .green)
+        XCTAssertEqual(MarkInk.resolved(ink: "", kind: "DOWN"), .red)
+        XCTAssertEqual(MarkInk.resolved(ink: "BLUE", kind: "DOWN"), .blue)
+        XCTAssertGreaterThan(MarkInk.blue.rgba.b, MarkInk.green.rgba.b)
+        XCTAssertEqual(MarkInk.green.rgba.g, 230.0 / 255.0, accuracy: 0.01)
+        let suite = UserDefaults(suiteName: "map.marks.ink.\(UUID().uuidString)")!
+        let planted = MapMark(
+            id: "well",
+            lat: 31.76,
+            lon: -106.49,
+            label: "WELL",
+            name: "WELL",
+            ink: MarkInk.blue.rawValue
+        )
+        MarkStore.save([planted], defaults: suite)
+        XCTAssertEqual(MarkStore.load(defaults: suite).first?.ink, "BLUE")
+        XCTAssertEqual(PlaceMark.body(planted).ink, "BLUE")
+        XCTAssertEqual(
+            PlaceMark.body(
+                MapMark(id: "d", lat: 31.76, lon: -106.49, label: "DOWN", kind: "DOWN")
+            ).ink,
+            "RED"
+        )
     }
 
     func testDestinationPinTracksTheChosenTarget() {

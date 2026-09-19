@@ -385,17 +385,26 @@ struct MapTab: View {
             if !SearchIndex.asking(query), !rows.isEmpty {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(rows) { m in
-                        Button(m.title) {
+                        Button {
                             if runtime.enterOverviewPack(lat: m.lat, lon: m.lon) {
                                 return
                             }
                             runtime.pickDestination(lat: m.lat, lon: m.lon)
                             runtime.navigate(mode: runtime.travelMode)
+                        } label: {
+                            HStack(spacing: 8) {
+                                Circle()
+                                    .fill(Theme.markInk(MarkInk.resolved(ink: m.ink, kind: m.kind)))
+                                    .frame(width: 10, height: 10)
+                                Text(m.title)
+                                    .font(.system(size: 13, weight: .heavy))
+                                    .foregroundStyle(Theme.silver)
+                                    .lineLimit(2)
+                                    .minimumScaleFactor(1)
+                                Spacer(minLength: 0)
+                            }
                         }
-                        .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(Theme.silver)
-                        .lineLimit(2)
-                        .minimumScaleFactor(1)
+                        .buttonStyle(.plain)
                         .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
                         .padding(.horizontal, 12)
                     }

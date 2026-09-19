@@ -5,6 +5,7 @@ import Router
 import DeadReckoning
 import Almanac
 import BlackBox
+import Tokens
 
 public struct MapMark: Equatable, Sendable, Identifiable {
     public var id: String
@@ -16,6 +17,7 @@ public struct MapMark: Equatable, Sendable, Identifiable {
     public var emblem: String
     public var from: String
     public var kind: String
+    public var ink: String
 
     public init(
         id: String,
@@ -26,7 +28,8 @@ public struct MapMark: Equatable, Sendable, Identifiable {
         note: String = "",
         emblem: String = PersonEmblem.fallback.rawValue,
         from: String = "",
-        kind: String = ""
+        kind: String = "",
+        ink: String = ""
     ) {
         self.id = id
         self.lat = lat
@@ -37,6 +40,7 @@ public struct MapMark: Equatable, Sendable, Identifiable {
         self.emblem = emblem
         self.from = from
         self.kind = kind
+        self.ink = ink
     }
 
     /// Glass row and SEARCH use the chosen NAME. Label keeps pack / OFF PACK.
@@ -48,7 +52,7 @@ public struct MapMark: Equatable, Sendable, Identifiable {
 
 extension MapMark: Codable {
     enum CodingKeys: String, CodingKey {
-        case id, lat, lon, label, name, note, emblem, from, kind
+        case id, lat, lon, label, name, note, emblem, from, kind, ink
     }
 
     public init(from decoder: Decoder) throws {
@@ -62,6 +66,7 @@ extension MapMark: Codable {
         emblem = try c.decodeIfPresent(String.self, forKey: .emblem) ?? PersonEmblem.fallback.rawValue
         from = try c.decodeIfPresent(String.self, forKey: .from) ?? ""
         kind = try c.decodeIfPresent(String.self, forKey: .kind) ?? ""
+        ink = try c.decodeIfPresent(String.self, forKey: .ink) ?? ""
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -75,16 +80,54 @@ extension MapMark: Codable {
         try c.encode(emblem, forKey: .emblem)
         try c.encode(from, forKey: .from)
         try c.encode(kind, forKey: .kind)
+        try c.encode(ink, forKey: .ink)
     }
 }
 
-/// Composer for a party place. NAME / NOTE / FACE live here until DROP.
+/// Pin ink on the MARK glass. Six HUD lamps so pins read apart at arm's length.
+public enum MarkInk: String, CaseIterable, Sendable, Hashable {
+    case silver = "SILVER"
+    case green = "GREEN"
+    case yellow = "YELLOW"
+    case orange = "ORANGE"
+    case red = "RED"
+    case blue = "BLUE"
+
+    public static let fallback = MarkInk.green
+
+    public var title: String { rawValue }
+
+    public var rgba: BlackoutTokens.RGBA {
+        switch self {
+        case .silver: return BlackoutTokens.Color.silver
+        case .green: return BlackoutTokens.Color.fix
+        case .yellow: return BlackoutTokens.Color.caution
+        case .orange: return BlackoutTokens.Color.heat
+        case .red: return BlackoutTokens.Color.accent
+        case .blue: return BlackoutTokens.Color.ice
+        }
+    }
+
+    public static func parse(_ raw: String?) -> MarkInk? {
+        let key = (raw ?? "").trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        return MarkInk(rawValue: key)
+    }
+
+    public static func resolved(ink: String?, kind: String = "") -> MarkInk {
+        if let parsed = parse(ink) { return parsed }
+        if EyeDesk.MarkKind.parse(kind) == .down { return .red }
+        return fallback
+    }
+}
+
+/// Composer for a party place. NAME / NOTE / COLOR / FACE live here until DROP.
 public struct MapMarkDraft: Equatable, Sendable {
     public var lat: Double
     public var lon: Double
     public var name: String
     public var note: String
     public var emblem: String
+    public var ink: String
     public var existingID: String?
 
     public init(
@@ -93,6 +136,7 @@ public struct MapMarkDraft: Equatable, Sendable {
         name: String = "",
         note: String = "",
         emblem: String = PersonEmblem.fallback.rawValue,
+        ink: String = MarkInk.fallback.rawValue,
         existingID: String? = nil
     ) {
         self.lat = lat
@@ -100,6 +144,7 @@ public struct MapMarkDraft: Equatable, Sendable {
         self.name = name
         self.note = note
         self.emblem = emblem
+        self.ink = ink
         self.existingID = existingID
     }
 }
@@ -128,7 +173,8 @@ public enum PlaceMark {
             emblem: mark.emblem,
             condition: mark.kind == EyeDesk.MarkKind.down.rawValue ? "red" : "green",
             kid: EyeDesk.kidMark(name: mark.name, kind: mark.kind),
-            markKind: mark.kind
+            markKind: mark.kind,
+            ink: MarkInk.resolved(ink: mark.ink, kind: mark.kind).rawValue
         )
     }
 }
@@ -1589,7 +1635,7 @@ public enum PersonMarkPaint: Sendable {
     public static func pipKey(_ pips: [PartyBody]) -> String {
         pips.map { pip in
             let heading = quantizedHeading(pip.ghost ? nil : pip.headingDeg)
-            return "\(pip.id)|\(pip.emblem)|\(pip.condition)|\(heading)|\(pip.markKind)|\(pip.lead)|\(pip.kid)|\(pip.presence)|\(pip.count)"
+            return "\(pip.id)|\(pip.emblem)|\(pip.condition)|\(heading)|\(pip.markKind)|\(pip.ink)|\(pip.lead)|\(pip.kid)|\(pip.presence)|\(pip.count)"
         }
         .joined(separator: ";")
     }
