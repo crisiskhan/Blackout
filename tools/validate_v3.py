@@ -789,7 +789,26 @@ def BlackoutTokens_accent(tokens: str) -> bool:
 
 def l10n() -> None:
     text = (ROOT / "Blackout" / "L10n.swift").read_text()
-    for key in ("CALL SOS", "LLAMAR SOS", "ROJO", "PARA-SI", "VENCIDO", "ESTOY BIEN", "NET · NONE", "NO VISION MODEL"):
+    for key in (
+        "CALL SOS",
+        "LLAMAR SOS",
+        "ROJO",
+        "PARA-SI",
+        "VENCIDO",
+        "ESTOY BIEN",
+        "NET · NONE",
+        "NO VISION MODEL",
+        "HERE",
+        "AQUÍ",
+        "MOVING",
+        "MARCHA",
+        "COME",
+        "VEN",
+        "HURT",
+        "HERIDO",
+        "FOUND",
+        "HALLADO",
+    ):
         if key not in text:
             bad(f"missing l10n {key}")
             return
@@ -827,12 +846,15 @@ def mesh() -> None:
         bad("party join missing QR encode/scan")
     else:
         ok("join is QR plus typed party code")
-    if "chip.rally" not in comms or "chip.down" not in comms:
-        bad("comms missing RALLY/DOWN chips")
+    chips = (ROOT / "Packages" / "CommsUI" / "Sources" / "CommsUI" / "CommsUI.swift").read_text()
+    if "static let rail" not in chips or "ForEach(Chip.rail" not in comms:
+        bad("comms chip rail is not Chip.rail")
+    elif ".here" not in chips or ".found" not in chips or ".hurt" not in chips:
+        bad("comms Chip.rail missing field words")
     if "sendRED" not in app or "sendTimer" not in app:
         bad("RED/timer not wired to mesh")
     else:
-        ok("RALLY/DOWN chips and RED/timer mesh wiring")
+        ok("Chip.rail field words and RED/timer mesh wiring")
     if "chromeNear" not in src or "noteHear" not in src or "ble, hop" not in src:
         bad("mesh missing NEAR / hop carry")
     elif "func startListen(" not in src or "chromeSignal" not in src:

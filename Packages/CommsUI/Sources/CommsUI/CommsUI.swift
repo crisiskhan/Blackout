@@ -5,7 +5,33 @@ import PTTAudio
 import RosterRoles
 
 public enum Chip: String, CaseIterable, Sendable, Hashable {
-    case ok, formUp, wait, water, lostKid, overdue, rally, down, sos
+    case here, wait, moving, come, rally, down, hurt, water, lost, found
+    case ok, formUp, lostKid, overdue, sos
+
+    /// Party words on the COMMS rail. SOS and I AM OK stay off it.
+    public static let rail: [Chip] = [
+        .here, .wait, .moving, .come, .rally, .down, .hurt, .water, .lost, .found
+    ]
+
+    public var wordKey: String {
+        switch self {
+        case .here: return "chip.here"
+        case .wait: return "chip.wait"
+        case .moving: return "chip.moving"
+        case .come: return "chip.come"
+        case .rally: return "chip.rally"
+        case .down: return "chip.down"
+        case .hurt: return "chip.hurt"
+        case .water: return "chip.water"
+        case .lost: return "chip.lost"
+        case .found: return "chip.found"
+        case .ok: return "ok.chip"
+        case .formUp: return "form.up"
+        case .lostKid: return "lost.kid"
+        case .overdue: return "overdue"
+        case .sos: return "sos.mesh"
+        }
+    }
 }
 
 public struct CommsState: Sendable {
@@ -34,12 +60,18 @@ public struct CommsState: Sendable {
 
     public var whisperOK: Bool { whisperMeters < 10 }
 
-    public mutating func formUp() { push(.formUp) }
-    public mutating func lostKid() { push(.lostKid) }
+    public mutating func here() { push(.here) }
     public mutating func wait() { push(.wait) }
-    public mutating func water() { push(.water) }
+    public mutating func moving() { push(.moving) }
+    public mutating func come() { push(.come) }
     public mutating func rally() { push(.rally) }
     public mutating func down() { push(.down) }
+    public mutating func hurt() { push(.hurt) }
+    public mutating func water() { push(.water) }
+    public mutating func lost() { push(.lost) }
+    public mutating func found() { push(.found) }
+    public mutating func formUp() { push(.formUp) }
+    public mutating func lostKid() { push(.lostKid) }
     public mutating func sos() { push(.sos) }
 
     public mutating func pickPeer(_ name: String) {

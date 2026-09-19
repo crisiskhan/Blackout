@@ -14,6 +14,28 @@ final class CommsUITests: XCTestCase {
         XCTAssertEqual(s.channel, "1:1")
     }
 
+    func testRailIsTheTenFieldWords() {
+        XCTAssertEqual(Chip.rail.count, 10)
+        XCTAssertEqual(
+            Chip.rail,
+            [.here, .wait, .moving, .come, .rally, .down, .hurt, .water, .lost, .found]
+        )
+        XCTAssertFalse(Chip.rail.contains(.sos))
+        XCTAssertFalse(Chip.rail.contains(.ok))
+        XCTAssertFalse(Chip.rail.contains(.formUp))
+        XCTAssertFalse(Chip.rail.contains(.lostKid))
+        XCTAssertFalse(Chip.rail.contains(.overdue))
+        XCTAssertEqual(Chip(rawValue: "formUp"), .formUp)
+        XCTAssertEqual(Chip(rawValue: "lostKid"), .lostKid)
+        XCTAssertEqual(Chip.here.wordKey, "chip.here")
+        XCTAssertEqual(Chip.found.wordKey, "chip.found")
+        XCTAssertEqual(Chip.ok.wordKey, "ok.chip")
+        var s = CommsState()
+        s.here()
+        s.found()
+        XCTAssertEqual(s.chips, [.here, .found])
+    }
+
     func testRadioCheckDoesNotInventAPeer() {
         var s = CommsState()
         s.radioCheck()

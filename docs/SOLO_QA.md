@@ -49,8 +49,8 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 
 - [ ] PASS / FAIL / N/A — Chrome starts `NET · NONE` (not `NET · MPC` / `NET · BLE` with nobody connected).
 - [ ] PASS / FAIL / N/A — ACTIVATE starts LISTEN without a party. COMMS `LISTEN` / `QUIET` is the same radio. `SCAN` is a 44pt NET button — it hears and places without a party. JOIN LOCAL NET starts the party radio and places the same way. Button becomes `LEAVE NET`. Still `NET · NONE` until a real peer. Heard radios print `NEAR · n` and, after SCAN or JOIN LOCAL NET, green-and-black dots — they are not peers. An open hop is `NET · HOP`. LEAVE NET keeps LISTEN and the scan. QUIET stops the radio and clears the dots. No `NET JOINED` dead control.
-- [ ] PASS / FAIL / N/A — RALLY or DOWN: write stays local; chrome `NO PEERS · LOGGED`. No TX / sent claim.
-- [ ] PASS / FAIL / N/A — FORM UP / LOST KID / WAIT / WATER chips log locally the same way. Whole words on the rail.
+- [ ] PASS / FAIL / N/A — HERE or WAIT or RALLY or DOWN: write stays local; chrome `NO PEERS · LOGGED`. No TX / sent claim.
+- [ ] PASS / FAIL / N/A — MOVING / COME / HURT / WATER / LOST / FOUND log the same way. Ten whole words on the rail: HERE, WAIT, MOVING, COME, RALLY, DOWN, HURT, WATER, LOST, FOUND. No I AM OK. No SOS. FORM UP and LOST KID stay off the rail; an inbound hop still prints them.
 - [ ] PASS / FAIL / N/A — HOLD PTT is a hold, not a tap. Live chrome `PTT` (RELEASE PTT) only after the mic arms. Release ends. Chrome `NO PEERS · LOGGED`. Mic deny: `MIC DENIED` and the header does not read `PTT`. Does not claim sent. 15s CLIP reads `RECORDING` while armed (tap ends it) and records the mic, or `MIC DENIED` / `CLIP EMPTY` — not silence zeros.
 - [ ] PASS / FAIL / N/A — 1:1 with nobody nearby is `NO PEERS` (not a private channel). Distinct from chip-write chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — Empty COMMS NOTE SEND chromes `WRITE NOTE` and keeps the draft. A tap draws, or it says why not.

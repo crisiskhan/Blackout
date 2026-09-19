@@ -234,23 +234,10 @@ struct CommsTab: View {
         VStack(alignment: .leading, spacing: 16) {
             sectionLabel("CHIPS")
             HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                chip(L10n.t("chip.rally", runtime.locale)) {
-                    runtime.sendPartyChip(.rally)
-                }
-                chip(L10n.t("chip.down", runtime.locale)) {
-                    runtime.sendPartyChip(.down)
-                }
-                chip(L10n.t("form.up", runtime.locale)) {
-                    runtime.sendPartyChip(.formUp)
-                }
-                chip(L10n.t("lost.kid", runtime.locale)) {
-                    runtime.sendPartyChip(.lostKid)
-                }
-                chip(L10n.t("chip.wait", runtime.locale)) {
-                    runtime.sendPartyChip(.wait)
-                }
-                chip(L10n.t("chip.water", runtime.locale)) {
-                    runtime.sendPartyChip(.water)
+                ForEach(Chip.rail, id: \.self) { c in
+                    chip(L10n.t(c.wordKey, runtime.locale)) {
+                        runtime.sendPartyChip(c)
+                    }
                 }
             }
             if !runtime.comms.chips.isEmpty || !runtime.mesh.inboundChips.isEmpty {
@@ -466,16 +453,6 @@ struct CommsTab: View {
     }
 
     private func chipWord(_ c: Chip) -> String {
-        switch c {
-        case .ok: return L10n.t("ok.chip", runtime.locale)
-        case .formUp: return L10n.t("form.up", runtime.locale)
-        case .wait: return L10n.t("chip.wait", runtime.locale)
-        case .water: return L10n.t("chip.water", runtime.locale)
-        case .lostKid: return L10n.t("lost.kid", runtime.locale)
-        case .overdue: return L10n.t("overdue", runtime.locale)
-        case .rally: return L10n.t("chip.rally", runtime.locale)
-        case .down: return L10n.t("chip.down", runtime.locale)
-        case .sos: return L10n.t("sos.mesh", runtime.locale)
-        }
+        L10n.t(c.wordKey, runtime.locale)
     }
 }
