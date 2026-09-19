@@ -37,27 +37,19 @@ ALBUQUERQUE = {"lat": 35.0844, "lon": -106.6504}
 
 
 def _aerial_paths(dest: Path) -> list[Path]:
-    files = [p for p in dest.glob("aerial*.pmtiles") if p.is_file()]
-
-    def key(path: Path) -> tuple[int, int]:
-        stem = path.name.removesuffix(".pmtiles")
-        if stem == "aerial":
-            return (0, 0)
-        _, _, rest = stem.partition("-")
-        return (1, int(rest) if rest.isdigit() else 0)
-
-    return sorted(files, key=key)
+    return [dest / name for name in aerial.shard_names(dest)]
 
 
 def _packed_jpeg(dest: Path, lon: float, lat: float, z: int) -> bytes | None:
     cx, cy = lonlat_to_tile(lon, lat, z)
     x, y = int(cx), int(cy)
+    found = None
     for path in _aerial_paths(dest):
         with open(path, "rb") as fh:
             blob = Reader(MmapSource(fh)).get(z, x, y)
         if blob:
-            return blob
-    return None
+            found = blob
+    return found
 
 
 def _job_has(pack: dict, lon: float, lat: float, z: int) -> bool:
@@ -174,7 +166,7 @@ class StyleAndResolverTests(unittest.TestCase):
     def test_resolver_and_eye_layers_lock(self):
         swift = SWIFT.read_text()
         offline = OFFLINE.read_text()
-        self.assertIn("resolverVersion = 15", swift)
+        self.assertIn("resolverVersion = 16", swift)
         self.assertIn("func attachKhanLayers", swift)
         self.assertIn("func attachAerialLayers", swift)
         self.assertIn("khan.pmtiles", swift)
@@ -628,7 +620,7 @@ class FullExtractPhotoTests(unittest.TestCase):
         self.assertIn("contentsOfDirectory", attach)
         self.assertIn('hasPrefix("aerial")', attach)
         self.assertIn("hasSuffix(\".pmtiles\")", attach)
-        self.assertIn("resolverVersion = 15", SWIFT.read_text())
+        self.assertIn("resolverVersion = 16", SWIFT.read_text())
         copy = (ROOT / "tools" / "copy_resources.sh").read_text()
         self.assertIn("Packs/*/.naip-cache", copy)
         ignore = (ROOT / ".gitignore").read_text()
@@ -671,6 +663,108 @@ class FullExtractPhotoTests(unittest.TestCase):
             self.assertGreater(len(blob), 800)
         if missing:
             self.skipTest("still packing " + ", ".join(missing))
+
+
+class PhotoSeamTests(unittest.TestCase):
+    """Packed NAIP is one photo, not a quilt of independently stretched tiles."""
+
+    def test_feather_blends_a_hard_tile_edge(self):
+        red = _solid_jpeg((220, 20, 20))
+        blue = _solid_jpeg((20, 20, 220))
+        tiles = {(16, 10, 10): red, (16, 11, 10): blue}
+        out = aerial.feather_tiles(tiles, px=8)
+        east = _jpeg_rgb(out[(16, 10, 10)])
+        west = _jpeg_rgb(out[(16, 11, 10)])
+        before = _edge_mean(_jpeg_rgb(red), _jpeg_rgb(blue), "ew")
+        after = _edge_mean(east, west, "ew")
+        self.assertGreater(before, 120)
+        self.assertLess(after, before * 0.45)
+
+    def test_doniphan_walk_desk_is_not_a_photo_quilt(self):
+        # Crisis still: DEST 31.874844, -106.533441. Doniphan sits on the
+        # north edge of this z16 tile. A raw NAIP export quilts there.
+        lon, lat, z = -106.533441, 31.874844, 16
+        cx, cy = lonlat_to_tile(lon, lat, z)
+        x, y = int(cx), int(cy)
+        dest = PACK_ROOT / "tx-west"
+        center_blob = _packed_jpeg(dest, lon, lat, z)
+        above = None
+        for path in _aerial_paths(dest):
+            with open(path, "rb") as fh:
+                blob = Reader(MmapSource(fh)).get(z, x, y - 1)
+            if blob:
+                above = blob
+        self.assertIsNotNone(center_blob)
+        self.assertIsNotNone(above)
+        center = _jpeg_rgb(center_blob)
+        seam = _edge_mean(_jpeg_rgb(above), center, "ns")
+        interior = _interior_mean(center)
+        self.assertLess(
+            seam,
+            interior * 1.65,
+            f"Doniphan north seam {seam:.1f} vs interior {interior:.1f}",
+        )
+        self.assertIn("aerial-seam.pmtiles", aerial.shard_names(dest))
+        self.assertEqual(aerial.shard_names(dest)[-1], "aerial-seam.pmtiles")
+
+    def test_aerial_resamples_linear_so_overzoom_is_not_a_grid(self):
+        paint = aerial.style_layer()["paint"]
+        self.assertEqual(paint.get("raster-resampling"), "linear")
+        attach = SWIFT.read_text().split("public static func attachAerialLayers")[1].split(
+            "Packed OSM houses"
+        )[0]
+        self.assertIn('"raster-resampling": "linear"', attach)
+        self.assertIn("resolverVersion = 16", SWIFT.read_text())
+        qa = (ROOT / "docs" / "SOLO_QA.md").read_text()
+        self.assertIn("photo is not a quilt", qa.lower())
+        self.assertIn("def feather_tiles", (ROOT / "tools" / "v3" / "aerial.py").read_text())
+        self.assertIn("SEAM_BOXES", (ROOT / "tools" / "v3" / "aerial.py").read_text())
+
+
+def _solid_jpeg(rgb: tuple[int, int, int]) -> bytes:
+    from io import BytesIO
+
+    from PIL import Image
+
+    buf = BytesIO()
+    Image.new("RGB", (256, 256), rgb).save(buf, format="JPEG", quality=95, subsampling=0)
+    return buf.getvalue()
+
+
+def _jpeg_rgb(blob: bytes):
+    from io import BytesIO
+
+    from PIL import Image
+
+    return Image.open(BytesIO(blob)).convert("RGB")
+
+
+def _edge_mean(left, right, side: str) -> float:
+    w, h = left.size
+    lp, rp = list(left.getdata()), list(right.getdata())
+    diffs = []
+    if side == "ew":
+        for y in range(h):
+            a = lp[y * w + (w - 1)]
+            b = rp[y * w]
+            diffs.append(sum(abs(a[i] - b[i]) for i in range(3)) / 3)
+    else:
+        for x in range(w):
+            a = lp[(h - 1) * w + x]
+            b = rp[x]
+            diffs.append(sum(abs(a[i] - b[i]) for i in range(3)) / 3)
+    return sum(diffs) / len(diffs)
+
+
+def _interior_mean(im) -> float:
+    w, h = im.size
+    pix = list(im.getdata())
+    diffs = []
+    for y in range(h):
+        a = pix[y * w + 8]
+        b = pix[y * w + 9]
+        diffs.append(sum(abs(a[i] - b[i]) for i in range(3)) / 3)
+    return sum(diffs) / len(diffs)
 
 
 if __name__ == "__main__":

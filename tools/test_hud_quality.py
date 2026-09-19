@@ -4240,7 +4240,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("khan.pmtiles", cam)
         self.assertIn("aerial.pmtiles", cam)
         self.assertIn('"type": "fill-extrusion"', cam)
-        self.assertIn("resolverVersion = 15", cam)
+        self.assertIn("resolverVersion = 16", cam)
         khan_attach = cam.split("func attachKhanLayers")[1].split("func attachWaterLayers")[0]
         self.assertIn("removeAll", khan_attach)
         self.assertNotIn('"id": khanBuildingsLayerID', khan_attach)

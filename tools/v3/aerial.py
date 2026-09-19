@@ -7,6 +7,7 @@ Not a live photo mesh, not a world feed.
 
 from __future__ import annotations
 
+import math
 import shutil
 import time
 import urllib.error
@@ -45,6 +46,17 @@ CACHE_DIR = ".naip-cache"
 WRITE_DIR = ".aerial-write"
 # Leave room for the PMTiles directory so a shard stays under GitHub's 100 MB.
 SHARD_PAYLOAD_BYTES = SHARD_MAX_BYTES - (2 * 1024 * 1024)
+# Blend this many pixels across a shared tile edge so NAIP is one photo.
+FEATHER_PX = 8
+# Walking desk Crisis scored: Vinton–Anthony plus Doniphan retail east of Oleaster.
+SEAM_BOXES = {
+    "tx-west": {
+        "south": 31.82,
+        "west": -106.68,
+        "north": 32.06,
+        "east": -106.48,
+    }
+}
 
 # Extra packed photo walks. Metro is downtown; YOU on Oleaster sits west of it.
 PHOTO_EXTRA = {
@@ -148,6 +160,10 @@ def shard_names(dest: Path) -> list[str]:
         if stem == "aerial":
             return (0, 0)
         _, _, rest = stem.partition("-")
+        if rest.startswith("seam"):
+            tail = rest[4:]
+            part = int(tail[1:]) if tail.startswith("-") and tail[1:].isdigit() else 0
+            return (2, part)
         return (1, int(rest) if rest.isdigit() else 0)
 
     return sorted(files, key=key)
@@ -182,7 +198,11 @@ def style_layer(name: str = AERIAL_FILE) -> dict:
         "minzoom": AERIAL_STYLE_MIN_ZOOM,
         "maxzoom": 22,
         "layout": {"visibility": "none"},
-        "paint": {"raster-opacity": 1, "raster-fade-duration": 0},
+        "paint": {
+            "raster-opacity": 1,
+            "raster-fade-duration": 0,
+            "raster-resampling": "linear",
+        },
     }
 
 
@@ -494,6 +514,7 @@ def build_aerial(dest: Path, pack: dict) -> dict[str, Any]:
     if not names:
         present = sum(1 for zxy in jobs if cache_get(dest, *zxy))
         return {"present": False, "reason": f"NAIP returned {present} tiles", "tiles": 0}
+    names.extend(write_feather_overlay(dest, pack_id))
     tiles = sum(1 for zxy in jobs if cache_get(dest, *zxy))
     bytes_out = sum((dest / name).stat().st_size for name in names)
     return {
@@ -504,3 +525,161 @@ def build_aerial(dest: Path, pack: dict) -> dict[str, Any]:
         "bytes": bytes_out,
         "attribution": NAIP_CREDIT,
     }
+
+
+def _tile_center(z: int, x: int, y: int) -> tuple[float, float]:
+    n = 2.0**z
+    lon = (x + 0.5) / n * 360.0 - 180.0
+    lat = math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * (y + 0.5) / n))))
+    return lon, lat
+
+
+def _zxy_in_box(z: int, x: int, y: int, box: dict) -> bool:
+    lon, lat = _tile_center(z, x, y)
+    return box["south"] <= lat <= box["north"] and box["west"] <= lon <= box["east"]
+
+
+def _jpeg_decode(blob: bytes):
+    from io import BytesIO
+
+    from PIL import Image
+
+    return Image.open(BytesIO(blob)).convert("RGB")
+
+
+def _jpeg_encode(im) -> bytes:
+    from io import BytesIO
+
+    buf = BytesIO()
+    im.save(buf, format="JPEG", quality=90, optimize=True, subsampling=0)
+    return buf.getvalue()
+
+
+def feather_tiles(
+    tiles: dict[tuple[int, int, int], bytes],
+    px: int = FEATHER_PX,
+) -> dict[tuple[int, int, int], bytes]:
+    """Blend shared edges so independently stretched NAIP tiles read as one photo."""
+    orig = {}
+    for zxy, blob in tiles.items():
+        if blob and blob.startswith(JPEG_MAGIC):
+            orig[zxy] = _jpeg_decode(blob)
+    out = dict(tiles)
+    for (z, x, y), im in orig.items():
+        width, height = im.size
+        band = min(px, width // 4, height // 4)
+        if band < 1:
+            continue
+        src = im.load()
+        new = im.copy()
+        dst = new.load()
+        changed = False
+
+        right = orig.get((z, x + 1, y))
+        if right is not None:
+            rp = right.load()
+            for i in range(band):
+                col = width - band + i
+                t = (i + 1) / (2 * band)
+                for row in range(height):
+                    a = src[col, row]
+                    b = rp[i, row]
+                    dst[col, row] = tuple(int(a[c] * (1 - t) + b[c] * t) for c in range(3))
+            changed = True
+
+        left = orig.get((z, x - 1, y))
+        if left is not None:
+            lp = left.load()
+            lw = left.size[0]
+            for i in range(band):
+                col = i
+                t = (band - i) / (2 * band)
+                for row in range(height):
+                    a = src[col, row]
+                    b = lp[lw - band + i, row]
+                    dst[col, row] = tuple(int(a[c] * (1 - t) + b[c] * t) for c in range(3))
+            changed = True
+
+        below = orig.get((z, x, y + 1))
+        if below is not None:
+            bp = below.load()
+            for i in range(band):
+                row = height - band + i
+                t = (i + 1) / (2 * band)
+                for col in range(width):
+                    a = src[col, row]
+                    b = bp[col, i]
+                    dst[col, row] = tuple(int(a[c] * (1 - t) + b[c] * t) for c in range(3))
+            changed = True
+
+        above = orig.get((z, x, y - 1))
+        if above is not None:
+            ap = above.load()
+            ah = above.size[1]
+            for i in range(band):
+                row = i
+                t = (band - i) / (2 * band)
+                for col in range(width):
+                    a = src[col, row]
+                    b = ap[col, ah - band + i]
+                    dst[col, row] = tuple(int(a[c] * (1 - t) + b[c] * t) for c in range(3))
+            changed = True
+
+        if changed:
+            blob = _jpeg_encode(new)
+            if blob.startswith(JPEG_MAGIC) and len(blob) > 800:
+                out[(z, x, y)] = blob
+    return out
+
+
+def write_feather_overlay(dest: Path, pack_id: str) -> list[str]:
+    """`aerial-seam.pmtiles` is last. Phone merge applies these tiles so the walk desk is one photo."""
+    box = SEAM_BOXES.get(pack_id)
+    if not box:
+        return []
+    tiles: dict[tuple[int, int, int], bytes] = {}
+    for name in shard_names(dest):
+        if name.startswith("aerial-seam"):
+            continue
+        tiles.update(read_archive(dest / name))
+    core = {zxy for zxy in tiles if zxy[0] >= 14 and _zxy_in_box(*zxy, box)}
+    wanted = set(core)
+    for z, x, y in core:
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nbr = (z, x + dx, y + dy)
+            if nbr in tiles:
+                wanted.add(nbr)
+    if len(wanted) < 8:
+        return []
+    subset = {zxy: tiles[zxy] for zxy in wanted}
+    feathered = feather_tiles(subset)
+    bbox = {
+        "west": box["west"],
+        "south": box["south"],
+        "east": box["east"],
+        "north": box["north"],
+    }
+    pack = {"id": pack_id, "name": pack_id}
+    ordered = sorted(feathered.items(), key=lambda item: zxy_to_tileid(*item[0]))
+    written: list[str] = []
+    current: list[tuple[tuple[int, int, int], bytes]] = []
+    size = 0
+    part = 0
+    for old in dest.glob("aerial-seam*.pmtiles"):
+        old.unlink()
+    for item in ordered:
+        payload = len(item[1])
+        if current and size + payload > SHARD_PAYLOAD_BYTES:
+            name = "aerial-seam.pmtiles" if part == 0 else f"aerial-seam-{part}.pmtiles"
+            _write_one_shard(dest / name, current, bbox, pack)
+            written.append(name)
+            part += 1
+            current = []
+            size = 0
+        current.append(item)
+        size += payload
+    if current:
+        name = "aerial-seam.pmtiles" if part == 0 else f"aerial-seam-{part}.pmtiles"
+        _write_one_shard(dest / name, current, bbox, pack)
+        written.append(name)
+    return written

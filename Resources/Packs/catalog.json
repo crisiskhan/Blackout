@@ -153,6 +153,7 @@
         "aerial-7.pmtiles",
         "aerial-8.pmtiles",
         "aerial-9.pmtiles",
+        "aerial-seam.pmtiles",
         "aerial.pmtiles",
         "cameras.json",
         "dem.json",
@@ -171,7 +172,7 @@
         "search.json",
         "style.json"
       ],
-      "bytes": 1189225671,
+      "bytes": 1276627143,
       "overview": false
     },
     {

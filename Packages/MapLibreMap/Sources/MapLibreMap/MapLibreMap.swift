@@ -848,7 +848,7 @@ public enum PackStyle {
     /// Bump when the resolver changes: a phone that already cached a resolved style must
     /// not keep replaying it. v15 strips grey house masses so a cached v14 style
     /// cannot keep covering the photo.
-    public static let resolverVersion = 15
+    public static let resolverVersion = 16
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -1144,6 +1144,7 @@ public enum PackStyle {
                 "paint": [
                     "raster-opacity": 1,
                     "raster-fade-duration": 0,
+                    "raster-resampling": "linear",
                 ],
             ]
             if let index = layers.firstIndex(where: { $0["id"] as? String == sourceID }) {
