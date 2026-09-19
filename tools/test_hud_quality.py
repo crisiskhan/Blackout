@@ -1202,6 +1202,9 @@ class ExpeditionHUDTests(unittest.TestCase):
         rail = exped.split("struct HUDVitalsRail")[1]
         self.assertIn("simultaneousGesture", rail)
         self.assertIn("dx >= dy", rail)
+        self.assertIn("minimumDistance: 16", rail)
+        self.assertNotIn("minimumDistance: 0", rail)
+        self.assertIn("onTapGesture", rail)
         self.assertIn("func applyRail(", rail)
         self.assertNotIn(".gesture(", rail.split("allowsHitTesting")[1].split("private func applyRail")[0])
         self.assertIn("Capsule()", rail)
@@ -3357,6 +3360,7 @@ class EmblemFaceGridTests(unittest.TestCase):
         self.assertIn("static let faces", emblem)
         self.assertIn("PersonEmblem.faces", grid)
         self.assertIn("ScrollView", grid)
+        self.assertIn("holdScroll()", grid)
         self.assertIn("mapChipHitPoints", grid)
         self.assertIn("*4", grid.replace(" ", ""))
         self.assertIn("var compact", grid)
@@ -4427,6 +4431,7 @@ class GlassCardHonestyTests(unittest.TestCase):
         # Xcode 16 frame() wants maxWidth before minHeight (GHA 35474761301).
         self.assertIn("maxWidth: .infinity, minHeight: 0", shell)
         self.assertNotIn("minHeight: 0, maxWidth:", shell)
+        self.assertIn("contentShape(RoundedRectangle", shell)
         self.assertIn("func holdScroll(", hold)
         for name in self.CARDS:
             src = read("Blackout", name)

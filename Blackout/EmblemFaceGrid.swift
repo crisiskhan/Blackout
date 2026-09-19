@@ -49,7 +49,7 @@ struct EmblemFaceGrid: View {
                 }
             }
         }
-        .scrollIndicators(.hidden)
+        .holdScroll()
     }
 
     private func thumb(_ emblem: PersonEmblem, lit: Bool) -> some View {

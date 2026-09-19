@@ -684,20 +684,19 @@ struct HUDVitalsRail: View {
                 .frame(width: width, height: hit)
                 .contentShape(Rectangle())
                 .allowsHitTesting(editable)
+                // Distance 0 owned the first pixel and the hold-card scroll
+                // died on PAIN / FATIGUE. 16pt lets the body take a swipe.
+                // A tap still sets the step.
+                .onTapGesture(count: 1, coordinateSpace: .local) { point in
+                    applyRail(x: point.x, width: width)
+                }
                 .simultaneousGesture(
-                    DragGesture(minimumDistance: 0)
+                    DragGesture(minimumDistance: 16)
                         .onChanged { gesture in
                             let dx = abs(gesture.translation.width)
                             let dy = abs(gesture.translation.height)
-                            guard dx > 8, dx >= dy else { return }
+                            guard dx >= dy else { return }
                             applyRail(x: gesture.location.x, width: width)
-                        }
-                        .onEnded { gesture in
-                            let dx = abs(gesture.translation.width)
-                            let dy = abs(gesture.translation.height)
-                            if dx < 8 && dy < 8 {
-                                applyRail(x: gesture.location.x, width: width)
-                            }
                         }
                 )
             }

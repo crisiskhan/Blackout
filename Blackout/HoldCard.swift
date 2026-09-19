@@ -150,6 +150,7 @@ struct HoldGlassShell<Content: View>: View {
                 .frame(height: 2)
         }
         .clipShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: corner, style: .continuous)
                 .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
