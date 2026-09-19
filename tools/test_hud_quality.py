@@ -4151,6 +4151,11 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("static func allowsPan(", cam)
         self.assertIn("static func allowsTilt(", cam)
         self.assertIn("static func cameraStaysOnPack(", cam)
+        stay = cam.split("static func cameraStaysOnPack(")[1].split(
+            "static func godsEyeCameraDistance("
+        )[0]
+        self.assertNotIn("godsEye", stay)
+        self.assertIn("overview: Bool", stay)
         self.assertIn("static let godsEyeMaxPitch: Double = 60", cam)
         self.assertIn("static func holdMinPitch(", cam)
         self.assertIn("static func holdMaxPitch(", cam)

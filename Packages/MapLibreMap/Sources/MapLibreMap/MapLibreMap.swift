@@ -709,7 +709,6 @@ public enum PackCamera {
     }
 
     public static func cameraStaysOnPack(
-        godsEye _: Bool = false,
         lat: Double,
         lon: Double,
         south: Double,

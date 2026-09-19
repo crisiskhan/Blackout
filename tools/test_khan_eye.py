@@ -228,6 +228,8 @@ class StyleAndResolverTests(unittest.TestCase):
             / "MapLibreMapTests.swift"
         ).read_text()
         self.assertIn("PackStyle.khanBuildingsLayerID", tests)
+        self.assertNotIn("cameraStaysOnPack(\n                overview:", tests)
+        self.assertIn("cameraStaysOnPack(\n                lat:", tests)
         count = 0
         for path in ROOT.joinpath("Packages", "MapLibreMap", "Tests").rglob("*.swift"):
             import re
@@ -395,7 +397,10 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         self.assertIn("PersonCompassArt.pin", mark)
         self.assertIn("func visiblePips", offline)
         vis = offline.split("func visiblePips")[1].split("func paintPersonMarks")[0]
-        self.assertIn("PlaceMark.parse", vis)
+        self.assertIn("spec.pips", vis)
+        self.assertNotIn("godsEye", vis)
+        paint = offline.split("func paintPersonMarks")[1].split("func partyShape")[0]
+        self.assertIn("PlaceMark.parse", paint)
         party = offline.split("func partyShape")[1].split("func emptyOverlayShape")[0]
         self.assertIn("PlaceMark.parse", party)
         self.assertIn('"bottom"', party)

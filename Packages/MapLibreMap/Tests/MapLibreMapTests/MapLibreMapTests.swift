@@ -287,24 +287,24 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(PackCamera.holdMaxPitch(godsEye: false), 60)
         XCTAssertTrue(
             PackCamera.cameraStaysOnPack(
-                overview: true,
                 lat: 31.5,
                 lon: -106.5,
                 south: 31.0,
                 west: -107.0,
                 north: 32.0,
-                east: -106.0
+                east: -106.0,
+                overview: true
             )
         )
         XCTAssertFalse(
             PackCamera.cameraStaysOnPack(
-                overview: true,
                 lat: 30.0,
                 lon: -106.5,
                 south: 31.0,
                 west: -107.0,
                 north: 32.0,
-                east: -106.0
+                east: -106.0,
+                overview: true
             )
         )
         XCTAssertTrue(
@@ -1275,13 +1275,13 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(PackCamera.allowsTilt(godsEye: false))
         XCTAssertFalse(
             PackCamera.cameraStaysOnPack(
-                overview: true,
                 lat: 40.0,
                 lon: -74.0,
                 south: 31.65,
                 west: -106.85,
                 north: 32.4,
-                east: -106.2
+                east: -106.2,
+                overview: true
             )
         )
         XCTAssertEqual(PackCamera.godsEyeCameraDistance(gev: 10_000, hudFit: 3_000), 10_000)
