@@ -69,7 +69,7 @@ python3 tools/test_hud_quality.py
 ```
 
 `audit_offline.sh` runs `validate_v3.py`, which runs `test_graph_plan.py`,
-`test_walkable_next_pack.py`, `test_tx_west_style.py`, `test_voice_nav.py`,
+`test_walkable_next_pack.py`, `test_states_pack.py`, `test_tx_west_style.py`, `test_voice_nav.py`,
 `test_speak_field.py`, `test_hud_quality.py`, `test_water_inspect.py`,
 `test_field_ask.py`, `test_survival_ask.py`, `test_field_tree.py`,
 `test_phone_trim.py`,

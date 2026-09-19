@@ -81,6 +81,10 @@ struct MapTab: View {
                         arranging: runtime.hudLayoutMode
                     ),
                     onMapTap: { lat, lon in
+                        if runtime.enterOverviewPack(lat: lat, lon: lon) {
+                            hits = []
+                            return
+                        }
                         runtime.pickDestination(lat: lat, lon: lon)
                         runtime.navigate(mode: runtime.travelMode)
                         hits = []
@@ -108,6 +112,7 @@ struct MapTab: View {
                     onPulse: { runtime.pulse() },
                     lockOn: runtime.lockOn,
                     godsEye: runtime.godsEye,
+                    overview: pack.overview,
                     travelMode: runtime.travelMode,
                     sun: runtime.lamp == .sun,
                     eyeLayers: runtime.eyeLayers,
@@ -376,6 +381,11 @@ struct MapTab: View {
                 let range = h.meters.map { SearchIndex.rangeLabel($0) }
                 let label = [h.name, word, range].compactMap { $0 }.joined(separator: " · ")
                 Button(label) {
+                    if runtime.enterOverviewPack(lat: h.lat, lon: h.lon) {
+                        hits = []
+                        query = ""
+                        return
+                    }
                     if h.kind == "address" {
                         runtime.holdAddress(h)
                     } else {
@@ -404,6 +414,9 @@ struct MapTab: View {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(rows) { m in
                         Button(m.title) {
+                            if runtime.enterOverviewPack(lat: m.lat, lon: m.lon) {
+                                return
+                            }
                             runtime.pickDestination(lat: m.lat, lon: m.lon)
                             runtime.navigate(mode: runtime.travelMode)
                         }

@@ -1,0 +1,157 @@
+{
+  "version": 8,
+  "name": "Blackout STATES",
+  "glyphs": "glyphs/{fontstack}/{range}.pbf",
+  "sources": {
+    "states": {
+      "type": "geojson",
+      "data": "states.geojson"
+    },
+    "highways": {
+      "type": "geojson",
+      "data": "highways.geojson"
+    },
+    "packs": {
+      "type": "geojson",
+      "data": "packs.geojson"
+    },
+    "cities": {
+      "type": "geojson",
+      "data": "cities.geojson"
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#000000"
+      }
+    },
+    {
+      "id": "state-fill",
+      "type": "fill",
+      "source": "states",
+      "paint": {
+        "fill-color": "#101214",
+        "fill-opacity": 1
+      }
+    },
+    {
+      "id": "state-line",
+      "type": "line",
+      "source": "states",
+      "paint": {
+        "line-color": "#B8BDC2",
+        "line-width": 1.6
+      }
+    },
+    {
+      "id": "highways",
+      "type": "line",
+      "source": "highways",
+      "paint": {
+        "line-color": "#B8BDC2",
+        "line-width": 1.15,
+        "line-opacity": 0.85
+      }
+    },
+    {
+      "id": "pack-fill",
+      "type": "fill",
+      "source": "packs",
+      "paint": {
+        "fill-color": "#E10600",
+        "fill-opacity": 0.14
+      }
+    },
+    {
+      "id": "pack-line",
+      "type": "line",
+      "source": "packs",
+      "paint": {
+        "line-color": "#E10600",
+        "line-width": 2
+      }
+    },
+    {
+      "id": "city-dot",
+      "type": "circle",
+      "source": "cities",
+      "paint": {
+        "circle-color": "#B8BDC2",
+        "circle-radius": 2.4,
+        "circle-stroke-color": "#000000",
+        "circle-stroke-width": 0.8
+      }
+    },
+    {
+      "id": "state-label",
+      "type": "symbol",
+      "source": "states",
+      "layout": {
+        "text-field": [
+          "get",
+          "name"
+        ],
+        "text-size": 18,
+        "text-font": [
+          "Open Sans Regular"
+        ],
+        "text-transform": "uppercase",
+        "text-letter-spacing": 0.12
+      },
+      "paint": {
+        "text-color": "#B8BDC2",
+        "text-halo-color": "#000000",
+        "text-halo-width": 1.4
+      }
+    },
+    {
+      "id": "pack-label",
+      "type": "symbol",
+      "source": "packs",
+      "layout": {
+        "text-field": [
+          "get",
+          "name"
+        ],
+        "text-size": 13,
+        "text-font": [
+          "Open Sans Regular"
+        ],
+        "text-allow-overlap": true
+      },
+      "paint": {
+        "text-color": "#E10600",
+        "text-halo-color": "#000000",
+        "text-halo-width": 1.2
+      }
+    },
+    {
+      "id": "city-label",
+      "type": "symbol",
+      "source": "cities",
+      "layout": {
+        "text-field": [
+          "get",
+          "name"
+        ],
+        "text-size": 12,
+        "text-font": [
+          "Open Sans Regular"
+        ],
+        "text-offset": [
+          0,
+          1.1
+        ],
+        "text-optional": true
+      },
+      "paint": {
+        "text-color": "#B8BDC2",
+        "text-halo-color": "#000000",
+        "text-halo-width": 1.1
+      }
+    }
+  ]
+}

@@ -233,7 +233,7 @@ def dropped_regions() -> None:
 
 def packs() -> None:
     cat = json.loads((ROOT / "Resources" / "Packs" / "catalog.json").read_text())
-    need = {"tx-west", "tx-east", "nm"}
+    need = {"tx-west", "tx-east", "nm", "states"}
     have = {p["id"] for p in cat["packs"]}
     if have != need:
         bad(f"pack set {have}")
@@ -262,6 +262,14 @@ def packs() -> None:
     ok("catalog ships TX/NM only; FL/NY packs dropped")
     for p in cat["packs"]:
         d = ROOT / "Resources" / "Packs" / p["id"]
+        if p.get("overview"):
+            if p.get("walkable"):
+                bad(f"{p['id']} overview pack must not be walkable")
+                return
+            if p.get("id") != "states":
+                bad(f"unexpected overview pack {p['id']}")
+                return
+            continue
         for req in ("manifest.json", "osm.geojson", "graph.bin", "contours.geojson", "style.json", "dem.json", "overlay.pmtiles"):
             if not (d / req).is_file():
                 bad(f"{p['id']} missing {req}")
@@ -1057,9 +1065,9 @@ def tip60_map_chrome() -> None:
         return
 
     pack_ids = {p.get("id") for p in catalog.get("packs") or []}
-    allowed_packs = {"nm", "tx-east", "tx-west"}
+    allowed_packs = {"nm", "tx-east", "tx-west", "states"}
     if pack_ids != allowed_packs:
-        bad("new packs added — tip-60 OUT")
+        bad("catalog packs drifted — metros plus STATES only")
         return
     if "CURRENT_PROJECT_VERSION = 1;" not in pbx or pbx.count("CURRENT_PROJECT_VERSION = 1;") < 6:
         bad("CPV bumped — tree must stay 1")
@@ -1142,9 +1150,9 @@ def tip62_nav() -> None:
     catalog = json.loads((ROOT / "Resources" / "Packs" / "catalog.json").read_text())
 
     pack_ids = {p.get("id") for p in catalog.get("packs") or []}
-    allowed_packs = {"nm", "tx-east", "tx-west"}
+    allowed_packs = {"nm", "tx-east", "tx-west", "states"}
     if pack_ids != allowed_packs:
-        bad("new packs added — tip-62 TX WEST only")
+        bad("catalog packs drifted — metros plus STATES only")
         return
     if "CURRENT_PROJECT_VERSION = 1;" not in pbx or pbx.count("CURRENT_PROJECT_VERSION = 1;") < 6:
         bad("CPV bumped — tree must stay 1")
@@ -1325,6 +1333,16 @@ def main() -> None:
         bad(f"walkable next-pack lock failed\n{next_pack.stdout}{next_pack.stderr}")
     else:
         ok("walkable next-pack lock: NM + TX EAST; default tx-west; no FL/NY")
+    states_pack = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_states_pack.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if states_pack.returncode != 0:
+        bad(f"STATES overview lock failed\n{states_pack.stdout}{states_pack.stderr}")
+    else:
+        ok("STATES overview: both states on one glass; metros stay walkable")
     style_read = subprocess.run(
         [sys.executable, str(ROOT / "tools" / "test_tx_west_style.py")],
         cwd=ROOT,

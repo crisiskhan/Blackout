@@ -1,0 +1,107 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "TX WEST",
+        "pack": "tx-west"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -107.6,
+              30.95
+            ],
+            [
+              -105.35,
+              30.95
+            ],
+            [
+              -105.35,
+              33.15
+            ],
+            [
+              -107.6,
+              33.15
+            ],
+            [
+              -107.6,
+              30.95
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "TX EAST",
+        "pack": "tx-east"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -97.95,
+              30.05
+            ],
+            [
+              -97.2,
+              30.05
+            ],
+            [
+              -97.2,
+              30.5
+            ],
+            [
+              -97.95,
+              30.5
+            ],
+            [
+              -97.95,
+              30.05
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "NM",
+        "pack": "nm"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -107.45,
+              34.35
+            ],
+            [
+              -105.65,
+              34.35
+            ],
+            [
+              -105.65,
+              35.95
+            ],
+            [
+              -107.45,
+              35.95
+            ],
+            [
+              -107.45,
+              34.35
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

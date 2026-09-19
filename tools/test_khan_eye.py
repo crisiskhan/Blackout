@@ -240,7 +240,7 @@ class StyleAndResolverTests(unittest.TestCase):
             import re
 
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 177)
+        self.assertEqual(count, 178)
 
 
 class PackedArchiveTests(unittest.TestCase):
@@ -435,11 +435,15 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         self.assertIn("static func holdMinZoom", cam)
         hold = cam.split("static func holdMinZoom")[1].split("static func holdMaxZoom")[0]
         self.assertIn("godsEye ? minZoom : photoMinZoom", hold)
+        self.assertIn("overviewMinZoom", hold)
         self.assertNotIn("godsEye _", hold)
         interact = OFFLINE.read_text().split("private func applyInteraction")[1].split(
             "public final class Coordinator"
         )[0]
-        self.assertIn("minimumZoomLevel = PackCamera.holdMinZoom(godsEye: godsEye)", interact)
+        self.assertIn(
+            "minimumZoomLevel = PackCamera.holdMinZoom(godsEye: godsEye, overview: overview)",
+            interact,
+        )
         self.assertNotIn("minimumZoomLevel = PackCamera.minZoom", interact)
         for blob in (
             (ROOT / "docs" / "SOLO_QA.md").read_text(),

@@ -1657,7 +1657,7 @@ class PartyPlaceMarkTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 177)
+        self.assertEqual(count, 178)
         self.assertIn("var name: String", marks)
         self.assertIn("var note: String", marks)
         self.assertIn("var emblem: String", marks)
@@ -2820,7 +2820,7 @@ class PartyHoldCardTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 177)
+        self.assertEqual(count, 178)
         self.assertIn("var onPersonHold", offline)
         self.assertIn("onPersonHold:", tab)
         self.assertIn("func personMark(at:", offline)
@@ -3815,7 +3815,7 @@ class AddressHoldCardTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 177)
+        self.assertEqual(count, 178)
         self.assertIn("struct HeldAddress", hold)
         self.assertIn("struct AddressHoldCard", card)
         self.assertIn("var heldAddress", app)
@@ -4009,9 +4009,15 @@ class MapCanvasHonestyTests(unittest.TestCase):
         interact = offline.split("private func applyInteraction")[1].split(
             "public final class Coordinator"
         )[0]
-        self.assertIn("minimumZoomLevel = PackCamera.holdMinZoom(godsEye: godsEye)", interact)
+        self.assertIn(
+            "minimumZoomLevel = PackCamera.holdMinZoom(godsEye: godsEye, overview: overview)",
+            interact,
+        )
         self.assertNotIn("minimumZoomLevel = PackCamera.minZoom", interact)
-        self.assertIn("maximumZoomLevel = PackCamera.holdMaxZoom(godsEye: godsEye)", interact)
+        self.assertIn(
+            "maximumZoomLevel = PackCamera.holdMaxZoom(godsEye: godsEye, overview: overview)",
+            interact,
+        )
         self.assertIn("godsEye ? godsEyeMaxZoom : maxZoom", cam)
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("Pinch stays on packed tiles", qa)
@@ -4193,7 +4199,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         count = 0
         for path in ROOT.joinpath("Packages", "MapLibreMap", "Tests").rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 177)
+        self.assertEqual(count, 178)
         self.assertIn("testPackCameraHoldsGodsEyeOverDestAndYou", tests)
         self.assertIn("if !runtime.godsEye", tab)
         self.assertIn("khanShadeOpacity", desk)

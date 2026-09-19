@@ -17,6 +17,10 @@ public struct PackManifest: Codable, Equatable, Sendable {
     /// year old. Optional because packs built before it existed have no honest
     /// answer, and a made-up date is worse than none.
     public var osmFetched: String?
+    /// Street graph and yard NAIP. STATES is the one catalog pack that is not.
+    public var walkable: Bool
+    /// Flat TX+NM chart. Pinch stays on the packed outlines; WALK stays off graph.
+    public var overview: Bool
 
     /// A struct's memberwise init is internal, so every other module could read
     /// a manifest off disk but not build one. That quietly made the map tests
@@ -30,7 +34,9 @@ public struct PackManifest: Codable, Equatable, Sendable {
         center: Coord,
         bbox: BBox,
         home: Coord? = nil,
-        osmFetched: String? = nil
+        osmFetched: String? = nil,
+        walkable: Bool = true,
+        overview: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -41,6 +47,42 @@ public struct PackManifest: Codable, Equatable, Sendable {
         self.bbox = bbox
         self.home = home
         self.osmFetched = osmFetched
+        self.walkable = walkable
+        self.overview = overview
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, state, bytes, banners, center, bbox, home, osmFetched, walkable, overview
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        name = try c.decode(String.self, forKey: .name)
+        state = try c.decode(String.self, forKey: .state)
+        bytes = try c.decode(Int.self, forKey: .bytes)
+        banners = try c.decode([String].self, forKey: .banners)
+        center = try c.decode(Coord.self, forKey: .center)
+        bbox = try c.decode(BBox.self, forKey: .bbox)
+        home = try c.decodeIfPresent(Coord.self, forKey: .home)
+        osmFetched = try c.decodeIfPresent(String.self, forKey: .osmFetched)
+        walkable = try c.decodeIfPresent(Bool.self, forKey: .walkable) ?? true
+        overview = try c.decodeIfPresent(Bool.self, forKey: .overview) ?? false
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(name, forKey: .name)
+        try c.encode(state, forKey: .state)
+        try c.encode(bytes, forKey: .bytes)
+        try c.encode(banners, forKey: .banners)
+        try c.encode(center, forKey: .center)
+        try c.encode(bbox, forKey: .bbox)
+        try c.encodeIfPresent(home, forKey: .home)
+        try c.encodeIfPresent(osmFetched, forKey: .osmFetched)
+        try c.encode(walkable, forKey: .walkable)
+        try c.encode(overview, forKey: .overview)
     }
 
     public struct Coord: Codable, Equatable, Sendable {
@@ -62,6 +104,10 @@ public struct PackManifest: Codable, Equatable, Sendable {
             self.west = west
             self.north = north
             self.east = east
+        }
+
+        public func contains(lat: Double, lon: Double) -> Bool {
+            lat >= south && lat <= north && lon >= west && lon <= east
         }
     }
 }
@@ -157,6 +203,13 @@ public final class PackStore: @unchecked Sendable {
 
     public func realSize(of id: String) -> Int? {
         catalog.packs.first(where: { $0.id == id })?.bytes
+    }
+
+    /// Metro under a STATES tap or SEARCH pin. Overview itself never wins.
+    public func walkablePack(at lat: Double, lon: Double) -> PackManifest? {
+        catalog.packs.first { pack in
+            pack.walkable && !pack.overview && pack.bbox.contains(lat: lat, lon: lon)
+        }
     }
 }
 

@@ -1,0 +1,50 @@
+{
+  "id": "states",
+  "name": "STATES",
+  "state": "TX",
+  "kind": "overview-chart",
+  "engine": "maplibre",
+  "defaultOpen": false,
+  "walkable": false,
+  "overview": true,
+  "bbox": {
+    "south": 25.5,
+    "west": -109.45,
+    "north": 37.35,
+    "east": -93.15
+  },
+  "banners": [],
+  "center": {
+    "lat": 31.425,
+    "lon": -101.3
+  },
+  "home": {
+    "lat": 31.425,
+    "lon": -101.3
+  },
+  "attribution": "Simplified TX+NM chart. No statewide aerial. Yard NAIP and street graphs stay on TX WEST, TX EAST, and NM.",
+  "stats": {
+    "features": 30,
+    "highwayLines": 8,
+    "namedStreets": 0,
+    "graphEdges": 0,
+    "graphNodes": 0,
+    "streetsVisibleAtWalkingZoom": false
+  },
+  "files": [
+    "cameras.json",
+    "cities.geojson",
+    "glyphs/Open Sans Regular/0-255.pbf",
+    "glyphs/Open Sans Regular/256-511.pbf",
+    "glyphs/Open Sans Regular/512-767.pbf",
+    "glyphs/Open Sans Regular/768-1023.pbf",
+    "glyphs/Open Sans Regular/8192-8447.pbf",
+    "highways.geojson",
+    "manifest.json",
+    "packs.geojson",
+    "search.json",
+    "states.geojson",
+    "style.json"
+  ],
+  "bytes": 209560
+}

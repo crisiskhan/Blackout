@@ -1,0 +1,243 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "El Paso",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.485,
+          31.7619
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Las Cruces",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.7637,
+          32.3199
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Albuquerque",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6504,
+          35.0844
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Santa Fe",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -105.9378,
+          35.687
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Farmington",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -108.2187,
+          36.7281
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Roswell",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -104.523,
+          33.3943
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Austin",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.7431,
+          30.2672
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "San Antonio",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -98.4936,
+          29.4241
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Houston",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -95.3698,
+          29.7604
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Dallas",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -96.797,
+          32.7767
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Fort Worth",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.3308,
+          32.7555
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Amarillo",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -101.8313,
+          35.222
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Lubbock",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -101.8552,
+          33.5779
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Midland",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -102.0779,
+          31.9973
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Corpus Christi",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.3964,
+          27.8006
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brownsville",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.4975,
+          25.9017
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Laredo",
+        "kind": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -99.5075,
+          27.5064
+        ]
+      }
+    }
+  ]
+}
