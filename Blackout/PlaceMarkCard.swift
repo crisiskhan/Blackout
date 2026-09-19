@@ -39,8 +39,14 @@ struct PlaceMarkCard: View {
                 Rectangle()
                     .fill(Theme.silver.opacity(0.22))
                     .frame(height: 1)
-                Button("DROP") { runtime.commitMark() }
-                    .buttonStyle(HoldActionStyle(filled: true, expand: true))
+                HStack(spacing: 8) {
+                    Button("DROP") { runtime.commitMark() }
+                        .buttonStyle(HoldActionStyle(filled: true, expand: true))
+                    if runtime.markDraft?.existingID != nil {
+                        Button("DELETE") { runtime.deleteMark() }
+                            .buttonStyle(HoldActionStyle(filled: false, expand: true))
+                    }
+                }
                 ScrollView {
                     VStack(alignment: .leading, spacing: 10) {
                         HUDField("NAME",

@@ -487,6 +487,34 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(MarkDrop.sameCoord((31.87054, -106.59731), (31.8705, -106.5973)))
     }
 
+    func testMarkDropRemovingTakesThePinOffByIdOrCoord() {
+        let a = MapMark(id: "cache", lat: 31.8705, lon: -106.5973, label: "CACHE")
+        let b = MapMark(id: "well", lat: 31.7619, lon: -106.4850, label: "WELL")
+        let marks = [a, b]
+        XCTAssertEqual(MarkDrop.removing(marks, id: "cache").map(\.id), ["well"])
+        XCTAssertEqual(
+            MarkDrop.removing(marks, lat: 31.76194, lon: -106.48504).map(\.id),
+            ["cache"]
+        )
+        XCTAssertEqual(MarkDrop.removing(marks, id: "missing").map(\.id), ["cache", "well"])
+        XCTAssertTrue(MarkDrop.removing(marks, id: "cache", lat: 31.7619, lon: -106.4850).isEmpty)
+    }
+
+    func testMarkGoneRemembersAnIdAndCapsTheList() {
+        let suite = UserDefaults(suiteName: "map.marks.gone.\(UUID().uuidString)")!
+        XCTAssertFalse(MarkGone.contains("cache", defaults: suite))
+        MarkGone.remember("cache", defaults: suite)
+        MarkGone.remember("", defaults: suite)
+        XCTAssertTrue(MarkGone.contains("cache", defaults: suite))
+        XCTAssertFalse(MarkGone.contains("", defaults: suite))
+        for i in 0..<MarkGone.cap {
+            MarkGone.remember("m\(i)", defaults: suite)
+        }
+        XCTAssertEqual(MarkGone.load(defaults: suite).count, MarkGone.cap)
+        XCTAssertFalse(MarkGone.contains("cache", defaults: suite))
+        XCTAssertTrue(MarkGone.contains("m0", defaults: suite))
+    }
+
     func testPackChromeLabelsElPasoOffTheNMPackNotOntoIt() {
         // Two packs we actually ship, close enough to confuse: a fix in El Paso
         // must read OFF PACK against Albuquerque, never borrow that pack's name.

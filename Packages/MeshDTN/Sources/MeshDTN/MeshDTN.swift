@@ -262,6 +262,22 @@ public enum MeshMarkBody {
     }
 }
 
+/// Party retract. Id plus coord so a peer can drop the pin even if ids drifted.
+public enum MeshMarkGoneBody {
+    public static func encode(id: String, lat: Double, lon: Double) -> String {
+        [id, String(lat), String(lon)].joined(separator: "\t")
+    }
+
+    public static func parse(_ raw: String) -> (id: String, lat: Double, lon: Double)? {
+        let parts = raw.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+        guard parts.count >= 3 else { return nil }
+        let id = parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !id.isEmpty, let lat = Double(parts[1]), let lon = Double(parts[2]) else { return nil }
+        guard lat.isFinite, lon.isFinite else { return nil }
+        return (id, lat, lon)
+    }
+}
+
 /// Seat announcement. Separate from POS so vitals stay a 12-part body.
 public enum MeshRosterBody {
     public static func encode(id: String, role: String, name: String) -> String {
@@ -743,6 +759,13 @@ public final class MeshNet: @unchecked Sendable {
         enqueue(make(from: from, kind: "mark", body: Data(body.utf8)))
     }
 
+    public func sendMarkGone(from: String, id: String, lat: Double, lon: Double) {
+        let clean = id.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !clean.isEmpty, lat.isFinite, lon.isFinite else { return }
+        let body = MeshMarkGoneBody.encode(id: clean, lat: lat, lon: lon)
+        enqueue(make(from: from, kind: "mark.gone", body: Data(body.utf8)))
+    }
+
     public func sendRoster(from: String, id: String, role: String, name: String) {
         let body = MeshRosterBody.encode(id: id, role: role, name: name)
         enqueue(make(from: from, kind: "roster", body: Data(body.utf8)))
@@ -979,7 +1002,7 @@ public final class MeshNet: @unchecked Sendable {
                     )
                 )
             }
-        case "mark", "kit", "voice", "roster":
+        case "mark", "mark.gone", "kit", "voice", "roster":
             break
         default:
             break
