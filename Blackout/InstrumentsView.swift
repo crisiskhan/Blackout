@@ -3,7 +3,6 @@ import BatteryAuction
 import Tokens
 import Almanac
 import Instruments
-import MapLibreMap
 
 private enum InstrumentPlate: String, CaseIterable {
     case packs
@@ -177,22 +176,6 @@ struct InstrumentsView: View {
                 Theme.plateRect()
                     .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
             )
-            sectionLabel("MARK")
-            if runtime.fieldYou == nil {
-                Text(EyeDesk.noFix)
-                    .font(.system(size: 13, weight: .heavy))
-                    .foregroundStyle(Theme.warn)
-            }
-            HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                ForEach(EyeDesk.MarkKind.allCases, id: \.self) { kind in
-                    Button(kind.title) {
-                        if let you = runtime.fieldYou {
-                            runtime.plantEyeMark(kind: kind, lat: you.lat, lon: you.lon)
-                        }
-                    }
-                    .buttonStyle(HUDOverlayChipStyle(filled: runtime.marks.contains { $0.kind == kind.rawValue }))
-                }
-            }
         }
     }
 
