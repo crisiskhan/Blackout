@@ -4424,6 +4424,9 @@ class GlassCardHonestyTests(unittest.TestCase):
         self.assertIn("smallestUsableCard", shell)
         self.assertNotIn("Self.smallestUsableCard", shell)
         self.assertIn("minHeight: 0", shell)
+        # Xcode 16 frame() wants maxWidth before minHeight (GHA 35474761301).
+        self.assertIn("maxWidth: .infinity, minHeight: 0", shell)
+        self.assertNotIn("minHeight: 0, maxWidth:", shell)
         self.assertIn("func holdScroll(", hold)
         for name in self.CARDS:
             src = read("Blackout", name)

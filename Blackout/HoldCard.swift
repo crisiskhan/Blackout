@@ -136,7 +136,7 @@ struct HoldGlassShell<Content: View>: View {
             content
                 // minHeight 0 lets a tall body shrink under the 50% cap so
                 // the ScrollView is bounded and can actually move.
-                .frame(minHeight: 0, maxWidth: .infinity, alignment: .top)
+                .frame(maxWidth: .infinity, minHeight: 0, alignment: .top)
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
