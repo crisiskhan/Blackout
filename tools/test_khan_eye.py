@@ -240,7 +240,7 @@ class StyleAndResolverTests(unittest.TestCase):
             import re
 
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 177)
+        self.assertEqual(count, 178)
 
 
 class PackedArchiveTests(unittest.TestCase):

@@ -562,7 +562,10 @@ final class WaterInspectTests: XCTestCase {
     func testEveryShippedPackAnswersFromItsOwnWater() throws {
         let root = try repoRoot().appendingPathComponent("Resources/Packs")
         let store = try PackStore(root: root, box: EventLog())
-        for pack in store.catalog.packs {
+        // Water is a metro extract. Overview (STATES) ships no water.bin.
+        let walkable = store.catalog.packs.filter { $0.walkable && !$0.overview }
+        XCTAssertEqual(Set(walkable.map(\.id)), ["tx-west", "tx-east", "nm"])
+        for pack in walkable {
             try store.switchTo(pack.id)
             let url = try XCTUnwrap(store.packURL("layers/water.bin"), pack.id)
             let index = try XCTUnwrap(WaterIndex.load(from: url), pack.id)
@@ -579,6 +582,29 @@ final class WaterInspectTests: XCTestCase {
             XCTAssertFalse(finding.doLine.isEmpty, pack.id)
             XCTAssertFalse(finding.fieldCardID.isEmpty, pack.id)
         }
+    }
+
+    func testOverviewPackHasNoWaterIndexAndHoldStillAnswers() throws {
+        let root = try repoRoot().appendingPathComponent("Resources/Packs")
+        let store = try PackStore(root: root, box: EventLog())
+        let pack = try XCTUnwrap(store.catalog.packs.first(where: \.overview))
+        XCTAssertEqual(pack.id, "states")
+        XCTAssertFalse(pack.walkable)
+        try store.switchTo(pack.id)
+        let url = try XCTUnwrap(store.packURL("layers/water.bin"), pack.id)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: url.path), pack.id)
+        XCTAssertNil(WaterIndex.load(from: url), pack.id)
+        let finding = MapInspect.resolve(
+            lat: pack.center.lat,
+            lon: pack.center.lon,
+            zoom: PackCamera.overviewMinZoom,
+            index: nil
+        )
+        XCTAssertFalse(finding.isWater, pack.id)
+        XCTAssertEqual(finding.title, "LAND")
+        XCTAssertFalse(finding.doLine.isEmpty, pack.id)
+        XCTAssertFalse(finding.fieldCardID.isEmpty, pack.id)
+        XCTAssertTrue(finding.why.contains("No water record"), finding.why)
     }
 
     func testThePackDecidesTheWaterRatherThanTheLastOneOpened() throws {

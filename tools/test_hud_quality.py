@@ -1657,7 +1657,7 @@ class PartyPlaceMarkTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 177)
+        self.assertEqual(count, 178)
         self.assertIn("var name: String", marks)
         self.assertIn("var note: String", marks)
         self.assertIn("var emblem: String", marks)
@@ -2820,7 +2820,7 @@ class PartyHoldCardTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 177)
+        self.assertEqual(count, 178)
         self.assertIn("var onPersonHold", offline)
         self.assertIn("onPersonHold:", tab)
         self.assertIn("func personMark(at:", offline)
@@ -3815,7 +3815,7 @@ class AddressHoldCardTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 177)
+        self.assertEqual(count, 178)
         self.assertIn("struct HeldAddress", hold)
         self.assertIn("struct AddressHoldCard", card)
         self.assertIn("var heldAddress", app)
@@ -4199,7 +4199,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         count = 0
         for path in ROOT.joinpath("Packages", "MapLibreMap", "Tests").rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 177)
+        self.assertEqual(count, 178)
         self.assertIn("testPackCameraHoldsGodsEyeOverDestAndYou", tests)
         self.assertIn("if !runtime.godsEye", tab)
         self.assertIn("khanShadeOpacity", desk)

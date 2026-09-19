@@ -109,6 +109,8 @@ def main() -> None:
         fail("STATES is a chart, not a metro tile extract")
     if (PACK / "graph.bin").exists() or (PACK / "graph.json").exists():
         fail("STATES must ship no graph so WALK/DRIVE stay OFF GRAPH")
+    if (PACK / "layers" / "water.bin").exists() or (PACK / "layers" / "water.geojson").exists():
+        fail("STATES must not ship a water index — hold is LAND, not fake statewide water")
     if (PACK / "dem.json").exists():
         fail("STATES must not claim terrain")
 
@@ -202,6 +204,15 @@ def main() -> None:
     if "func walkablePack" not in pack_io:
         fail("PackStore must name the metro under a tap")
 
+    water_tests = (
+        ROOT / "Packages" / "MapLibreMap" / "Tests" / "MapLibreMapTests" / "WaterInspectTests.swift"
+    ).read_text()
+    every = water_tests.split("func testEveryShippedPackAnswersFromItsOwnWater")[1].split("func test")[0]
+    if "overview" not in every:
+        fail("testEveryShippedPackAnswersFromItsOwnWater must skip overview packs")
+    if "func testOverviewPackHasNoWaterIndexAndHoldStillAnswers" not in water_tests:
+        fail("STATES must lock that hold has no water index")
+
     app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
     if "func enterOverviewPack" not in app:
         fail("tap / SEARCH on STATES must enter the metro under the pin")
@@ -231,6 +242,8 @@ def main() -> None:
             fail("SOLO_QA / DEVICE must say how to open STATES")
         if "OFF GRAPH" not in blob:
             fail("STATES device line must keep OFF GRAPH honest")
+    if "Hold is LAND" not in solo:
+        fail("SOLO_QA must say STATES hold is LAND")
 
     print("OK   STATES shows Texas and New Mexico on one glass")
     print("OK   metros stay walkable; default stays tx-west; no statewide aerial")
