@@ -44,8 +44,7 @@ struct PartyHoldCard: View {
                         inventoryBlock
                     }
                 }
-                .scrollIndicators(.hidden)
-                .scrollBounceBehavior(.basedOnSize)
+                .holdScroll()
             }
         }
         .onAppear { nameDraft = person.name }

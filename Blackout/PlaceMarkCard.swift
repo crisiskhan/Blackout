@@ -75,8 +75,7 @@ struct PlaceMarkCard: View {
                         row(key: "COORDINATES", value: coordinates)
                     }
                 }
-                .scrollIndicators(.hidden)
-                .scrollBounceBehavior(.basedOnSize)
+                .holdScroll()
             }
         }
     }

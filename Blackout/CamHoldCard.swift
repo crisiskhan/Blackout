@@ -22,8 +22,7 @@ struct CamHoldCard: View {
                         rows
                     }
                 }
-                .scrollIndicators(.hidden)
-                .scrollBounceBehavior(.basedOnSize)
+                .holdScroll()
             }
         }
     }

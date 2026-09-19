@@ -16,7 +16,7 @@ struct EmblemFaceGrid: View {
         if compact {
             rail.frame(height: plate)
         } else {
-            rail.frame(maxHeight: .infinity)
+            rail.frame(minHeight: 0, maxHeight: .infinity)
         }
     }
 

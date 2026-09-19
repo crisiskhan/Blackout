@@ -134,6 +134,9 @@ struct HoldGlassShell<Content: View>: View {
         VStack(alignment: .leading, spacing: 10) {
             grabber
             content
+                // minHeight 0 lets a tall body shrink under the 50% cap so
+                // the ScrollView is bounded and can actually move.
+                .frame(minHeight: 0, maxWidth: .infinity, alignment: .top)
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -167,6 +170,17 @@ struct HoldGlassShell<Content: View>: View {
     }
 }
 
+extension View {
+    /// Hold-card body scroll. The 50% cap must bound this view or the
+    /// card clips mid-rail and the thumb has nowhere to go.
+    func holdScroll() -> some View {
+        self
+            .scrollIndicators(.hidden)
+            .scrollBounceBehavior(.basedOnSize)
+            .frame(minHeight: 0)
+    }
+}
+
 struct HoldCardView: View {
     let held: HeldPoint
     /// Cards the open pack actually ships. The button names the first of
@@ -192,8 +206,7 @@ struct HoldCardView: View {
                 ScrollView {
                     rows
                 }
-                .scrollIndicators(.hidden)
-                .scrollBounceBehavior(.basedOnSize)
+                .holdScroll()
             }
         }
     }
