@@ -669,6 +669,8 @@ class PhotoSeamTests(unittest.TestCase):
     """Packed NAIP is one photo, not a quilt of independently stretched tiles."""
 
     def test_feather_blends_a_hard_tile_edge(self):
+        if not _have_pil():
+            self.skipTest("Pillow not on this python (macOS CI guards)")
         red = _solid_jpeg((220, 20, 20))
         blue = _solid_jpeg((20, 20, 220))
         tiles = {(16, 10, 10): red, (16, 11, 10): blue}
@@ -687,16 +689,34 @@ class PhotoSeamTests(unittest.TestCase):
         cx, cy = lonlat_to_tile(lon, lat, z)
         x, y = int(cx), int(cy)
         dest = PACK_ROOT / "tx-west"
-        center_blob = _packed_jpeg(dest, lon, lat, z)
+        names = aerial.shard_names(dest)
+        self.assertIn("aerial-seam.pmtiles", names)
+        self.assertEqual(names[-1], "aerial-seam.pmtiles")
+        seam_path = dest / "aerial-seam.pmtiles"
+        self.assertLessEqual(seam_path.stat().st_size, aerial.SHARD_MAX_BYTES)
+        with open(seam_path, "rb") as fh:
+            seam_blob = Reader(MmapSource(fh)).get(z, x, y)
+        self.assertIsNotNone(seam_blob)
+        self.assertTrue(seam_blob.startswith(b"\xff\xd8"))
+        self.assertEqual(_packed_jpeg(dest, lon, lat, z), seam_blob)
+        earlier = None
+        for path in _aerial_paths(dest)[:-1]:
+            with open(path, "rb") as fh:
+                blob = Reader(MmapSource(fh)).get(z, x, y)
+            if blob:
+                earlier = blob
+        self.assertIsNotNone(earlier)
+        self.assertNotEqual(earlier, seam_blob)
+        if not _have_pil():
+            return
+        center = _jpeg_rgb(seam_blob)
         above = None
         for path in _aerial_paths(dest):
             with open(path, "rb") as fh:
                 blob = Reader(MmapSource(fh)).get(z, x, y - 1)
             if blob:
                 above = blob
-        self.assertIsNotNone(center_blob)
         self.assertIsNotNone(above)
-        center = _jpeg_rgb(center_blob)
         seam = _edge_mean(_jpeg_rgb(above), center, "ns")
         interior = _interior_mean(center)
         self.assertLess(
@@ -704,8 +724,6 @@ class PhotoSeamTests(unittest.TestCase):
             interior * 1.65,
             f"Doniphan north seam {seam:.1f} vs interior {interior:.1f}",
         )
-        self.assertIn("aerial-seam.pmtiles", aerial.shard_names(dest))
-        self.assertEqual(aerial.shard_names(dest)[-1], "aerial-seam.pmtiles")
 
     def test_aerial_resamples_linear_so_overzoom_is_not_a_grid(self):
         paint = aerial.style_layer()["paint"]
@@ -719,6 +737,15 @@ class PhotoSeamTests(unittest.TestCase):
         self.assertIn("photo is not a quilt", qa.lower())
         self.assertIn("def feather_tiles", (ROOT / "tools" / "v3" / "aerial.py").read_text())
         self.assertIn("SEAM_BOXES", (ROOT / "tools" / "v3" / "aerial.py").read_text())
+
+
+def _have_pil() -> bool:
+    try:
+        import PIL  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
 
 
 def _solid_jpeg(rgb: tuple[int, int, int]) -> bytes:
