@@ -808,6 +808,10 @@ def l10n() -> None:
         "HERIDO",
         "FOUND",
         "HALLADO",
+        "TYPE OR SAY",
+        "ESCRIBE O DI",
+        "SEND TO PARTY",
+        "ENVIAR AL GRUPO",
     ):
         if key not in text:
             bad(f"missing l10n {key}")

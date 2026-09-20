@@ -574,13 +574,13 @@ def assert_a_land_hold_opens_the_stepper_and_not_the_menu() -> None:
     back to SEARCH, or a hold is a one-way door into it.
     """
     tab = (APP / "FieldTab.swift").read_text()
-    opened = re.search(r"if let (\w+) = stepper \{", tab)
+    opened = re.search(r"if let (\w+) = runtime\.field\.stepper \{", tab)
     if not opened:
         fail("FieldTab does not branch on whether a card is open")
     held = brace_body(tab, opened.end() - 1)
     if "List(cards)" in held:
         fail("FieldTab draws the card list over the card the hold already picked")
-    if "ALL CARDS" not in tab:
+    if "leaveCard()" not in tab or "field.search" not in tab:
         fail("an open card has no way back to SEARCH, so a hold is a one-way door into it")
     rest = tab[opened.end() + len(held):]
     fallback = re.match(r"\}\s*else \{", rest)
@@ -591,11 +591,11 @@ def assert_a_land_hold_opens_the_stepper_and_not_the_menu() -> None:
         fail("FieldTab has no SEARCH when no card is open")
     if "ForEach(listCards)" in body:
         fail("SEARCH still dumps card titles instead of opening the answer")
-    if 'HUDField("SEARCH"' not in tab:
+    if "field.search" not in tab:
         fail("FieldTab has no SEARCH field")
     if "onSubmit: openAnswer" not in tab:
         fail("SEARCH does not open the answering card's steps")
-    print("OK   a land hold opens one card's steps, with SEARCH behind ALL CARDS")
+    print("OK   a land hold opens one card's steps, with SEARCH on the open card")
 
 
 def assert_the_pack_says_when_it_was_pulled(pack_id: str) -> None:

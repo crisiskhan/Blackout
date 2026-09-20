@@ -180,7 +180,7 @@ Arriving there used to land on a menu. The tab drew all seventeen card titles
 in a `List` and hung the open card's steps underneath them, which is fine when
 you came to browse and useless when the map already chose: on a phone the list
 ate the height and the answer was below the fold. It shows one card or SEARCH,
-never both, with `ALL CARDS` on the open card so a hold is not a one-way
+never both, with `SEARCH` on the open card so a hold is not a one-way
 door into it. Empty SEARCH does not dump the book. The catalog SEARCH ranks
 this pack's chapter for a situation typed in and opens the first answering
 card's steps; an unknown situation opens a live ASK walk (`ASK · LIVE`),
@@ -315,7 +315,7 @@ cactus, animals, shelter, bite treatment, meat you already have — as `NEXT · 
 `NEXT · ANIMAL` / `NEXT · BITE` rather than dumping you on the list after the
 first card. A FIELD still of this pack's mammal, tree, cactus or snake offers
 the same procedure (`FIELD · ANIMAL` / `PLANT` / `BITE`). UNKNOWN and no
-model do not invent a card. ALL CARDS returns to SEARCH, not a dump of
+model do not invent a card. SEARCH returns to SEARCH, not a dump of
 the other pack's javelina or mesquite. A javelina still still opens the west mammal card.
 Animals of this country live in the Field book, not
 as GPS pins.

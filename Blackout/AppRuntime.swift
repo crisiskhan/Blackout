@@ -104,6 +104,9 @@ final class AppRuntime {
     /// first, set by the hold card's FIELD button. The last one is always core,
     /// so the walk down the list cannot come up empty.
     var fieldJump: [String]?
+    /// Open card, ASK, VISION, and SEARCH survive leaving FIELD. FieldTab dies
+    /// in the tab switch; this session does not.
+    var field = FieldSession()
     /// Card ids the open pack's Field book actually ships. The hold button
     /// names the first of these on the route, so a Texas peak is not COLD
     /// for an ice-on-rock card that is not in the book.
@@ -1997,6 +2000,7 @@ final class AppRuntime {
         }
         loadFieldBookIDs()
         loadPackCams()
+        field.clearInstrument()
         heldCam = nil
         heldNear = nil
     }

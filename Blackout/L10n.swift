@@ -27,6 +27,19 @@ enum L10n {
         "vision.leave": ["en": "LEAVE IT", "es": "DÉJALO"],
         "scan.qr": ["en": "SCAN QR", "es": "ESCANEAR QR"],
         "net.nolog": ["en": "NO PEERS · LOGGED", "es": "SIN PARES · REGISTRADO"],
+        "field.search": ["en": "SEARCH", "es": "BUSCAR"],
+        "field.say": ["en": "SAY", "es": "DI"],
+        "field.next": ["en": "NEXT", "es": "SIGUIENTE"],
+        "field.done": ["en": "DONE", "es": "LISTO"],
+        "field.send": ["en": "SEND TO PARTY", "es": "ENVIAR AL GRUPO"],
+        "field.type": ["en": "TYPE OR SAY", "es": "ESCRIBE O DI"],
+        "field.card": ["en": "CARD", "es": "TARJETA"],
+        "field.step": ["en": "STEP", "es": "PASO"],
+        "field.of": ["en": "OF", "es": "DE"],
+        "field.back": ["en": "BACK", "es": "ATRÁS"],
+        "field.care": ["en": "CARE", "es": "CUIDADO"],
+        "field.do": ["en": "DO", "es": "HAZ"],
+        "field.ask": ["en": "ASK", "es": "PREGUNTA"],
     ]
 
     static func t(_ key: String, _ locale: String) -> String {

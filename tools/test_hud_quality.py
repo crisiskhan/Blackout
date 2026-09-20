@@ -1369,7 +1369,10 @@ class FieldInstrumentTests(unittest.TestCase):
 
     def test_open_card_is_the_whole_instrument(self):
         field = read("Blackout", "FieldTab.swift")
+        session = read("Blackout", "FieldSession.swift")
+        app = read("Blackout", "AppRuntime.swift")
         speech = read("Packages", "FieldSpeech", "Sources", "FieldSpeech", "FieldSpeech.swift")
+        l10n = read("Blackout", "L10n.swift")
         self.assertIn("s.card.stop_if", field)
         self.assertIn("s.card.situation", field)
         self.assertIn("get_to_care", field)
@@ -1377,19 +1380,20 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn("s.step.stop", field)
         self.assertIn("tickSeconds", field)
         self.assertIn('L10n.t("stop.if"', field)
-        self.assertIn('Button("ALL CARDS")', field)
+        self.assertNotIn("ALL CARDS", field)
+        self.assertIn('L10n.t("field.search"', field)
         open_fn = field.split("private func open(")[1].split("private func sectionLabel")[0]
         self.assertIn("loc(s.card.title)", open_fn)
         self.assertIn("HStack(alignment: .firstTextBaseline)", open_fn)
         self.assertLess(
             open_fn.find("loc(s.card.title)"),
-            open_fn.find('Button("ALL CARDS")'),
+            open_fn.find('L10n.t("field.search"'),
         )
         self.assertIn("leaveCard()", field)
-        self.assertIn("fieldTrail", field)
+        self.assertIn("runtime.field.trail", field)
         self.assertIn("InspectField.nextAction", field)
         self.assertIn('Button("SPEAK")', field)
-        self.assertIn('Button("SEND TO PARTY")', field)
+        self.assertIn('L10n.t("field.send"', field)
         self.assertIn('L10n.t("vision.none"', field)
         self.assertIn("step: s.index", field)
         self.assertIn("step: Int", speech)
@@ -1400,38 +1404,38 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn("onSubmit: openAnswer", field)
         self.assertIn("FieldCorpus.ask(", field)
         self.assertIn("FieldCorpus.asking(", field)
-        self.assertIn('HUDField("SEARCH"', field)
+        self.assertIn('L10n.t("field.search"', field)
         self.assertNotIn("TextField(", field)
         self.assertIn("NO MATCH", field)
         self.assertNotIn("mapSearchHitCap", field)
         search = field.split("private var searchField")[1].split("private func say")[0]
-        self.assertIn('Button("SEARCH")', search)
+        self.assertIn('L10n.t("field.search"', search)
         self.assertIn("openAnswer()", search)
-        self.assertIn('submit: "SEARCH"', search)
-        self.assertIn('Button("SAY")', field)
+        self.assertIn('L10n.t("field.say"', field)
         self.assertIn("SAY FAILED", field)
         self.assertIn('sectionLabel("SITUATION")', field)
         self.assertIn('sectionLabel("DO")', field)
         self.assertIn('sectionLabel("GET-TO-CARE")', field)
         self.assertIn('sectionLabel("CAUSE")', field)
-        self.assertIn('Button("BACK")', field)
+        self.assertIn('L10n.t("field.back"', field)
         self.assertIn("FieldTree.decorate(", field)
         self.assertIn("openLink(", field)
-        self.assertIn("forkStack", field)
+        self.assertIn("runtime.field.fork", field)
         self.assertNotIn('sectionLabel("CARE")', field)
         self.assertIn("s.step.image", field)
         self.assertIn("Field/images", field)
         self.assertIn("openRoute([first.id]", field)
-        self.assertIn("openLive(", field)
-        self.assertIn("FieldAsk.answer", field)
+        self.assertIn("openFieldLive(", session)
+        self.assertIn("FieldAsk.answer", session)
         self.assertIn("import FieldAsk", field)
-        self.assertIn("ASK · LIVE", field)
-        self.assertIn("Task.detached", field)
+        self.assertIn("ASK · LIVE", session)
+        self.assertIn("Task.detached", session)
         self.assertIn("FieldCorpus.doLines", field)
         self.assertIn("s.step.child", open_fn)
         self.assertIn('sectionLabel("HANDS")', open_fn)
         self.assertIn("speakFirst: true", field)
-        self.assertIn("TYPE OR SAY", field)
+        self.assertIn("field.type", field)
+        self.assertIn('"TYPE OR SAY"', l10n)
         self.assertNotIn("best in class", field.lower())
         self.assertLess(
             open_fn.find('sectionLabel("DO")'),
@@ -1449,7 +1453,7 @@ class FieldInstrumentTests(unittest.TestCase):
             open_fn.find('L10n.t("stop.if"'),
         )
         self.assertGreater(
-            open_fn.find("SEND TO PARTY"),
+            open_fn.find('L10n.t("field.send"'),
             open_fn.find('sectionLabel("GET-TO-CARE")'),
         )
         self.assertRegex(
@@ -1464,19 +1468,42 @@ class FieldInstrumentTests(unittest.TestCase):
             r"maxHeight: \.infinity\)\s+visionHUD",
             "VISION is SEARCH-only",
         )
+        self.assertIn("var field = FieldSession()", app)
+        self.assertIn("field.clearInstrument()", app)
+        self.assertIn("haltFieldListen()", field)
+        self.assertIn("func cancelFieldAsk(", session)
+        self.assertIn("HUDWrapRail", field.split("private func causeChips")[1])
+        self.assertNotIn("loc(link.when)", field)
+        self.assertNotIn("LazyVGrid", field)
+        self.assertIn("enum FieldPlate", session)
+        self.assertIn("case walk, care", session)
+        walk = field.split("private func walkPlate")[1].split("private func carePlate")[0]
+        care = field.split("private func carePlate")[1].split("private func sectionLabel")[0]
+        self.assertIn('sectionLabel("DO")', walk)
+        self.assertIn('L10n.t("stop.if"', walk)
+        self.assertIn('sectionLabel("GET-TO-CARE")', care)
+        self.assertIn('L10n.t("field.send"', care)
+        self.assertNotIn("GET-TO-CARE", walk)
+        self.assertNotIn('Text("ASK")', body)
+        status = field.split("private var fieldStatus")[1].split("private var fieldTone")[0]
+        self.assertIn("speech.listening", status)
+        self.assertIn('L10n.t("field.say"', status)
+        self.assertIn('L10n.t("field.ask"', status)
+        self.assertIn("ESCRIBE O DI", l10n)
+        self.assertIn("ENVIAR AL GRUPO", l10n)
+        self.assertIn("SIGUIENTE", l10n)
 
     def test_search_and_say_sit_at_the_end_of_the_bar(self):
         field = read("Blackout", "FieldTab.swift")
         qa = read("docs", "SOLO_QA.md")
         bar = field_search_bar(field)
-        self.assertIn('HUDField("SEARCH"', bar)
-        self.assertIn('Button("SEARCH")', bar)
-        self.assertIn('Button("SAY")', bar)
-        self.assertLess(bar.find('HUDField("SEARCH"'), bar.find('Button("SEARCH")'))
-        self.assertLess(bar.find('Button("SEARCH")'), bar.find('Button("SAY")'))
+        self.assertIn('L10n.t("field.search"', bar)
+        self.assertIn('L10n.t("field.say"', bar)
+        self.assertLess(bar.find('L10n.t("field.search"'), bar.find('L10n.t("field.say"'))
         self.assertIn("HUDOverlayChipStyle()", bar)
+        self.assertIn("HUDOverlayChipStyle(filled: runtime.speech.listening)", bar)
         search = field.split("private var searchField")[1].split("private func say")[0]
-        self.assertLess(search.find("HStack"), search.find('HUDField("SEARCH"'))
+        self.assertLess(search.find("HStack"), search.find('L10n.t("field.search"'))
         self.assertIn("end of the SEARCH bar", qa)
         self.assertIn("not a second row", qa)
         self.assertNotIn("best in class", qa.lower())
@@ -1492,6 +1519,13 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn("FIELD SEARCH", qa)
         self.assertIn("GET-TO-CARE", qa)
         self.assertIn("SAY", qa)
+        self.assertIn("SEARCH returns to SEARCH", qa)
+        self.assertIn("Leave FIELD and come back", qa)
+        self.assertIn("CARE is a second plate", qa)
+        self.assertIn("Header reads SAY", qa)
+        self.assertIn("Header reads ASK", qa)
+        self.assertIn("CAUSE chips wrap as words", qa)
+        self.assertIn("Español chrome", qa)
 
 
 class CommsInstrumentTests(unittest.TestCase):
@@ -2069,13 +2103,13 @@ class VisionInstrumentTests(unittest.TestCase):
         self.assertIn("NO VISION MODEL", vis)
         self.assertNotIn("hashValue", vis)
         self.assertIn("unknownGuess", vis)
-        self.assertIn("noModelGuess", field)
+        self.assertIn("noModelGuess", read("Blackout", "FieldSession.swift"))
         self.assertIn("LEAVE IT", vis + field + read("Blackout", "L10n.swift"))
         self.assertIn("VNClassifyImageRequest", still)
         self.assertNotIn("import VisionCoreML", still)
         self.assertNotIn("VisionCoreML.VisionObservation", still)
         self.assertIn("struct SystemVisionHit", still)
-        self.assertIn("VisionObservation(identifier:", field)
+        self.assertIn("VisionObservation(identifier:", read("Blackout", "FieldSession.swift"))
         self.assertIn("AVCapturePhotoOutput", still)
         self.assertIn("CAPTURE", still)
         self.assertIn("requestAccess", still)
@@ -2185,10 +2219,11 @@ class VisionInstrumentTests(unittest.TestCase):
 
     def test_vision_speaks_the_guess_and_the_walk(self):
         field = read("Blackout", "FieldTab.swift")
-        vis_btn = field.split("func visionFieldButton", 1)[1].split("func applyVision", 1)[0]
+        session = read("Blackout", "FieldSession.swift")
+        vis_btn = field.split("func visionFieldButton", 1)[1].split("private func loc", 1)[0]
         self.assertIn("speakFirst: true", vis_btn)
-        apply = field.split("func applyVision", 1)[1].split("private func loc", 1)[0]
-        self.assertIn("runtime.speech.speak", apply)
+        apply = session.split("func speakFieldVision", 1)[1].split("func haltFieldListen", 1)[0]
+        self.assertIn("speech.speak", apply)
         self.assertIn("SPEECH FAILED", apply)
         self.assertIn('L10n.t("vision.leave"', apply)
         self.assertIn('L10n.t("vision.none"', apply)
@@ -4754,8 +4789,8 @@ class HUDKeyboardTests(unittest.TestCase):
         map_tab = read("Blackout", "MapTab.swift")
         self.assertIn('HUDField("SEARCH"', map_tab)
         field = read("Blackout", "FieldTab.swift")
-        self.assertIn('HUDField("SEARCH"', field)
-        self.assertIn('submit: "SEARCH"', field)
+        self.assertIn('L10n.t("field.search"', field)
+        self.assertIn("HUDField(", field)
         exped = read("Blackout", "ExpeditionTab.swift")
         self.assertIn('HUDField("NAME"', exped)
         self.assertIn('HUDField("TIME"', exped)

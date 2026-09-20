@@ -2,30 +2,15 @@ import SwiftUI
 import UIKit
 import FieldCorpus
 import FieldStepper
-import FieldSpeech
 import FieldAsk
 import MapLibreMap
-import OfflineSpeech
 import Tokens
 import VisionCoreML
 
 struct FieldTab: View {
     @Bindable var runtime: AppRuntime
     @State private var cards: [FieldCard] = []
-    @State private var query = ""
-    @State private var stepper: StepperState?
-    @State private var fieldTrail: [String] = []
-    @State private var fieldTrailTotal: Int = 0
-    @State private var fieldTrailBook: String = ""
-    @State private var forkStack: [FieldCard] = []
-    @State private var fieldQuery = ""
-    @State private var guess: VisionGuess?
     @State private var showVision = false
-    @State private var sayFailed = false
-    @State private var askBusy = false
-    @State private var askFailed = false
-    @State private var askSeq = 0
-    @State private var visionSeq = 0
 
     var body: some View {
         HUDPage(
@@ -38,7 +23,7 @@ struct FieldTab: View {
                 // answering card's steps. A title dump is not an answer.
                 // VISION stays on SEARCH so the open procedure is the book.
                 Group {
-                    if let s = stepper {
+                    if let s = runtime.field.stepper {
                         ScrollView {
                             open(s)
                         }
@@ -51,13 +36,6 @@ struct FieldTab: View {
                             }
                         } else {
                             searchField
-                            if askBusy {
-                                HUDGlassCard {
-                                    Text("ASK")
-                                        .font(.system(size: 13, weight: .heavy))
-                                        .foregroundStyle(Theme.silver)
-                                }
-                            }
                             if catalogMiss {
                                 HUDGlassCard {
                                     Text("NO MATCH")
@@ -78,11 +56,11 @@ struct FieldTab: View {
                 VisionStill(
                     onImage: { image in
                         showVision = false
-                        applyVision(image: image)
+                        runtime.applyFieldVision(image: image)
                     },
                     onFail: {
                         showVision = false
-                        applyVision(image: nil)
+                        runtime.applyFieldVision(image: nil)
                     },
                     onCancel: { showVision = false }
                 )
@@ -93,36 +71,35 @@ struct FieldTab: View {
         }
         .animation(Theme.Motion.heavy, value: showVision)
         .onAppear(perform: load)
+        .onDisappear {
+            runtime.haltFieldListen()
+            showVision = false
+        }
         .onChange(of: runtime.fieldJump) { _, _ in jump() }
         .onChange(of: runtime.packs?.active?.id) { _, _ in
-            query = ""
-            sayFailed = false
-            askFailed = false
-            askBusy = false
-            askSeq += 1
-            visionSeq += 1
             load()
         }
-        .onChange(of: query) { _, _ in
-            askFailed = false
+        .onChange(of: runtime.field.query) { _, _ in
+            runtime.field.askFailed = false
         }
     }
 
     private var fieldStatus: String {
-        if askBusy { return "ASK" }
+        if runtime.speech.listening { return L10n.t("field.say", runtime.locale) }
+        if runtime.field.askBusy { return L10n.t("field.ask", runtime.locale) }
         if runtime.speechChrome == "SPEECH FAILED" { return "SPEECH FAILED" }
-        if let s = stepper {
+        if let s = runtime.field.stepper {
             // A hold named a trail of plant / bite / use cards. STEP 1 OF 1
             // on every one of them hides that you are walking the biome book.
-            if fieldTrailTotal > 1 {
-                let at = fieldTrailTotal - fieldTrail.count
-                return "CARD \(at) OF \(fieldTrailTotal)"
+            if runtime.field.trailTotal > 1 {
+                let at = runtime.field.trailTotal - runtime.field.trail.count
+                return "\(L10n.t("field.card", runtime.locale)) \(at) \(L10n.t("field.of", runtime.locale)) \(runtime.field.trailTotal)"
             }
-            return "STEP \(s.index + 1) OF \(s.card.steps.count)"
+            return "\(L10n.t("field.step", runtime.locale)) \(s.index + 1) \(L10n.t("field.of", runtime.locale)) \(s.card.steps.count)"
         }
-        guard let g = guess else {
-            if askFailed { return "NO MATCH" }
-            return "TYPE OR SAY"
+        guard let g = runtime.field.guess else {
+            if runtime.field.askFailed { return "NO MATCH" }
+            return L10n.t("field.type", runtime.locale)
         }
         if g.noModel { return L10n.t("vision.none", runtime.locale) }
         if g.leaveIt {
@@ -132,11 +109,12 @@ struct FieldTab: View {
     }
 
     private var fieldTone: HUDStatusTone {
-        if askBusy { return .silver }
+        if runtime.speech.listening { return .silver }
+        if runtime.field.askBusy { return .silver }
         if runtime.speechChrome == "SPEECH FAILED" { return .warn }
-        if askFailed { return .warn }
-        if stepper != nil { return .silver }
-        if let g = guess {
+        if runtime.field.askFailed { return .warn }
+        if runtime.field.stepper != nil { return .silver }
+        if let g = runtime.field.guess {
             if g.leaveIt { return .crisis }
             if g.noModel { return .warn }
         }
@@ -147,15 +125,15 @@ struct FieldTab: View {
     private var visionHUD: some View {
         sectionLabel("VISION")
         Button("VISION") {
-            guess = nil
+            runtime.field.guess = nil
             #if canImport(AVFoundation) && canImport(UIKit)
             showVision = true
             #else
-            guess = VisionCoreML.noModelGuess()
+            runtime.applyFieldVision(image: nil)
             #endif
         }
         .buttonStyle(HUDActionStyle(filled: true))
-        if let g = guess {
+        if let g = runtime.field.guess {
             HUDGlassCard {
                 VStack(alignment: .leading, spacing: 8) {
                     if g.noModel {
@@ -215,56 +193,6 @@ struct FieldTab: View {
         }
     }
 
-    private func applyVision(image: CGImage?) {
-        visionSeq += 1
-        let seq = visionSeq
-        guard let image else {
-            let next = VisionCoreML.noModelGuess()
-            guess = next
-            speakVision(next)
-            return
-        }
-        let book = runtime.visionBook()
-        let locale = runtime.locale
-        DispatchQueue.global(qos: .userInitiated).async {
-            let observations = SystemVision.observations(from: image)
-            let next: VisionGuess
-            if let observations, let book {
-                next = VisionCoreML.classify(
-                    observations: observations.map {
-                        VisionObservation(identifier: $0.identifier, confidence: $0.confidence)
-                    },
-                    book: book,
-                    locale: locale
-                )
-            } else {
-                next = VisionCoreML.noModelGuess()
-            }
-            DispatchQueue.main.async {
-                guard seq == visionSeq else { return }
-                guess = next
-                speakVision(next)
-            }
-        }
-    }
-
-    private func speakVision(_ g: VisionGuess) {
-        let locale = runtime.locale
-        let line: String
-        if g.noModel {
-            line = L10n.t("vision.none", locale)
-        } else if g.leaveIt {
-            line = "\(g.name). \(L10n.t("vision.leave", locale))"
-        } else {
-            line = g.name
-        }
-        if !runtime.speech.speak(line, locale: locale) {
-            runtime.speechChrome = "SPEECH FAILED"
-        } else {
-            runtime.speechChrome = ""
-        }
-    }
-
     /// Every card ships both languages. The list was reading the locale and
     /// the steps were not, so a Spanish reader picked a card by its Spanish
     /// title and then got the instructions in English.
@@ -280,151 +208,183 @@ struct FieldTab: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(loc(s.card.title))
                     .font(.system(size: 18, weight: .heavy))
-                    .foregroundStyle(Color.white)
+                    .foregroundStyle(Theme.silver)
                 Spacer(minLength: 8)
-                if !forkStack.isEmpty {
-                    Button("BACK") { backFork() }
+                if !runtime.field.fork.isEmpty {
+                    Button(L10n.t("field.back", runtime.locale)) { backFork() }
                         .buttonStyle(HUDOverlayChipStyle())
                 }
-                Button("ALL CARDS") { leaveCard() }
+                Button(L10n.t("field.search", runtime.locale)) { leaveCard() }
                     .buttonStyle(HUDOverlayChipStyle())
             }
-            sectionLabel("SITUATION")
-            Text(loc(s.card.situation))
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Theme.silver.opacity(0.7))
-                .fixedSize(horizontal: false, vertical: true)
-            if !fieldTrailBook.isEmpty {
-                Text(fieldTrailBook)
-                    .font(.system(size: 11, weight: .heavy))
-                    .foregroundStyle(Theme.silver.opacity(0.5))
-                    .fixedSize(horizontal: false, vertical: true)
+            plateRail
+            switch runtime.field.plate {
+            case .walk:
+                walkPlate(s)
+            case .care:
+                carePlate(s)
             }
-            causeChips(s)
-
-            sectionLabel("DO")
-            HUDGlassCard {
-                VStack(alignment: .leading, spacing: 8) {
-                    if !s.step.image.isEmpty,
-                       let root = AppRuntime.resourceRoot()?.appendingPathComponent("Field/images/\(s.step.image)"),
-                       let ui = UIImage(contentsOfFile: root.path)
-                    {
-                        Image(uiImage: ui)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxHeight: 120)
-                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                            .accessibilityHidden(true)
-                    }
-                    if s.card.steps.count > 1 {
-                        Text("STEP \(s.index + 1) OF \(s.card.steps.count)")
-                            .font(.system(size: 13, weight: .heavy))
-                            .foregroundStyle(Theme.silver)
-                    }
-                    ForEach(Array(FieldCorpus.doLines(loc(s.step.`do`)).enumerated()), id: \.offset) { n, line in
-                        HStack(alignment: .firstTextBaseline, spacing: 8) {
-                            Text("\(n + 1)")
-                                .font(.system(size: 18, weight: .heavy))
-                                .foregroundStyle(Theme.silver)
-                                .frame(minWidth: 18, alignment: .leading)
-                            Text(line)
-                                .font(.system(size: 18, weight: .heavy))
-                                .foregroundStyle(Theme.silver)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                    sectionLabel("HANDS")
-                    Text(loc(s.step.child))
-                        .font(.system(size: 18, weight: .heavy))
-                        .foregroundStyle(Theme.silver)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text(loc(s.step.why))
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(Theme.silver.opacity(0.7))
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text(loc(s.step.stop))
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(Theme.accent)
-                        .fixedSize(horizontal: false, vertical: true)
-                    if let tick = s.step.tickSeconds {
-                        Text("TICK \(tick)s")
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(Theme.silver)
-                    }
-                    if let bpm = s.step.metronomeBpm {
-                        Text("CPR \(bpm)")
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(Theme.accent)
-                    }
-                }
-            }
-            HStack(spacing: 8) {
-                // On the last step NEXT did nothing at all, which reads as a
-                // broken button rather than the end of the card. A hold that
-                // named a trail of plant / bite / use cards still has work
-                // after this one — name that procedure the same way the hold
-                // button did, then open it. ALL CARDS dumps the rest and
-                // returns to SEARCH.
-                Button(stepTitle(s)) {
-                    if s.isLast {
-                        advanceTrail()
-                    } else {
-                        var x = s
-                        x.next()
-                        stepper = x
-                    }
-                }
-                .buttonStyle(HUDActionStyle(filled: true))
-                Button("SPEAK") {
-                    var x = s; x.speak(); stepper = x
-                    speakOpenStep(s.card, step: s.index)
-                }
-                .buttonStyle(HUDActionStyle(filled: false))
-            }
-            if !runtime.speechChrome.isEmpty {
-                Text(runtime.speechChrome).font(.caption).foregroundStyle(Theme.warn)
-            }
-
-            sectionLabel(L10n.t("stop.if", runtime.locale))
-            ForEach(Array(s.card.stop_if.enumerated()), id: \.offset) { _, line in
-                Text(loc(line))
-                    .font(.system(size: 13, weight: .heavy))
-                    .foregroundStyle(Theme.accent)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(10)
-                    .background(Theme.accent.opacity(0.14))
-                    .clipShape(Theme.plateRect())
-                    .overlay(
-                        Theme.plateRect()
-                            .strokeBorder(Theme.accent.opacity(0.55), lineWidth: Theme.strokeWidth(1))
-                    )
-            }
-
-            sectionLabel("GET-TO-CARE")
-            Text(loc(s.card.get_to_care))
-                .font(.system(size: 13, weight: .heavy))
-                .foregroundStyle(Theme.silver)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(12)
-                .background(Theme.glass())
-                .clipShape(Theme.plateRect())
-
-            Button("SEND TO PARTY") {
-                var x = s
-                x.send()
-                stepper = x
-                runtime.sendFieldToParty(cardID: s.card.id)
-            }
-            .buttonStyle(HUDActionStyle(filled: false))
-            Text(
-                [runtime.mesh.chromeNet, runtime.mesh.chromeNear, runtime.mesh.chromeSignal]
-                    .filter { !$0.isEmpty }
-                    .joined(separator: " · ")
-            ).font(.caption).foregroundStyle(Theme.warn)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var plateRail: some View {
+        HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+            ForEach(FieldPlate.allCases, id: \.self) { item in
+                Button(plateTitle(item)) { runtime.field.plate = item }
+                    .buttonStyle(HUDOverlayChipStyle(filled: runtime.field.plate == item))
+            }
+        }
+    }
+
+    private func plateTitle(_ item: FieldPlate) -> String {
+        switch item {
+        case .walk: return L10n.t("field.do", runtime.locale)
+        case .care: return L10n.t("field.care", runtime.locale)
+        }
+    }
+
+    @ViewBuilder
+    private func walkPlate(_ s: StepperState) -> some View {
+        sectionLabel("SITUATION")
+        Text(loc(s.card.situation))
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(Theme.silver.opacity(0.7))
+            .fixedSize(horizontal: false, vertical: true)
+        if !runtime.field.trailBook.isEmpty {
+            Text(runtime.field.trailBook)
+                .font(.system(size: 11, weight: .heavy))
+                .foregroundStyle(Theme.silver.opacity(0.5))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        causeChips(s)
+
+        sectionLabel("DO")
+        HUDGlassCard {
+            VStack(alignment: .leading, spacing: 8) {
+                if !s.step.image.isEmpty,
+                   let root = AppRuntime.resourceRoot()?.appendingPathComponent("Field/images/\(s.step.image)"),
+                   let ui = UIImage(contentsOfFile: root.path)
+                {
+                    Image(uiImage: ui)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxHeight: 120)
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        .accessibilityHidden(true)
+                }
+                if s.card.steps.count > 1 {
+                    Text("\(L10n.t("field.step", runtime.locale)) \(s.index + 1) \(L10n.t("field.of", runtime.locale)) \(s.card.steps.count)")
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(Theme.silver)
+                }
+                ForEach(Array(FieldCorpus.doLines(loc(s.step.`do`)).enumerated()), id: \.offset) { n, line in
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text("\(n + 1)")
+                            .font(.system(size: 18, weight: .heavy))
+                            .foregroundStyle(Theme.silver)
+                            .frame(minWidth: 18, alignment: .leading)
+                        Text(line)
+                            .font(.system(size: 18, weight: .heavy))
+                            .foregroundStyle(Theme.silver)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                sectionLabel("HANDS")
+                Text(loc(s.step.child))
+                    .font(.system(size: 18, weight: .heavy))
+                    .foregroundStyle(Theme.silver)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(loc(s.step.why))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.silver.opacity(0.7))
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(loc(s.step.stop))
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Theme.accent)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let tick = s.step.tickSeconds {
+                    Text("TICK \(tick)s")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Theme.silver)
+                }
+                if let bpm = s.step.metronomeBpm {
+                    Text("CPR \(bpm)")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Theme.accent)
+                }
+            }
+        }
+        HStack(spacing: 8) {
+            // On the last step NEXT did nothing at all, which reads as a
+            // broken button rather than the end of the card. A hold that
+            // named a trail of plant / bite / use cards still has work
+            // after this one — name that procedure the same way the hold
+            // button did, then open it. SEARCH dumps the rest and
+            // returns to the catalog field.
+            Button(stepTitle(s)) {
+                if s.isLast {
+                    advanceTrail()
+                } else {
+                    var x = s
+                    x.next()
+                    runtime.field.stepper = x
+                }
+            }
+            .buttonStyle(HUDActionStyle(filled: true))
+            Button("SPEAK") {
+                var x = s
+                x.speak()
+                runtime.field.stepper = x
+                runtime.speakFieldStep(s.card, step: s.index)
+            }
+            .buttonStyle(HUDActionStyle(filled: false))
+        }
+        if !runtime.speechChrome.isEmpty {
+            Text(runtime.speechChrome).font(.caption).foregroundStyle(Theme.warn)
+        }
+
+        sectionLabel(L10n.t("stop.if", runtime.locale))
+        ForEach(Array(s.card.stop_if.enumerated()), id: \.offset) { _, line in
+            Text(loc(line))
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(Theme.accent)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(10)
+                .background(Theme.accent.opacity(0.14))
+                .clipShape(Theme.plateRect())
+                .overlay(
+                    Theme.plateRect()
+                        .strokeBorder(Theme.accent.opacity(0.55), lineWidth: Theme.strokeWidth(1))
+                )
+        }
+    }
+
+    @ViewBuilder
+    private func carePlate(_ s: StepperState) -> some View {
+        sectionLabel("GET-TO-CARE")
+        Text(loc(s.card.get_to_care))
+            .font(.system(size: 13, weight: .heavy))
+            .foregroundStyle(Theme.silver)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12)
+            .background(Theme.glass())
+            .clipShape(Theme.plateRect())
+
+        Button(L10n.t("field.send", runtime.locale)) {
+            var x = s
+            x.send()
+            runtime.field.stepper = x
+            runtime.sendFieldToParty(cardID: s.card.id)
+        }
+        .buttonStyle(HUDActionStyle(filled: false))
+        Text(
+            [runtime.mesh.chromeNet, runtime.mesh.chromeNear, runtime.mesh.chromeSignal]
+                .filter { !$0.isEmpty }
+                .joined(separator: " · ")
+        ).font(.caption).foregroundStyle(Theme.warn)
     }
 
     private func sectionLabel(_ title: String) -> some View {
@@ -437,20 +397,10 @@ struct FieldTab: View {
     private func causeChips(_ s: StepperState) -> some View {
         if let links = s.card.links, !links.isEmpty {
             sectionLabel("CAUSE")
-            LazyVGrid(
-                columns: [GridItem(.adaptive(minimum: 108), spacing: 8)],
-                alignment: .leading,
-                spacing: 8
-            ) {
+            HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
                 ForEach(links) { link in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Button(link.label) { openLink(link) }
-                            .buttonStyle(HUDActionStyle(filled: false))
-                        Text(loc(link.when))
-                            .font(.system(size: 13, weight: .heavy))
-                            .foregroundStyle(Theme.silver)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                    Button(link.label) { openLink(link) }
+                        .buttonStyle(HUDOverlayChipStyle())
                 }
             }
         }
@@ -459,13 +409,13 @@ struct FieldTab: View {
     /// SEARCH is the menu. Empty is waiting, not a dump of the book. Hits
     /// are not a title list — the SEARCH chip (or keyboard Search) opens the
     /// first answering card. A miss opens a live ASK walk on the same card.
-    /// ALL CARDS on an open card returns here.
+    /// SEARCH on an open card returns here.
     private var catalogQuery: String {
-        query.trimmingCharacters(in: .whitespacesAndNewlines)
+        runtime.field.query.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private var catalogMiss: Bool {
-        askFailed
+        runtime.field.askFailed
     }
 
     private var listCards: [FieldCard] {
@@ -476,21 +426,29 @@ struct FieldTab: View {
         )
     }
 
+    private var queryBind: Binding<String> {
+        Binding(
+            get: { runtime.field.query },
+            set: { runtime.field.query = $0 }
+        )
+    }
+
     private var searchField: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .center, spacing: 8) {
-                HUDField("SEARCH",
-                    text: $query,
+                HUDField(
+                    L10n.t("field.search", runtime.locale),
+                    text: queryBind,
                     id: "field.search",
-                    submit: "SEARCH",
+                    submit: L10n.t("field.search", runtime.locale),
                     onSubmit: openAnswer
                 )
-                Button("SEARCH") { openAnswer() }
+                Button(L10n.t("field.search", runtime.locale)) { openAnswer() }
                     .buttonStyle(HUDOverlayChipStyle())
-                Button("SAY") { say() }
-                    .buttonStyle(HUDActionStyle(filled: true))
+                Button(L10n.t("field.say", runtime.locale)) { say() }
+                    .buttonStyle(HUDOverlayChipStyle(filled: runtime.speech.listening))
             }
-            if sayFailed {
+            if runtime.field.sayFailed {
                 Text("SAY FAILED")
                     .font(.system(size: 13, weight: .heavy))
                     .foregroundStyle(Theme.warn)
@@ -500,10 +458,11 @@ struct FieldTab: View {
 
     /// Spoken question uses the same ask path as type. Deny, PTT live, and
     /// a missing on-device recognizer are SAY FAILED — not a network model.
+    /// A second tap stops the mic.
     private func say() {
-        sayFailed = false
+        runtime.field.sayFailed = false
         if runtime.ptt.live || runtime.clipLive {
-            sayFailed = true
+            runtime.field.sayFailed = true
             return
         }
         if runtime.speech.listening {
@@ -512,16 +471,16 @@ struct FieldTab: View {
         }
         let started = runtime.speech.listen(locale: runtime.locale) { spoken in
             if spoken.isEmpty {
-                sayFailed = true
+                runtime.field.sayFailed = true
                 return
             }
-            query = spoken
-            if FieldCorpus.asking(query) {
+            runtime.field.query = spoken
+            if FieldCorpus.asking(runtime.field.query) {
                 openAnswer()
             }
         }
         if !started {
-            sayFailed = true
+            runtime.field.sayFailed = true
         }
     }
 
@@ -544,64 +503,27 @@ struct FieldTab: View {
     /// SEARCH ranked a situation. Open the first answering card's steps.
     /// Remaining hits stay out — a title list is a menu of cards, not an
     /// answer. Unknown words open a live ASK walk on the same stepper.
+    /// SEARCH while ASK is building cancels that walk, then starts again.
     private func openAnswer() {
+        if runtime.field.askBusy {
+            runtime.cancelFieldAsk()
+            if !FieldCorpus.asking(catalogQuery) { return }
+        }
         guard FieldCorpus.asking(catalogQuery) else { return }
         if let first = listCards.first {
-            sayFailed = false
-            askFailed = false
-            fieldQuery = catalogQuery
+            runtime.field.sayFailed = false
+            runtime.field.askFailed = false
+            runtime.field.fieldQuery = catalogQuery
             openRoute([first.id], speakFirst: true)
             return
         }
-        let q = catalogQuery
-        let chapter = FieldCorpus.chapter(cards, pack: runtime.packs?.active?.id)
-        let locale = runtime.locale
-        let packName = runtime.packs?.active?.name ?? "pack"
-        let packId = runtime.packs?.active?.id
-        let model = FieldAsk.modelURL(in: AppRuntime.resourceRoot())
-        askSeq += 1
-        let seq = askSeq
-        askBusy = true
-        askFailed = false
-        sayFailed = false
-        Task.detached {
-            let card = FieldAsk.answer(
-                query: q,
-                chapter: chapter,
-                locale: locale,
-                packName: packName,
-                packId: packId,
-                modelURL: model
-            )
-            await MainActor.run {
-                applyAsk(seq: seq, expected: q, card: card)
-            }
-        }
-    }
-
-    private func applyAsk(seq: Int, expected: String, card: FieldCard?) {
-        guard seq == askSeq else { return }
-        askBusy = false
-        let now = catalogQuery
-        if now.isEmpty || now != expected { return }
-        if let card {
-            fieldQuery = expected
-            openLive(card)
-        } else {
-            askFailed = true
-        }
-    }
-
-    private func openLive(_ card: FieldCard) {
-        query = ""
-        askFailed = false
-        askBusy = false
-        fieldTrail = []
-        fieldTrailTotal = 1
-        fieldTrailBook = "ASK · LIVE"
-        let wired = FieldTree.decorate(card, query: fieldQuery)
-        stepper = StepperState(card: wired, index: 0, speaking: false, sentToParty: false)
-        speakOpenStep(wired, step: 0)
+        runtime.beginFieldAsk(
+            query: catalogQuery,
+            chapter: FieldCorpus.chapter(cards, pack: runtime.packs?.active?.id),
+            locale: runtime.locale,
+            packName: runtime.packs?.active?.name ?? "pack",
+            packId: runtime.packs?.active?.id
+        )
     }
 
     /// The map's hold card named the cards that answer the ground it held,
@@ -609,53 +531,39 @@ struct FieldTab: View {
     /// heat island card only ships in Texas, the ice-on-rock card only in New
     /// Mexico — and keep the rest of the route as a trail so DONE can open
     /// plant-use after plant-danger, bite after the state's snake, shelter
-    /// after the trees. ALL CARDS dumps the trail and returns to SEARCH.
+    /// after the trees. SEARCH dumps the trail and returns to the field.
     private func jump() {
         guard let route = runtime.fieldJump else { return }
         runtime.fieldJump = nil
-        fieldQuery = ""
-        forkStack = []
+        runtime.field.fieldQuery = ""
+        runtime.field.fork = []
         openRoute(route)
     }
 
     private func openRoute(_ route: [String], speakFirst: Bool = false) {
-        query = ""
+        runtime.field.query = ""
         let present = InspectField.presentRoute(route, in: Set(cards.map(\.id)))
         guard let first = present.first,
               let card = cards.first(where: { $0.id == first })
         else { return }
-        fieldTrail = Array(present.dropFirst())
-        fieldTrailTotal = present.count
-        fieldTrailBook = InspectField.bookLine(for: present) ?? ""
-        let wired = FieldTree.decorate(card, query: fieldQuery)
-        stepper = StepperState(card: wired, index: 0, speaking: false, sentToParty: false)
+        runtime.field.trail = Array(present.dropFirst())
+        runtime.field.trailTotal = present.count
+        runtime.field.trailBook = InspectField.bookLine(for: present) ?? ""
+        runtime.field.plate = .walk
+        let wired = FieldTree.decorate(card, query: runtime.field.fieldQuery)
+        runtime.field.stepper = StepperState(card: wired, index: 0, speaking: false, sentToParty: false)
         if speakFirst {
-            speakOpenStep(wired, step: 0)
-        }
-    }
-
-    private func speakOpenStep(_ card: FieldCard, step: Int) {
-        if !FieldSpeech.speak(card, locale: runtime.locale, engine: runtime.speech, step: step) {
-            runtime.speechChrome = "SPEECH FAILED"
-        } else {
-            runtime.speechChrome = ""
+            runtime.speakFieldStep(wired, step: 0)
         }
     }
 
     private func leaveCard() {
-        fieldTrail = []
-        fieldTrailTotal = 0
-        fieldTrailBook = ""
-        forkStack = []
-        fieldQuery = ""
-        askFailed = false
-        askBusy = false
-        stepper = nil
+        runtime.field.leaveCard()
     }
 
     private func openLink(_ link: FieldLink) {
-        if let current = stepper?.card {
-            forkStack.append(current)
+        if let current = runtime.field.stepper?.card {
+            runtime.field.fork.append(current)
         }
         let chapter = FieldCorpus.chapter(cards, pack: runtime.packs?.active?.id)
         let next = FieldTree.openLink(
@@ -664,35 +572,39 @@ struct FieldTab: View {
             packId: runtime.packs?.active?.id,
             locale: runtime.locale
         )
-        fieldQuery = link.ask
-        fieldTrail = []
-        fieldTrailTotal = 1
-        fieldTrailBook = link.label
-        stepper = StepperState(card: next, index: 0, speaking: false, sentToParty: false)
-        speakOpenStep(next, step: 0)
+        runtime.field.fieldQuery = link.ask
+        runtime.field.trail = []
+        runtime.field.trailTotal = 1
+        runtime.field.trailBook = link.label
+        runtime.field.plate = .walk
+        runtime.field.stepper = StepperState(card: next, index: 0, speaking: false, sentToParty: false)
+        runtime.speakFieldStep(next, step: 0)
     }
 
     private func backFork() {
-        guard let prev = forkStack.popLast() else { return }
-        stepper = StepperState(card: prev, index: 0, speaking: false, sentToParty: false)
+        guard let prev = runtime.field.fork.popLast() else { return }
+        runtime.field.plate = .walk
+        runtime.field.stepper = StepperState(card: prev, index: 0, speaking: false, sentToParty: false)
     }
 
     private func advanceTrail() {
-        while !fieldTrail.isEmpty {
-            let id = fieldTrail.removeFirst()
+        while !runtime.field.trail.isEmpty {
+            let id = runtime.field.trail.removeFirst()
             if let card = cards.first(where: { $0.id == id }) {
-                stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
+                runtime.field.plate = .walk
+                runtime.field.stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
                 return
             }
         }
-        fieldTrailTotal = 0
-        fieldTrailBook = ""
-        stepper = nil
+        runtime.field.trailTotal = 0
+        runtime.field.trailBook = ""
+        runtime.field.stepper = nil
+        runtime.field.plate = .walk
     }
 
     private func stepTitle(_ s: StepperState) -> String {
-        if !s.isLast { return "NEXT" }
-        if let id = fieldTrail.first { return InspectField.nextAction(for: id) }
-        return "DONE"
+        if !s.isLast { return L10n.t("field.next", runtime.locale) }
+        if let id = runtime.field.trail.first { return InspectField.nextAction(for: id) }
+        return L10n.t("field.done", runtime.locale)
     }
 }
