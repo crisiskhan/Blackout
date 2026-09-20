@@ -300,10 +300,12 @@ class FieldTreeSourceTests(unittest.TestCase):
         self.assertIn("case .sugar", walk)
         self.assertIn("FieldTree.decorate(", ask)
         self.assertIn('sectionLabel("CAUSE")', tab)
-        self.assertIn('Button("BACK")', tab)
+        self.assertIn('L10n.t("field.back"', tab)
         self.assertIn("openLink(", tab)
-        self.assertIn("forkStack", tab)
+        self.assertIn("runtime.field.fork", tab)
         self.assertIn("link.label", tab)
+        self.assertIn("HUDWrapRail", tab.split("private func causeChips")[1])
+        self.assertNotIn("loc(link.when)", tab)
         self.assertNotIn("…", tree)
         for blob, name in (
             (tree, "FieldTree"),
