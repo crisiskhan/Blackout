@@ -776,6 +776,21 @@ class FieldRankedBookTests(unittest.TestCase):
         self.assertEqual(BOOST["thirst"][0], "water-disinfect")
         self.assertEqual(BOOST["food"][0], "food-cook")
         self.assertEqual(BOOST["wool"][0], "camp-layers")
+        src = _corpus_src()
+        start = src.index("= [", src.index("private static let boost")) + 2
+        depth = 0
+        block = ""
+        for j, ch in enumerate(src[start:], start):
+            if ch == "[":
+                depth += 1
+            elif ch == "]":
+                depth -= 1
+                if depth == 0:
+                    block = src[start : j + 1]
+                    break
+        keys = re.findall(r'"([^"]+)":\s*\[', block)
+        dups = sorted({k for k in keys if keys.count(k) > 1})
+        self.assertEqual(dups, [], "Swift boost duplicate keys crash xctest: " + ", ".join(dups))
 
     def test_shipped_book_opens_the_procedure(self):
         cards = load_book()

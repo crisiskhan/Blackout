@@ -992,7 +992,6 @@ public enum FieldCorpus {
         "mojarra": ["animal-fish"],
         "trucha": ["animal-fish"],
         "camaleon": ["animal-lizard"],
-        "hongo": ["fungi-leave"],
         "colmenilla": ["fungi-leave"],
         "turkey": ["animal-bird", "food-game"],
         "quail": ["animal-bird"],
