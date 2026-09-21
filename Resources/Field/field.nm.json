@@ -324,8 +324,8 @@
         "es": "Árboles de Nuevo México — sombra, no comida"
       },
       "situation": {
-        "en": "You are in New Mexico woodland, park, or bosque. Rio Grande cottonwood, juniper, piñon. Aspen is high country. Shade and wind. Piñon is not a Field meal ticket.",
-        "es": "Estás en arbolado, parque o bosque de Nuevo México. Álamo del Río Grande, enebro, piñón. El álamo temblón es de alta montaña. Sombra y viento. El piñón no es un ticket de comida de Field."
+        "en": "You are in New Mexico woodland, park, or bosque. Rio Grande cottonwood, juniper, piñon. Aspen is high country. Ponderosa is high country pine. Shade and wind. Piñon is not a Field meal ticket.",
+        "es": "Estás en arbolado, parque o bosque de Nuevo México. Álamo del Río Grande, enebro, piñón. El álamo temblón es de alta montaña. El pino ponderosa es de alta montaña. Sombra y viento. El piñón no es un ticket de comida de Field."
       },
       "stop_if": [
         {
@@ -346,8 +346,8 @@
       "steps": [
         {
           "do": {
-            "en": "Rio Grande cottonwood, juniper, piñon. Juniper and piñon are woodland. Aspen is high country. South-side shade, wind break, deadfall only for fire. Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin.",
-            "es": "Álamo del Río Grande, enebro, piñón. El enebro y el piñón son de arbolado. El álamo temblón es de alta montaña. Sombra al sur, cortaviento, madera muerta para fuego. No descortezces vivo. No mastiques semillas ni flores."
+            "en": "Rio Grande cottonwood, juniper, piñon. Juniper and piñon are woodland. Aspen is high country. Ponderosa is high country pine. South-side shade, wind break, deadfall only for fire. Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin.",
+            "es": "Álamo del Río Grande, enebro, piñón. El enebro y el piñón son de arbolado. El álamo temblón es de alta montaña. El pino ponderosa es de alta montaña. Sombra al sur, cortaviento, madera muerta para fuego. No descortezces vivo. No mastiques semillas ni flores."
           },
           "why": {
             "en": "A named tree is calories only after a name you already trust. Shade is the honest use today.",
@@ -404,8 +404,8 @@
       "steps": [
         {
           "do": {
-            "en": "Black bear: do not run, stand large, food sealed and away from camp. Elk is high country. Elk in rut: give way. Mule deer at dusk — give it the road. Coyote and jackrabbit: do not feed. Pronghorn at dusk — give it the road. A maul is trauma. If bitten, the bite card. If you already have meat, the food card. Do not hunt from this map.",
-            "es": "Oso negro: no corras, hazte grande, comida sellada y lejos del campamento. El wapití es de alta montaña. Wapití en celo: cede el paso. Venado bura al anochecer — cede el camino. Coyote y liebre: no alimentes. Berrendo al anochecer — cede el camino. Un golpe es trauma. Si hay mordida, la tarjeta de mordedura. Si ya tienes carne, la tarjeta de comida. No caces desde este mapa."
+            "en": "Black bear: do not run, stand large, food sealed and away from camp. Elk is high country. Elk in rut: give way. Mule deer at dusk — give it the road. Coyote, jackrabbit, squirrel, and fox: do not feed. Pronghorn at dusk — give it the road. A maul is trauma. If bitten, the bite card. If you already have meat, the food card. Do not hunt from this map.",
+            "es": "Oso negro: no corras, hazte grande, comida sellada y lejos del campamento. El wapití es de alta montaña. Wapití en celo: cede el paso. Venado bura al anochecer — cede el camino. Coyote, liebre, ardilla y zorro: no alimentes. Berrendo al anochecer — cede el camino. Un golpe es trauma. Si hay mordida, la tarjeta de mordedura. Si ya tienes carne, la tarjeta de comida. No caces desde este mapa."
           },
           "why": {
             "en": "Range is the Field book of the open pack. A coordinate is not an animal.",

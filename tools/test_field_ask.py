@@ -30,8 +30,49 @@ LIVE = {
     "javelina", "peccary", "pecari", "hog", "coyote", "deer", "elk", "bear",
     "turkey", "quail", "dove", "bird", "fish", "bass", "lizard", "turtle",
     "frog", "toad",
+    "jackrabbit", "raccoon", "squirrel", "fox", "skunk", "armadillo",
+    "bobcat", "pronghorn", "roadrunner", "hawk", "owl", "eagle", "duck",
+    "vulture", "raven", "catfish", "trout", "sunfish", "gila", "softshell",
+    "bullfrog",
 }
 MEAL = {"meat", "hunt", "cook", "already", "caza", "carne"}
+
+
+def _vision_ask_family(lab: dict) -> set[str]:
+    """Cards a vision English name may open. Pack chapter then filters."""
+    kind = lab["kind"]
+    lid = lab["id"]
+    if kind == "tree":
+        if "loblolly" in lid:
+            return {"tx-east-tree-use"}
+        if lid.startswith("nm-"):
+            return {"nm-tree-use"}
+        return {"tx-tree-use", "tx-east-tree-use"}
+    if kind in {"cactus", "cacti_yucca"}:
+        return {"tx-cactus", "nm-cactus"}
+    if kind == "snake":
+        return {"animal-bite", "tx-snake", "tx-east-snake", "nm-snake"}
+    if kind == "mammal":
+        if "hog" in lid:
+            return {"tx-east-mammal"}
+        if "javelina" in lid:
+            return {"tx-mammal"}
+        if lid.startswith("nm-"):
+            return {"nm-mammal", "tx-mammal", "tx-east-mammal"}
+        return {"tx-mammal", "tx-east-mammal", "nm-mammal"}
+    if kind == "bird":
+        return {"animal-bird"}
+    if kind == "fish":
+        return {"animal-fish"}
+    if kind == "lizard":
+        return {"animal-lizard"}
+    if kind == "turtle":
+        return {"animal-turtle"}
+    if kind == "frog":
+        return {"animal-frog"}
+    if kind == "fungi":
+        return {"fungi-leave"}
+    raise AssertionError(f"unknown vision kind {kind}")
 
 
 def _corpus_src() -> str:
@@ -753,12 +794,47 @@ class FieldRankedBookTests(unittest.TestCase):
         self.assertEqual(first("lizard"), "animal-lizard")
         self.assertEqual(first("turtle"), "animal-turtle")
         self.assertEqual(first("toad"), "animal-frog")
+        self.assertEqual(first("ponderosa"), "nm-tree-use")
+        self.assertEqual(first("softshell"), "animal-turtle")
+        self.assertEqual(first("jackrabbit"), "tx-mammal")
+        self.assertEqual(first("cottonwood"), "tx-tree-use")
+        self.assertEqual(first("mesquite"), "tx-tree-use")
+        self.assertEqual(first("cholla"), "nm-cactus")
+        self.assertEqual(first("roadrunner"), "animal-bird")
+        self.assertEqual(first("sunfish"), "animal-fish")
         self.assertEqual(first("panic"), "tact-breathe")
         self.assertEqual(first("gps"), "nav-lost")
         self.assertEqual(first("sed"), "water-find")
         self.assertEqual(first("comida"), "food-cook")
         self.assertFalse(ask_book(cards, "xyzzy plugh"))
         self.assertEqual(ask_book(cards, "javelina")[0]["category"], "animals")
+
+    def test_a_vision_name_opens_the_same_kind_of_walk(self):
+        """The still and SEARCH of that name open the same kind of card.
+
+        One body word is not a procedure, so the vision English name has
+        to be a boost (or title) hit. A ponderosa still is tree-use, not
+        water; SEARCH ponderosa is the same walk, not NONE.
+        """
+        cards = load_book()
+        wrong: list[str] = []
+        for state in ("tx", "nm"):
+            book = json.loads(
+                (ROOT / "Resources" / "Vision" / f"labels.{state}.json").read_text()
+            )
+            for lab in book["labels"]:
+                expect = _vision_ask_family(lab)
+                hits = ask_book(cards, lab["name"]["en"])
+                got = hits[0]["id"] if hits else None
+                if got not in expect:
+                    wrong.append(
+                        f"{lab['id']} {lab['name']['en']!r} -> {got} not {sorted(expect)}"
+                    )
+        self.assertEqual(wrong, [], "VISION name / ASK drift:\n" + "\n".join(wrong))
+        src = _corpus_src()
+        live_block = src.split("liveAnimal: Set<String> = [", 1)[1].split("]", 1)[0]
+        swift_live = set(re.findall(r'"([^"]+)"', live_block))
+        self.assertEqual(LIVE, swift_live)
 
     def test_spoken_field_talk_opens_the_procedure(self):
         """A scared human does not type catalog ids. SEARCH still has to open a walk."""

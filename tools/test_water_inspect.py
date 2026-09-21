@@ -8327,6 +8327,7 @@ class GroundFieldSync(unittest.TestCase):
         nm_tree = next(c for c in nm_do["cards"] if c["id"] == "nm-tree-use")
         nm_sit = nm_tree["situation"]["en"].lower()
         self.assertIn("aspen is high country", nm_sit)
+        self.assertIn("ponderosa is high country pine", nm_sit)
         self.assertNotIn(
             "or aspen",
             nm_sit,
@@ -8335,9 +8336,11 @@ class GroundFieldSync(unittest.TestCase):
         nm_tree_do = nm_tree["steps"][0]["do"]["en"].lower()
         self.assertIn("rio grande cottonwood", nm_tree_do)
         self.assertIn("high country", nm_tree_do)
+        self.assertIn("ponderosa", nm_tree_do)
         self.assertIn("juniper and piñon are woodland", nm_tree_do)
         field_py = (ROOT / "tools/v3/field.py").read_text()
         self.assertIn("Aspen is high country", field_py)
+        self.assertIn("Ponderosa is high country pine", field_py)
 
         west = blob("tx", "tx-tree-use")
         self.assertIn("mesquite", west)
