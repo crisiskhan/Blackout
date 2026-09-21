@@ -6,12 +6,11 @@ import MapLibreMap
 import UIKit
 
 private enum CommsPlate: String, CaseIterable {
-    case party, face, net, call, note, chips
+    case party, net, call, note, chips
 
     var title: String {
         switch self {
         case .party: return "PARTY"
-        case .face: return "FACE"
         case .net: return "NET"
         case .call: return "CALL"
         case .note: return "NOTE"
@@ -94,9 +93,6 @@ struct CommsTab: View {
         case .party:
             sectionLabel("PARTY")
             partyCard
-        case .face:
-            sectionLabel("FACE")
-            faceCard
         case .net:
             netPlate
         case .call:
@@ -296,18 +292,6 @@ struct CommsTab: View {
                 }
                 faceThumb(runtime.youEmblem, selected: true)
             }
-        }
-    }
-
-    private var faceCard: some View {
-        HUDGlassCard {
-            EmblemFaceGrid(
-                selected: runtime.youEmblem,
-                onPick: { runtime.pickEmblem($0) },
-                titleSize: 8,
-                compact: true
-            )
-            .padding(4)
         }
     }
 

@@ -2768,9 +2768,12 @@ class PersonMarkOnTheMapTests(unittest.TestCase):
         folder = ROOT.joinpath(
             "Packages", "MapLibreMap", "Sources", "MapLibreMap", "Emblems"
         )
-        self.assertIn('sectionLabel("FACE")', comms)
-        self.assertIn("EmblemFaceGrid(", comms)
-        self.assertIn("pickEmblem", comms)
+        self.assertNotIn('sectionLabel("FACE")', comms)
+        self.assertNotIn("EmblemFaceGrid(", comms)
+        self.assertNotIn("pickEmblem", comms)
+        self.assertNotIn("case .face", comms)
+        self.assertNotIn('return "FACE"', comms)
+        self.assertNotIn("private var faceCard", comms)
         self.assertIn("youHeading: runtime.headingDeg", tab)
         self.assertIn("youEmblem: runtime.youEmblem.rawValue", tab)
         self.assertIn("runtime.eyeCanvasPips()", tab)
@@ -3472,10 +3475,8 @@ class EmblemFaceGridTests(unittest.TestCase):
         self.assertNotIn("best in class", grid.lower())
         self.assertNotIn("Waze", grid)
         self.assertNotIn("Google", grid)
-        face_card = comms.split("private var faceCard")[1].split("private func faceThumb")[0]
-        self.assertIn("EmblemFaceGrid(", face_card)
-        self.assertIn("compact: true", face_card)
-        self.assertNotIn("LazyVGrid", face_card)
+        self.assertNotIn("private var faceCard", comms)
+        self.assertNotIn("EmblemFaceGrid(", comms)
         self.assertIn("EmblemFaceGrid(", pick)
         self.assertIn("compact: false", pick)
         self.assertNotIn("LazyVGrid", pick)
@@ -3485,10 +3486,12 @@ class EmblemFaceGridTests(unittest.TestCase):
         self.assertIn("PersonEmblem.faces", tests)
         self.assertIn("Set(PersonEmblem.faces)", tests.replace(" ", ""))
         comms_qa = next(
-            line for line in qa.splitlines() if "FACE picks the person mark" in line
+            line
+            for line in qa.splitlines()
+            if "glass HUD pages over the still-mounted map" in line
         )
-        self.assertIn("scroll", comms_qa.lower())
-        self.assertIn("look", comms_qa.lower())
+        self.assertNotIn("FACE picks the person mark", comms_qa)
+        self.assertIn("not on COMMS", comms_qa)
         mark_qa = next(
             line
             for line in qa.splitlines()

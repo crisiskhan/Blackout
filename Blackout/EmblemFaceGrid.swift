@@ -2,8 +2,8 @@ import SwiftUI
 import MapLibreMap
 import Tokens
 
-/// FACE picker used on COMMS, YOU, and MARK. Compact plates scroll so the
-/// page stays short. Order is PersonEmblem.faces — look-alike marks sit together.
+/// FACE picker used on the YOU emblem glass and MARK. Compact plates scroll
+/// so the page stays short. Order is PersonEmblem.faces — look-alike marks sit together.
 struct EmblemFaceGrid: View {
     let selected: PersonEmblem
     let onPick: (PersonEmblem) -> Void
