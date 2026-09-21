@@ -409,6 +409,14 @@ class GraphPlanTests(unittest.TestCase):
         self.assertIn("maxMetres", router)
         self.assertIn("best.metres + index.maxMetres", router)
 
+    def test_xctunwrap_sits_in_a_throwing_test(self):
+        src = (ROOT / "Packages" / "Router" / "Tests" / "RouterTests" / "RouterTests.swift").read_text()
+        for part in re.split(r"\n    func ", src)[1:]:
+            if "XCTUnwrap" not in part:
+                continue
+            head = part.split("{", 1)[0]
+            self.assertIn("throws", head, head)
+
     def test_drive_snaps_past_a_walk_only_door(self):
         g = Graph(
             {
