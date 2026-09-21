@@ -11,12 +11,14 @@ public struct PartyVitals: Equatable, Sendable {
     public static let redAt: Double = 0.8
     /// The fifth CONDITION color. Past RED. Mesh SOS, not a phone dial.
     public static let blackAt: Double = 1.0
-    /// Two YELLOW rails is CONDITION ORANGE, not a yellow average.
-    public static let stackYellowToOrange: Int = 2
-    /// Three YELLOW rails is a compounding body.
-    public static let stackYellowToRed: Int = 3
+    /// Three YELLOW rails is CONDITION ORANGE. Two stay YELLOW.
+    public static let stackYellowToOrange: Int = 3
+    /// Every rail YELLOW is CONDITION RED.
+    public static let stackYellowToRed: Int = 5
     /// Two ORANGE rails is CONDITION RED.
     public static let stackOrangeToRed: Int = 2
+    /// One ORANGE plus two YELLOW is CONDITION RED. One plus one stays ORANGE.
+    public static let stackOrangeAndYellowToRed: Int = 2
     public static let yellowLoad: Int = 1
     public static let orangeLoad: Int = 2
     public static let redLoad: Int = 3
@@ -88,15 +90,30 @@ public struct PartyVitals: Equatable, Sendable {
     public static func band(rails: [Double], flags: [String] = []) -> ConditionBand {
         if rails.contains(where: { band(of: $0) == .black }) { return .black }
         if flags.contains("RED") { return .red }
-        var total = 0
+        var yellow = 0
+        var orange = 0
+        var red = 0
         for value in rails {
-            let piece = load(of: value)
-            if piece >= redLoad { return .red }
-            total += piece
+            switch band(of: value) {
+            case .black:
+                return .black
+            case .red:
+                red += 1
+            case .orange:
+                orange += 1
+            case .yellow:
+                yellow += 1
+            case .green:
+                break
+            }
         }
-        if total >= stackYellowToRed { return .red }
-        if total >= stackYellowToOrange { return .orange }
-        if total > 0 { return .yellow }
+        if red >= 1 { return .red }
+        if orange >= stackOrangeToRed { return .red }
+        if orange >= 1 && yellow >= stackOrangeAndYellowToRed { return .red }
+        if orange >= 1 { return .orange }
+        if yellow >= stackYellowToRed { return .red }
+        if yellow >= stackYellowToOrange { return .orange }
+        if yellow >= 1 { return .yellow }
         return .green
     }
 
