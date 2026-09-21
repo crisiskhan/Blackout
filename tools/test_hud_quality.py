@@ -20,6 +20,16 @@ def read(*parts: str) -> str:
     return ROOT.joinpath(*parts).read_text()
 
 
+def instruments_qa_line() -> str:
+    """INSTRUMENTS score line. COMPASS CAL + SOS FLASHLIGHT stay on BODY."""
+    qa = read("docs", "SOLO_QA.md")
+    return next(
+        line
+        for line in qa.splitlines()
+        if "COMPASS CAL" in line and "SOS FLASHLIGHT" in line
+    )
+
+
 def field_search_bar(src: str) -> str:
     """The SEARCH/SAY HStack on FIELD. Chips belong on this row, not under it."""
     search = src.split("private var searchField")[1].split("private func say")[0]
@@ -301,12 +311,8 @@ class PageOpenCloseFadeTests(unittest.TestCase):
         self.assertNotIn(".sheet(isPresented: $runtime.showInstruments)", root)
         self.assertNotIn("presentationBackground", root)
         self.assertNotIn(".spring(", root)
+        inst_line = instruments_qa_line()
         qa = read("docs", "SOLO_QA.md")
-        inst_line = next(
-            line
-            for line in qa.splitlines()
-            if "COMPASS CAL" in line and "USB-C PTT" in line
-        )
         self.assertIn("fade", inst_line.lower())
         self.assertIn("no bounce", inst_line.lower())
         self.assertNotIn("best in class", qa.lower())
@@ -1833,7 +1839,8 @@ class PartyPlaceMarkTests(unittest.TestCase):
         self.assertNotIn("Waze", qa)
         self.assertIn("PlaceMark.parse", app)
         commit = app.split("func commitMark(")[1].split("func deleteMark(")[0]
-        self.assertIn("EyeDesk.MarkKind.parse", commit)
+        self.assertNotIn("EyeDesk.MarkKind.parse", commit)
+        self.assertIn('kind: ""', commit)
         self.assertIn("named == Inspect.unnamed", commit)
         self.assertIn("MarkInk.resolved", commit)
         self.assertIn("ink: mark.ink", commit)
@@ -2303,7 +2310,7 @@ class HonestyOnTheGlassTests(unittest.TestCase):
             "SOS FLASHLIGHT",
             "COMPASS CAL",
             "TRUE NORTH",
-            "USB-C PTT",
+            "POCKET",
         ):
             self.assertIn(stamp, inst, stamp)
         self.assertIn('sectionLabel("VOICE")', inst)
@@ -3701,10 +3708,12 @@ class InstrumentNorthAndBodyTests(unittest.TestCase):
         self.assertIn("preferWiredPTT", app)
         self.assertIn("LAMP · NONE", inst)
         self.assertIn("runtime.calibrateCompass()", inst)
-        self.assertIn("runtime.attachUSB_C_PTT", inst)
+        self.assertNotIn("runtime.attachUSB_C_PTT", inst)
+        self.assertNotIn("USB-C PTT", inst)
         self.assertNotIn("runtime.attachGNSSPuck", inst)
         self.assertNotIn("GNSS PUCK", inst)
-        self.assertIn("instrumentChrome", inst)
+        self.assertNotIn("instrumentChrome", inst)
+        self.assertIn("preferWiredPTT(true)", app)
         self.assertIn("import Observation", board)
         self.assertIn("@Observable", board)
         auction = read(
@@ -3771,11 +3780,7 @@ class InstrumentNorthAndBodyTests(unittest.TestCase):
         self.assertNotIn("USNG %d / %.4f %.4f", usng)
         self.assertIn("USNG 17T NE 8536 2823", tests)
         self.assertIn("USNG 13R CR 5889 1501", tests)
-        inst_line = next(
-            line
-            for line in qa.splitlines()
-            if "COMPASS CAL" in line and "USB-C PTT" in line
-        )
+        inst_line = instruments_qa_line()
         self.assertIn("RULER —", inst_line)
         self.assertIn("USNG —", inst_line)
         self.assertIn("13R", inst_line)
@@ -4926,8 +4931,9 @@ class MapHoldScrollAndPlateRailTests(unittest.TestCase):
         self.assertIn("enum InstrumentPlate", inst)
         self.assertIn("HUDWrapRail", inst)
         self.assertIn("@State private var plate", inst)
-        for title in ("PACKS", "HUD", "MAP", "SUN", "BODY", "VOICE", "POWER"):
+        for title in ("PACKS", "HUD", "MAP", "SUN", "BODY", "VOICE"):
             self.assertIn(f'case .{title.lower()}: return "{title}"', inst, title)
+        self.assertNotIn('return "POWER"', inst)
         self.assertNotIn("godsEyeTitle", inst)
         self.assertNotIn("eyeDeskPlate", inst)
         self.assertNotIn("saveEyeScene", inst)
@@ -4958,12 +4964,8 @@ class MapHoldScrollAndPlateRailTests(unittest.TestCase):
         hud_fn = tab.split("private func hud")[1].split("private var searchField")[0]
         self.assertNotIn("markList", hud_fn)
         self.assertNotIn("EyeTapStrip", tab)
+        inst_line = instruments_qa_line()
         qa = read("docs", "SOLO_QA.md")
-        inst_line = next(
-            line
-            for line in qa.splitlines()
-            if "COMPASS CAL" in line and "USB-C PTT" in line
-        )
         self.assertIn("plate rail", inst_line.lower())
         hold_line = next(
             line for line in qa.splitlines() if "same hold glass" in line
@@ -5031,36 +5033,85 @@ class MeshNearHUDTests(unittest.TestCase):
 class DeadGlassGoneTests(unittest.TestCase):
     """Theater that looked live is gone. A tap draws, or it says why not."""
 
-    def test_power_is_pocket_not_an_auction(self):
+    def test_power_lives_on_body_not_its_own_plate(self):
         inst = read("Blackout", "InstrumentsView.swift")
-        power = inst.split("private var powerPlate")[1].split("private var lampWord")[0]
-        self.assertIn("POCKET", power)
-        self.assertNotIn("PowerMode.allCases", power)
-        self.assertNotIn("SPARE", power)
-        self.assertNotIn("powerBankWh", power)
-        self.assertNotIn("runtime.power.set(", power)
-        qa = read("docs", "SOLO_QA.md")
-        inst_line = next(
-            line
-            for line in qa.splitlines()
-            if "COMPASS CAL" in line and "USB-C PTT" in line
-        )
+        self.assertNotIn("powerPlate", inst)
+        self.assertNotIn("case .power", inst)
+        self.assertNotIn('return "POWER"', inst)
+        body = inst.split("private var bodyPlate")[1].split("private var voicePlate")[0]
+        self.assertIn("POCKET", body)
+        self.assertNotIn("PowerMode.allCases", inst)
+        self.assertNotIn("SPARE", inst)
+        self.assertNotIn("powerBankWh", inst)
+        self.assertNotIn("runtime.power.set(", inst)
+        inst_line = instruments_qa_line()
         self.assertNotIn("Auction is QUIET", inst_line)
         self.assertNotIn("GNSS PUCK", inst_line)
-        self.assertIn("NO CABLE", inst_line)
+        self.assertNotIn("USB-C", inst_line)
+        self.assertNotIn("NO CABLE", inst_line)
         self.assertIn("POCKET", inst_line)
+        self.assertNotIn("/ POWER", inst_line)
 
-    def test_usb_c_says_no_cable_and_puck_is_off_the_glass(self):
+    def test_wired_ptt_has_no_toggle(self):
         inst = read("Blackout", "InstrumentsView.swift")
         app = read("Blackout", "AppRuntime.swift")
         mic = read("Blackout", "PTTMic.swift")
-        self.assertIn("USB-C PTT", inst)
+        self.assertNotIn("USB-C PTT", inst)
+        self.assertNotIn("attachUSB_C_PTT", inst)
         self.assertNotIn("GNSS PUCK", inst)
-        self.assertIn("instrumentChrome", inst)
+        self.assertNotIn("instrumentChrome", inst)
         self.assertIn("hasWiredInput", mic)
-        usb = app.split("func attachUSB_C_PTT(")[1].split("func ", 1)[0]
-        self.assertIn("hasWiredInput", usb)
-        self.assertIn("NO CABLE", usb)
+        self.assertIn("wantWiredPTT = true", mic)
+        self.assertIn("preferWiredPTT(true)", app)
+        self.assertNotIn("func attachUSB_C_PTT(", app)
+        self.assertNotIn("NO CABLE", app)
+
+    def test_typed_mark_name_is_not_a_kind_ring(self):
+        app = read("Blackout", "AppRuntime.swift")
+        commit = app.split("func commitMark(")[1].split("func deleteMark(")[0]
+        inbound = app.split('case "mark":')[1].split('case "mark.gone"')[0]
+        self.assertNotIn("EyeDesk.MarkKind.parse", commit)
+        self.assertNotIn("EyeDesk.MarkKind.parse", inbound)
+        self.assertIn('kind: ""', commit)
+        self.assertIn('kind: ""', inbound)
+        maps = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift"
+        )
+        upsert = maps.split("public static func upsert(")[1].split(
+            "public static func removing("
+        )[0]
+        self.assertIn("ink:", upsert)
+        self.assertNotIn("kind.isEmpty ? kept.kind", upsert)
+        self.assertIn("ink.isEmpty ? kept.ink", upsert)
+        load = maps.split("public static func load(")[1].split(
+            "public static func uniqued("
+        )[0]
+        self.assertIn('kind: ""', load)
+        self.assertIn("MarkInk.resolved", load)
+        body = maps.split("public static func body(_ mark: MapMark)")[1].split(
+            "public enum MarkStore"
+        )[0]
+        self.assertNotIn("EyeDesk.kidMark(name: mark.name", body)
+        self.assertIn("kid: false", body)
+        self.assertIn('markKind: ""', body)
+        relabel = app.split("private func relabelMarksForActivePack(")[1].split(
+            "private func pullFix("
+        )[0]
+        self.assertIn("ink: m.ink", relabel)
+        self.assertIn('kind: ""', relabel)
+        qa = read("docs", "SOLO_QA.md")
+        mark_line = next(
+            line
+            for line in qa.splitlines()
+            if "NAME, NOTE, COLOR, FACE" in line
+        )
+        self.assertIn("does not arm a kind ring", mark_line)
+        ptt_line = next(
+            line for line in qa.splitlines() if "HOLD PTT is a hold" in line
+        )
+        self.assertIn("wired", ptt_line.lower())
+        self.assertNotIn("USB-C", ptt_line)
+        self.assertNotIn("NO CABLE", ptt_line)
 
     def test_clip_plays_and_solo_does_not_claim_sent(self):
         comms = read("Blackout", "CommsTab.swift")

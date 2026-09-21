@@ -10,7 +10,6 @@ private enum InstrumentPlate: String, CaseIterable {
     case sun
     case body
     case voice
-    case power
 
     var title: String {
         switch self {
@@ -20,7 +19,6 @@ private enum InstrumentPlate: String, CaseIterable {
         case .sun: return "SUN"
         case .body: return "BODY"
         case .voice: return "VOICE"
-        case .power: return "POWER"
         }
     }
 }
@@ -69,9 +67,6 @@ struct InstrumentsView: View {
         case .voice:
             sectionLabel("VOICE")
             voicePlate
-        case .power:
-            sectionLabel("POWER")
-            powerPlate
         }
     }
 
@@ -193,15 +188,10 @@ struct InstrumentsView: View {
             Text(runtime.instruments.state.magNorth ? "MAG NORTH" : "TRUE NORTH")
                 .font(.caption.weight(.bold))
                 .foregroundStyle(Theme.silver.opacity(0.55))
-            hudToggle("USB-C PTT", Binding(
-                get: { runtime.instruments.state.usbCPTT },
-                set: { runtime.attachUSB_C_PTT($0) }
+            hudToggle("POCKET", Binding(
+                get: { runtime.power.state.pocket },
+                set: { runtime.setPocket($0) }
             ))
-            if !runtime.instrumentChrome.isEmpty {
-                Text(runtime.instrumentChrome)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(Theme.warn)
-            }
         }
     }
 
@@ -211,15 +201,6 @@ struct InstrumentsView: View {
                 Button(voice.title) { runtime.setNavVoice(voice) }
                     .buttonStyle(HUDActionStyle(filled: runtime.instruments.state.voice == voice))
             }
-        }
-    }
-
-    private var powerPlate: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            hudToggle("POCKET", Binding(
-                get: { runtime.power.state.pocket },
-                set: { runtime.setPocket($0) }
-            ))
         }
     }
 

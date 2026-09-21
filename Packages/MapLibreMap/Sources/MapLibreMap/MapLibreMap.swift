@@ -172,8 +172,8 @@ public enum PlaceMark {
             headingDeg: nil,
             emblem: mark.emblem,
             condition: mark.kind == EyeDesk.MarkKind.down.rawValue ? "red" : "green",
-            kid: EyeDesk.kidMark(name: mark.name, kind: mark.kind),
-            markKind: mark.kind,
+            kid: false,
+            markKind: "",
             ink: MarkInk.resolved(ink: mark.ink, kind: mark.kind).rawValue
         )
     }
@@ -194,7 +194,20 @@ public enum MarkStore {
     public static func load(defaults: UserDefaults = .standard) -> [MapMark] {
         guard let data = defaults.data(forKey: key) else { return [] }
         let loaded = (try? JSONDecoder().decode([MapMark].self, from: data)) ?? []
-        return uniqued(loaded)
+        return uniqued(loaded).map { mark in
+            MapMark(
+                id: mark.id,
+                lat: mark.lat,
+                lon: mark.lon,
+                label: mark.label,
+                name: mark.name,
+                note: mark.note,
+                emblem: mark.emblem,
+                from: mark.from,
+                kind: "",
+                ink: MarkInk.resolved(ink: mark.ink, kind: mark.kind).rawValue
+            )
+        }
     }
 
     /// Drop marks that repeat a coordinate, keeping the one already on disk.
@@ -255,7 +268,8 @@ public enum MarkDrop {
                 note: mark.note,
                 emblem: mark.emblem,
                 from: mark.from.isEmpty ? kept.from : mark.from,
-                kind: mark.kind.isEmpty ? kept.kind : mark.kind
+                kind: mark.kind,
+                ink: mark.ink.isEmpty ? kept.ink : mark.ink
             )
             return next
         }
