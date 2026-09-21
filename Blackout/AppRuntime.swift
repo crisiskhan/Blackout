@@ -100,6 +100,11 @@ final class AppRuntime {
     /// Chosen name on YOU. Empty is still YOU on the card.
     var youName = ""
     var youStatus: PartyStatus = .good
+    /// Last held ground walk. A generic TREE / MAMMAL still uses this when
+    /// YOU is still on that ground, so Hueco is not picnic woodland.
+    var lastGroundRoute: [String] = []
+    var lastGroundLat = Double.nan
+    var lastGroundLon = Double.nan
     /// Cards the FIELD tab should try to open the next time it appears, best
     /// first, set by the hold card's FIELD button. The last one is always core,
     /// so the walk down the list cannot come up empty.
@@ -696,6 +701,15 @@ final class AppRuntime {
             ),
             marked: marks.contains { MarkDrop.sameCoord(($0.lat, $0.lon), (lat, lon)) }
         )
+        lastGroundRoute = held?.card.fieldRoute ?? []
+        lastGroundLat = lat
+        lastGroundLon = lon
+    }
+
+    func forgetGround() {
+        lastGroundRoute = []
+        lastGroundLat = .nan
+        lastGroundLon = .nan
     }
 
     func closeHold() {

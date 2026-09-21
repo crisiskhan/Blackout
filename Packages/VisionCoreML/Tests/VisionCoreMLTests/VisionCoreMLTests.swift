@@ -14,7 +14,7 @@ final class VisionCoreMLTests: XCTestCase {
         XCTAssertEqual(g.labelId, "no-model")
     }
 
-    func testCactusStillIsThePackCactus() {
+    func testCactusKindIsCactusNotTheOnlyBookSpecies() {
         let g = VisionCoreML.classify(
             observations: [VisionObservation(identifier: "Cactus", confidence: 0.8)],
             book: txBook()
@@ -22,7 +22,19 @@ final class VisionCoreMLTests: XCTestCase {
         XCTAssertFalse(g.noModel)
         XCTAssertFalse(g.edible)
         XCTAssertEqual(g.percent, 0)
+        XCTAssertEqual(g.name, "CACTUS")
+        XCTAssertEqual(g.labelId, "kind:cactus")
+        XCTAssertNotEqual(g.name, "PRICKLY PEAR")
+    }
+
+    func testPricklyPearNameIsStillTheBookName() {
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Prickly pear", confidence: 0.8)],
+            book: txBook()
+        )
         XCTAssertEqual(g.name, "PRICKLY PEAR")
+        XCTAssertEqual(g.labelId, "tx-prickly-pear")
+        XCTAssertFalse(g.edible)
     }
 
     func testFungiIsLeaveItNeverASpeciesPick() {
@@ -77,9 +89,10 @@ final class VisionCoreMLTests: XCTestCase {
             ],
             book: txBook()
         )
-        XCTAssertEqual(g.name, "PRICKLY PEAR")
-        XCTAssertEqual(g.labelId, "tx-prickly-pear")
+        XCTAssertEqual(g.name, "CACTUS")
+        XCTAssertEqual(g.labelId, "kind:cactus")
         XCTAssertNotEqual(g.name, "TREE")
+        XCTAssertNotEqual(g.name, "PRICKLY PEAR")
         XCTAssertFalse(g.edible)
         XCTAssertEqual(g.percent, 0)
     }
@@ -117,8 +130,10 @@ final class VisionCoreMLTests: XCTestCase {
             ],
             book: txBook()
         )
-        XCTAssertEqual(g.name, "PRICKLY PEAR")
+        XCTAssertEqual(g.name, "CACTUS")
+        XCTAssertEqual(g.labelId, "kind:cactus")
         XCTAssertNotEqual(g.name, "TREE")
+        XCTAssertNotEqual(g.name, "PRICKLY PEAR")
         XCTAssertFalse(g.edible)
     }
 

@@ -343,9 +343,6 @@ public enum VisionCoreML {
                     return fungiGuess(book, locale: locale)
                 case .cactus, .cactiYucca, .mammal, .tree:
                     let labels = book.labels.filter { $0.kind == kind.rawValue }
-                    if labels.count == 1 {
-                        return speciesGuess(labels[0], locale: locale)
-                    }
                     return kindGuess(kind, labels: labels, locale: locale)
                 }
             }

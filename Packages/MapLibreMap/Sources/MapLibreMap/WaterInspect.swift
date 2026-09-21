@@ -736,6 +736,39 @@ public enum InspectField {
         return nil
     }
 
+    /// A generic TREE or MAMMAL still may walk the last held ground
+    /// instead of picnic woodland, when YOU is still on that ground.
+    public static func visionUsesGround(_ labelId: String) -> Bool {
+        let id = labelId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return id == "kind:tree" || id == "kind:mammal"
+    }
+
+    public static let groundNearMeters: Double = 300
+
+    public static func groundIsNearYou(
+        you: (lat: Double, lon: Double)?,
+        groundLat: Double,
+        groundLon: Double
+    ) -> Bool {
+        guard let you, you.lat.isFinite, you.lon.isFinite,
+              groundLat.isFinite, groundLon.isFinite
+        else { return false }
+        return metres(from: you, to: (groundLat, groundLon)) <= groundNearMeters
+    }
+
+    private static func metres(
+        from: (lat: Double, lon: Double),
+        to: (lat: Double, lon: Double)
+    ) -> Double {
+        let r = 6371000.0
+        let p1 = from.lat * .pi / 180
+        let p2 = to.lat * .pi / 180
+        let dp = (to.lat - from.lat) * .pi / 180
+        let dl = (to.lon - from.lon) * .pi / 180
+        let x = sin(dp / 2) * sin(dp / 2) + cos(p1) * cos(p2) * sin(dl / 2) * sin(dl / 2)
+        return 2 * r * asin(min(1, sqrt(x)))
+    }
+
     /// The still named a kind. Open that kind's cards — not the whole biome.
     /// A javelina is the mammal trail, not woodland plant-danger. Bite
     /// treatment follows, as it does for a snake still. A prickly pear is
