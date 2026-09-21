@@ -1472,6 +1472,14 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(DestinationPin.load(defaults: suite)?.lat, dest.lat)
         DestinationPin.clear(defaults: suite)
         XCTAssertNil(DestinationPin.load(defaults: suite))
+        XCTAssertEqual(DeskNav.persistKey, "nav.mode")
+        XCTAssertNil(DeskNav.load(defaults: suite))
+        DeskNav.save(.walk, defaults: suite)
+        XCTAssertEqual(DeskNav.load(defaults: suite), .walk)
+        DeskNav.save(.drive, defaults: suite)
+        XCTAssertEqual(DeskNav.load(defaults: suite), .drive)
+        DeskNav.clear(defaults: suite)
+        XCTAssertNil(DeskNav.load(defaults: suite))
     }
 
     func testFixPublishThrottlesHeadingJitterAndKeepsFirstFix() {

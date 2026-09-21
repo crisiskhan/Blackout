@@ -101,7 +101,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — Party code typed on COMMS is still there after kill-and-relaunch.
 - [ ] PASS / FAIL / N/A — MAP marks are still listed after kill-and-relaunch.
 - [ ] PASS / FAIL / N/A — Pack selected in INSTRUMENTS → PACKS is still the active pack on MAP after kill-and-relaunch. VOICE (STEEL / NIGHT / RANGE / MESH / DESERT) is still the voice WALK, DRIVE, and SPEAK use.
-- [ ] PASS / FAIL / N/A — Last known YOU is still on the canvas after kill-and-relaunch (no GNSS yet). DEST is still the same pin. COORDINATES stay quiet until live GNSS. RULER / USNG stay dashed until live GNSS.
+- [ ] PASS / FAIL / N/A — Last known YOU is still on the canvas after kill-and-relaunch (no GNSS yet). DEST is still the same pin. A WALK or DRIVE line that was live is still on the streets. SPEAK does not replay the whole script on launch. COORDINATES stay quiet until live GNSS. RULER / USNG stay dashed until live GNSS.
 - [ ] PASS / FAIL / N/A — EXPEDITION CONDITION rails, INVENTORY counts, and a named timer (including OVERDUE) are still there after kill-and-relaunch.
 - [ ] PASS / FAIL / N/A — An open FIELD card is still the same CARD n OF / step after kill-and-relaunch. SEARCH still dumps it.
-- [ ] PASS / FAIL / N/A — INSTRUMENTS POCKET, LEFT HAND, and MAG/TRUE are still the choice after kill-and-relaunch.
+- [ ] PASS / FAIL / N/A — INSTRUMENTS POCKET, LEFT HAND, MAG/TRUE, and ES / EN are still the choice after kill-and-relaunch.

@@ -561,7 +561,7 @@ class VoiceNavSourceContracts(unittest.TestCase):
     def test_walk_and_drive_speak_with_the_live_voice(self):
         app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
         qa = (ROOT / "docs" / "SOLO_QA.md").read_text()
-        nav = app.split("func navigate(mode: TravelMode)")[1].split("func tapRuler")[0]
+        nav = app.split("func navigate(mode:")[1].split("func tapRuler")[0]
         speak = app.split("func speakMap()")[1].split("func beginPTTSolo")[0]
         tone = app.split("func applySpeechTone()")[1].split("func ", 1)[0]
         blocked = nav.split("Task {", 1)[0]

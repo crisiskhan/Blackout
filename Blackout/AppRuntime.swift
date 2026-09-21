@@ -145,6 +145,8 @@ final class AppRuntime {
     var canRouteOnGraph: Bool { packs?.hasUsableGraph() ?? false }
     /// Last WALK or DRIVE tap. Drops a stale plot so it cannot speak over a newer one.
     private var navSeq = 0
+    /// One silent replan after kill. Live WALK/DRIVE taps speak as they always did.
+    private var deskNavRestored = false
     private var graphCache: RouteGraph?
     private var graphsByPack: [String: RouteGraph] = [:]
     private var graphPackID: String?
@@ -199,6 +201,14 @@ final class AppRuntime {
         timers.load()
         lastKnownFix = UserPuck.loadFix()
         routeTarget = DestinationPin.load()
+        if let mode = DeskNav.load() {
+            travelMode = mode
+        }
+        if let saved = UserDefaults.standard.string(forKey: "hud.locale"),
+           saved == "es" || saved == "en"
+        {
+            locale = saved
+        }
         if let saved = UserDefaults.standard.string(forKey: "party.code"), !saved.isEmpty {
             roster = roster.setting(code: saved)
         }
@@ -1156,6 +1166,8 @@ final class AppRuntime {
         pulse()
         routeTarget = (lat, lon)
         DestinationPin.save(lat: lat, lon: lon)
+        DeskNav.clear()
+        deskNavRestored = false
         // A new destination invalidates everything the old one produced.
         routeCoords = []
         navChrome = ""
@@ -1166,7 +1178,7 @@ final class AppRuntime {
         resetLiveGuide()
     }
 
-    func navigate(mode: TravelMode) {
+    func navigate(mode: TravelMode, speak: Bool = true) {
         touch(.dock)
         speechChrome = ""
         travelMode = mode
@@ -1186,19 +1198,19 @@ final class AppRuntime {
             hasYouFix: fieldYou != nil
         ) {
             clearRoute(plan: block.planChrome, chrome: block.chrome(mode: mode, packName: packName))
-            speakMap()
+            if speak { speakMap() }
             return
         }
         guard let dest else {
             let block = RouteBlock.noDestination
             clearRoute(plan: block.planChrome, chrome: block.chrome(mode: mode, packName: packName))
-            speakMap()
+            if speak { speakMap() }
             return
         }
         guard let from = fieldYou else {
             let block = RouteBlock.noYou
             clearRoute(plan: block.planChrome, chrome: block.chrome(mode: mode, packName: packName))
-            speakMap()
+            if speak { speakMap() }
             return
         }
         routeTarget = dest
@@ -1230,9 +1242,27 @@ final class AppRuntime {
                 self.routeChrome = RouteLine.shouldDraw(plan.coords)
                     ? RouteSummary.chrome(mode: mode, coords: plan.coords, seconds: plan.seconds)
                     : RouteBlock.noPath.chrome(mode: mode, packName: packName)
-                self.speakMap()
+                if RouteLine.shouldDraw(plan.coords) {
+                    DeskNav.save(mode)
+                }
+                if speak { self.speakMap() }
             }
         }
+    }
+
+    func restoreDeskRoute() {
+        guard !deskNavRestored else { return }
+        guard routeCoords.isEmpty, routeTarget != nil, fieldYou != nil else { return }
+        guard let mode = DeskNav.load() else { return }
+        deskNavRestored = true
+        travelMode = mode
+        navigate(mode: mode, speak: false)
+    }
+
+    func setLocale(_ next: String) {
+        locale = next == "es" ? "es" : "en"
+        UserDefaults.standard.set(locale, forKey: "hud.locale")
+        applySpeechTone()
     }
 
     func tapUpdate() {
@@ -2011,6 +2041,8 @@ final class AppRuntime {
         UserDefaults.standard.set(id, forKey: "pack.id")
         routeTarget = nil
         DestinationPin.clear()
+        DeskNav.clear()
+        deskNavRestored = false
         clearRoute(plan: "", chrome: "")
         fitPackToken += 1
         relabelMarksForActivePack()
@@ -2138,6 +2170,7 @@ final class AppRuntime {
             try? await Task.sleep(nanoseconds: UInt64(remain * 1_000_000_000))
         }
         bootStage = .ready
+        restoreDeskRoute()
         box.log("boot", "ready packs=\(loaded.count)")
     }
 
@@ -2278,6 +2311,7 @@ final class AppRuntime {
         sendPOSIfPossible()
         refreshHeldParty()
         refreshHeldNear()
+        restoreDeskRoute()
         applyLiveGuide()
         pulse()
     }

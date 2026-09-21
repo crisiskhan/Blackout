@@ -3975,7 +3975,7 @@ class LiveStreetGuideTests(unittest.TestCase):
         self.assertIn("remainingCoords", guide)
         self.assertIn("navigate(mode: travelMode)", guide)
         self.assertIn("liveSpokenTurn", app)
-        nav = app.split("func navigate(mode: TravelMode)")[1].split("func tapRuler")[0]
+        nav = app.split("func navigate(mode:")[1].split("func tapRuler")[0]
         self.assertIn("speakMap()", nav)
         self.assertNotIn("guard let dest else { return }", nav)
         self.assertNotIn("guard let from = fieldYou else { return }", nav)
@@ -5287,6 +5287,43 @@ class DeskHoldTests(unittest.TestCase):
         self.assertIn("timer", kill.lower())
         self.assertIn("FIELD", kill)
         self.assertIn("POCKET", kill)
+
+    def test_locale_and_live_walk_survive_kill(self):
+        app = read("Blackout", "AppRuntime.swift")
+        inst = read("Blackout", "InstrumentsView.swift")
+        dest = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift"
+        )
+        self.assertIn("hud.locale", app)
+        self.assertIn("func setLocale", app)
+        self.assertIn("enum DeskNav", dest)
+        self.assertIn("nav.mode", dest)
+        self.assertIn("func restoreDeskRoute", app)
+        self.assertIn("DeskNav.load", app)
+        self.assertIn("DeskNav.save", app)
+        self.assertIn("DeskNav.clear", app)
+        nav = app.split("func navigate(mode:")[1].split("func tapUpdate")[0]
+        self.assertIn("speak:", nav)
+        restore = app.split("func restoreDeskRoute")[1].split("func ")[0]
+        self.assertIn("speak: false", restore)
+        locale = inst.split("ES / EN")[1].split("private var mapPlate")[0]
+        self.assertIn("setLocale", locale)
+        qa = read("docs", "SOLO_QA.md")
+        kill = qa.split("## Kill-and-relaunch")[1]
+        self.assertIn("ES / EN", kill)
+        self.assertIn("WALK or DRIVE", kill)
+        self.assertIn("does not replay", kill.lower())
+
+    def test_field_restore_never_speaks_the_open_step(self):
+        session = read("Blackout", "FieldSession.swift")
+        field = read("Blackout", "FieldTab.swift")
+        restore = session.split("func restoreFieldWalk")[1]
+        self.assertNotIn("speakFieldStep", restore)
+        self.assertNotIn("speakFirst", restore)
+        load = field.split("private func load()")[1].split("private func openAnswer")[0]
+        self.assertIn("restoreFieldWalk", load)
+        jump = field.split("private func jump()")[1].split("private func openRoute")[0]
+        self.assertIn("speakFirst: true", jump)
 
 
 if __name__ == "__main__":

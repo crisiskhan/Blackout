@@ -1236,7 +1236,7 @@ def tip62_nav() -> None:
         and "hasDestination" in route_line
         and "enum RouteBlock" in route_line
         and "alwaysTappable" in route_line
-        and "func navigate(mode: TravelMode)" in app
+        and "func navigate(mode:" in app
         and "GraphPlan.line" in app
         and "WalkDriveChip.block(" in app
         and "RouteSummary.chrome(" in app

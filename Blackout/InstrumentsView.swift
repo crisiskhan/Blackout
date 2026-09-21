@@ -150,8 +150,7 @@ struct InstrumentsView: View {
             Button("RESET HUD") { runtime.resetHUD() }
                 .buttonStyle(HUDActionStyle(filled: false))
             hudButton("ES / EN") {
-                runtime.locale = runtime.locale == "es" ? "en" : "es"
-                runtime.applySpeechTone()
+                runtime.setLocale(runtime.locale == "es" ? "en" : "es")
             }
         }
     }

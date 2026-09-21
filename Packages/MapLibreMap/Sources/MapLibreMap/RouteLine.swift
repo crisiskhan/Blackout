@@ -111,6 +111,25 @@ public enum DestinationPin {
     }
 }
 
+/// Last WALK or DRIVE that drew a line. Kill-and-relaunch replans that line
+/// silently so the silver path comes back without speaking the script.
+public enum DeskNav {
+    public static let persistKey = "nav.mode"
+
+    public static func save(_ mode: TravelMode, defaults: UserDefaults = .standard) {
+        defaults.set(mode.rawValue, forKey: persistKey)
+    }
+
+    public static func load(defaults: UserDefaults = .standard) -> TravelMode? {
+        guard let raw = defaults.string(forKey: persistKey) else { return nil }
+        return TravelMode(rawValue: raw)
+    }
+
+    public static func clear(defaults: UserDefaults = .standard) {
+        defaults.removeObject(forKey: persistKey)
+    }
+}
+
 /// A party body on the canvas. Heading is live when the peer sent it.
 public struct PartyBody: Equatable, Sendable {
     public var id: String
