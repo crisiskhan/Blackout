@@ -408,6 +408,22 @@ class GraphPlanTests(unittest.TestCase):
         router = ROUTER.read_text()
         self.assertIn("maxMetres", router)
         self.assertIn("best.metres + index.maxMetres", router)
+        ring = router.split("var ring: Int64 = 0", 1)[1].split("private static let maxRing", 1)[0]
+        self.assertIn("cellX - ring", ring)
+        self.assertIn("cellX + ring", ring)
+        self.assertNotIn(
+            "if ring > 1",
+            ring,
+            "ring 1 must read the east/west cells or a dest one cell over is OFF GRAPH",
+        )
+
+    def test_xctunwrap_sits_in_a_throwing_test(self):
+        src = (ROOT / "Packages" / "Router" / "Tests" / "RouterTests" / "RouterTests.swift").read_text()
+        for part in re.split(r"\n    func ", src)[1:]:
+            if "XCTUnwrap" not in part:
+                continue
+            head = part.split("{", 1)[0]
+            self.assertIn("throws", head, head)
 
     def test_xctunwrap_sits_in_a_throwing_test(self):
         src = (ROOT / "Packages" / "Router" / "Tests" / "RouterTests" / "RouterTests.swift").read_text()

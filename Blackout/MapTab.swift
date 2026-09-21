@@ -12,6 +12,7 @@ struct MapTab: View {
     @State private var hits: [SearchHit] = []
     @State private var packedIndex: SearchIndex?
     @State private var sayFailed = false
+    @State private var saying = false
     @State private var pasteFailed = false
     @State private var searchGen: UInt64 = 0
     @State private var looking = false
@@ -293,19 +294,21 @@ struct MapTab: View {
     private var searchField: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .center, spacing: 8) {
-                HUDField("SEARCH",
-                    text: $query,
-                    id: "map.search",
-                    submit: "DONE",
-                    pointSize: 16,
-                    onOpen: { runtime.touch(.search) },
-                    onSubmit: {
-                        runtime.touch(.search)
-                        search()
-                    }
-                )
-                Button("SAY") { say() }
-                    .buttonStyle(HUDOverlayChipStyle())
+                ZStack(alignment: .trailing) {
+                    HUDField("SEARCH",
+                        text: $query,
+                        id: "map.search",
+                        submit: "DONE",
+                        pointSize: 16,
+                        onOpen: { runtime.touch(.search) },
+                        onSubmit: {
+                            runtime.touch(.search)
+                            search()
+                        },
+                        reserveTrailing: BlackoutTokens.Chrome.mapChipHitPoints
+                    )
+                    HUDSearchMic(listening: saying, action: say)
+                }
                 Button("PASTE") { pasteSearch() }
                     .buttonStyle(HUDOverlayChipStyle())
             }
@@ -744,15 +747,19 @@ struct MapTab: View {
     /// a missing on-device recognizer are SAY FAILED — not a network model.
     private func say() {
         sayFailed = false
+        runtime.keepChrome()
         if runtime.ptt.live || runtime.clipLive {
             sayFailed = true
+            saying = false
             return
         }
         if runtime.speech.listening {
             runtime.speech.endListen()
+            saying = false
             return
         }
         let started = runtime.speech.listen(locale: runtime.locale) { spoken in
+            saying = false
             if spoken.isEmpty {
                 sayFailed = true
                 return
@@ -764,6 +771,7 @@ struct MapTab: View {
             query = spoken
             search()
         }
+        saying = started
         if !started {
             sayFailed = true
         }
