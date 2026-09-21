@@ -321,6 +321,7 @@ struct FieldTab: View {
                     var x = s
                     x.next()
                     runtime.field.stepper = x
+                    runtime.persistFieldWalk()
                 }
             }
             .buttonStyle(HUDActionStyle(filled: true))
@@ -490,6 +491,7 @@ struct FieldTab: View {
             return $0.title.en < $1.title.en
         }
         jump()
+        runtime.restoreFieldWalk(in: cards)
     }
 
     /// SEARCH ranked a situation. Open the first answering card's steps.
@@ -529,7 +531,7 @@ struct FieldTab: View {
         runtime.fieldJump = nil
         runtime.field.fieldQuery = ""
         runtime.field.fork = []
-        openRoute(route)
+        openRoute(route, speakFirst: true)
     }
 
     private func openRoute(_ route: [String], speakFirst: Bool = false) {
@@ -544,6 +546,7 @@ struct FieldTab: View {
         runtime.field.plate = .walk
         let wired = FieldTree.decorate(card, query: runtime.field.fieldQuery)
         runtime.field.stepper = StepperState(card: wired, index: 0, speaking: false, sentToParty: false)
+        runtime.persistFieldWalk()
         if speakFirst {
             runtime.speakFieldStep(wired, step: 0)
         }
@@ -551,6 +554,7 @@ struct FieldTab: View {
 
     private func leaveCard() {
         runtime.field.leaveCard()
+        runtime.persistFieldWalk()
     }
 
     private func openLink(_ link: FieldLink) {
@@ -570,6 +574,7 @@ struct FieldTab: View {
         runtime.field.trailBook = link.label
         runtime.field.plate = .walk
         runtime.field.stepper = StepperState(card: next, index: 0, speaking: false, sentToParty: false)
+        runtime.persistFieldWalk()
         runtime.speakFieldStep(next, step: 0)
     }
 
@@ -577,6 +582,7 @@ struct FieldTab: View {
         guard let prev = runtime.field.fork.popLast() else { return }
         runtime.field.plate = .walk
         runtime.field.stepper = StepperState(card: prev, index: 0, speaking: false, sentToParty: false)
+        runtime.persistFieldWalk()
     }
 
     private func advanceTrail() {
@@ -585,6 +591,7 @@ struct FieldTab: View {
             if let card = cards.first(where: { $0.id == id }) {
                 runtime.field.plate = .walk
                 runtime.field.stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
+                runtime.persistFieldWalk()
                 return
             }
         }
@@ -592,6 +599,7 @@ struct FieldTab: View {
         runtime.field.trailBook = ""
         runtime.field.stepper = nil
         runtime.field.plate = .walk
+        runtime.persistFieldWalk()
     }
 
     private func stepTitle(_ s: StepperState) -> String {

@@ -102,6 +102,19 @@ final class MapLibreMapTests: XCTestCase {
         let you = UserPuck.coordinate(lastKnown: last, packCenter: (29.95, -81.34))
         XCTAssertEqual(you.lat, last.lat)
         XCTAssertEqual(you.lon, last.lon)
+        XCTAssertTrue(UserPuck.shouldPaint(lat: last.lat, lon: last.lon))
+        XCTAssertFalse(UserPuck.shouldPaint(lat: .nan, lon: last.lon))
+        XCTAssertFalse(UserPuck.shouldPaint(lat: last.lat, lon: .infinity))
+        XCTAssertFalse(UserPuck.shouldPaint(lat: 91, lon: last.lon))
+        let suite = UserDefaults(suiteName: "you.fix.test.\(UUID().uuidString)")!
+        XCTAssertNil(UserPuck.loadFix(defaults: suite))
+        UserPuck.saveFix(lat: last.lat, lon: last.lon, defaults: suite)
+        XCTAssertEqual(UserPuck.loadFix(defaults: suite)?.lat, last.lat)
+        XCTAssertEqual(UserPuck.loadFix(defaults: suite)?.lon, last.lon)
+        UserPuck.saveFix(lat: .nan, lon: last.lon, defaults: suite)
+        XCTAssertEqual(UserPuck.loadFix(defaults: suite)?.lat, last.lat)
+        suite.set(["nope"], forKey: UserPuck.fixKey)
+        XCTAssertNil(UserPuck.loadFix(defaults: suite))
     }
 
     func testUserPuckHaloRingClosesAroundCoordinate() {
@@ -1052,6 +1065,10 @@ final class MapLibreMapTests: XCTestCase {
     func testOverlaySyncSkipsStyleMutationWhenPuckAndRouteHold() {
         XCTAssertTrue(OverlaySync.shouldMutateMap(styleLoading: false))
         XCTAssertFalse(OverlaySync.shouldMutateMap(styleLoading: true))
+        XCTAssertTrue(OverlaySync.shouldDrawOverlayLine([(lat: 31.76, lon: -106.49), (lat: 31.80, lon: -106.50)]))
+        XCTAssertFalse(OverlaySync.shouldDrawOverlayLine([]))
+        XCTAssertFalse(OverlaySync.shouldDrawOverlayLine([(lat: .nan, lon: -106.49)]))
+        XCTAssertFalse(OverlaySync.shouldDrawOverlayLine([(lat: 31.76, lon: .infinity)]))
         XCTAssertFalse(
             OverlaySync.needsStyleMutation(force: false, puckNeedsReapply: false, routeNeedsReapply: false)
         )
@@ -1446,6 +1463,15 @@ final class MapLibreMapTests: XCTestCase {
             DestinationPin.needsReapply(stored: dest, destination: (lat: 31.80, lon: -106.4850))
         )
         XCTAssertEqual(DestinationPin.sourceID, "dest-pin-src")
+        let suite = UserDefaults(suiteName: "map.dest.test.\(UUID().uuidString)")!
+        XCTAssertNil(DestinationPin.load(defaults: suite))
+        DestinationPin.save(lat: dest.lat, lon: dest.lon, defaults: suite)
+        XCTAssertEqual(DestinationPin.load(defaults: suite)?.lat, dest.lat)
+        XCTAssertEqual(DestinationPin.load(defaults: suite)?.lon, dest.lon)
+        DestinationPin.save(lat: .nan, lon: dest.lon, defaults: suite)
+        XCTAssertEqual(DestinationPin.load(defaults: suite)?.lat, dest.lat)
+        DestinationPin.clear(defaults: suite)
+        XCTAssertNil(DestinationPin.load(defaults: suite))
     }
 
     func testFixPublishThrottlesHeadingJitterAndKeepsFirstFix() {

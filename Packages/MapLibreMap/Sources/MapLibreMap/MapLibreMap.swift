@@ -562,11 +562,34 @@ public enum UserPuck {
             && lon <= max(west, east)
     }
 
+    public static let fixKey = "you.fix"
+
+    /// Native annotation + style sources abort on NaN / Inf / out-of-range.
+    public static func shouldPaint(lat: Double, lon: Double) -> Bool {
+        lat.isFinite && lon.isFinite && abs(lat) <= 90 && abs(lon) <= 180
+    }
+
+    public static func saveFix(
+        lat: Double,
+        lon: Double,
+        defaults: UserDefaults = .standard
+    ) {
+        guard shouldPaint(lat: lat, lon: lon) else { return }
+        defaults.set([lat, lon], forKey: fixKey)
+    }
+
+    public static func loadFix(defaults: UserDefaults = .standard) -> (lat: Double, lon: Double)? {
+        guard let pair = defaults.array(forKey: fixKey) as? [Double], pair.count == 2,
+              shouldPaint(lat: pair[0], lon: pair[1])
+        else { return nil }
+        return (pair[0], pair[1])
+    }
+
     public static func coordinate(
         lastKnown: (lat: Double, lon: Double)?,
         packCenter: (lat: Double, lon: Double)
     ) -> (lat: Double, lon: Double) {
-        if let last = lastKnown, last.lat.isFinite, last.lon.isFinite {
+        if let last = lastKnown, shouldPaint(lat: last.lat, lon: last.lon) {
             return last
         }
         return packCenter
@@ -1600,6 +1623,11 @@ public enum OverlaySync: Sendable {
     /// (remove outline, addLayer) is a use-after-free.
     public static func shouldMutateMap(styleLoading: Bool) -> Bool {
         !styleLoading
+    }
+
+    /// Eye tails / rings. Empty or a NaN vertex is not a line.
+    public static func shouldDrawOverlayLine(_ coords: [(lat: Double, lon: Double)]) -> Bool {
+        !coords.isEmpty && coords.allSatisfy { $0.lat.isFinite && $0.lon.isFinite }
     }
 
     /// Style mutation is add/remove of sources and layers. GPS ticks must

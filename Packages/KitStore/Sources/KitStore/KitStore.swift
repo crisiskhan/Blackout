@@ -1,6 +1,6 @@
 import Foundation
 
-public struct GearItem: Equatable, Sendable, Identifiable {
+public struct GearItem: Equatable, Sendable, Identifiable, Codable {
     public var id: String
     public var name: String
     public var working: Bool
@@ -79,5 +79,27 @@ public struct KitBag: Equatable, Sendable {
         } else {
             items.append(item)
         }
+    }
+
+    public static let persistKey = "you.kit"
+
+    public static func emptyWater() -> KitBag {
+        KitBag(items: [GearItem(id: "water", name: "Water", working: true, count: 0)])
+    }
+
+    public static func save(_ bag: KitBag, defaults: UserDefaults = .standard) {
+        if let data = try? JSONEncoder().encode(bag.items), !bag.items.isEmpty {
+            defaults.set(data, forKey: persistKey)
+        } else {
+            defaults.removeObject(forKey: persistKey)
+        }
+    }
+
+    public static func load(defaults: UserDefaults = .standard) -> KitBag {
+        guard let data = defaults.data(forKey: persistKey),
+              let items = try? JSONDecoder().decode([GearItem].self, from: data),
+              !items.isEmpty
+        else { return emptyWater() }
+        return KitBag(items: items)
     }
 }

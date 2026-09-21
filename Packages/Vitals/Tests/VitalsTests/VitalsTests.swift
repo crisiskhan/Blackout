@@ -197,4 +197,27 @@ final class VitalsTests: XCTestCase {
         )
         XCTAssertEqual(redFlagStillBlack.band, .black)
     }
+
+    func testRailsSurviveKill() {
+        let body = PartyVitals(
+            hunger: 0.45,
+            thirst: 0.65,
+            pain: 0.2,
+            water: 0.2,
+            fatigue: 0.8,
+            weatherExposure: 0.2
+        )
+        let suite = UserDefaults(suiteName: "you.vitals.test.\(UUID().uuidString)")!
+        XCTAssertNil(PartyVitals.load(defaults: suite))
+        PartyVitals.save(body, defaults: suite)
+        let back = PartyVitals.load(defaults: suite)
+        XCTAssertEqual(back?.hunger, 0.45)
+        XCTAssertEqual(back?.thirst, 0.65)
+        XCTAssertEqual(back?.pain, 0.2)
+        XCTAssertEqual(back?.fatigue, 0.8)
+        XCTAssertEqual(back?.weatherExposure, 0.2)
+        XCTAssertEqual(back?.band, .red)
+        suite.set("nope", forKey: PartyVitals.persistKey)
+        XCTAssertNil(PartyVitals.load(defaults: suite))
+    }
 }

@@ -38,4 +38,21 @@ final class KitStoreTests: XCTestCase {
         XCTAssertEqual(bag.assigned(to: "YOU", name: "Khan", isYou: true).map(\.name), ["Tape"])
         XCTAssertTrue(bag.assigned(to: "peer", name: "Sam", isYou: false).isEmpty)
     }
+
+    func testBagSurvivesKill() {
+        var bag = KitBag(items: [GearItem(id: "water", name: "Water", working: true, count: 3)])
+        bag.assign("water", to: "YOU")
+        bag.addNamed("Tape")
+        let suite = UserDefaults(suiteName: "you.kit.test.\(UUID().uuidString)")!
+        XCTAssertEqual(KitBag.load(defaults: suite).items.map(\.name), ["Water"])
+        XCTAssertEqual(KitBag.load(defaults: suite).items.first?.count, 0)
+        KitBag.save(bag, defaults: suite)
+        let back = KitBag.load(defaults: suite)
+        XCTAssertEqual(back.items.map(\.name), ["Water", "Tape"])
+        XCTAssertEqual(back.items.first?.count, 3)
+        XCTAssertEqual(back.items.first?.assignedTo, "YOU")
+        suite.set("nope", forKey: KitBag.persistKey)
+        XCTAssertEqual(KitBag.load(defaults: suite).items.map(\.name), ["Water"])
+        XCTAssertEqual(KitBag.load(defaults: suite).items.first?.count, 0)
+    }
 }

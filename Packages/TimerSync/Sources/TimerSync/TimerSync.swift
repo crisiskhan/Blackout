@@ -46,7 +46,7 @@ public enum TimerDuration {
     }
 }
 
-public struct PartyTimer: Equatable, Sendable, Identifiable {
+public struct PartyTimer: Equatable, Sendable, Identifiable, Codable {
     public var id: String
     public var who: String
     public var task: String
@@ -163,4 +163,30 @@ public final class TimerBoard: @unchecked Sendable {
     }
 
     public func isSOS(_ t: PartyTimer) -> Bool { false }
+
+    public static let persistKey = "you.timers"
+
+    public func restore(timers: [PartyTimer], completed: [PartyTimer] = []) {
+        self.timers = Array(timers.prefix(Self.maxActive))
+        self.completed = completed
+    }
+
+    public func save(defaults: UserDefaults = .standard) {
+        let blob = TimerBlob(timers: timers, completed: completed)
+        if let data = try? JSONEncoder().encode(blob) {
+            defaults.set(data, forKey: Self.persistKey)
+        }
+    }
+
+    public func load(defaults: UserDefaults = .standard) {
+        guard let data = defaults.data(forKey: Self.persistKey),
+              let blob = try? JSONDecoder().decode(TimerBlob.self, from: data)
+        else { return }
+        restore(timers: blob.timers, completed: blob.completed)
+    }
+}
+
+private struct TimerBlob: Codable {
+    var timers: [PartyTimer]
+    var completed: [PartyTimer]
 }

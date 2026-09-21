@@ -74,6 +74,28 @@ public enum DestinationPin {
     public static let ringRadius: Double = 13
     public static let coreRadius: Double = 5
 
+    public static let persistKey = "map.dest"
+
+    public static func save(
+        lat: Double,
+        lon: Double,
+        defaults: UserDefaults = .standard
+    ) {
+        guard UserPuck.shouldPaint(lat: lat, lon: lon) else { return }
+        defaults.set([lat, lon], forKey: persistKey)
+    }
+
+    public static func load(defaults: UserDefaults = .standard) -> (lat: Double, lon: Double)? {
+        guard let pair = defaults.array(forKey: persistKey) as? [Double], pair.count == 2,
+              UserPuck.shouldPaint(lat: pair[0], lon: pair[1])
+        else { return nil }
+        return (pair[0], pair[1])
+    }
+
+    public static func clear(defaults: UserDefaults = .standard) {
+        defaults.removeObject(forKey: persistKey)
+    }
+
     public static func needsReapply(
         stored: (lat: Double, lon: Double)?,
         destination: (lat: Double, lon: Double)?

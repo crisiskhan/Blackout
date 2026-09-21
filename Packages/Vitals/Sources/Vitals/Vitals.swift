@@ -172,4 +172,14 @@ public struct PartyVitals: Equatable, Sendable {
     public var posRails: [Double] {
         [hunger, thirst, pain, water, fatigue, weatherExposure].map { Self.snap($0) }
     }
+
+    public static let persistKey = "you.vitals"
+
+    public static func save(_ vitals: PartyVitals, defaults: UserDefaults = .standard) {
+        defaults.set(vitals.posRails, forKey: persistKey)
+    }
+
+    public static func load(defaults: UserDefaults = .standard) -> PartyVitals? {
+        fromPOS(defaults.array(forKey: persistKey) as? [Double])
+    }
 }

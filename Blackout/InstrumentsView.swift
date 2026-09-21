@@ -128,7 +128,10 @@ struct InstrumentsView: View {
     private var hudPlate: some View {
         VStack(alignment: .leading, spacing: 16) {
             sectionLabel("HUD")
-            hudToggle("LEFT HAND", $runtime.leftHand)
+            hudToggle("LEFT HAND", Binding(
+                get: { runtime.leftHand },
+                set: { runtime.setLeftHand($0) }
+            ))
             HStack(spacing: 1) {
                 Button("NIGHT") { runtime.tapLamp(.night) }
                     .buttonStyle(HUDActionStyle(filled: runtime.lamp == .night))
@@ -170,6 +173,12 @@ struct InstrumentsView: View {
                 Theme.plateRect()
                     .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
             )
+            Text(runtime.liveRulerChrome)
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(Theme.silver)
+            Text(runtime.liveUSNGChrome)
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(Theme.silver)
         }
     }
 

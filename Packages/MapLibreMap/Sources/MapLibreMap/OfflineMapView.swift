@@ -806,7 +806,7 @@ public struct OfflineMapView: UIViewRepresentable {
                         packOutline = nil
                     }
 
-                    if spec.showYou {
+                    if spec.showYou, UserPuck.shouldPaint(lat: spec.puckLat, lon: spec.puckLon) {
                         let you = PersonMarkAnnotation()
                         you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
                         you.title = UserPuck.title
@@ -855,7 +855,7 @@ public struct OfflineMapView: UIViewRepresentable {
             for leftover in (view.annotations ?? []).compactMap({ $0 as? PersonMarkAnnotation }) {
                 view.removeAnnotation(leftover)
             }
-            if !spec.showYou {
+            if !spec.showYou || !UserPuck.shouldPaint(lat: spec.puckLat, lon: spec.puckLon) {
                 puck = nil
                 storedPuck = nil
             } else if let you = puck as? PersonMarkAnnotation {
@@ -942,7 +942,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 lastPipKey: paintedPipKey
             )
             let youShape: MLNShape
-            if spec.showYou {
+            if spec.showYou, UserPuck.shouldPaint(lat: spec.puckLat, lon: spec.puckLon) {
                 let you = MLNPointFeature()
                 you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
                 youShape = you
@@ -1087,7 +1087,7 @@ public struct OfflineMapView: UIViewRepresentable {
             let tailShape: MLNShape
             if showTails, !spec.trails.isEmpty {
                 let features: [[String: Any]] = spec.trails.compactMap { line in
-                    guard line.count >= 2 else { return nil }
+                    guard OverlaySync.shouldDrawOverlayLine(line), line.count >= 2 else { return nil }
                     return [
                         "type": "Feature",
                         "geometry": [
@@ -1123,7 +1123,7 @@ public struct OfflineMapView: UIViewRepresentable {
             var ringFeatures: [[String: Any]] = []
             for ring in spec.rings {
                 let pts = EyeDesk.ringPoints(lat: ring.lat, lon: ring.lon, meters: ring.meters)
-                guard pts.count >= 8 else { continue }
+                guard OverlaySync.shouldDrawOverlayLine(pts), pts.count >= 8 else { continue }
                 ringFeatures.append([
                     "type": "Feature",
                     "properties": ["overdue": ring.overdue],
@@ -1525,7 +1525,7 @@ public struct OfflineMapView: UIViewRepresentable {
             }
 
             let youShape: MLNShape
-            if spec.showYou {
+            if spec.showYou, UserPuck.shouldPaint(lat: spec.puckLat, lon: spec.puckLon) {
                 let you = MLNPointFeature()
                 you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
                 youShape = you

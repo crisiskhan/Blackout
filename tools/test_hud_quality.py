@@ -5211,6 +5211,84 @@ class DeadGlassGoneTests(unittest.TestCase):
         self.assertNotIn("Watch companion, Live Activity, Action Button", readme)
 
 
+class DeskHoldTests(unittest.TestCase):
+    """Kill-and-relaunch keeps the desk. NaN YOU cannot kill the globe."""
+
+    def test_last_known_you_and_dest_survive_kill(self):
+        puck = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift"
+        )
+        dest = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift"
+        )
+        app = read("Blackout", "AppRuntime.swift")
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        self.assertIn("func shouldPaint", puck)
+        self.assertIn("func saveFix", puck)
+        self.assertIn("func loadFix", puck)
+        self.assertIn("you.fix", puck)
+        self.assertIn("func shouldDrawOverlayLine", puck)
+        self.assertIn("func save(", dest.split("enum DestinationPin")[1])
+        self.assertIn("func load(", dest.split("enum DestinationPin")[1])
+        self.assertIn("func clear(", dest.split("enum DestinationPin")[1])
+        self.assertIn("UserPuck.loadFix", app)
+        self.assertIn("UserPuck.saveFix", app)
+        self.assertIn("DestinationPin.load", app)
+        self.assertIn("DestinationPin.save", app)
+        self.assertIn("DestinationPin.clear", app)
+        you_paint = offline.split("if spec.showYou")[1].split("} else {")[0]
+        self.assertIn("UserPuck.shouldPaint", you_paint)
+        overlay = offline.split("func syncStyleOverlays")[1].split("func insertUnderMarks")[0]
+        self.assertIn("UserPuck.shouldPaint", overlay)
+        eye = offline.split("func syncEyeOverlays")[1].split("func syncRoute")[0]
+        self.assertIn("shouldDrawOverlayLine", eye)
+        qa = read("docs", "SOLO_QA.md")
+        kill = qa.split("## Kill-and-relaunch")[1]
+        self.assertIn("last known you", kill.lower())
+        self.assertIn("DEST", kill)
+
+    def test_body_kit_timers_and_field_walk_survive_kill(self):
+        vitals = read("Packages", "Vitals", "Sources", "Vitals", "Vitals.swift")
+        kit = read("Packages", "KitStore", "Sources", "KitStore", "KitStore.swift")
+        timers = read("Packages", "TimerSync", "Sources", "TimerSync", "TimerSync.swift")
+        session = read("Blackout", "FieldSession.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        field = read("Blackout", "FieldTab.swift")
+        inst = read("Blackout", "InstrumentsView.swift")
+        self.assertIn("persistKey", vitals)
+        self.assertIn("static func save", vitals)
+        self.assertIn("static func load", vitals)
+        self.assertIn("PartyVitals.load", app)
+        self.assertIn("PartyVitals.save", app)
+        self.assertIn("KitBag.load", app)
+        self.assertIn("KitBag.save", app)
+        self.assertIn("timers.load", app)
+        self.assertIn("timers.save", app)
+        self.assertIn("hud.pocket", app)
+        self.assertIn("hud.magNorth", app)
+        self.assertIn("hud.leftHand", app)
+        self.assertIn("enum FieldWalkStore", session)
+        self.assertIn("func persistFieldWalk", session)
+        self.assertIn("func restoreFieldWalk", session)
+        self.assertIn("restoreFieldWalk", field)
+        jump = field.split("private func jump()")[1].split("private func openRoute")[0]
+        self.assertIn("speakFirst: true", jump)
+        plate = inst.split("private var mapPlate")[1].split("private var bodyPlate")[0]
+        self.assertIn("liveRulerChrome", plate)
+        self.assertIn("liveUSNGChrome", plate)
+        self.assertIn("var liveRulerChrome", app)
+        self.assertIn("var liveUSNGChrome", app)
+        qa = read("docs", "SOLO_QA.md")
+        kill = qa.split("## Kill-and-relaunch")[1]
+        self.assertIn("CONDITION", kill)
+        self.assertIn("INVENTORY", kill)
+        self.assertIn("timer", kill.lower())
+        self.assertIn("FIELD", kill)
+        self.assertIn("POCKET", kill)
+
+
 if __name__ == "__main__":
     unittest.main()
 

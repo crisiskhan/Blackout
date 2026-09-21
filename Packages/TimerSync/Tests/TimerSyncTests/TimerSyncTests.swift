@@ -91,4 +91,42 @@ final class TimerSyncTests: XCTestCase {
         b.markDone(id)
         XCTAssertEqual(b.doneLines(id: id), ["1min ALL DONE"])
     }
+
+    func testTimersSurviveKill() {
+        let start = Date(timeIntervalSince1970: 1_700_000_000)
+        let live = PartyTimer(
+            id: "cook",
+            who: "Khan",
+            task: "COOK",
+            duration: 120,
+            started: start,
+            subjectAllTurnaround: true,
+            owner: "Khan"
+        )
+        let done = PartyTimer(
+            id: "water",
+            who: "ALL",
+            task: "WATER",
+            duration: 60,
+            started: start,
+            subjectAllTurnaround: true
+        )
+        let suite = UserDefaults(suiteName: "you.timers.test.\(UUID().uuidString)")!
+        let empty = TimerBoard(box: EventLog())
+        empty.load(defaults: suite)
+        XCTAssertTrue(empty.timers.isEmpty)
+        let saved = TimerBoard(box: EventLog())
+        saved.restore(timers: [live], completed: [done])
+        saved.save(defaults: suite)
+        let back = TimerBoard(box: EventLog())
+        back.load(defaults: suite)
+        XCTAssertEqual(back.timers.map(\.task), ["COOK"])
+        XCTAssertEqual(back.timers.first?.started, start)
+        XCTAssertEqual(back.timers.first?.duration, 120)
+        XCTAssertEqual(back.completed.map(\.task), ["WATER"])
+        suite.set("nope", forKey: TimerBoard.persistKey)
+        let corrupt = TimerBoard(box: EventLog())
+        corrupt.load(defaults: suite)
+        XCTAssertTrue(corrupt.timers.isEmpty)
+    }
 }
