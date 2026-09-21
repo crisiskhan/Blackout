@@ -170,7 +170,7 @@ final class RouterTests: XCTestCase {
         XCTAssertEqual(GraphPlan.snapMeters, 150)
     }
 
-    func testDriveSnapsPastAWalkOnlyDoorOntoTheStreet() {
+    func testDriveSnapsPastAWalkOnlyDoorOntoTheStreet() throws {
         let g = RouteGraph(
             nodes: [
                 .init(id: 0, lon: 0, lat: 0.0004),
@@ -199,7 +199,7 @@ final class RouterTests: XCTestCase {
         XCTAssertEqual(walk.chrome, "")
     }
 
-    func testMidBlockSnapStaysOnTheStreetNotTheYard() {
+    func testMidBlockSnapStaysOnTheStreetNotTheYard() throws {
         let g = RouteGraph(
             nodes: [
                 .init(id: 1, lon: 0, lat: 0),
@@ -290,7 +290,7 @@ final class RouterTests: XCTestCase {
         XCTAssertEqual(walk.coords.last?.lon, dest.lon)
     }
 
-    func testLongStreetBeatsANearerNodeOnAFartherStreet() {
+    func testLongStreetBeatsANearerNodeOnAFartherStreet() throws {
         let g = RouteGraph(
             nodes: [
                 .init(id: 1, lon: -0.03, lat: 0),
