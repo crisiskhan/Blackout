@@ -1,5 +1,4 @@
 import SwiftUI
-import BatteryAuction
 import Tokens
 import Almanac
 import Instruments
@@ -198,10 +197,11 @@ struct InstrumentsView: View {
                 get: { runtime.instruments.state.usbCPTT },
                 set: { runtime.attachUSB_C_PTT($0) }
             ))
-            hudToggle("GNSS PUCK", Binding(
-                get: { runtime.instruments.state.externalGNSS },
-                set: { runtime.attachGNSSPuck($0) }
-            ))
+            if !runtime.instrumentChrome.isEmpty {
+                Text(runtime.instrumentChrome)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Theme.warn)
+            }
         }
     }
 
@@ -216,20 +216,10 @@ struct InstrumentsView: View {
 
     private var powerPlate: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 1) {
-                ForEach(PowerMode.allCases, id: \.self) { mode in
-                    Button(mode.rawValue.uppercased()) { runtime.power.set(mode) }
-                        .buttonStyle(HUDActionStyle(filled: runtime.power.state.mode == mode))
-                }
-            }
-            .clipShape(Theme.plateRect())
             hudToggle("POCKET", Binding(
                 get: { runtime.power.state.pocket },
                 set: { runtime.setPocket($0) }
             ))
-            Text("SPARE \(Int(runtime.power.state.powerBankWh)) WH")
-                .font(.caption.weight(.bold))
-                .foregroundStyle(Theme.silver.opacity(0.55))
         }
     }
 

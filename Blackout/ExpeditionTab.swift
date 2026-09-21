@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import Vitals
 import TimerSync
 import PaperGen
@@ -130,10 +131,6 @@ struct ExpeditionTab: View {
                             .font(.system(size: 13, weight: .heavy))
                             .foregroundStyle(Theme.warn)
                     }
-                    Button("JOIN NAV") {
-                        navChrome = runtime.seatNav() == nil ? nil : "NAV · SEATED"
-                    }
-                    .buttonStyle(HUDActionStyle(filled: false))
                 }
             }
             sectionLabel("DIARY")
@@ -188,6 +185,7 @@ struct ExpeditionTab: View {
                 let text = PaperGen.export(diary: runtime.diary, roster: runtime.paperRoster(), packName: runtime.packs?.active?.name ?? "")
                 paperText = text
                 runtime.box.log("paper", text)
+                PaperShare.present(text)
             }
             .buttonStyle(HUDActionStyle(filled: false))
             if !paperText.isEmpty {
@@ -771,5 +769,34 @@ struct HUDVitalsRail: View {
             startPoint: .top,
             endPoint: .bottom
         )
+    }
+}
+
+enum PaperShare {
+    static func present(_ text: String) {
+        let sheet = UIActivityViewController(activityItems: [text], applicationActivities: nil)
+        guard let scene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive })
+            ?? UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first,
+            let root = scene.keyWindow?.rootViewController
+                ?? scene.windows.first(where: \.isKeyWindow)?.rootViewController
+                ?? scene.windows.first?.rootViewController
+        else { return }
+        var presenter = root
+        while let shown = presenter.presentedViewController {
+            presenter = shown
+        }
+        if let pop = sheet.popoverPresentationController {
+            pop.sourceView = presenter.view
+            pop.sourceRect = CGRect(
+                x: presenter.view.bounds.midX,
+                y: presenter.view.bounds.midY,
+                width: 1,
+                height: 1
+            )
+            pop.permittedArrowDirections = []
+        }
+        presenter.present(sheet, animated: true)
     }
 }

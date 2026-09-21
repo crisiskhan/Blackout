@@ -49,6 +49,17 @@ final class PTTMic {
         applyPreferredInput()
     }
 
+    var hasWiredInput: Bool {
+        #if canImport(AVFoundation)
+        let session = AVAudioSession.sharedInstance()
+        return session.availableInputs?.contains { port in
+            port.portType == .usbAudio || port.portType == .headsetMic
+        } ?? false
+        #else
+        return false
+        #endif
+    }
+
     private func applyPreferredInput() {
         #if canImport(AVFoundation)
         let session = AVAudioSession.sharedInstance()
