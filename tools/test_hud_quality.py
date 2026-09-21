@@ -2312,6 +2312,53 @@ class VisionInstrumentTests(unittest.TestCase):
         self.assertIn("alligator still is animal", qa)
         self.assertIn("FIELD · WATER", qa)
         self.assertIn("Hedgehog is not hog", qa)
+        self.assertIn("A cactus still prints `CACTUS`", qa)
+        self.assertIn("prickly pear", qa.lower())
+
+    def test_kind_needles_do_not_name_the_only_book_species(self):
+        vis = read("Packages", "VisionCoreML", "Sources", "VisionCoreML", "VisionCoreML.swift")
+        tests = read(
+            "Packages",
+            "VisionCoreML",
+            "Tests",
+            "VisionCoreMLTests",
+            "VisionCoreMLTests.swift",
+        )
+        match = vis.split("private static func match(", 1)[1].split(
+            "private static func speciesGuess", 1
+        )[0]
+        kind_return = match.split("for (kind, needles) in kindNeedles", 1)[1]
+        self.assertNotIn(
+            "labels.count == 1",
+            kind_return,
+            "a cactus still must stay CACTUS, not the only cactus in the book",
+        )
+        self.assertIn("testCactusKindIsCactusNotTheOnlyBookSpecies", tests)
+        self.assertIn("testPricklyPearNameIsStillTheBookName", tests)
+        self.assertIn('XCTAssertEqual(g.name, "CACTUS")', tests)
+        self.assertIn('identifier: "Prickly pear"', tests)
+
+    def test_vision_walk_is_the_first_hit_and_generic_kinds_can_use_held_ground(self):
+        field = read("Blackout", "FieldTab.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        inspect = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "WaterInspect.swift"
+        )
+        still = read("Blackout", "VisionStill.swift")
+        vis_btn = field.split("func visionFieldButton", 1)[1].split("private func loc", 1)[0]
+        self.assertIn("HUDActionStyle(filled: true)", vis_btn)
+        self.assertIn("visionUsesGround", vis_btn)
+        self.assertIn("lastGroundRoute", vis_btn)
+        self.assertIn("var lastGroundRoute", app)
+        self.assertIn("lastGroundRoute =", app)
+        self.assertIn("func visionUsesGround", inspect)
+        self.assertIn("func groundIsNearYou", inspect)
+        self.assertIn('"kind:tree"', inspect)
+        self.assertIn('"kind:mammal"', inspect)
+        chrome = still.split("func installChrome", 1)[1].split("func cancel", 1)[0]
+        self.assertIn("225.0 / 255.0", chrome)
+        self.assertIn("setTitleColor", chrome)
+        self.assertIn("44", chrome)
 
 
 class HonestyOnTheGlassTests(unittest.TestCase):

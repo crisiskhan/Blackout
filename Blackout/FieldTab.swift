@@ -77,6 +77,7 @@ struct FieldTab: View {
         }
         .onChange(of: runtime.fieldJump) { _, _ in jump() }
         .onChange(of: runtime.packs?.active?.id) { _, _ in
+            runtime.forgetGround()
             load()
         }
         .onChange(of: runtime.field.query) { _, _ in
@@ -134,6 +135,7 @@ struct FieldTab: View {
         }
         .buttonStyle(HUDActionStyle(filled: true))
         if let g = runtime.field.guess {
+            visionFieldButton(g)
             HUDGlassCard {
                 VStack(alignment: .leading, spacing: 8) {
                     if g.noModel {
@@ -154,7 +156,6 @@ struct FieldTab: View {
                     }
                 }
             }
-            visionFieldButton(g)
         }
     }
 
@@ -163,19 +164,27 @@ struct FieldTab: View {
     /// model stay a name, not an invented card.
     @ViewBuilder
     private func visionFieldButton(_ g: VisionGuess) -> some View {
+        let vision = InspectField.fieldRoute(
+            forVision: g.labelId,
+            state: runtime.packs?.active?.state,
+            pack: runtime.packs?.active?.id
+        )
+        let useGround = InspectField.visionUsesGround(g.labelId)
+            && !runtime.lastGroundRoute.isEmpty
+            && InspectField.groundIsNearYou(
+                you: runtime.fieldYou,
+                groundLat: runtime.lastGroundLat,
+                groundLon: runtime.lastGroundLon
+            )
         let route = InspectField.presentRoute(
-            InspectField.fieldRoute(
-                forVision: g.labelId,
-                state: runtime.packs?.active?.state,
-                pack: runtime.packs?.active?.id
-            ),
+            useGround ? runtime.lastGroundRoute : vision,
             in: Set(cards.map(\.id))
         )
         if let first = route.first {
             Button(InspectField.label(for: first)) {
                 openRoute(route, speakFirst: true)
             }
-            .buttonStyle(HUDActionStyle(filled: false))
+            .buttonStyle(HUDActionStyle(filled: true))
             if let book = InspectField.bookLine(for: route) {
                 Text(book)
                     .font(.system(size: 11, weight: .heavy))

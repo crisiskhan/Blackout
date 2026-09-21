@@ -162,19 +162,22 @@ struct VisionStill: UIViewControllerRepresentable {
         }
 
         private func installChrome() {
+            let silver = UIColor(white: 0.86, alpha: 1)
             let close = UIButton(type: .system)
             close.setTitle("CLOSE", for: .normal)
             close.titleLabel?.font = .systemFont(ofSize: 13, weight: .heavy)
-            close.setTitleColor(.white, for: .normal)
+            close.setTitleColor(silver, for: .normal)
             close.addTarget(self, action: #selector(cancel), for: .touchUpInside)
             close.translatesAutoresizingMaskIntoConstraints = false
 
             let capture = UIButton(type: .system)
             capture.setTitle("CAPTURE", for: .normal)
             capture.titleLabel?.font = .systemFont(ofSize: 13, weight: .heavy)
-            capture.setTitleColor(.white, for: .normal)
+            capture.setTitleColor(silver, for: .normal)
             capture.backgroundColor = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
             capture.layer.cornerRadius = 10
+            capture.layer.borderWidth = 1
+            capture.layer.borderColor = silver.withAlphaComponent(0.45).cgColor
             capture.addTarget(self, action: #selector(shoot), for: .touchUpInside)
             capture.translatesAutoresizingMaskIntoConstraints = false
             capture.isEnabled = false
