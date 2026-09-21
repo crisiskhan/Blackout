@@ -8,6 +8,7 @@ COMMS dumped Whisper meters. Those are not the best way — these contracts are.
 """
 from __future__ import annotations
 
+import json
 import re
 import unittest
 import zlib
@@ -137,6 +138,45 @@ _VISION_RANK = {
     "bird": 26,
     "tree": 10,
 }
+
+
+_VISION_BOOK_KIND = {
+    "tree": "tree",
+    "cactus": "cactus",
+    "cacti_yucca": "cactus",
+    "snake": "snake",
+    "mammal": "mammal",
+    "bird": "bird",
+    "fish": "fish",
+    "lizard": "lizard",
+    "turtle": "turtle",
+    "frog": "frog",
+    "fungi": "fungi",
+}
+
+
+def _vision_id_cond(ident: str, cond: str) -> bool:
+    """Mirror of one visionGroundFromSpecies if-condition."""
+    for part in cond.split("||"):
+        contains = re.search(r'id\.contains\("([^"]+)"\)', part)
+        if contains and contains.group(1) in ident:
+            return True
+        suffix = re.search(r'id\.hasSuffix\("([^"]+)"\)', part)
+        if suffix and ident.endswith(suffix.group(1)):
+            return True
+    return False
+
+
+def _vision_ground_from_species(label_id: str, src: str) -> str | None:
+    """First matching return in visionGroundFromSpecies. Order is the bug."""
+    fn = src.split("func visionGroundFromSpecies", 1)[1].split(
+        "func visionPrepWarns", 1
+    )[0]
+    ident = label_id.lower()
+    for match in re.finditer(r"if ([^{]+) \{\s*return \.(\w+)", fn):
+        if _vision_id_cond(ident, match.group(1)):
+            return match.group(2)
+    return None
 
 
 def _vision_best(
@@ -2456,6 +2496,80 @@ class VisionInstrumentTests(unittest.TestCase):
         self.assertIn('"animal-frog"', field_py)
         self.assertIn("Cholla is not food", field_py)
         self.assertIn("Pads you already know are prickly pear", field_py)
+
+    def test_every_packed_vision_label_opens_a_field_route(self):
+        """A named still opens that kind's FIELD walk, not a substring trap.
+
+        nm-ponderosa contains the letters pond, so a pine still used to open
+        WATER. tx-softshell has no turtle/tortoise/terrapin needle, so it
+        opened nothing. Place-name matcher `ponderosa` stays off — Loma
+        Ponderosa Open Space is an open reserve, not a pine still.
+        """
+        inspect = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "WaterInspect.swift"
+        )
+        tests = read(
+            "Packages",
+            "MapLibreMap",
+            "Tests",
+            "MapLibreMapTests",
+            "InspectTests.swift",
+        )
+        wrong: list[str] = []
+        for state in ("tx", "nm"):
+            book = json.loads(
+                (ROOT / "Resources" / "Vision" / f"labels.{state}.json").read_text()
+            )
+            for lab in book["labels"]:
+                expected = _VISION_BOOK_KIND[lab["kind"]]
+                got = _vision_ground_from_species(lab["id"], inspect)
+                if got != expected:
+                    wrong.append(f"{lab['id']} kind={lab['kind']} routed={got}")
+        self.assertEqual(
+            wrong,
+            [],
+            "VISION stills opened the wrong FIELD kind: " + "; ".join(wrong),
+        )
+        species = inspect.split("func visionGroundFromSpecies", 1)[1].split(
+            "func visionPrepWarns", 1
+        )[0]
+        tree = species.split('id.contains("oak")', 1)[1].split(
+            'id.contains("lake")', 1
+        )[0]
+        self.assertIn('"ponderosa"', tree)
+        self.assertLess(
+            species.find("ponderosa"),
+            species.find('"pond"'),
+            "pond is a substring of ponderosa — the pine must win first",
+        )
+        turtle = species.split('id.contains("turtle")', 1)[1].split(
+            'id.contains("frog")', 1
+        )[0]
+        self.assertIn('"softshell"', turtle)
+        route = inspect.split("func fieldRoute(forVision", 1)[1]
+        pine_route = route.split('id.contains("pine")', 1)[1].split("if nm", 1)[0]
+        self.assertNotIn(
+            "ponderosa",
+            pine_route,
+            "NM ponderosa is nm-tree-use, not the East Texas pine card",
+        )
+        self.assertIn('forVision: "kind:bird"', tests)
+        self.assertIn('forVision: "kind:fish"', tests)
+        self.assertIn('forVision: "kind:lizard"', tests)
+        self.assertIn('forVision: "kind:turtle"', tests)
+        self.assertIn('forVision: "kind:frog"', tests)
+        self.assertIn('forVision: "nm-ponderosa"', tests)
+        self.assertIn('forVision: "tx-softshell"', tests)
+        self.assertIn('forVision: "tx-turkey"', tests)
+        self.assertIn('forVision: "tx-bass"', tests)
+        self.assertIn('forVision: "tx-horned-lizard"', tests)
+        ponderosa_assert = tests.split('forVision: "nm-ponderosa"', 1)[1][:500]
+        self.assertIn("treeUseNMCard", ponderosa_assert)
+        softshell_assert = tests.split('forVision: "tx-softshell"', 1)[1][:400]
+        self.assertIn("turtleCard", softshell_assert)
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("ponderosa still is tree-use, not water", qa)
+        self.assertIn("softshell still is the turtle card", qa)
 
 
 class HonestyOnTheGlassTests(unittest.TestCase):

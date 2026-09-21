@@ -720,16 +720,18 @@ public enum InspectField {
         if id.contains("prickly") || id.contains("cholla") || id.contains("yucca") || id.contains("sotol") {
             return .cactus
         }
+        // Ponderosa before pond: those four letters sit inside the pine id.
+        if id.contains("oak") || id.contains("mesquite") || id.contains("elm") || id.contains("pecan")
+            || id.contains("pinon") || id.contains("juniper") || id.contains("aspen")
+            || id.contains("cottonwood") || id.contains("pine") || id.contains("loblolly")
+            || id.contains("ponderosa")
+        {
+            return .tree
+        }
         if id.contains("lake") || id.contains("pond") || id.contains("reservoir")
             || id.contains("creek") || id.contains("river") || id.contains("spring")
         {
             return .water
-        }
-        if id.contains("oak") || id.contains("mesquite") || id.contains("elm") || id.contains("pecan")
-            || id.contains("pinon") || id.contains("juniper") || id.contains("aspen")
-            || id.contains("cottonwood") || id.contains("pine") || id.contains("loblolly")
-        {
-            return .tree
         }
         if id.contains("wildfire") || id.contains("bushfire") {
             return .fire
@@ -768,7 +770,9 @@ public enum InspectField {
         if id.contains("gila") || id.contains("lizard") || id.contains("gecko") {
             return .lizard
         }
-        if id.contains("turtle") || id.contains("tortoise") || id.contains("terrapin") {
+        if id.contains("turtle") || id.contains("tortoise") || id.contains("terrapin")
+            || id.contains("softshell")
+        {
             return .turtle
         }
         if id.contains("frog") || id.contains("toad") {

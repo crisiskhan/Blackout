@@ -4450,6 +4450,49 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(pineWest.first, Inspect.treeUseEastCard)
         XCTAssertFalse(pineWest.contains(Inspect.treeUseTXCard))
+
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "kind:bird", state: "TX"),
+            [Inspect.birdCard, Inspect.gameCard]
+        )
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "kind:fish", state: "TX"),
+            [Inspect.fishCard, "food-cook"]
+        )
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "kind:lizard", state: "TX"),
+            [Inspect.lizardCard]
+        )
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "kind:turtle", state: "TX"),
+            [Inspect.turtleCard, "food-cook"]
+        )
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "kind:frog", state: "TX"),
+            [Inspect.frogCard]
+        )
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "tx-turkey", state: "TX"),
+            [Inspect.birdCard, Inspect.gameCard]
+        )
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "tx-bass", state: "TX"),
+            [Inspect.fishCard, "food-cook"]
+        )
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "tx-horned-lizard", state: "TX"),
+            [Inspect.lizardCard]
+        )
+        let ponderosa = InspectField.fieldRoute(forVision: "nm-ponderosa", state: "NM")
+        XCTAssertEqual(ponderosa.first, Inspect.treeUseNMCard)
+        XCTAssertFalse(
+            ponderosa.contains(Inspect.treeUseEastCard),
+            "NM ponderosa is high-country timber, not East Texas loblolly"
+        )
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "tx-softshell", state: "TX"),
+            [Inspect.turtleCard, "food-cook"]
+        )
     }
 
     func testTheLoadedBookDropsTheOtherStatesCardAndKeepsTheCoreTrail() {
