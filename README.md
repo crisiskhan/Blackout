@@ -27,7 +27,6 @@ With a packed bbox on device and Airplane Mode on:
 - Walk a Field stepper with pictures, SPEAK, SEND TO PARTY, Español.
 - Point Vision at a plant: pack-book name or UNKNOWN. Fungi default LEAVE IT. Never edible unlock. No percent.
 - Switch TX WEST → NM pack. A pack for a state we ship no map for can never become active.
-- Share paper from EXPEDITION (Files / copy / print). The dump also stays on the glass.
 
 ## Architecture
 

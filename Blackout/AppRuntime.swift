@@ -376,13 +376,6 @@ final class AppRuntime {
         )
     }
 
-    func paperRoster() -> PartyRoster {
-        PartyRoster(
-            code: roster.code,
-            members: liveRoster.map { PartyMember(id: $0.id, name: $0.name, role: $0.role) }
-        )
-    }
-
     func seatNav() -> String? {
         seat(id: mesh.localID, name: displayYouName, role: .nav)
     }
