@@ -476,7 +476,9 @@ public enum InspectField {
             return .plant
         case Inspect.snakeTXCard, Inspect.snakeNMCard, Inspect.snakeEastCard, Inspect.biteCard:
             return .bite
-        case Inspect.mammalTXCard, Inspect.mammalNMCard, Inspect.mammalEastCard, Inspect.gatorCard:
+        case Inspect.mammalTXCard, Inspect.mammalNMCard, Inspect.mammalEastCard, Inspect.gatorCard,
+             Inspect.birdCard, Inspect.lizardCard, Inspect.turtleCard, Inspect.frogCard,
+             Inspect.fishCard:
             return .animal
         case Inspect.caveCard:
             return .cave
@@ -625,6 +627,11 @@ public enum InspectField {
         case lightning
         case shelter
         case wound
+        case bird
+        case fish
+        case lizard
+        case turtle
+        case frog
     }
 
     /// UNKNOWN and no model stay empty — a missing guess is not a card.
@@ -663,6 +670,16 @@ public enum InspectField {
             return .shelter
         case "kind:wound":
             return .wound
+        case "kind:bird":
+            return .bird
+        case "kind:fish":
+            return .fish
+        case "kind:lizard":
+            return .lizard
+        case "kind:turtle":
+            return .turtle
+        case "kind:frog":
+            return .frog
         default:
             return visionGroundFromSpecies(id)
         }
@@ -695,6 +712,8 @@ public enum InspectField {
             || id.contains("cougar") || id.contains("puma") || id.contains("raccoon")
             || id.contains("skunk") || id.contains("armadillo") || id.contains("rabbit")
             || id.contains("pronghorn") || id.contains("wolf")
+            || id.contains("squirrel") || id.contains("opossum") || id.contains("beaver")
+            || id.contains("bison") || id.contains("badger")
         {
             return .mammal
         }
@@ -733,7 +752,42 @@ public enum InspectField {
         if id.contains("wound") || id.contains("bleed") {
             return .wound
         }
+        if id.contains("turkey") || id.contains("quail") || id.contains("dove")
+            || id.contains("roadrunner") || id.contains("hawk") || id.contains("eagle")
+            || id.contains("owl") || id.contains("duck") || id.contains("goose")
+            || id.contains("vulture") || id.contains("raven") || id.contains("crow")
+            || id.contains("bird")
+        {
+            return .bird
+        }
+        if id.contains("bass") || id.contains("catfish") || id.contains("trout")
+            || id.contains("sunfish") || id.hasSuffix("fish")
+        {
+            return .fish
+        }
+        if id.contains("gila") || id.contains("lizard") || id.contains("gecko") {
+            return .lizard
+        }
+        if id.contains("turtle") || id.contains("tortoise") || id.contains("terrapin") {
+            return .turtle
+        }
+        if id.contains("frog") || id.contains("toad") {
+            return .frog
+        }
         return nil
+    }
+
+    /// Cactus, game, bird, fish, turtle: WARNING then the prep walk.
+    /// Fungi, snake, lizard, frog, unknown: no meal.
+    public static func visionPrepWarns(_ labelId: String) -> Bool {
+        guard let ground = visionGround(labelId: labelId) else { return false }
+        switch ground {
+        case .cactus, .mammal, .bird, .fish, .turtle:
+            return true
+        case .fungi, .snake, .sting, .gator, .lizard, .frog, .tree, .water,
+             .fire, .flood, .ice, .smoke, .lightning, .shelter, .wound:
+            return false
+        }
     }
 
     /// A generic TREE or MAMMAL still may walk the last held ground
@@ -843,6 +897,16 @@ public enum InspectField {
             return ["shelter-tarp"]
         case .wound:
             return ["med-bleed-pack"]
+        case .bird:
+            return [Inspect.birdCard, Inspect.gameCard]
+        case .fish:
+            return [Inspect.fishCard, "food-cook"]
+        case .lizard:
+            return [Inspect.lizardCard]
+        case .turtle:
+            return [Inspect.turtleCard, "food-cook"]
+        case .frog:
+            return [Inspect.frogCard]
         }
     }
 }

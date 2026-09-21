@@ -700,6 +700,8 @@ public enum FieldCorpus {
     /// already named meat, hunt, or cook.
     private static let liveAnimal: Set<String> = [
         "javelina", "peccary", "pecari", "hog", "coyote", "deer", "elk", "bear",
+        "turkey", "quail", "dove", "bird", "fish", "bass", "lizard", "turtle",
+        "frog", "toad",
     ]
 
     private static let mealWord: Set<String> = [
@@ -936,6 +938,26 @@ public enum FieldCorpus {
         "nada": ["camp-start"],
         "hurricane": ["tx-hurricane-paper"],
         "cactus": ["tx-cactus", "nm-cactus"],
+        "turkey": ["animal-bird", "food-game"],
+        "quail": ["animal-bird"],
+        "dove": ["animal-bird"],
+        "bird": ["animal-bird"],
+        "ave": ["animal-bird"],
+        "pavo": ["animal-bird"],
+        "fish": ["animal-fish", "food-cook"],
+        "bass": ["animal-fish"],
+        "catfish": ["animal-fish"],
+        "trout": ["animal-fish"],
+        "pescado": ["animal-fish", "food-cook"],
+        "lizard": ["animal-lizard"],
+        "gila": ["animal-lizard"],
+        "lagarto": ["animal-lizard"],
+        "turtle": ["animal-turtle"],
+        "tortuga": ["animal-turtle"],
+        "frog": ["animal-frog"],
+        "toad": ["animal-frog"],
+        "rana": ["animal-frog"],
+        "sapo": ["animal-frog"],
         "oleander": ["tx-plant-danger"],
         "datura": ["nm-plant-danger"],
         "javelina": ["tx-mammal", "tx-game"],

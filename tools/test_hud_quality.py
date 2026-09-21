@@ -121,15 +121,20 @@ _VISION_RANK = {
     "sting": 38,
     "fire": 37,
     "gator": 36,
+    "lizard": 36,
+    "frog": 36,
     "cactus": 35,
     "cactiYucca": 35,
     "flood": 34,
-    "lightning": 33,
-    "water": 32,
-    "smoke": 31,
-    "mammal": 30,
-    "ice": 29,
-    "shelter": 28,
+    "fish": 33,
+    "turtle": 33,
+    "lightning": 32,
+    "water": 31,
+    "smoke": 30,
+    "mammal": 29,
+    "ice": 28,
+    "shelter": 27,
+    "bird": 26,
     "tree": 10,
 }
 
@@ -2314,6 +2319,11 @@ class VisionInstrumentTests(unittest.TestCase):
         self.assertIn("Hedgehog is not hog", qa)
         self.assertIn("A cactus still prints `CACTUS`", qa)
         self.assertIn("prickly pear", qa.lower())
+        self.assertIn("WARNING", qa)
+        self.assertIn("subject", qa.lower())
+        self.assertIn("BIRD", qa)
+        self.assertIn("FUNGI", qa)
+        self.assertNotIn("`EDIBLE`", qa)
 
     def test_kind_needles_do_not_name_the_only_book_species(self):
         vis = read("Packages", "VisionCoreML", "Sources", "VisionCoreML", "VisionCoreML.swift")
@@ -2359,6 +2369,91 @@ class VisionInstrumentTests(unittest.TestCase):
         self.assertIn("225.0 / 255.0", chrome)
         self.assertIn("setTitleColor", chrome)
         self.assertIn("44", chrome)
+
+    def test_subject_crop_classifies_the_thing_not_just_the_sky(self):
+        still = read("Blackout", "VisionStill.swift")
+        vis = read("Packages", "VisionCoreML", "Sources", "VisionCoreML", "VisionCoreML.swift")
+        self.assertIn("VNGenerateObjectnessBasedSaliencyImageRequest", still)
+        self.assertIn("func subjectCrop", still)
+        self.assertIn("func centerCrop", still)
+        self.assertIn("salientObjects", still)
+        obs = still.split("static func observations", 1)[1]
+        self.assertIn("subjectCrop", obs)
+        self.assertIn("centerCrop", obs)
+        self.assertNotIn("onDeviceModelPresent = true", vis)
+
+    def test_tx_nm_life_kinds_beat_a_tree_and_prep_is_warning_not_edible(self):
+        vis = read("Packages", "VisionCoreML", "Sources", "VisionCoreML", "VisionCoreML.swift")
+        tests = read(
+            "Packages",
+            "VisionCoreML",
+            "Tests",
+            "VisionCoreMLTests",
+            "VisionCoreMLTests.swift",
+        )
+        inspect = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "WaterInspect.swift"
+        )
+        field = read("Blackout", "FieldTab.swift")
+        session = read("Blackout", "FieldSession.swift")
+        l10n = read("Blackout", "L10n.swift")
+        needles = _vision_kind_needles(vis)
+        self.assertEqual(_vision_kind(needles, "Bird"), "bird")
+        self.assertEqual(_vision_kind(needles, "Wild turkey"), "bird")
+        self.assertEqual(_vision_kind(needles, "Largemouth bass"), "fish")
+        self.assertEqual(_vision_kind(needles, "Lizard"), "lizard")
+        self.assertEqual(_vision_kind(needles, "Gila monster"), "lizard")
+        self.assertEqual(_vision_kind(needles, "Turtle"), "turtle")
+        self.assertEqual(_vision_kind(needles, "Frog"), "frog")
+        self.assertEqual(
+            _vision_best(needles, [("Tree", 0.9), ("Bird", 0.35)]),
+            "bird",
+        )
+        self.assertEqual(
+            _vision_best(needles, [("Tree", 0.9), ("Fish", 0.33)]),
+            "fish",
+        )
+        for name in (
+            "testBirdKindIsBirdNotATree",
+            "testTurkeyNameIsStillTheBookName",
+            "testBassIsFishNotWater",
+            "testGilaIsLizardLeaveIt",
+            "testFrogIsLeaveItNotAMeal",
+        ):
+            self.assertIn(name, tests, name)
+        route = inspect.split("func fieldRoute(forVision", 1)[1].split(
+            "public struct InspectFinding", 1
+        )[0]
+        self.assertIn("case .bird:", route)
+        self.assertIn("case .fish:", route)
+        self.assertIn("case .lizard:", route)
+        self.assertIn("animal-bird", route)
+        self.assertIn("animal-fish", route)
+        self.assertIn("animal-lizard", route)
+        self.assertIn("food-game", route)
+        self.assertIn("food-cook", route)
+        self.assertIn("func visionPrepWarns", inspect)
+        self.assertIn("visionPrepWarns", field)
+        self.assertIn('L10n.t("vision.warn"', field)
+        self.assertIn('L10n.t("vision.warn"', session)
+        self.assertIn('"WARNING"', l10n)
+        self.assertNotIn("EDIBLE", field)
+        self.assertNotIn("g.edible", field)
+        fungi = route.split("case .fungi:", 1)[1].split("case .", 1)[0]
+        self.assertNotIn("food-game", fungi)
+        self.assertNotIn("food-cook", fungi)
+        snake = route.split("case .snake:", 1)[1].split("case .mammal:", 1)[0]
+        self.assertNotIn("food-game", snake)
+        self.assertNotIn("food-cook", snake)
+        field_py = read("tools", "v3", "field.py")
+        self.assertIn("def cactus_steps", field_py)
+        self.assertIn('"animal-bird"', field_py)
+        self.assertIn('"animal-fish"', field_py)
+        self.assertIn('"animal-lizard"', field_py)
+        self.assertIn('"animal-turtle"', field_py)
+        self.assertIn('"animal-frog"', field_py)
+        self.assertIn("Cholla is not food", field_py)
+        self.assertIn("Pads you already know are prickly pear", field_py)
 
 
 class HonestyOnTheGlassTests(unittest.TestCase):

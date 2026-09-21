@@ -18,7 +18,20 @@ struct SystemVisionHit: Equatable, Sendable {
 }
 
 enum SystemVision {
+    /// Full frame plus the subject. Desert sky and the tree behind a
+    /// cactus must not be the only words the matcher sees.
     static func observations(from image: CGImage) -> [SystemVisionHit]? {
+        guard var hits = classify(image) else { return nil }
+        if let crop = subjectCrop(from: image), let extra = classify(crop) {
+            hits.append(contentsOf: extra)
+        }
+        if let mid = centerCrop(image), let extra = classify(mid) {
+            hits.append(contentsOf: extra)
+        }
+        return merge(hits)
+    }
+
+    private static func classify(_ image: CGImage) -> [SystemVisionHit]? {
         #if canImport(Vision)
         let request = VNClassifyImageRequest()
         let handler = VNImageRequestHandler(cgImage: image, options: [:])
@@ -36,6 +49,65 @@ enum SystemVision {
         #else
         return nil
         #endif
+    }
+
+    private static func subjectCrop(from image: CGImage) -> CGImage? {
+        #if canImport(Vision)
+        let request = VNGenerateObjectnessBasedSaliencyImageRequest()
+        let handler = VNImageRequestHandler(cgImage: image, options: [:])
+        do {
+            try handler.perform([request])
+        } catch {
+            return nil
+        }
+        guard let obs = (request.results as? [VNSaliencyImageObservation])?.first,
+              let objects = obs.salientObjects,
+              let box = objects.max(by: { $0.confidence < $1.confidence })
+        else { return nil }
+        return crop(image, normalized: box.boundingBox, pad: 0.12)
+        #else
+        return nil
+        #endif
+    }
+
+    private static func centerCrop(_ image: CGImage, fraction: CGFloat = 0.55) -> CGImage? {
+        let w = CGFloat(image.width)
+        let h = CGFloat(image.height)
+        let cw = max(32, w * fraction)
+        let ch = max(32, h * fraction)
+        let rect = CGRect(x: (w - cw) / 2, y: (h - ch) / 2, width: cw, height: ch)
+        return image.cropping(to: rect.integral)
+    }
+
+    /// Vision boxes are origin-bottom-left. CGImage crop is origin-top-left.
+    private static func crop(_ image: CGImage, normalized box: CGRect, pad: CGFloat) -> CGImage? {
+        let w = CGFloat(image.width)
+        let h = CGFloat(image.height)
+        var r = CGRect(
+            x: box.minX * w,
+            y: (1 - box.maxY) * h,
+            width: box.width * w,
+            height: box.height * h
+        )
+        r = r.insetBy(dx: -r.width * pad, dy: -r.height * pad)
+        r = r.intersection(CGRect(x: 0, y: 0, width: w, height: h))
+        guard r.width >= 32, r.height >= 32 else { return nil }
+        return image.cropping(to: r.integral)
+    }
+
+    private static func merge(_ hits: [SystemVisionHit]) -> [SystemVisionHit] {
+        var best: [String: SystemVisionHit] = [:]
+        for hit in hits {
+            let key = hit.identifier.lowercased()
+            if let current = best[key] {
+                if hit.confidence > current.confidence {
+                    best[key] = hit
+                }
+            } else {
+                best[key] = hit
+            }
+        }
+        return Array(best.values)
     }
 }
 

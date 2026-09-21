@@ -137,14 +137,19 @@ public enum VisionCoreML {
         case .sting: return 38
         case .fire: return 37
         case .gator: return 36
+        case .lizard: return 36
+        case .frog: return 36
         case .cactus: return 35
         case .flood: return 34
-        case .lightning: return 33
-        case .water: return 32
-        case .smoke: return 31
-        case .specific: return 30
-        case .ice: return 29
-        case .shelter: return 28
+        case .fish: return 33
+        case .turtle: return 33
+        case .lightning: return 32
+        case .water: return 31
+        case .smoke: return 30
+        case .specific: return 29
+        case .ice: return 28
+        case .shelter: return 27
+        case .bird: return 26
         case .tree: return 10
         }
     }
@@ -156,6 +161,8 @@ public enum VisionCoreML {
         case sting
         case fire
         case gator
+        case lizard
+        case frog
         case cactus
         case flood
         case lightning
@@ -164,6 +171,9 @@ public enum VisionCoreML {
         case specific
         case ice
         case shelter
+        case bird
+        case fish
+        case turtle
         case tree
     }
 
@@ -184,6 +194,11 @@ public enum VisionCoreML {
         case lightning
         case shelter
         case wound
+        case bird
+        case fish
+        case lizard
+        case turtle
+        case frog
     }
 
     private static func kindRank(_ guess: VisionGuess) -> KindRank {
@@ -205,6 +220,12 @@ public enum VisionCoreML {
             || id.contains("crocodile")
         {
             return .gator
+        }
+        if guess.name == "LIZARD" || id == "kind:lizard" || id.contains("gila") {
+            return .lizard
+        }
+        if guess.name == "FROG" || id == "kind:frog" || id.contains("toad") {
+            return .frog
         }
         if id == "kind:cactus" || id == "kind:cacti_yucca" || id.contains("cactus")
             || id.contains("prickly") || id.contains("cholla") || id.contains("yucca")
@@ -235,6 +256,19 @@ public enum VisionCoreML {
         }
         if guess.name == "WOUND" || id == "kind:wound" || id.contains("bleed") {
             return .wound
+        }
+        if guess.name == "BIRD" || id == "kind:bird" || id.contains("turkey")
+            || id.contains("quail") || id.contains("dove")
+        {
+            return .bird
+        }
+        if guess.name == "FISH" || id == "kind:fish" || id.contains("bass")
+            || id.contains("catfish") || id.contains("trout")
+        {
+            return .fish
+        }
+        if guess.name == "TURTLE" || id == "kind:turtle" {
+            return .turtle
         }
         if id == "kind:tree" || guess.name == "TREE" {
             return .tree
@@ -268,6 +302,12 @@ public enum VisionCoreML {
             g.leaveIt = true
         }
         if g.labelId.contains("wound") || g.name == "WOUND" {
+            g.leaveIt = true
+        }
+        if g.labelId.contains("lizard") || g.labelId.contains("gila") || g.name == "LIZARD" {
+            g.leaveIt = true
+        }
+        if g.labelId.contains("frog") || g.name == "FROG" || g.labelId.contains("toad") {
             g.leaveIt = true
         }
         return g
@@ -339,6 +379,16 @@ public enum VisionCoreML {
                     return namedGuess("kind:shelter", "SHELTER", leaveIt: false)
                 case .wound:
                     return namedGuess("kind:wound", "WOUND", leaveIt: true)
+                case .bird:
+                    return namedGuess("kind:bird", "BIRD", leaveIt: false)
+                case .fish:
+                    return namedGuess("kind:fish", "FISH", leaveIt: false)
+                case .lizard:
+                    return namedGuess("kind:lizard", "LIZARD", leaveIt: true)
+                case .turtle:
+                    return namedGuess("kind:turtle", "TURTLE", leaveIt: false)
+                case .frog:
+                    return namedGuess("kind:frog", "FROG", leaveIt: true)
                 case .fungi:
                     return fungiGuess(book, locale: locale)
                 case .cactus, .cactiYucca, .mammal, .tree:
@@ -412,6 +462,16 @@ public enum VisionCoreML {
             return namedGuess("kind:shelter", "SHELTER", leaveIt: false)
         case .wound:
             return namedGuess("kind:wound", "WOUND", leaveIt: true)
+        case .bird:
+            return namedGuess("kind:bird", "BIRD", leaveIt: false)
+        case .fish:
+            return namedGuess("kind:fish", "FISH", leaveIt: false)
+        case .lizard:
+            return namedGuess("kind:lizard", "LIZARD", leaveIt: true)
+        case .turtle:
+            return namedGuess("kind:turtle", "TURTLE", leaveIt: false)
+        case .frog:
+            return namedGuess("kind:frog", "FROG", leaveIt: true)
         case .cactus, .cactiYucca, .mammal, .tree:
             let names = labels.map { $0.displayName(locale).uppercased() }
             let extras = labels.flatMap { $0.lookalikes.map(lookalikeWord) }
@@ -523,6 +583,11 @@ public enum VisionCoreML {
         case .lightning: return "LIGHTNING"
         case .shelter: return "SHELTER"
         case .wound: return "WOUND"
+        case .bird: return "BIRD"
+        case .fish: return "FISH"
+        case .lizard: return "LIZARD"
+        case .turtle: return "TURTLE"
+        case .frog: return "FROG"
         }
     }
 
@@ -571,7 +636,8 @@ public enum VisionCoreML {
         (.mammal, [
             "coyote", "javelina", "peccary", "deer", "elk", "bear", "hog", "boar",
             "fox", "bobcat", "cougar", "mountain lion", "puma", "raccoon", "skunk",
-            "armadillo", "rabbit", "pronghorn", "wolf",
+            "armadillo", "rabbit", "jackrabbit", "pronghorn", "wolf",
+            "squirrel", "opossum", "beaver", "bison", "badger", "ringtail",
         ]),
         (.water, [
             "lake", "pond", "reservoir", "creek", "river", "spring", "waterfall",
@@ -585,5 +651,31 @@ public enum VisionCoreML {
         (.shelter, ["tent", "campsite", "bivouac"]),
         (.wound, ["open wound", "bleeding wound", "laceration", "gash"]),
         (.tree, ["oak", "mesquite", "elm", "pecan", "pine", "pinon", "juniper", "aspen", "cottonwood", "tree"]),
+        (.bird, [
+            "turkey", "quail", "dove", "roadrunner", "hawk", "eagle", "owl",
+            "duck", "goose", "vulture", "raven", "crow", "pigeon", "pheasant",
+            "heron", "egret", "crane", "jay", "woodpecker", "hummingbird",
+            "mockingbird", "cardinal", "sparrow", "wren", "swallow",
+            "nighthawk", "chicken", "grouse", "teal", "pelican", "cormorant",
+            "kingfisher", "sandpiper", "bird",
+        ]),
+        (.fish, [
+            "bass", "catfish", "trout", "sunfish", "perch", "carp", "gar",
+            "minnow", "crappie", "bluegill", "walleye", "drum", "shad",
+            "bowfin", "tilapia", "fish",
+        ]),
+        (.lizard, [
+            "gila monster", "gila", "horned lizard", "collared lizard",
+            "whiptail", "gecko", "skink", "anole", "chuckwalla", "racerunner",
+            "lizard",
+        ]),
+        (.turtle, [
+            "softshell", "slider", "terrapin", "tortoise", "cooter",
+            "snapping turtle", "box turtle", "mud turtle", "turtle",
+        ]),
+        (.frog, [
+            "bullfrog", "toad", "treefrog", "tree frog", "spadefoot",
+            "chorus frog", "leopard frog", "frog",
+        ]),
     ]
 }

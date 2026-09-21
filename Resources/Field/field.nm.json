@@ -404,8 +404,8 @@
       "steps": [
         {
           "do": {
-            "en": "Black bear: do not run, stand large, food sealed and away from camp. Elk is high country. Elk in rut: give way. Mule deer at dusk — give it the road. A maul is trauma. If bitten, the bite card. If you already have meat, the food card. Do not hunt from this map.",
-            "es": "Oso negro: no corras, hazte grande, comida sellada y lejos del campamento. El wapití es de alta montaña. Wapití en celo: cede el paso. Venado bura al anochecer — cede el camino. Un golpe es trauma. Si hay mordida, la tarjeta de mordedura. Si ya tienes carne, la tarjeta de comida. No caces desde este mapa."
+            "en": "Black bear: do not run, stand large, food sealed and away from camp. Elk is high country. Elk in rut: give way. Mule deer at dusk — give it the road. Coyote and jackrabbit: do not feed. Pronghorn at dusk — give it the road. A maul is trauma. If bitten, the bite card. If you already have meat, the food card. Do not hunt from this map.",
+            "es": "Oso negro: no corras, hazte grande, comida sellada y lejos del campamento. El wapití es de alta montaña. Wapití en celo: cede el paso. Venado bura al anochecer — cede el camino. Coyote y liebre: no alimentes. Berrendo al anochecer — cede el camino. Un golpe es trauma. Si hay mordida, la tarjeta de mordedura. Si ya tienes carne, la tarjeta de comida. No caces desde este mapa."
           },
           "why": {
             "en": "Range is the Field book of the open pack. A coordinate is not an animal.",
@@ -436,12 +436,12 @@
         "NM"
       ],
       "title": {
-        "en": "New Mexico cactus and yucca — spines, not a meal",
-        "es": "Cactus y yuca de Nuevo México — espinas, no comida"
+        "en": "New Mexico cactus and yucca — WARNING then flowers",
+        "es": "Cactus y yuca de Nuevo México — AVISO luego flores"
       },
       "situation": {
-        "en": "Cholla, yucca, sotol. Joints hitchhike on skin. Do not chew the flower.",
-        "es": "Cholla, yuca, sotol. Los segmentos se pegan a la piel. No comas la flor."
+        "en": "Cholla, yucca, sotol. Joints hitchhike. Cholla is not food. Yucca flowers only if you already know the plant.",
+        "es": "Cholla, yuca, sotol. Los segmentos se pegan. La cholla no es comida. Flores de yuca solo si ya conoces la planta."
       },
       "stop_if": [
         {
@@ -454,30 +454,107 @@
         }
       ],
       "get_to_care": {
-        "en": "A joint in the skin is comb, not squeeze. Sap in the eye is care.",
-        "es": "Un segmento en la piel se peina, no se aprieta. Savia en el ojo es cuidado."
+        "en": "A joint in the skin is comb, not squeeze. Sap in the eye is care. WARNING: a guess is not a name.",
+        "es": "Un segmento en la piel se peina, no se aprieta. Savia en el ojo es cuidado. AVISO: una conjetura no es un nombre."
       },
       "speak": true,
       "sendToParty": true,
       "steps": [
         {
           "do": {
-            "en": "Cholla, yucca, sotol. Give it room. Comb joints and glochids out with a comb or tape, not fingers. Do not chew pads, fruit, or flower. Wash sap off skin and eyes with water.",
-            "es": "Cholla, yuca, sotol. Da espacio. Peina segmentos y globidios con peine o cinta, no con los dedos. No mastiques nopales, fruto ni flor. Lava savia con agua."
+            "en": "Cholla, yucca, sotol. Give it room. Comb joints and glochids out with a comb or tape, not fingers. Wash sap off skin and eyes with water. Cholla is not food.",
+            "es": "Cholla, yuca, sotol. Da espacio. Peina segmentos y globidios con peine o cinta, no con los dedos. Lava savia con agua. La cholla no es comida."
           },
           "why": {
-            "en": "Spines are the honest use of this plant today: stay clear. A pad is not a Field meal.",
-            "es": "Hoy las espinas son el uso honesto: apártate. Un nopal no es una comida de Field."
+            "en": "Glochids and joints hitchhike. Space first, then a name you already trust.",
+            "es": "Los globidios y los segmentos se pegan. Primero espacio, luego un nombre que ya confías."
           },
           "child": {
-            "en": "A child does not carry a joint or a pretty flower.",
-            "es": "El niño no lleva un segmento ni una flor bonita."
+            "en": "Child stays back. They do not pick pads or fruit.",
+            "es": "El niño atrás. No recoge nopales ni fruto."
           },
           "stop": {
-            "en": "Stop if anyone's mouth tingles or an eye swells — sit, water on the eye, offer Emergency SOS if a net exists.",
-            "es": "Para si hormiguea la boca o hincha un ojo: sienta, agua en el ojo, ofrece Emergency SOS si hay red."
+            "en": "Stop if sap is in an eye or a joint is in deep — that is care, not a meal.",
+            "es": "Para si hay savia en un ojo o un segmento hondo: eso es cuidado, no comida."
           },
-          "image": "nm-cactus.png"
+          "image": "nm-cactus.png",
+          "party": {
+            "1": "Give it room. Comb, not fingers.",
+            "2": "One combs, one watches the child.",
+            "4": "Space / comb / water / no mouths."
+          }
+        },
+        {
+          "do": {
+            "en": "WARNING. A still is a guess. Only a plant you already know is food. Unknown cactus is not a meal. Gloves or a folded cloth. Tongs, not bare fingers.",
+            "es": "AVISO. Una foto es una conjetura. Solo una planta que ya conoces es comida. Un cactus desconocido no es comida. Guantes o trapo. Pinzas, no dedos."
+          },
+          "why": {
+            "en": "A percent is not a name. Glochids first, then heat.",
+            "es": "Un porcentaje no es un nombre. Primero globidios, luego calor."
+          },
+          "child": {
+            "en": "Child holds the cloth, not the pad.",
+            "es": "El niño sostiene el trapo, no el nopal."
+          },
+          "stop": {
+            "en": "Stop if you cannot name the plant without the still — leave it.",
+            "es": "Para si no puedes nombrar la planta sin la foto: déjala."
+          },
+          "image": "plant-use.png",
+          "party": {
+            "1": "Name it first or leave it.",
+            "2": "One names, one fetches gloves.",
+            "4": "Name / gloves / child / leave unknowns."
+          }
+        },
+        {
+          "do": {
+            "en": "Cholla is not food. Do not burn, boil, or peel jumping joints. Comb them off skin with a comb or tape. Sotol heart is work and lookalikes hurt — leave sotol unless you already know that plant.",
+            "es": "La cholla no es comida. No quemes, hiervas ni peles segmentos que saltan. Péinalos con peine o cinta. El corazón de sotol es trabajo y los parecidos lastiman: déjalo salvo que ya conozcas esa planta."
+          },
+          "why": {
+            "en": "A joint in the pot is still a joint in the skin. Sotol is not a Field meal ticket.",
+            "es": "Un segmento en la olla sigue siendo un segmento en la piel. El sotol no es un ticket de Field."
+          },
+          "child": {
+            "en": "Take the joint out of a child's hand. No trophy stick.",
+            "es": "Saca el segmento de la mano del niño. Sin palo de trofeo."
+          },
+          "stop": {
+            "en": "Stop squeezing a joint — that drives spines deeper.",
+            "es": "No aprietes un segmento: clava más las espinas."
+          },
+          "image": "nm-cactus.png",
+          "party": {
+            "1": "Comb it off. Leave cholla.",
+            "2": "One combs, one watches the pile.",
+            "4": "Comb / no pot / child / leave sotol."
+          }
+        },
+        {
+          "do": {
+            "en": "Yucca flowers only if you already know the plant. Pick open cream flowers, not the root. Boil the petals 10 minutes, change the water, boil again until soft. Root is soap, not food. If the plant is prickly pear you already know, pads and tunas follow the Texas card.",
+            "es": "Flores de yuca solo si ya conoces la planta. Recoge flores crema abiertas, no la raíz. Hierve 10 minutos, cambia el agua, hierve otra vez. La raíz es jabón, no comida. Si es nopal que ya conoces, nopales y tunas como en Texas."
+          },
+          "why": {
+            "en": "Saponins in the root wreck a gut. Flowers you already trust are the only yucca food on this card.",
+            "es": "Las saponinas de la raíz destrozan el estómago. Solo las flores que ya confías son comida de yuca aquí."
+          },
+          "child": {
+            "en": "Child gets the cooked petal, not the raw flower or the root.",
+            "es": "El niño come el pétalo cocido, no la flor cruda ni la raíz."
+          },
+          "stop": {
+            "en": "Stop if the mouth foams or burns — that was root or the wrong plant.",
+            "es": "Para si la boca espuma o arde: era raíz o la planta equivocada."
+          },
+          "image": "food-boil.png",
+          "party": {
+            "1": "Flowers you know, then two boils.",
+            "2": "One picks, one boils and changes water.",
+            "4": "Pick / boil / change water / no root."
+          }
         }
       ]
     },
@@ -515,8 +592,8 @@
       "steps": [
         {
           "do": {
-            "en": "Elk or mule deer you already have. If you did not see it die, leave it. If you did: keep it cool, gut away from water and camp, cook until the juice runs clear. No raw. Hands and knives washed after. Do not hunt from this map.",
-            "es": "Wapití o venado bura que ya tienes. Si no lo viste morir, déjalo. Si sí: frío, vísceras lejos del agua y del campamento, cocina hasta que el jugo salga claro. Nada crudo. No caces desde este mapa."
+            "en": "Elk or mule deer you already have. If you did not see it die, leave it. If you did: keep it cool, gut away from water and camp, cook until the juice runs clear. No raw. Hands and knives washed after. Do not hunt from this map. WARNING: a still is a guess.",
+            "es": "Wapití o venado bura que ya tienes. Si no lo viste morir, déjalo. Si sí: frío, vísceras lejos del agua y del campamento, cocina hasta que el jugo salga claro. Nada crudo. No caces desde este mapa. AVISO: una foto es una conjetura."
           },
           "why": {
             "en": "Mystery meat is how camps get sick. Heat and distance from the creek are the field rules.",
@@ -535,6 +612,54 @@
             "1": "Cook through or leave it.",
             "2": "One guts away from camp, one watches the pot.",
             "4": "Gut / cook / water / keep animals and kids off the pile."
+          }
+        },
+        {
+          "do": {
+            "en": "On its side, away from water and camp. Open the belly without cutting the gut. Dump the pile downhill and downwind. Save liver only if it is clean, then cook it hard. Get the hide off if you can. Hang or bag the meat in shade. Flies that have had it — leave it.",
+            "es": "De lado, lejos del agua y del campamento. Abre el vientre sin cortar el intestino. Tira el montón cuesta abajo y a sotavento. Hígado solo si está limpio, luego cocínalo recio. Quita el cuero si puedes. Cuelga o embolsa a la sombra. Si ya lo tuvieron las moscas: déjalo."
+          },
+          "why": {
+            "en": "Gut on the meat and sun on the pile are how a camp gets sick the next day.",
+            "es": "Vísceras en la carne y sol en el montón enferman al campamento al día siguiente."
+          },
+          "child": {
+            "en": "Child stays at camp. They do not hold the knife or the pile.",
+            "es": "El niño en el campamento. No sostiene el cuchillo ni el montón."
+          },
+          "stop": {
+            "en": "Stop if the gut spills on the meat you cannot wash — that piece is gone.",
+            "es": "Para si el intestino moja carne que no puedes lavar: esa pieza se va."
+          },
+          "image": "food-game.png",
+          "party": {
+            "1": "Gut away from water.",
+            "2": "One guts, one keeps the creek clear.",
+            "4": "Gut / shade / creek watch / no kids on the pile."
+          }
+        },
+        {
+          "do": {
+            "en": "Elk and mule deer: same cook-through. Liver only if it looks clean and then cooked hard. A found carcass you did not take is still leave it. Coals or a pot. Juice runs clear. No raw liver. Hands and knives washed after. Keep raw off the ready pile.",
+            "es": "Wapití y venado bura: la misma cocción completa. Hígado solo si se ve limpio y luego bien cocido. Un cuerpo que no tomaste se deja. Brasas u olla. Jugo claro. Nada de hígado crudo. Manos y cuchillos lavados. Separa crudo de listo."
+          },
+          "why": {
+            "en": "Heat is the treatment you have. A pink center is still raw.",
+            "es": "El calor es el tratamiento que tienes. Un centro rosa sigue crudo."
+          },
+          "child": {
+            "en": "Child gets the well-done edge, never the middle you are still watching.",
+            "es": "El niño come el borde bien cocido, nunca el centro que aún miras."
+          },
+          "stop": {
+            "en": "Stop if grease fire starts — lid, not water.",
+            "es": "Si prende la grasa: tapa, no agua."
+          },
+          "image": "food-boil.png",
+          "party": {
+            "1": "Cook through. Wash the knife.",
+            "2": "One cooks, one washes.",
+            "4": "Cook / wash / shade / no raw pile."
           }
         }
       ]

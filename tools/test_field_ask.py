@@ -26,7 +26,11 @@ STOP = {
     "es", "se", "te", "lo", "al", "del", "para", "por", "con", "como",
     "mi", "tu", "su",
 }
-LIVE = {"javelina", "peccary", "pecari", "hog", "coyote", "deer", "elk", "bear"}
+LIVE = {
+    "javelina", "peccary", "pecari", "hog", "coyote", "deer", "elk", "bear",
+    "turkey", "quail", "dove", "bird", "fish", "bass", "lizard", "turtle",
+    "frog", "toad",
+}
 MEAL = {"meat", "hunt", "cook", "already", "caza", "carne"}
 
 
@@ -382,6 +386,11 @@ FROM_NOTHING = (
     "camp-sweat",
     "med-glare",
     "animal-gator",
+    "animal-bird",
+    "animal-fish",
+    "animal-lizard",
+    "animal-turtle",
+    "animal-frog",
     "water-urban",
     "camp-layers",
     "camp-tape",
@@ -739,6 +748,11 @@ class FieldRankedBookTests(unittest.TestCase):
         self.assertEqual(first("wildfire"), "env-wildfire")
         self.assertEqual(first("seep"), "water-seep")
         self.assertEqual(first("mushroom"), "fungi-leave")
+        self.assertEqual(first("turkey"), "animal-bird")
+        self.assertEqual(first("bass"), "animal-fish")
+        self.assertEqual(first("lizard"), "animal-lizard")
+        self.assertEqual(first("turtle"), "animal-turtle")
+        self.assertEqual(first("toad"), "animal-frog")
         self.assertEqual(first("panic"), "tact-breathe")
         self.assertEqual(first("gps"), "nav-lost")
         self.assertEqual(first("sed"), "water-find")
