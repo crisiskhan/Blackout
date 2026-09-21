@@ -1342,8 +1342,9 @@ class ExpeditionHUDTests(unittest.TestCase):
         self.assertIn("cancelSelfRed", exped)
         self.assertNotIn('Button("JOIN NAV")', exped)
         self.assertIn("runtime.cycleSeat", exped)
-        self.assertIn('Button("EXPORT PAPER")', exped)
-        for section in ("CONDITION", "ROSTER", "TIMERS", "PAPER"):
+        self.assertNotIn('Button("EXPORT PAPER")', exped)
+        self.assertNotIn('sectionLabel("PAPER")', exped)
+        for section in ("CONDITION", "ROSTER", "TIMERS", "DIARY"):
             self.assertIn(f'sectionLabel("{section}")', exped, section)
         self.assertIn('L10n.t("overdue"', exped)
         self.assertNotIn("not SOS", exped)
@@ -1901,9 +1902,10 @@ class PartyPlaceMarkTests(unittest.TestCase):
         self.assertNotIn('sectionLabel("TRIP")', exped)
         self.assertIn("runtime.kit", exped)
         self.assertIn("runtime.diary", exped)
-        self.assertIn('Button("EXPORT PAPER")', exped)
-        self.assertIn("paperText", exped)
-        self.assertIn("PaperGen.export", exped)
+        self.assertNotIn('Button("EXPORT PAPER")', exped)
+        self.assertNotIn("paperText", exped)
+        self.assertNotIn("PaperGen.export", exped)
+        self.assertNotIn('sectionLabel("PAPER")', exped)
 
     def test_kit_names_counts_and_assigns_to_profile(self):
         kit = read("Packages", "KitStore", "Sources", "KitStore", "KitStore.swift")
@@ -2521,7 +2523,7 @@ class LiveRosterOnTheGlassTests(unittest.TestCase):
         self.assertIn("struct RosterPeer", roles)
         self.assertIn("var liveRoster", app)
         self.assertIn("func seatNav()", app)
-        self.assertIn("func paperRoster()", app)
+        self.assertNotIn("func paperRoster()", app)
         self.assertIn("func sendRosterSeat()", app)
         self.assertIn("rebindingLead(to:", app)
         self.assertIn('"you.role"', app)
@@ -2552,8 +2554,7 @@ class LiveRosterOnTheGlassTests(unittest.TestCase):
         self.assertNotIn("Google", qa)
         assign = exped.split("private var assignPeople")[1].split("private func timerWho")[0]
         self.assertIn("liveRoster", assign)
-        export = exped.split('Button("EXPORT PAPER")')[1].split("if !paperText.isEmpty")[0]
-        self.assertIn("paperRoster()", export)
+        self.assertNotIn("paperRoster()", exped)
         self.assertIn("func cycling(", roles)
         self.assertIn("runtime.cycleSeat", exped)
 
@@ -5132,17 +5133,24 @@ class DeadGlassGoneTests(unittest.TestCase):
         self.assertIn("PLAY", clip_line)
         self.assertIn("NO PEERS · LOGGED", clip_line)
 
-    def test_paper_shares_and_join_nav_is_gone(self):
+    def test_paper_section_and_join_nav_are_gone(self):
         exped = read("Blackout", "ExpeditionTab.swift")
-        self.assertIn('Button("EXPORT PAPER")', exped)
-        self.assertIn("UIActivityViewController", exped)
-        self.assertIn("PaperShare.present", exped)
+        app = read("Blackout", "AppRuntime.swift")
+        self.assertNotIn('Button("EXPORT PAPER")', exped)
+        self.assertNotIn('sectionLabel("PAPER")', exped)
+        self.assertNotIn("PaperShare", exped)
+        self.assertNotIn("UIActivityViewController", exped)
+        self.assertNotIn("import PaperGen", exped)
+        self.assertNotIn("func paperRoster()", app)
         self.assertNotIn('Button("JOIN NAV")', exped)
         qa = read("docs", "SOLO_QA.md")
         roster = next(line for line in qa.splitlines() if "ROLE chip cycles" in line)
         self.assertIn("NAV · SEATED", roster)
-        self.assertIn("share", roster.lower())
+        self.assertNotIn("EXPORT PAPER", roster)
+        self.assertNotIn("share sheet", roster.lower())
         self.assertNotIn("JOIN NAV seats YOU", qa)
+        readme = read("README.md")
+        self.assertNotIn("Share paper from EXPEDITION", readme)
 
     def test_vision_glass_does_not_print_lookalikes(self):
         field = read("Blackout", "FieldTab.swift")
