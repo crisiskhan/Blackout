@@ -145,6 +145,8 @@ final class AppRuntime {
     var canRouteOnGraph: Bool { packs?.hasUsableGraph() ?? false }
     /// Last WALK or DRIVE tap. Drops a stale plot so it cannot speak over a newer one.
     private var navSeq = 0
+    /// One silent replan after kill. Live WALK/DRIVE taps speak as they always did.
+    private var deskNavRestored = false
     private var graphCache: RouteGraph?
     private var graphsByPack: [String: RouteGraph] = [:]
     private var graphPackID: String?
@@ -179,8 +181,34 @@ final class AppRuntime {
         speech = SpeechEngine(box: box)
         mesh.airplane = true
         instruments.setVoice(NavVoice.parse(UserDefaults.standard.string(forKey: "nav.voice")))
+        if UserDefaults.standard.object(forKey: "hud.magNorth") != nil,
+           UserDefaults.standard.bool(forKey: "hud.magNorth") == false
+        {
+            instruments.setTrueNorth()
+        }
         applySpeechTone()
         fix.applyInstrument(instruments.state)
+        if UserDefaults.standard.object(forKey: "hud.pocket") != nil {
+            power.setPocket(UserDefaults.standard.bool(forKey: "hud.pocket"))
+        }
+        if UserDefaults.standard.object(forKey: "hud.leftHand") != nil {
+            leftHand = UserDefaults.standard.bool(forKey: "hud.leftHand")
+        }
+        if let body = PartyVitals.load() {
+            vitals = body
+        }
+        kit = KitBag.load()
+        timers.load()
+        lastKnownFix = UserPuck.loadFix()
+        routeTarget = DestinationPin.load()
+        if let mode = DeskNav.load() {
+            travelMode = mode
+        }
+        if let saved = UserDefaults.standard.string(forKey: "hud.locale"),
+           saved == "es" || saved == "en"
+        {
+            locale = saved
+        }
         if let saved = UserDefaults.standard.string(forKey: "party.code"), !saved.isEmpty {
             roster = roster.setting(code: saved)
         }
@@ -983,6 +1011,7 @@ final class AppRuntime {
     func setYouVitals(_ next: PartyVitals) {
         let gained = Set(next.blackTitles).subtracting(vitals.blackTitles)
         vitals = next
+        PartyVitals.save(vitals)
         if heldParty?.isYou == true {
             heldParty?.vitals = next
         }
@@ -1136,6 +1165,9 @@ final class AppRuntime {
         guard lat.isFinite, lon.isFinite else { return }
         pulse()
         routeTarget = (lat, lon)
+        DestinationPin.save(lat: lat, lon: lon)
+        DeskNav.clear()
+        deskNavRestored = false
         // A new destination invalidates everything the old one produced.
         routeCoords = []
         navChrome = ""
@@ -1146,7 +1178,7 @@ final class AppRuntime {
         resetLiveGuide()
     }
 
-    func navigate(mode: TravelMode) {
+    func navigate(mode: TravelMode, speak: Bool = true) {
         touch(.dock)
         speechChrome = ""
         travelMode = mode
@@ -1166,19 +1198,19 @@ final class AppRuntime {
             hasYouFix: fieldYou != nil
         ) {
             clearRoute(plan: block.planChrome, chrome: block.chrome(mode: mode, packName: packName))
-            speakMap()
+            if speak { speakMap() }
             return
         }
         guard let dest else {
             let block = RouteBlock.noDestination
             clearRoute(plan: block.planChrome, chrome: block.chrome(mode: mode, packName: packName))
-            speakMap()
+            if speak { speakMap() }
             return
         }
         guard let from = fieldYou else {
             let block = RouteBlock.noYou
             clearRoute(plan: block.planChrome, chrome: block.chrome(mode: mode, packName: packName))
-            speakMap()
+            if speak { speakMap() }
             return
         }
         routeTarget = dest
@@ -1210,9 +1242,27 @@ final class AppRuntime {
                 self.routeChrome = RouteLine.shouldDraw(plan.coords)
                     ? RouteSummary.chrome(mode: mode, coords: plan.coords, seconds: plan.seconds)
                     : RouteBlock.noPath.chrome(mode: mode, packName: packName)
-                self.speakMap()
+                if RouteLine.shouldDraw(plan.coords) {
+                    DeskNav.save(mode)
+                }
+                if speak { self.speakMap() }
             }
         }
+    }
+
+    func restoreDeskRoute() {
+        guard !deskNavRestored else { return }
+        guard routeCoords.isEmpty, routeTarget != nil, fieldYou != nil else { return }
+        guard let mode = DeskNav.load() else { return }
+        deskNavRestored = true
+        travelMode = mode
+        navigate(mode: mode, speak: false)
+    }
+
+    func setLocale(_ next: String) {
+        locale = next == "es" ? "es" : "en"
+        UserDefaults.standard.set(locale, forKey: "hud.locale")
+        applySpeechTone()
     }
 
     func tapUpdate() {
@@ -1255,6 +1305,7 @@ final class AppRuntime {
         fix.arm()
         instruments.toggleMagTrue()
         applyInstrumentBoard()
+        UserDefaults.standard.set(instruments.state.magNorth, forKey: "hud.magNorth")
         toolChrome = MagTrueChip.chrome(magNorth: instruments.state.magNorth)
         showInstruments = false
     }
@@ -1263,6 +1314,7 @@ final class AppRuntime {
         fix.arm()
         instruments.setTrueNorth()
         applyInstrumentBoard()
+        UserDefaults.standard.set(instruments.state.magNorth, forKey: "hud.magNorth")
         toolChrome = MagTrueChip.chrome(magNorth: instruments.state.magNorth)
     }
 
@@ -1614,6 +1666,7 @@ final class AppRuntime {
         if timers.add(who: who, task: name, duration: duration, subjectAll: true, owner: timerOwner()) != nil {
             mesh.sendTimer(from: mesh.localID, task: name, done: false, duration: duration)
             timerSeq += 1
+            timers.save()
         }
     }
 
@@ -1621,23 +1674,27 @@ final class AppRuntime {
         timers.markDone(id)
         mesh.sendTimer(from: mesh.localID, task: task, done: true)
         timerSeq += 1
+        timers.save()
     }
 
     func bumpKit(_ id: String, by: Int) {
         kit.bump(id, by: by)
         sendKitItem(id)
         kitSeq += 1
+        KitBag.save(kit)
     }
 
     func syncKit(_ id: String) {
         sendKitItem(id)
         kitSeq += 1
+        KitBag.save(kit)
     }
 
     func assignKitItem(_ id: String, to: String) {
         kit.assign(id, to: to)
         sendKitItem(id)
         kitSeq += 1
+        KitBag.save(kit)
     }
 
     func addKitItem(_ name: String) {
@@ -1646,6 +1703,7 @@ final class AppRuntime {
         if let item = kit.items.last, item.name == trimmed {
             sendKitMesh(item)
             kitSeq += 1
+            KitBag.save(kit)
         }
     }
 
@@ -1752,18 +1810,21 @@ final class AppRuntime {
                     owner: env.from
                 )
                 timerSeq += 1
+                timers.save()
             }
         case "timer.done":
             if let raw = String(data: env.body, encoding: .utf8) {
                 let parsed = MeshTimerBody.parse(raw)
                 timers.markDoneTask(parsed.task)
                 timerSeq += 1
+                timers.save()
             }
         case "kit":
             if let raw = String(data: env.body, encoding: .utf8),
                let parsed = MeshKitBody.parse(raw) {
                 applyKitMesh(parsed)
                 kitSeq += 1
+                KitBag.save(kit)
             }
         case "chip":
             if let raw = String(data: env.body, encoding: .utf8) {
@@ -1979,6 +2040,9 @@ final class AppRuntime {
         try? packs?.switchTo(id)
         UserDefaults.standard.set(id, forKey: "pack.id")
         routeTarget = nil
+        DestinationPin.clear()
+        DeskNav.clear()
+        deskNavRestored = false
         clearRoute(plan: "", chrome: "")
         fitPackToken += 1
         relabelMarksForActivePack()
@@ -2018,7 +2082,21 @@ final class AppRuntime {
 
     func setPocket(_ on: Bool) {
         power.setPocket(on)
+        UserDefaults.standard.set(on, forKey: "hud.pocket")
         applyMapKeepAwake()
+    }
+
+    func setLeftHand(_ on: Bool) {
+        leftHand = on
+        UserDefaults.standard.set(on, forKey: "hud.leftHand")
+    }
+
+    var liveRulerChrome: String {
+        MapRuler.chrome(from: gnssYou, to: routeTarget)
+    }
+
+    var liveUSNGChrome: String {
+        USNG.label(lat: gnssYou?.lat ?? .nan, lon: gnssYou?.lon ?? .nan)
     }
 
     /// Live GNSS only. Pack center and cached fallbacks stay off the MAP COORDINATES rail.
@@ -2092,6 +2170,7 @@ final class AppRuntime {
             try? await Task.sleep(nanoseconds: UInt64(remain * 1_000_000_000))
         }
         bootStage = .ready
+        restoreDeskRoute()
         box.log("boot", "ready packs=\(loaded.count)")
     }
 
@@ -2227,10 +2306,12 @@ final class AppRuntime {
         if let c = fix.last {
             lastKnownFix = (c.latitude, c.longitude)
             lastFixAt = Date().timeIntervalSince1970
+            UserPuck.saveFix(lat: c.latitude, lon: c.longitude)
         }
         sendPOSIfPossible()
         refreshHeldParty()
         refreshHeldNear()
+        restoreDeskRoute()
         applyLiveGuide()
         pulse()
     }

@@ -10,6 +10,48 @@ enum FieldPlate: String, CaseIterable, Sendable, Hashable {
     case walk, care
 }
 
+enum FieldWalkStore {
+    static let key = "field.walk"
+
+    struct Snapshot: Codable, Equatable {
+        var cardID: String
+        var index: Int
+        var trail: [String]
+        var trailTotal: Int
+        var trailBook: String
+        var plate: String
+        var fieldQuery: String
+    }
+
+    static func snapshot(of field: FieldSession) -> Snapshot? {
+        guard let stepper = field.stepper else { return nil }
+        return Snapshot(
+            cardID: stepper.card.id,
+            index: stepper.index,
+            trail: field.trail,
+            trailTotal: field.trailTotal,
+            trailBook: field.trailBook,
+            plate: field.plate.rawValue,
+            fieldQuery: field.fieldQuery
+        )
+    }
+
+    static func save(_ field: FieldSession, defaults: UserDefaults = .standard) {
+        guard let snap = snapshot(of: field),
+              let data = try? JSONEncoder().encode(snap)
+        else {
+            defaults.removeObject(forKey: key)
+            return
+        }
+        defaults.set(data, forKey: key)
+    }
+
+    static func load(defaults: UserDefaults = .standard) -> Snapshot? {
+        guard let data = defaults.data(forKey: key) else { return nil }
+        return try? JSONDecoder().decode(Snapshot.self, from: data)
+    }
+}
+
 struct FieldSession: Sendable {
     var query = ""
     var stepper: StepperState?
@@ -110,6 +152,7 @@ extension AppRuntime {
         field.plate = .walk
         let wired = FieldTree.decorate(card, query: field.fieldQuery)
         field.stepper = StepperState(card: wired, index: 0, speaking: false, sentToParty: false)
+        persistFieldWalk()
         speakFieldStep(wired, step: 0)
     }
 
@@ -174,5 +217,29 @@ extension AppRuntime {
         if speech.listening {
             speech.endListen()
         }
+    }
+
+    func persistFieldWalk() {
+        FieldWalkStore.save(field)
+    }
+
+    func restoreFieldWalk(in cards: [FieldCard]) {
+        guard field.stepper == nil, !field.askBusy else { return }
+        guard let snap = FieldWalkStore.load(),
+              let card = cards.first(where: { $0.id == snap.cardID }),
+              !card.steps.isEmpty
+        else { return }
+        let index = min(max(0, snap.index), card.steps.count - 1)
+        field.fieldQuery = snap.fieldQuery
+        field.trail = snap.trail
+        field.trailTotal = max(snap.trailTotal, 1)
+        field.trailBook = snap.trailBook
+        field.plate = FieldPlate(rawValue: snap.plate) ?? .walk
+        field.stepper = StepperState(
+            card: FieldTree.decorate(card, query: snap.fieldQuery),
+            index: index,
+            speaking: false,
+            sentToParty: false
+        )
     }
 }

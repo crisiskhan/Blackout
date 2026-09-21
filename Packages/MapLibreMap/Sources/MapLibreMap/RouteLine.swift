@@ -74,6 +74,28 @@ public enum DestinationPin {
     public static let ringRadius: Double = 13
     public static let coreRadius: Double = 5
 
+    public static let persistKey = "map.dest"
+
+    public static func save(
+        lat: Double,
+        lon: Double,
+        defaults: UserDefaults = .standard
+    ) {
+        guard UserPuck.shouldPaint(lat: lat, lon: lon) else { return }
+        defaults.set([lat, lon], forKey: persistKey)
+    }
+
+    public static func load(defaults: UserDefaults = .standard) -> (lat: Double, lon: Double)? {
+        guard let pair = defaults.array(forKey: persistKey) as? [Double], pair.count == 2,
+              UserPuck.shouldPaint(lat: pair[0], lon: pair[1])
+        else { return nil }
+        return (pair[0], pair[1])
+    }
+
+    public static func clear(defaults: UserDefaults = .standard) {
+        defaults.removeObject(forKey: persistKey)
+    }
+
     public static func needsReapply(
         stored: (lat: Double, lon: Double)?,
         destination: (lat: Double, lon: Double)?
@@ -86,6 +108,25 @@ public enum DestinationPin {
         default:
             return true
         }
+    }
+}
+
+/// Last WALK or DRIVE that drew a line. Kill-and-relaunch replans that line
+/// silently so the silver path comes back without speaking the script.
+public enum DeskNav {
+    public static let persistKey = "nav.mode"
+
+    public static func save(_ mode: TravelMode, defaults: UserDefaults = .standard) {
+        defaults.set(mode.rawValue, forKey: persistKey)
+    }
+
+    public static func load(defaults: UserDefaults = .standard) -> TravelMode? {
+        guard let raw = defaults.string(forKey: persistKey) else { return nil }
+        return TravelMode(rawValue: raw)
+    }
+
+    public static func clear(defaults: UserDefaults = .standard) {
+        defaults.removeObject(forKey: persistKey)
     }
 }
 

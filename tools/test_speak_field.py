@@ -468,7 +468,7 @@ class FieldChromeSourceContracts(unittest.TestCase):
         pick = app.split("func pickDestination")[1].split("func ")[0]
         self.assertIn('toolChrome = ""', pick)
         self.assertIn('speechChrome = ""', pick)
-        navigate = app.split("func navigate(mode: TravelMode)")[1].split("func tapRuler")[0]
+        navigate = app.split("func navigate(mode:")[1].split("func tapRuler")[0]
         self.assertIn('speechChrome = ""', navigate)
         self.assertIn("travelMode = mode", navigate)
         clear = app.split("private func clearRoute(")[1].split("\n    }")[0]
