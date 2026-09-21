@@ -502,11 +502,13 @@ public enum GraphRouter {
                     scan(cellY - ring, cellX + dx)
                     scan(cellY + ring, cellX + dx)
                 }
-                if ring > 1 {
-                    for dy in (-ring + 1)...(ring - 1) {
-                        scan(cellY + dy, cellX - ring)
-                        scan(cellY + dy, cellX + ring)
-                    }
+                // Ring 1 is the four edge cells, including due east and west.
+                // Skipping those until ring > 1 left a dest on a one-way
+                // sink one cell over (the two-hop walk fixture at lon 0.02)
+                // with no outgoing link in its own cell, so WALK said OFF GRAPH.
+                for dy in (-ring + 1)...(ring - 1) {
+                    scan(cellY + dy, cellX - ring)
+                    scan(cellY + dy, cellX + ring)
                 }
             }
             // A node just outside this ring can still own a long edge that

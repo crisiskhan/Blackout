@@ -117,6 +117,21 @@ final class RouterTests: XCTestCase {
         XCTAssertTrue(g.index.neighbours(of: 1, mode: .drive).isEmpty)
     }
 
+    func testNearestNodeReadsTheCellDueEastOnRingOne() {
+        // 0.02° is one grid cell. A probe just west of the seam must still
+        // see the node due east — that is the same miss that made WALK
+        // OFF GRAPH when dest sat on a one-way sink.
+        let g = RouteGraph(
+            nodes: [
+                .init(id: 1, lon: 0, lat: 0),
+                .init(id: 2, lon: 0.02, lat: 0),
+            ],
+            edges: []
+        )
+        XCTAssertEqual(GraphRouter.nearestNode(graph: g, lat: 0, lon: 0.019), 2)
+        XCTAssertEqual(GraphRouter.nearestNode(graph: g, lat: 0, lon: 0.001), 1)
+    }
+
     func testGraphPlanDrawsOnGraphLineAndStaysHonestOffGraph() {
         let g = twoHopWalkOnly()
         let walk = GraphPlan.line(graph: g, from: (lat: 0, lon: 0), to: (lat: 0, lon: 0.02), mode: .walk)
