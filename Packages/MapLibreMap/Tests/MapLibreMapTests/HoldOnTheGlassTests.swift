@@ -5312,6 +5312,8 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(held.card?.title, "La Cruz Peak", "\(held)")
         let doLine = held.card?.doLine.lowercased() ?? ""
         XCTAssertTrue(doLine.contains("black bear and elk range"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("aspen"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("ponderosa"), held.card?.doLine ?? "")
         XCTAssertTrue(doLine.contains("give it the road"), held.card?.doLine ?? "")
         XCTAssertFalse(doLine.contains("javelina"), held.card?.doLine ?? "")
         XCTAssertFalse(doLine.contains("hog"), held.card?.doLine ?? "")

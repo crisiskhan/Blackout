@@ -386,6 +386,9 @@ public enum FieldCorpus {
         ("rip current", "rip"),
         ("undertow", "rip"),
         ("thunderstorm", "lightning"),
+        ("naranja en estante", "lantern"),
+        ("falsa colmenilla", "morel"),
+        ("correcaminos", "roadrunner"),
     ]
 
     private static func hasPhrase(_ hay: String, _ needle: String) -> Bool {
@@ -587,7 +590,7 @@ public enum FieldCorpus {
             {
                 score += 25
             }
-            if qTokens.contains("deer")
+            if (qTokens.contains("deer") || qTokens.contains("venado"))
                 && (card.id == "tx-mammal" || card.id == "tx-east-mammal" || card.id == "nm-mammal")
             {
                 score += 25
@@ -706,6 +709,10 @@ public enum FieldCorpus {
         "bobcat", "pronghorn", "roadrunner", "hawk", "owl", "eagle", "duck",
         "vulture", "raven", "catfish", "trout", "sunfish", "gila", "softshell",
         "bullfrog",
+        "venado", "cerdo", "oso", "wapiti", "berrendo", "zorrillo", "lince",
+        "liebre", "mapache", "ardilla", "zorro", "codorniz", "paloma", "pato",
+        "halcon", "buho", "aguila", "zopilote", "cuervo", "lobina", "bagre",
+        "mojarra", "trucha", "camaleon",
     ]
 
     private static let mealWord: Set<String> = [
@@ -953,6 +960,40 @@ public enum FieldCorpus {
         "pinon": ["nm-tree-use"],
         "aspen": ["nm-tree-use"],
         "alamo": ["tx-tree-use", "nm-tree-use"],
+        "oak": ["tx-tree-use", "tx-east-tree-use"],
+        "elm": ["tx-tree-use", "tx-east-tree-use"],
+        "encino": ["tx-tree-use", "tx-east-tree-use"],
+        "mezquite": ["tx-tree-use"],
+        "nogal": ["tx-tree-use", "tx-east-tree-use"],
+        "pecanero": ["tx-tree-use", "tx-east-tree-use"],
+        "enebro": ["nm-tree-use"],
+        "temblon": ["nm-tree-use"],
+        "nopal": ["tx-cactus", "nm-cactus"],
+        "cascabel": ["tx-snake", "nm-snake", "animal-bite"],
+        "pecari": ["tx-mammal"],
+        "venado": ["tx-mammal", "tx-east-mammal", "nm-mammal"],
+        "cerdo": ["tx-east-mammal"],
+        "oso": ["nm-mammal"],
+        "wapiti": ["nm-mammal"],
+        "berrendo": ["nm-mammal"],
+        "zorrillo": ["tx-mammal", "tx-east-mammal"],
+        "lince": ["tx-mammal", "tx-east-mammal"],
+        "codorniz": ["animal-bird"],
+        "paloma": ["animal-bird"],
+        "pato": ["animal-bird"],
+        "halcon": ["animal-bird"],
+        "buho": ["animal-bird"],
+        "aguila": ["animal-bird"],
+        "zopilote": ["animal-bird"],
+        "cuervo": ["animal-bird"],
+        "correcamino": ["animal-bird"],
+        "lobina": ["animal-fish"],
+        "bagre": ["animal-fish"],
+        "mojarra": ["animal-fish"],
+        "trucha": ["animal-fish"],
+        "camaleon": ["animal-lizard"],
+        "hongo": ["fungi-leave"],
+        "colmenilla": ["fungi-leave"],
         "turkey": ["animal-bird", "food-game"],
         "quail": ["animal-bird"],
         "dove": ["animal-bird"],

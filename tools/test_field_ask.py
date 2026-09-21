@@ -34,6 +34,10 @@ LIVE = {
     "bobcat", "pronghorn", "roadrunner", "hawk", "owl", "eagle", "duck",
     "vulture", "raven", "catfish", "trout", "sunfish", "gila", "softshell",
     "bullfrog",
+    "venado", "cerdo", "oso", "wapiti", "berrendo", "zorrillo", "lince",
+    "liebre", "mapache", "ardilla", "zorro", "codorniz", "paloma", "pato",
+    "halcon", "buho", "aguila", "zopilote", "cuervo", "lobina", "bagre",
+    "mojarra", "trucha", "camaleon",
 }
 MEAL = {"meat", "hunt", "cook", "already", "caza", "carne"}
 
@@ -802,6 +806,14 @@ class FieldRankedBookTests(unittest.TestCase):
         self.assertEqual(first("cholla"), "nm-cactus")
         self.assertEqual(first("roadrunner"), "animal-bird")
         self.assertEqual(first("sunfish"), "animal-fish")
+        self.assertEqual(first("oak"), "tx-tree-use")
+        self.assertEqual(first("nopal"), "tx-cactus")
+        self.assertEqual(first("encino"), "tx-tree-use")
+        self.assertEqual(first("mezquite"), "tx-tree-use")
+        self.assertEqual(first("venado"), "tx-mammal")
+        self.assertEqual(ask_book(cards, "venado")[0]["category"], "animals")
+        self.assertEqual(first("zorrillo"), "tx-mammal")
+        self.assertEqual(first("hongo"), "fungi-leave")
         self.assertEqual(first("panic"), "tact-breathe")
         self.assertEqual(first("gps"), "nav-lost")
         self.assertEqual(first("sed"), "water-find")
@@ -812,9 +824,10 @@ class FieldRankedBookTests(unittest.TestCase):
     def test_a_vision_name_opens_the_same_kind_of_walk(self):
         """The still and SEARCH of that name open the same kind of card.
 
-        One body word is not a procedure, so the vision English name has
-        to be a boost (or title) hit. A ponderosa still is tree-use, not
-        water; SEARCH ponderosa is the same walk, not NONE.
+        One body word is not a procedure, so the vision English or Spanish
+        name has to be a boost (or title) hit. A ponderosa still is
+        tree-use, not water; SEARCH ponderosa / nopal / venado is the
+        same walk the still opens, not NONE, not the meal.
         """
         cards = load_book()
         wrong: list[str] = []
@@ -824,12 +837,13 @@ class FieldRankedBookTests(unittest.TestCase):
             )
             for lab in book["labels"]:
                 expect = _vision_ask_family(lab)
-                hits = ask_book(cards, lab["name"]["en"])
-                got = hits[0]["id"] if hits else None
-                if got not in expect:
-                    wrong.append(
-                        f"{lab['id']} {lab['name']['en']!r} -> {got} not {sorted(expect)}"
-                    )
+                for name in (lab["name"]["en"], lab["name"]["es"]):
+                    hits = ask_book(cards, name)
+                    got = hits[0]["id"] if hits else None
+                    if got not in expect:
+                        wrong.append(
+                            f"{lab['id']} {name!r} -> {got} not {sorted(expect)}"
+                        )
         self.assertEqual(wrong, [], "VISION name / ASK drift:\n" + "\n".join(wrong))
         src = _corpus_src()
         live_block = src.split("liveAnimal: Set<String> = [", 1)[1].split("]", 1)[0]
