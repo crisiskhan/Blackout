@@ -1652,6 +1652,22 @@ public enum OverlaySync: Sendable {
     ) -> Bool {
         force || lampFlip || paletteFlip || eyeFlip || layersChanged
     }
+
+    /// SEARCH type and chrome pulse rebuild the representable. Same overlay
+    /// must not tear YOU or `setCenter` — that is the LOCK-ON crash class.
+    public static func shouldSkipApply(force: Bool, specUnchanged: Bool) -> Bool {
+        !force && specUnchanged
+    }
+
+    /// `layoutSubviews` fires on HUD keystrokes. Same size is not a camera.
+    public static func boundsSizeChanged(
+        stored: (width: Double, height: Double)?,
+        size: (width: Double, height: Double)
+    ) -> Bool {
+        guard size.width > 1, size.height > 1 else { return false }
+        guard let stored else { return true }
+        return abs(stored.width - size.width) > 1 || abs(stored.height - size.height) > 1
+    }
 }
 
 public enum PersonMarkPaint: Sendable {

@@ -1135,6 +1135,33 @@ final class MapLibreMapTests: XCTestCase {
             )
         )
         XCTAssertEqual(PartyPips.titlePrefix, "PARTY·")
+        XCTAssertTrue(OverlaySync.shouldSkipApply(force: false, specUnchanged: true))
+        XCTAssertFalse(OverlaySync.shouldSkipApply(force: true, specUnchanged: true))
+        XCTAssertFalse(OverlaySync.shouldSkipApply(force: false, specUnchanged: false))
+        XCTAssertFalse(
+            OverlaySync.boundsSizeChanged(
+                stored: (width: 390, height: 844),
+                size: (width: 390, height: 844)
+            )
+        )
+        XCTAssertTrue(
+            OverlaySync.boundsSizeChanged(
+                stored: nil,
+                size: (width: 390, height: 844)
+            )
+        )
+        XCTAssertTrue(
+            OverlaySync.boundsSizeChanged(
+                stored: (width: 390, height: 844),
+                size: (width: 390, height: 600)
+            )
+        )
+        XCTAssertFalse(
+            OverlaySync.boundsSizeChanged(
+                stored: (width: 390, height: 844),
+                size: (width: 0, height: 0)
+            )
+        )
     }
 
     func testCanvasOpensWhereStreetNamesRender() {

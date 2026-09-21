@@ -1,6 +1,6 @@
 import Foundation
 
-public enum TravelMode: String, Sendable { case walk, drive }
+public enum TravelMode: String, Sendable, Equatable { case walk, drive }
 
 /// A node as callers describe one when building a graph by hand. Storage keeps
 /// nothing of this shape — see `RouteGraph`.

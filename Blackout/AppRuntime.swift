@@ -1358,6 +1358,12 @@ final class AppRuntime {
         hudFocus = piece
     }
 
+    /// SEARCH glyphs keep the glass up without pruning mesh or tearing YOU.
+    func keepChrome() {
+        chromeAwake = true
+        scheduleChromeSleep()
+    }
+
     func pulse() {
         chromeAwake = true
         hudFocus = .none
@@ -1366,6 +1372,10 @@ final class AppRuntime {
             commsChrome = ""
         }
         refreshHeldNear()
+        scheduleChromeSleep()
+    }
+
+    private func scheduleChromeSleep() {
         pulseTask?.cancel()
         pulseTask = Task { @MainActor in
             try? await Task.sleep(for: .seconds(BlackoutTokens.Chrome.chromeIdleSeconds))
