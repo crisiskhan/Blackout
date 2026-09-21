@@ -77,6 +77,113 @@ def nearest(graph: Graph, lat: float, lon: float):
     return None if best is None else best[1]
 
 
+def _segment_metres(lat: float, lon: float, a_lat: float, a_lon: float, b_lat: float, b_lon: float):
+    metres_lon = 111_320.0 * math.cos(math.radians(lat))
+    ax = (a_lon - lon) * metres_lon
+    ay = (a_lat - lat) * 110_540.0
+    bx = (b_lon - lon) * metres_lon
+    by = (b_lat - lat) * 110_540.0
+    dx = bx - ax
+    dy = by - ay
+    length2 = dx * dx + dy * dy
+    if length2 < 1:
+        t = 0.0
+    else:
+        t = min(1.0, max(0.0, (-ax * dx - ay * dy) / length2))
+    px = ax + t * dx
+    py = ay + t * dy
+    snap_lat = a_lat + t * (b_lat - a_lat)
+    snap_lon = a_lon + t * (b_lon - a_lon)
+    return math.hypot(px, py), snap_lat, snap_lon, t
+
+
+def nearest_access(graph: Graph, lat: float, lon: float, mode: str):
+    if not math.isfinite(lat) or not math.isfinite(lon):
+        return None
+    best = None
+    for e in graph.edges:
+        ok = e["walk"] if mode == "walk" else e["drive"]
+        if not ok:
+            continue
+        a = graph.nodes[str(e["a"])]
+        b = graph.nodes[str(e["b"])]
+        metres, snap_lat, snap_lon, t = _segment_metres(
+            lat, lon, a["lat"], a["lon"], b["lat"], b["lon"]
+        )
+        node = e["a"] if t <= 0.5 else e["b"]
+        item = {
+            "id": node,
+            "lat": snap_lat,
+            "lon": snap_lon,
+            "metres": metres,
+            "a": e["a"],
+            "b": e["b"],
+        }
+        if best is None or metres < best["metres"]:
+            best = item
+    return best
+
+
+def has_link(graph: Graph, src: int, dst: int, mode: str) -> bool:
+    for e in graph.edges:
+        ok = e["walk"] if mode == "walk" else e["drive"]
+        if ok and e["a"] == src and e["b"] == dst:
+            return True
+    return False
+
+
+def closer(graph: Graph, a: int, b: int, toward) -> int:
+    pa = graph.nodes[str(a)]
+    pb = graph.nodes[str(b)]
+    da = haversine(pa["lat"], pa["lon"], toward[0], toward[1])
+    db = haversine(pb["lat"], pb["lon"], toward[0], toward[1])
+    return a if da <= db else b
+
+
+def ahead(start: dict, end: dict, graph: Graph, mode: str) -> bool:
+    share = (start["a"] == end["a"] and start["b"] == end["b"]) or (
+        start["a"] == end["b"] and start["b"] == end["a"]
+    )
+    if not share:
+        return False
+    can_ab = has_link(graph, start["a"], start["b"], mode)
+    can_ba = has_link(graph, start["b"], start["a"], mode)
+    if can_ab and can_ba:
+        return True
+    pu = graph.nodes[str(start["a"])]
+    start_along = haversine(pu["lat"], pu["lon"], start["lat"], start["lon"])
+    end_along = haversine(pu["lat"], pu["lon"], end["lat"], end["lon"])
+    if can_ab:
+        return start_along <= end_along + 1
+    if can_ba:
+        return start_along >= end_along - 1
+    return False
+
+
+def leave(access: dict, toward, graph: Graph, mode: str) -> int:
+    can_ab = has_link(graph, access["a"], access["b"], mode)
+    can_ba = has_link(graph, access["b"], access["a"], mode)
+    if can_ab and can_ba:
+        return closer(graph, access["a"], access["b"], toward)
+    if can_ab:
+        return access["b"]
+    if can_ba:
+        return access["a"]
+    return access["id"]
+
+
+def arrive(access: dict, toward, graph: Graph, mode: str) -> int:
+    can_ab = has_link(graph, access["a"], access["b"], mode)
+    can_ba = has_link(graph, access["b"], access["a"], mode)
+    if can_ab and can_ba:
+        return closer(graph, access["a"], access["b"], toward)
+    if can_ab:
+        return access["a"]
+    if can_ba:
+        return access["b"]
+    return access["id"]
+
+
 DRIVE_SPEED = {
     0: 11.0,
     1: 29.0,
@@ -137,23 +244,38 @@ STITCH_METERS = 1.0
 def plan(graph: Graph | None, frm, to, mode: str):
     if graph is None or not graph.edges or not graph.nodes:
         return [], OFF_GRAPH
-    a = nearest(graph, frm[0], frm[1])
-    b = nearest(graph, to[0], to[1])
-    if a is None or b is None:
+    if not all(math.isfinite(v) for v in (*frm, *to)):
         return [], OFF_GRAPH
-    from_pt = graph.nodes[str(a)]
-    to_pt = graph.nodes[str(b)]
-    from_snap = haversine(frm[0], frm[1], from_pt["lat"], from_pt["lon"])
-    to_snap = haversine(to[0], to[1], to_pt["lat"], to_pt["lon"])
-    if from_snap > SNAP_METERS or to_snap > SNAP_METERS:
+    start = nearest_access(graph, frm[0], frm[1], mode)
+    end = nearest_access(graph, to[0], to[1], mode)
+    if start is None or end is None:
         return [], OFF_GRAPH
-    path = route(graph, a, b, mode)
+    if start["metres"] > SNAP_METERS or end["metres"] > SNAP_METERS:
+        return [], OFF_GRAPH
+    if ahead(start, end, graph, mode):
+        coords = [(start["lat"], start["lon"])]
+        if haversine(start["lat"], start["lon"], end["lat"], end["lon"]) >= STITCH_METERS:
+            coords.append((end["lat"], end["lon"]))
+        if start["metres"] >= STITCH_METERS:
+            coords.insert(0, (frm[0], frm[1]))
+        if end["metres"] >= STITCH_METERS:
+            coords.append((to[0], to[1]))
+        if len(coords) < 2:
+            return [], OFF_GRAPH
+        return coords, ""
+    path = route(graph, leave(start, to, graph, mode), arrive(end, frm, graph, mode), mode)
     if not path:
         return [], OFF_GRAPH
     coords = [(graph.nodes[str(i)]["lat"], graph.nodes[str(i)]["lon"]) for i in path]
-    if from_snap >= STITCH_METERS:
+    first = coords[0]
+    last = coords[-1]
+    if haversine(start["lat"], start["lon"], first[0], first[1]) >= STITCH_METERS:
+        coords.insert(0, (start["lat"], start["lon"]))
+    if start["metres"] >= STITCH_METERS:
         coords.insert(0, (frm[0], frm[1]))
-    if to_snap >= STITCH_METERS:
+    if haversine(end["lat"], end["lon"], last[0], last[1]) >= STITCH_METERS:
+        coords.append((end["lat"], end["lon"]))
+    if end["metres"] >= STITCH_METERS:
         coords.append((to[0], to[1]))
     if len(coords) < 2:
         return [], OFF_GRAPH
@@ -178,6 +300,28 @@ def diamond() -> Graph:
             {"a": 3, "b": 1, "m": haversine(0.001, 0.010, 0.0, 0.0), "walk": True, "drive": True, "cls": 6},
             {"a": 3, "b": 4, "m": haversine(0.001, 0.010, 0.0, 0.020), "walk": True, "drive": True, "cls": 6},
             {"a": 4, "b": 3, "m": haversine(0.0, 0.020, 0.001, 0.010), "walk": True, "drive": True, "cls": 6},
+        ],
+    )
+
+
+def one_way_block() -> Graph:
+    """Eastbound cars on the north street; feet may reverse. South street is the around."""
+    return Graph(
+        {
+            "1": {"id": 1, "lon": 0.0, "lat": 0.0},
+            "2": {"id": 2, "lon": 0.01, "lat": 0.0},
+            "3": {"id": 3, "lon": 0.0, "lat": 0.002},
+            "4": {"id": 4, "lon": 0.01, "lat": 0.002},
+        },
+        [
+            {"a": 1, "b": 2, "m": 1100, "walk": True, "drive": True, "cls": 6},
+            {"a": 2, "b": 1, "m": 1100, "walk": True, "drive": False},
+            {"a": 1, "b": 3, "m": 220, "walk": True, "drive": True, "cls": 6},
+            {"a": 3, "b": 1, "m": 220, "walk": True, "drive": True, "cls": 6},
+            {"a": 3, "b": 4, "m": 1100, "walk": True, "drive": True, "cls": 6},
+            {"a": 4, "b": 3, "m": 1100, "walk": True, "drive": True, "cls": 6},
+            {"a": 4, "b": 2, "m": 220, "walk": True, "drive": True, "cls": 6},
+            {"a": 2, "b": 4, "m": 220, "walk": True, "drive": True, "cls": 6},
         ],
     )
 
@@ -255,7 +399,160 @@ class GraphPlanTests(unittest.TestCase):
         )[0]
         self.assertIn("static let snapMeters", body)
         self.assertIn("snapMeters", body)
+        self.assertIn("nearestAccess", body)
         self.assertNotIn("bearingFallback", body)
+        self.assertIn("isFinite", body)
+        self.assertIn("func ahead", body)
+        self.assertIn("func leave", body)
+        self.assertIn("func arrive", body)
+        router = ROUTER.read_text()
+        self.assertIn("maxMetres", router)
+        self.assertIn("best.metres + index.maxMetres", router)
+        ring = router.split("var ring: Int64 = 0", 1)[1].split("private static let maxRing", 1)[0]
+        self.assertIn("cellX - ring", ring)
+        self.assertIn("cellX + ring", ring)
+        self.assertNotIn(
+            "if ring > 1",
+            ring,
+            "ring 1 must read the east/west cells or a dest one cell over is OFF GRAPH",
+        )
+
+    def test_xctunwrap_sits_in_a_throwing_test(self):
+        src = (ROOT / "Packages" / "Router" / "Tests" / "RouterTests" / "RouterTests.swift").read_text()
+        for part in re.split(r"\n    func ", src)[1:]:
+            if "XCTUnwrap" not in part:
+                continue
+            head = part.split("{", 1)[0]
+            self.assertIn("throws", head, head)
+
+    def test_drive_snaps_past_a_walk_only_door(self):
+        g = Graph(
+            {
+                "0": {"id": 0, "lon": 0.0, "lat": 0.0004},
+                "1": {"id": 1, "lon": 0.0, "lat": 0.0},
+                "2": {"id": 2, "lon": 0.01, "lat": 0.0},
+            },
+            [
+                {"a": 0, "b": 1, "m": 45, "walk": True, "drive": False},
+                {"a": 1, "b": 0, "m": 45, "walk": True, "drive": False},
+                {"a": 1, "b": 2, "m": 1100, "walk": True, "drive": True, "cls": 6},
+                {"a": 2, "b": 1, "m": 1100, "walk": True, "drive": True, "cls": 6},
+            ],
+        )
+        you = (0.00038, 0.0)
+        self.assertEqual(nearest(g, you[0], you[1]), 0)
+        access = nearest_access(g, you[0], you[1], "drive")
+        self.assertIsNotNone(access)
+        self.assertEqual(access["id"], 1)
+        coords, chrome = plan(g, you, (0.0, 0.01), "drive")
+        self.assertEqual(chrome, "")
+        self.assertGreaterEqual(len(coords), 2)
+        self.assertEqual(coords[0], you)
+
+    def test_mid_block_snap_stays_on_the_street(self):
+        g = Graph(
+            {
+                "1": {"id": 1, "lon": 0.0, "lat": 0.0},
+                "2": {"id": 2, "lon": 0.01, "lat": 0.0},
+            },
+            [
+                {"a": 1, "b": 2, "m": 1100, "walk": True, "drive": True, "cls": 6},
+                {"a": 2, "b": 1, "m": 1100, "walk": True, "drive": True, "cls": 6},
+            ],
+        )
+        you = (0.0002, 0.005)
+        access = nearest_access(g, you[0], you[1], "walk")
+        self.assertIsNotNone(access)
+        self.assertAlmostEqual(access["lat"], 0.0, places=4)
+        self.assertAlmostEqual(access["lon"], 0.005, places=3)
+        coords, chrome = plan(g, you, (0.0, 0.01), "walk")
+        self.assertEqual(chrome, "")
+        self.assertEqual(coords[0], you)
+        self.assertAlmostEqual(coords[1][0], access["lat"], places=4)
+        self.assertAlmostEqual(coords[1][1], access["lon"], places=3)
+        self.assertFalse(
+            any(abs(c[0]) < 1e-5 and abs(c[1]) < 1e-5 for c in coords),
+            "mid-block walk ran back to the near intersection",
+        )
+
+    def test_same_block_dest_does_not_run_the_corners(self):
+        g = Graph(
+            {
+                "1": {"id": 1, "lon": 0.0, "lat": 0.0},
+                "2": {"id": 2, "lon": 0.01, "lat": 0.0},
+            },
+            [
+                {"a": 1, "b": 2, "m": 1100, "walk": True, "drive": True, "cls": 6},
+                {"a": 2, "b": 1, "m": 1100, "walk": True, "drive": True, "cls": 6},
+            ],
+        )
+        you = (0.0002, 0.003)
+        dest = (0.0002, 0.007)
+        coords, chrome = plan(g, you, dest, "drive")
+        self.assertEqual(chrome, "")
+        self.assertEqual(coords[0], you)
+        self.assertEqual(coords[-1], dest)
+        self.assertFalse(
+            any(abs(c[1]) < 1e-4 or abs(c[1] - 0.01) < 1e-4 for c in coords),
+            "same-block dest went to an intersection",
+        )
+
+    def test_drive_does_not_reverse_a_one_way(self):
+        g = one_way_block()
+        you = (0.0002, 0.007)
+        dest = (0.0002, 0.002)
+        drive, chrome = plan(g, you, dest, "drive")
+        self.assertEqual(chrome, "")
+        self.assertTrue(any(abs(c[0] - 0.002) < 1e-4 for c in drive), drive)
+        walk, walk_chrome = plan(g, you, dest, "walk")
+        self.assertEqual(walk_chrome, "")
+        self.assertFalse(any(abs(c[0] - 0.002) < 1e-4 for c in walk), walk)
+
+    def test_drive_against_a_one_way_with_no_way_around_is_off_graph(self):
+        g = Graph(
+            {
+                "1": {"id": 1, "lon": 0.0, "lat": 0.0},
+                "2": {"id": 2, "lon": 0.01, "lat": 0.0},
+            },
+            [
+                {"a": 1, "b": 2, "m": 1100, "walk": True, "drive": True, "cls": 6},
+                {"a": 2, "b": 1, "m": 1100, "walk": True, "drive": False},
+            ],
+        )
+        you = (0.0002, 0.007)
+        dest = (0.0002, 0.002)
+        self.assertEqual(plan(g, you, dest, "drive")[1], OFF_GRAPH)
+        walk, chrome = plan(g, you, dest, "walk")
+        self.assertEqual(chrome, "")
+        self.assertEqual(walk[0], you)
+        self.assertEqual(walk[-1], dest)
+
+    def test_long_street_beats_a_nearer_node_on_a_farther_street(self):
+        g = Graph(
+            {
+                "1": {"id": 1, "lon": -0.03, "lat": 0.0},
+                "2": {"id": 2, "lon": 0.03, "lat": 0.0},
+                "3": {"id": 3, "lon": 0.0, "lat": 0.0008},
+                "4": {"id": 4, "lon": 0.001, "lat": 0.0009},
+            },
+            [
+                {"a": 1, "b": 2, "m": 6700, "walk": True, "drive": True, "cls": 2},
+                {"a": 2, "b": 1, "m": 6700, "walk": True, "drive": True, "cls": 2},
+                {"a": 3, "b": 4, "m": 120, "walk": True, "drive": True, "cls": 6},
+                {"a": 4, "b": 3, "m": 120, "walk": True, "drive": True, "cls": 6},
+            ],
+        )
+        you = (0.0002, 0.0)
+        access = nearest_access(g, you[0], you[1], "drive")
+        self.assertIsNotNone(access)
+        self.assertAlmostEqual(access["lat"], 0.0, places=4)
+        self.assertAlmostEqual(access["lon"], 0.0, places=3)
+        self.assertLess(access["metres"], 40)
+
+    def test_broken_coordinate_is_off_graph(self):
+        g = walk_only()
+        self.assertEqual(plan(g, (float("nan"), 0.0), (0.0, 0.02), "walk")[1], OFF_GRAPH)
+        self.assertEqual(plan(g, (0.0, 0.0), (float("inf"), 0.02), "drive")[1], OFF_GRAPH)
 
 
 class WalkDriveChipTests(unittest.TestCase):

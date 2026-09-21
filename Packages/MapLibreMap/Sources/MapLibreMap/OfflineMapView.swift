@@ -355,6 +355,61 @@ public struct OfflineMapView: UIViewRepresentable {
             var frameExtra: [(lat: Double, lon: Double)]
             var offAerial: Bool
             var cams: [CctvMark]
+
+            static func == (lhs: OverlaySpec, rhs: OverlaySpec) -> Bool {
+                lhs.puckLat == rhs.puckLat
+                    && lhs.puckLon == rhs.puckLon
+                    && lhs.showYou == rhs.showYou
+                    && lhs.packSouth == rhs.packSouth
+                    && lhs.packWest == rhs.packWest
+                    && lhs.packNorth == rhs.packNorth
+                    && lhs.packEast == rhs.packEast
+                    && sameLine(lhs.route, rhs.route)
+                    && samePoint(lhs.destination, rhs.destination)
+                    && samePoint(lhs.held, rhs.held)
+                    && lhs.fitToken == rhs.fitToken
+                    && lhs.pips == rhs.pips
+                    && lhs.youHeading == rhs.youHeading
+                    && lhs.youEmblem == rhs.youEmblem
+                    && lhs.youCondition == rhs.youCondition
+                    && lhs.homeLat == rhs.homeLat
+                    && lhs.homeLon == rhs.homeLon
+                    && lhs.lockOn == rhs.lockOn
+                    && lhs.godsEye == rhs.godsEye
+                    && lhs.overview == rhs.overview
+                    && lhs.travelMode == rhs.travelMode
+                    && lhs.sun == rhs.sun
+                    && lhs.eyeLayers == rhs.eyeLayers
+                    && lhs.eyePalette == rhs.eyePalette
+                    && lhs.followID == rhs.followID
+                    && lhs.trails.count == rhs.trails.count
+                    && zip(lhs.trails, rhs.trails).allSatisfy { sameLine($0, $1) }
+                    && lhs.rings == rhs.rings
+                    && sameLine(lhs.frameExtra, rhs.frameExtra)
+                    && lhs.offAerial == rhs.offAerial
+                    && lhs.cams == rhs.cams
+            }
+
+            private static func samePoint(
+                _ a: (lat: Double, lon: Double)?,
+                _ b: (lat: Double, lon: Double)?
+            ) -> Bool {
+                switch (a, b) {
+                case (nil, nil):
+                    return true
+                case let (a?, b?):
+                    return a.lat == b.lat && a.lon == b.lon
+                default:
+                    return false
+                }
+            }
+
+            private static func sameLine(
+                _ a: [(lat: Double, lon: Double)],
+                _ b: [(lat: Double, lon: Double)]
+            ) -> Bool {
+                a.count == b.count && zip(a, b).allSatisfy { $0.lat == $1.lat && $0.lon == $1.lon }
+            }
         }
 
         var spec: OverlaySpec?
