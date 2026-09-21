@@ -213,16 +213,75 @@ public struct SearchIndex: Sendable {
 
     public static func coordinates(in query: String) -> (lat: Double, lon: Double)? {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        let parts = trimmed.split(whereSeparator: { $0 == "," || $0.isWhitespace })
+        guard !trimmed.isEmpty else { return nil }
+        var cleaned = trimmed.replacingOccurrences(of: "°", with: " ")
+        cleaned = cleaned.replacingOccurrences(of: "º", with: " ")
+        cleaned = cleaned.replacingOccurrences(of: "/", with: ",")
+        cleaned = cleaned.replacingOccurrences(of: ";", with: ",")
+        let parts = cleaned.split(whereSeparator: { $0 == "," || $0.isWhitespace })
             .map { String($0) }
             .filter { !$0.isEmpty }
-        guard parts.count == 2,
-              let lat = Double(parts[0]),
-              let lon = Double(parts[1]),
+        let pair: (String, String)?
+        switch parts.count {
+        case 2:
+            pair = (parts[0], parts[1])
+        case 3:
+            if isHemisphere(parts[1], axis: .lat) {
+                pair = (parts[0] + parts[1], parts[2])
+            } else if isHemisphere(parts[2], axis: .lon) {
+                pair = (parts[0], parts[1] + parts[2])
+            } else {
+                pair = nil
+            }
+        case 4:
+            pair = (parts[0] + parts[1], parts[2] + parts[3])
+        default:
+            pair = nil
+        }
+        guard let pair,
+              let lat = parseAxis(pair.0, axis: .lat),
+              let lon = parseAxis(pair.1, axis: .lon),
+              lat.isFinite, lon.isFinite,
               lat >= -90, lat <= 90,
               lon >= -180, lon <= 180
         else { return nil }
         return (lat, lon)
+    }
+
+    private enum GeoAxis {
+        case lat, lon
+    }
+
+    private static func isHemisphere(_ raw: String, axis: GeoAxis) -> Bool {
+        let letter = raw.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        switch axis {
+        case .lat: return letter == "N" || letter == "S"
+        case .lon: return letter == "E" || letter == "W"
+        }
+    }
+
+    private static func parseAxis(_ raw: String, axis: GeoAxis) -> Double? {
+        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return nil }
+        var hemi: Character?
+        var body = text
+        if let first = body.first, "NSEWnsew".contains(first) {
+            hemi = first.uppercased().first
+            body.removeFirst()
+        } else if let last = body.last, "NSEWnsew".contains(last) {
+            hemi = last.uppercased().first
+            body.removeLast()
+        }
+        body = body.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let value = Double(body), value.isFinite else { return nil }
+        guard let hemi else { return value }
+        switch (axis, hemi) {
+        case (.lat, "N"): return abs(value)
+        case (.lat, "S"): return -abs(value)
+        case (.lon, "E"): return abs(value)
+        case (.lon, "W"): return -abs(value)
+        default: return nil
+        }
     }
 
     public static func rangeLabel(_ meters: Double) -> String {
@@ -334,6 +393,7 @@ public struct SearchIndex: Sendable {
                 )
             }
             for row in extra {
+                guard row.lat.isFinite, row.lon.isFinite else { continue }
                 consider(
                     Self.makeDoc(name: row.name, kind: row.kind, lat: row.lat, lon: row.lon),
                     foldedQuery: restFolded,
@@ -359,6 +419,7 @@ public struct SearchIndex: Sendable {
             )
         }
         for row in extra {
+            guard row.lat.isFinite, row.lon.isFinite else { continue }
             consider(
                 Self.makeDoc(name: row.name, kind: row.kind, lat: row.lat, lon: row.lon),
                 foldedQuery: foldedQuery,
@@ -432,6 +493,7 @@ public struct SearchIndex: Sendable {
         streetFreq = counts
         var streetCell: [Int64: [Int]] = [:]
         for (i, d) in docs.enumerated() where SearchHUDWord.from(packed: d.kind) == .street {
+            guard d.lat.isFinite, d.lon.isFinite else { continue }
             streetCell[Self.nameCell(lat: d.lat, lon: d.lon), default: []].append(i)
         }
         self.streetCell = streetCell
@@ -439,6 +501,7 @@ public struct SearchIndex: Sendable {
         for (i, range) in addrRanges.enumerated() {
             let lat = (range.lat0 + range.lat1) / 2
             let lon = (range.lon0 + range.lon1) / 2
+            guard lat.isFinite, lon.isFinite else { continue }
             rangeCell[Self.nameCell(lat: lat, lon: lon), default: []].append(i)
         }
         self.rangeCell = rangeCell
@@ -656,7 +719,8 @@ public struct SearchIndex: Sendable {
             found.formUnion(foldedPrefixHits(foldedQuery))
         }
         for q in qTokens {
-            for alias in Self.aliases(of: q) {
+            let names = q.count <= 1 ? [q] : Array(Self.aliases(of: q))
+            for alias in names {
                 if let ids = tokenIndex[alias] {
                     found.formUnion(ids)
                 }
@@ -1168,10 +1232,13 @@ public struct SearchIndex: Sendable {
     }
 
     private static func nameCell(lat: Double, lon: Double) -> Int64 {
-        nameCell(
-            y: Int64((lat / nameCellDegrees).rounded(.down)),
-            x: Int64((lon / nameCellDegrees).rounded(.down))
-        )
+        let y = (lat / nameCellDegrees).rounded(.down)
+        let x = (lon / nameCellDegrees).rounded(.down)
+        guard y.isFinite, x.isFinite,
+              y > Double(Int64.min) + 1, y < Double(Int64.max) - 1,
+              x > Double(Int64.min) + 1, x < Double(Int64.max) - 1
+        else { return 0 }
+        return nameCell(y: Int64(y), x: Int64(x))
     }
 
     private static func nameCell(y: Int64, x: Int64) -> Int64 {

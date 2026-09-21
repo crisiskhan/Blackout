@@ -168,8 +168,13 @@ public struct OfflineMapView: UIViewRepresentable {
         view.delegate = context.coordinator
         view.onBoundsChange = { [weak view] size in
             guard let view, let spec = context.coordinator.spec else { return }
+            let next = (width: Double(size.width), height: Double(size.height))
+            guard OverlaySync.boundsSizeChanged(
+                stored: context.coordinator.lastBoundsSize,
+                size: next
+            ) else { return }
+            context.coordinator.lastBoundsSize = next
             context.coordinator.applyCamera(spec, on: view, force: false)
-            _ = size
         }
         applyInteraction(view)
         view.prefetchesTiles = false
@@ -319,7 +324,7 @@ public struct OfflineMapView: UIViewRepresentable {
     }
 
     public final class Coordinator: NSObject, MLNMapViewDelegate, UIGestureRecognizerDelegate {
-        struct OverlaySpec {
+        struct OverlaySpec: Equatable {
             var puckLat: Double
             var puckLon: Double
             var showYou: Bool
@@ -353,6 +358,7 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         var spec: OverlaySpec?
+        var lastBoundsSize: (width: Double, height: Double)?
         var onMapTap: ((Double, Double) -> Void)?
         var onMapHold: ((Double, Double, [String: String], Double) -> Void)?
         var onPersonHold: ((String, Double, Double) -> Void)?
@@ -735,6 +741,9 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         func apply(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
+            if OverlaySync.shouldSkipApply(force: force, specUnchanged: self.spec == spec) {
+                return
+            }
             self.spec = spec
             let lampFlip = storedSun != spec.sun
             let eyeFlip = storedGodsEye != spec.godsEye

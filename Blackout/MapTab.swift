@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import MapLibreMap
 import Search
 import Router
@@ -11,6 +12,7 @@ struct MapTab: View {
     @State private var hits: [SearchHit] = []
     @State private var packedIndex: SearchIndex?
     @State private var sayFailed = false
+    @State private var pasteFailed = false
     @State private var searchGen: UInt64 = 0
     @State private var looking = false
 
@@ -33,6 +35,7 @@ struct MapTab: View {
             query = ""
             hits = []
             sayFailed = false
+            pasteFailed = false
             loadIndex()
         }
     }
@@ -303,14 +306,22 @@ struct MapTab: View {
                 )
                 Button("SAY") { say() }
                     .buttonStyle(HUDOverlayChipStyle())
+                Button("PASTE") { pasteSearch() }
+                    .buttonStyle(HUDOverlayChipStyle())
             }
             .onChange(of: query) { _, _ in
                 sayFailed = false
-                runtime.touch(.search)
+                pasteFailed = false
+                runtime.keepChrome()
                 search()
             }
             if sayFailed {
                 Text("SAY FAILED")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.warn)
+            }
+            if pasteFailed {
+                Text("NO PASTE")
                     .font(.system(size: 13, weight: .heavy))
                     .foregroundStyle(Theme.warn)
             }
@@ -712,6 +723,21 @@ struct MapTab: View {
         if SearchIndex.asking(query) {
             search()
         }
+    }
+
+    /// HUD typewriter has no iPhone paste. The board is the only way
+    /// `31.76190, -106.49000` lands in one tap.
+    private func pasteSearch() {
+        sayFailed = false
+        pasteFailed = false
+        runtime.keepChrome()
+        let text = (UIPasteboard.general.string ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else {
+            pasteFailed = true
+            return
+        }
+        query = text
     }
 
     /// Spoken place uses the same lookup as type. Deny, PTT live, and

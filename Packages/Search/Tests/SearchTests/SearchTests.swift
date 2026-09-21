@@ -45,6 +45,51 @@ final class SearchTests: XCTestCase {
         XCTAssertEqual(hits.first?.lat ?? 0, 31.76190, accuracy: 0.00001)
         XCTAssertEqual(hits.first?.lon ?? 0, -106.49000, accuracy: 0.00001)
         XCTAssertEqual(SearchHUDWord.from(packed: "coordinates").title, "COORDINATES")
+        let spaced = SearchIndex.coordinates(in: "31.76190 -106.49000")
+        XCTAssertEqual(spaced?.lat ?? 0, 31.76190, accuracy: 0.00001)
+        XCTAssertEqual(spaced?.lon ?? 0, -106.49000, accuracy: 0.00001)
+        let hemi = SearchIndex.coordinates(in: "31.76190 N, 106.49000 W")
+        XCTAssertEqual(hemi?.lat ?? 0, 31.76190, accuracy: 0.00001)
+        XCTAssertEqual(hemi?.lon ?? 0, -106.49000, accuracy: 0.00001)
+        let degrees = SearchIndex.coordinates(in: "31.76190°, -106.49000°")
+        XCTAssertEqual(degrees?.lat ?? 0, 31.76190, accuracy: 0.00001)
+        XCTAssertEqual(degrees?.lon ?? 0, -106.49000, accuracy: 0.00001)
+        XCTAssertNil(SearchIndex.coordinates(in: "inf, 0"))
+        XCTAssertNil(SearchIndex.coordinates(in: "nan, nan"))
+        XCTAssertNil(SearchIndex.coordinates(in: "91, -106.49"))
+        XCTAssertNil(SearchIndex.coordinates(in: "31.76, -200"))
+    }
+
+    func testSingleLetterDoesNotAliasEverySouthStreet() {
+        let idx = SearchIndex(pois: [
+            ["name": "Vista South", "kind": "street", "lat": 31.70, "lon": -106.40],
+            ["name": "S Mesa", "kind": "street", "lat": 31.76, "lon": -106.49],
+            ["name": "South Street 1", "kind": "street", "lat": 31.0, "lon": -106.0],
+        ])
+        let hits = idx.lookup("s", cap: 5)
+        XCTAssertEqual(hits.first?.name, "S Mesa")
+        XCTAssertFalse(hits.contains { $0.name == "Vista South" })
+        XCTAssertEqual(idx.lookup("south street 1").first?.name, "South Street 1")
+        XCTAssertEqual(idx.lookup("vista south").first?.name, "Vista South")
+    }
+
+    func testNonFiniteMarkIsNotAHit() {
+        let idx = SearchIndex(pois: [
+            ["name": "Home", "kind": "place", "lat": 31.7, "lon": -106.4],
+        ])
+        let extra = SearchExtra(name: "CAMP", kind: "mark", lat: .nan, lon: .nan)
+        XCTAssertTrue(idx.lookup("camp", extra: [extra]).isEmpty)
+        XCTAssertEqual(idx.lookup("home").first?.name, "Home")
+    }
+
+    func testBrokenStreetDocDoesNotTrapTheIndex() {
+        let idx = SearchIndex(pois: [
+            ["name": "Bad", "kind": "street", "lat": Double.nan, "lon": -106.4],
+            ["name": "Montana Avenue", "kind": "street", "lat": 31.78, "lon": -106.42],
+        ])
+        XCTAssertEqual(idx.lookup("montana").first?.name, "Montana Avenue")
+        XCTAssertNil(idx.streetName(near: .nan, lon: -106.42))
+        XCTAssertNil(idx.streetName(near: 31.78, lon: .infinity))
     }
 
     func testEmptyQueryIsNotADump() {
