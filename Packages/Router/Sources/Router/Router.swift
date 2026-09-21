@@ -90,6 +90,9 @@ public struct GraphIndex: Sendable {
     let target: [Int32]
     let metres: [Double]
     let mode: [UInt8]
+    /// Longest link. Mode-legal snap has to keep reading until a farther
+    /// node cannot own an edge that still beats the best hit.
+    let maxMetres: Double
 
     /// Node ids grouped by grid cell, and where each cell's group sits.
     let cellNode: [Int32]
@@ -103,6 +106,7 @@ public struct GraphIndex: Sendable {
         func usable(_ e: GraphEdge) -> Bool {
             e.a >= 0 && e.a < nodeCount && e.b >= 0 && e.b < nodeCount
                 && !lat[e.a].isNaN && !lat[e.b].isNaN
+                && e.m.isFinite
         }
         var counts = [Int32](repeating: 0, count: nodeCount + 1)
         for e in edges where usable(e) {
@@ -132,6 +136,7 @@ public struct GraphIndex: Sendable {
         self.target = target
         self.metres = metres
         self.mode = mode
+        self.maxMetres = metres.lazy.filter(\.isFinite).max() ?? 0
         (self.cellNode, self.cellSpan) = Self.grid(lat: lat, lon: lon)
     }
 
@@ -142,6 +147,7 @@ public struct GraphIndex: Sendable {
         self.target = target
         self.metres = metres
         self.mode = mode
+        self.maxMetres = metres.lazy.filter(\.isFinite).max() ?? 0
         (self.cellNode, self.cellSpan) = Self.grid(lat: lat, lon: lon)
     }
 
@@ -247,6 +253,16 @@ public struct GraphIndex: Sendable {
         let want = Self.bit(travel)
         return mode.contains { $0 & want != 0 }
     }
+
+    func linkBits(from: Int, to: Int, mode travel: TravelMode) -> UInt8? {
+        let want = Self.bit(travel)
+        for i in span(of: from) {
+            if mode[i] & want != 0, Int(target[i]) == to {
+                return mode[i]
+            }
+        }
+        return nil
+    }
 }
 
 /// A pack's street network, held the way the wire format already describes it:
@@ -312,6 +328,17 @@ public struct RouteResult: Equatable, Sendable {
 }
 
 public enum RouteFallback: String, Equatable, Sendable { case onGraph, bearingOffGraph }
+
+/// Mode-legal point on a street segment. `id` is the nearer end; `a`/`b`
+/// are the directed link the snap sat on.
+public struct StreetAccess: Equatable, Sendable {
+    public var id: Int
+    public var lat: Double
+    public var lon: Double
+    public var metres: Double
+    public var a: Int
+    public var b: Int
+}
 
 public enum GraphRouter {
     public static func route(graph: RouteGraph, from: Int, to: Int, mode: TravelMode, avoid: Set<Int> = []) -> RouteResult? {
@@ -381,20 +408,87 @@ public enum GraphRouter {
     /// Nearest node by way of the grid, so snapping a tap to the street network
     /// reads the cells around it rather than every node in the pack.
     public static func nearestNode(graph: RouteGraph, lat: Double, lon: Double) -> Int? {
+        nearestAccess(graph: graph, lat: lat, lon: lon, mode: nil)?.id
+    }
+
+    /// Mode-legal street under a point. Drive ignores a walk-only door.
+    /// The snap sits on the segment, not the yard, so a mid-block start
+    /// does not cut across lots to the intersection.
+    public static func nearestAccess(
+        graph: RouteGraph,
+        lat: Double,
+        lon: Double,
+        mode: TravelMode
+    ) -> StreetAccess? {
+        nearestAccess(graph: graph, lat: lat, lon: lon, mode: Optional(mode))
+    }
+
+    private static func nearestAccess(
+        graph: RouteGraph,
+        lat: Double,
+        lon: Double,
+        mode: TravelMode?
+    ) -> StreetAccess? {
+        guard lat.isFinite, lon.isFinite, graph.nodeCount > 0 else { return nil }
         let index = graph.index
-        if graph.nodeCount == 0 { return nil }
-        let cy = Int64((lat / GraphIndex.cellDegrees).rounded(.down))
-        let cx = Int64((lon / GraphIndex.cellDegrees).rounded(.down))
+        let cy = (lat / GraphIndex.cellDegrees).rounded(.down)
+        let cx = (lon / GraphIndex.cellDegrees).rounded(.down)
+        guard cy.isFinite, cx.isFinite,
+              cy > Double(Int64.min) + 1, cy < Double(Int64.max) - 1,
+              cx > Double(Int64.min) + 1, cx < Double(Int64.max) - 1
+        else { return nil }
+        let cellY = Int64(cy)
+        let cellX = Int64(cx)
         // Shortest a degree gets at this latitude, so the ring bound below can
         // never claim more coverage than it has.
         let metresPerDegree = min(110_540.0, 111_320.0 * cos(lat * .pi / 180))
-        var best: (id: Int, metres: Double)?
+        var best: StreetAccess?
+        let want = mode.map { GraphIndex.bit($0) }
+        func consider(_ hit: StreetAccess) {
+            if best == nil || hit.metres < best!.metres {
+                best = hit
+            }
+        }
         func scan(_ y: Int64, _ x: Int64) {
             guard let span = index.cellSpan[GraphIndex.cell(y: y, x: x)] else { return }
             for slot in span {
                 let id = Int(index.cellNode[slot])
-                let d = haversine(lat, lon, graph.lat[id], graph.lon[id])
-                if best == nil || d < best!.metres { best = (id, d) }
+                guard let want else {
+                    consider(
+                        StreetAccess(
+                            id: id,
+                            lat: graph.lat[id],
+                            lon: graph.lon[id],
+                            metres: haversine(lat, lon, graph.lat[id], graph.lon[id]),
+                            a: id,
+                            b: id
+                        )
+                    )
+                    continue
+                }
+                for i in index.span(of: id) {
+                    guard index.mode[i] & want != 0 else { continue }
+                    let other = Int(index.target[i])
+                    guard let to = graph.point(other) else { continue }
+                    let hit = project(
+                        lat: lat,
+                        lon: lon,
+                        aLat: graph.lat[id],
+                        aLon: graph.lon[id],
+                        bLat: to.lat,
+                        bLon: to.lon
+                    )
+                    consider(
+                        StreetAccess(
+                            id: hit.t <= 0.5 ? id : other,
+                            lat: hit.lat,
+                            lon: hit.lon,
+                            metres: hit.metres,
+                            a: id,
+                            b: other
+                        )
+                    )
+                }
             }
         }
         var ring: Int64 = 0
@@ -402,27 +496,63 @@ public enum GraphRouter {
             // Walk the ring's edge only. Re-reading its whole square each time
             // turned a widening search into a cubic one.
             if ring == 0 {
-                scan(cy, cx)
+                scan(cellY, cellX)
             } else {
                 for dx in -ring...ring {
-                    scan(cy - ring, cx + dx)
-                    scan(cy + ring, cx + dx)
+                    scan(cellY - ring, cellX + dx)
+                    scan(cellY + ring, cellX + dx)
                 }
                 if ring > 1 {
                     for dy in (-ring + 1)...(ring - 1) {
-                        scan(cy + dy, cx - ring)
-                        scan(cy + dy, cx + ring)
+                        scan(cellY + dy, cellX - ring)
+                        scan(cellY + dy, cellX + ring)
                     }
                 }
             }
-            // Everything still unread sits at least this far out, so once the
-            // best is inside that, no further ring can beat it.
-            if let best, best.metres <= Double(ring) * GraphIndex.cellDegrees * metresPerDegree {
-                return best.id
+            // A node just outside this ring can still own a long edge that
+            // passes closer than any hit so far. Node snap does not have
+            // that problem.
+            if let best {
+                let reach = Double(ring) * GraphIndex.cellDegrees * metresPerDegree
+                if mode == nil {
+                    if best.metres <= reach { return best }
+                } else if best.metres + index.maxMetres <= reach {
+                    return best
+                }
             }
             ring += 1
         }
-        return best?.id
+        return best
+    }
+
+    private static func project(
+        lat: Double,
+        lon: Double,
+        aLat: Double,
+        aLon: Double,
+        bLat: Double,
+        bLon: Double
+    ) -> (lat: Double, lon: Double, metres: Double, t: Double) {
+        let metresLon = 111_320.0 * cos(lat * .pi / 180)
+        let ax = (aLon - lon) * metresLon
+        let ay = (aLat - lat) * 110_540.0
+        let bx = (bLon - lon) * metresLon
+        let by = (bLat - lat) * 110_540.0
+        let dx = bx - ax
+        let dy = by - ay
+        let length2 = dx * dx + dy * dy
+        let t: Double
+        if length2 < 1 {
+            t = 0
+        } else {
+            t = min(1, max(0, (-ax * dx - ay * dy) / length2))
+        }
+        return (
+            lat: aLat + t * (bLat - aLat),
+            lon: aLon + t * (bLon - aLon),
+            metres: hypot(ax + t * dx, ay + t * dy),
+            t: t
+        )
     }
 
     /// Far enough to cross any pack we ship; stops a tap in open water from
@@ -445,6 +575,9 @@ public enum GraphRouter {
     }
 
     public static func haversine(_ a: Double, _ b: Double, _ c: Double, _ d: Double) -> Double {
+        guard a.isFinite, b.isFinite, c.isFinite, d.isFinite else {
+            return .greatestFiniteMagnitude
+        }
         let r = 6371000.0
         let p1 = a * .pi / 180, p2 = c * .pi / 180
         let dp = (c - a) * .pi / 180, dl = (d - b) * .pi / 180
@@ -466,42 +599,147 @@ public enum GraphPlan {
         to: (lat: Double, lon: Double),
         mode: TravelMode
     ) -> (coords: [(lat: Double, lon: Double)], chrome: String, seconds: Double) {
-        guard let graph, !graph.isEmpty,
-              let a = GraphRouter.nearestNode(graph: graph, lat: from.lat, lon: from.lon),
-              let b = GraphRouter.nearestNode(graph: graph, lat: to.lat, lon: to.lon),
-              let fromPt = graph.point(a),
-              let toPt = graph.point(b)
+        guard from.lat.isFinite, from.lon.isFinite, to.lat.isFinite, to.lon.isFinite,
+              let graph, !graph.isEmpty,
+              let start = GraphRouter.nearestAccess(graph: graph, lat: from.lat, lon: from.lon, mode: mode),
+              let end = GraphRouter.nearestAccess(graph: graph, lat: to.lat, lon: to.lon, mode: mode)
         else {
             return ([], offGraph, 0)
         }
-        let fromSnap = GraphRouter.haversine(from.lat, from.lon, fromPt.lat, fromPt.lon)
-        let toSnap = GraphRouter.haversine(to.lat, to.lon, toPt.lat, toPt.lon)
-        guard fromSnap <= snapMeters, toSnap <= snapMeters else {
+        guard start.metres <= snapMeters, end.metres <= snapMeters else {
             return ([], offGraph, 0)
         }
-        guard let r = GraphRouter.route(graph: graph, from: a, to: b, mode: mode),
+        if ahead(start, end, graph: graph, mode: mode) {
+            var coords = [(start.lat, start.lon)]
+            if GraphRouter.haversine(start.lat, start.lon, end.lat, end.lon) >= stitchMeters {
+                coords.append((end.lat, end.lon))
+            }
+            if start.metres >= stitchMeters {
+                coords.insert(from, at: 0)
+            }
+            if end.metres >= stitchMeters {
+                coords.append(to)
+            }
+            guard coords.count >= 2 else {
+                return ([], offGraph, 0)
+            }
+            let street = GraphRouter.haversine(start.lat, start.lon, end.lat, end.lon)
+            let bits = graph.index.linkBits(from: start.a, to: start.b, mode: mode)
+                ?? graph.index.linkBits(from: start.b, to: start.a, mode: mode)
+                ?? 0
+            let cost = GraphIndex.stepCost(metres: street, mode: mode, bits: bits)
+            return (
+                coords,
+                "",
+                GraphIndex.seconds(metres: street, cost: cost, mode: mode) + extraSeconds(start, end, mode: mode)
+            )
+        }
+        let startId = leave(start, toward: to, graph: graph, mode: mode)
+        let endId = arrive(end, toward: from, graph: graph, mode: mode)
+        guard let r = GraphRouter.route(graph: graph, from: startId, to: endId, mode: mode),
               r.fallback == .onGraph
         else {
             return ([], offGraph, 0)
         }
         var coords = GraphRouter.coordinates(graph: graph, nodeIds: r.nodeIds)
-        if fromSnap >= stitchMeters {
+        guard let first = coords.first, let last = coords.last else {
+            return ([], offGraph, 0)
+        }
+        if GraphRouter.haversine(start.lat, start.lon, first.lat, first.lon) >= stitchMeters {
+            coords.insert((start.lat, start.lon), at: 0)
+        }
+        if start.metres >= stitchMeters {
             coords.insert(from, at: 0)
         }
-        if toSnap >= stitchMeters {
+        if GraphRouter.haversine(end.lat, end.lon, last.lat, last.lon) >= stitchMeters {
+            coords.append((end.lat, end.lon))
+        }
+        if end.metres >= stitchMeters {
             coords.append(to)
         }
         guard coords.count >= 2 else {
             return ([], offGraph, 0)
         }
-        let extra: Double
+        return (coords, "", r.seconds + extraSeconds(start, end, mode: mode))
+    }
+
+    private static func extraSeconds(_ start: StreetAccess, _ end: StreetAccess, mode: TravelMode) -> Double {
         switch mode {
         case .walk:
-            extra = (fromSnap + toSnap) / GraphIndex.walkMps
+            return (start.metres + end.metres) / GraphIndex.walkMps
         case .drive:
-            extra = (fromSnap + toSnap) / GraphIndex.unknownDriveMps
+            return (start.metres + end.metres) / GraphIndex.unknownDriveMps
         }
-        return (coords, "", r.seconds + extra)
+    }
+
+    /// Same packed street, and the mode may roll from the start snap to
+    /// the dest snap without reversing a one-way.
+    private static func ahead(
+        _ start: StreetAccess,
+        _ end: StreetAccess,
+        graph: RouteGraph,
+        mode: TravelMode
+    ) -> Bool {
+        let share = (start.a == end.a && start.b == end.b)
+            || (start.a == end.b && start.b == end.a)
+        guard share else { return false }
+        let canAB = graph.index.linkBits(from: start.a, to: start.b, mode: mode) != nil
+        let canBA = graph.index.linkBits(from: start.b, to: start.a, mode: mode) != nil
+        if canAB && canBA { return true }
+        guard let pu = graph.point(start.a) else { return false }
+        let startAlong = GraphRouter.haversine(pu.lat, pu.lon, start.lat, start.lon)
+        let endAlong = GraphRouter.haversine(pu.lat, pu.lon, end.lat, end.lon)
+        if canAB { return startAlong <= endAlong + 1 }
+        if canBA { return startAlong >= endAlong - 1 }
+        return false
+    }
+
+    /// Mid-block two-way, leave toward the other pin. One-way, leave
+    /// only the legal way so the line does not reverse on the street.
+    private static func leave(
+        _ access: StreetAccess,
+        toward: (lat: Double, lon: Double),
+        graph: RouteGraph,
+        mode: TravelMode
+    ) -> Int {
+        let canAB = graph.index.linkBits(from: access.a, to: access.b, mode: mode) != nil
+        let canBA = graph.index.linkBits(from: access.b, to: access.a, mode: mode) != nil
+        if canAB && canBA {
+            return closer(access.a, access.b, to: toward, graph: graph)
+        }
+        if canAB { return access.b }
+        if canBA { return access.a }
+        return access.id
+    }
+
+    /// Arrive from the legal source of a one-way so the last stitch
+    /// does not back up against traffic.
+    private static func arrive(
+        _ access: StreetAccess,
+        toward: (lat: Double, lon: Double),
+        graph: RouteGraph,
+        mode: TravelMode
+    ) -> Int {
+        let canAB = graph.index.linkBits(from: access.a, to: access.b, mode: mode) != nil
+        let canBA = graph.index.linkBits(from: access.b, to: access.a, mode: mode) != nil
+        if canAB && canBA {
+            return closer(access.a, access.b, to: toward, graph: graph)
+        }
+        if canAB { return access.a }
+        if canBA { return access.b }
+        return access.id
+    }
+
+    private static func closer(
+        _ a: Int,
+        _ b: Int,
+        to: (lat: Double, lon: Double),
+        graph: RouteGraph
+    ) -> Int {
+        guard let pa = graph.point(a), let pb = graph.point(b) else { return a }
+        let da = GraphRouter.haversine(pa.lat, pa.lon, to.lat, to.lon)
+        let db = GraphRouter.haversine(pb.lat, pb.lon, to.lat, to.lon)
+        return da <= db ? a : b
     }
 }
 

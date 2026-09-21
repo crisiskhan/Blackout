@@ -170,6 +170,169 @@ final class RouterTests: XCTestCase {
         XCTAssertEqual(GraphPlan.snapMeters, 150)
     }
 
+    func testDriveSnapsPastAWalkOnlyDoorOntoTheStreet() {
+        let g = RouteGraph(
+            nodes: [
+                .init(id: 0, lon: 0, lat: 0.0004),
+                .init(id: 1, lon: 0, lat: 0),
+                .init(id: 2, lon: 0.01, lat: 0),
+            ],
+            edges: [
+                .init(a: 0, b: 1, m: 45, walk: true, drive: false),
+                .init(a: 1, b: 0, m: 45, walk: true, drive: false),
+                .init(a: 1, b: 2, m: 1100, walk: true, drive: true, roadClass: 6),
+                .init(a: 2, b: 1, m: 1100, walk: true, drive: true, roadClass: 6),
+            ]
+        )
+        let you = (lat: 0.00038, lon: 0.0)
+        XCTAssertEqual(GraphRouter.nearestNode(graph: g, lat: you.lat, lon: you.lon), 0)
+        let drive = try XCTUnwrap(
+            GraphRouter.nearestAccess(graph: g, lat: you.lat, lon: you.lon, mode: .drive)
+        )
+        XCTAssertEqual(drive.id, 1)
+        XCTAssertLessThan(drive.metres, GraphPlan.snapMeters)
+        let plan = GraphPlan.line(graph: g, from: you, to: (lat: 0, lon: 0.01), mode: .drive)
+        XCTAssertEqual(plan.chrome, "")
+        XCTAssertGreaterThanOrEqual(plan.coords.count, 2)
+        XCTAssertEqual(plan.coords.first?.lat, you.lat)
+        let walk = GraphPlan.line(graph: g, from: you, to: (lat: 0, lon: 0.01), mode: .walk)
+        XCTAssertEqual(walk.chrome, "")
+    }
+
+    func testMidBlockSnapStaysOnTheStreetNotTheYard() {
+        let g = RouteGraph(
+            nodes: [
+                .init(id: 1, lon: 0, lat: 0),
+                .init(id: 2, lon: 0.01, lat: 0),
+            ],
+            edges: [
+                .init(a: 1, b: 2, m: 1100, walk: true, drive: true, roadClass: 6),
+                .init(a: 2, b: 1, m: 1100, walk: true, drive: true, roadClass: 6),
+            ]
+        )
+        let you = (lat: 0.0002, lon: 0.005)
+        let access = try XCTUnwrap(
+            GraphRouter.nearestAccess(graph: g, lat: you.lat, lon: you.lon, mode: .walk)
+        )
+        XCTAssertEqual(access.lat, 0, accuracy: 0.00005)
+        XCTAssertEqual(access.lon, 0.005, accuracy: 0.0002)
+        let plan = GraphPlan.line(graph: g, from: you, to: (lat: 0, lon: 0.01), mode: .walk)
+        XCTAssertEqual(plan.chrome, "")
+        XCTAssertEqual(plan.coords.first?.lat, you.lat)
+        XCTAssertEqual(plan.coords[1].lat, access.lat, accuracy: 0.00005)
+        XCTAssertEqual(plan.coords[1].lon, access.lon, accuracy: 0.0002)
+        XCTAssertFalse(
+            plan.coords.contains { abs($0.lat) < 0.00005 && abs($0.lon) < 0.00005 },
+            "mid-block walk ran back to the near intersection"
+        )
+    }
+
+    func testSameBlockDestDoesNotRunTheCorners() {
+        let g = RouteGraph(
+            nodes: [
+                .init(id: 1, lon: 0, lat: 0),
+                .init(id: 2, lon: 0.01, lat: 0),
+            ],
+            edges: [
+                .init(a: 1, b: 2, m: 1100, walk: true, drive: true, roadClass: 6),
+                .init(a: 2, b: 1, m: 1100, walk: true, drive: true, roadClass: 6),
+            ]
+        )
+        let you = (lat: 0.0002, lon: 0.003)
+        let dest = (lat: 0.0002, lon: 0.007)
+        let plan = GraphPlan.line(graph: g, from: you, to: dest, mode: .drive)
+        XCTAssertEqual(plan.chrome, "")
+        XCTAssertEqual(plan.coords.first?.lat, you.lat)
+        XCTAssertEqual(plan.coords.last?.lon, dest.lon)
+        XCTAssertFalse(
+            plan.coords.contains { abs($0.lon) < 0.0002 || abs($0.lon - 0.01) < 0.0002 },
+            "same-block dest went to an intersection"
+        )
+    }
+
+    func testDriveDoesNotReverseAOneWay() {
+        let g = oneWayBlock()
+        let you = (lat: 0.0002, lon: 0.007)
+        let dest = (lat: 0.0002, lon: 0.002)
+        let drive = GraphPlan.line(graph: g, from: you, to: dest, mode: .drive)
+        XCTAssertEqual(drive.chrome, "")
+        XCTAssertTrue(
+            drive.coords.contains { abs($0.lat - 0.002) < 0.0002 },
+            "drive behind a one-way must take the around"
+        )
+        let walk = GraphPlan.line(graph: g, from: you, to: dest, mode: .walk)
+        XCTAssertEqual(walk.chrome, "")
+        XCTAssertFalse(
+            walk.coords.contains { abs($0.lat - 0.002) < 0.0002 },
+            "walk reversed on the street the car could not"
+        )
+    }
+
+    func testDriveAgainstAOneWayWithNoWayAroundIsOffGraph() {
+        let g = RouteGraph(
+            nodes: [
+                .init(id: 1, lon: 0, lat: 0),
+                .init(id: 2, lon: 0.01, lat: 0),
+            ],
+            edges: [
+                .init(a: 1, b: 2, m: 1100, walk: true, drive: true, roadClass: 6),
+                .init(a: 2, b: 1, m: 1100, walk: true, drive: false),
+            ]
+        )
+        let you = (lat: 0.0002, lon: 0.007)
+        let dest = (lat: 0.0002, lon: 0.002)
+        let drive = GraphPlan.line(graph: g, from: you, to: dest, mode: .drive)
+        XCTAssertEqual(drive.chrome, GraphPlan.offGraph)
+        XCTAssertTrue(drive.coords.isEmpty)
+        let walk = GraphPlan.line(graph: g, from: you, to: dest, mode: .walk)
+        XCTAssertEqual(walk.chrome, "")
+        XCTAssertEqual(walk.coords.first?.lat, you.lat)
+        XCTAssertEqual(walk.coords.last?.lon, dest.lon)
+    }
+
+    func testLongStreetBeatsANearerNodeOnAFartherStreet() {
+        let g = RouteGraph(
+            nodes: [
+                .init(id: 1, lon: -0.03, lat: 0),
+                .init(id: 2, lon: 0.03, lat: 0),
+                .init(id: 3, lon: 0, lat: 0.0008),
+                .init(id: 4, lon: 0.001, lat: 0.0009),
+            ],
+            edges: [
+                .init(a: 1, b: 2, m: 6700, walk: true, drive: true, roadClass: 2),
+                .init(a: 2, b: 1, m: 6700, walk: true, drive: true, roadClass: 2),
+                .init(a: 3, b: 4, m: 120, walk: true, drive: true, roadClass: 6),
+                .init(a: 4, b: 3, m: 120, walk: true, drive: true, roadClass: 6),
+            ]
+        )
+        let you = (lat: 0.0002, lon: 0.0)
+        let access = try XCTUnwrap(
+            GraphRouter.nearestAccess(graph: g, lat: you.lat, lon: you.lon, mode: .drive)
+        )
+        XCTAssertEqual(access.lat, 0, accuracy: 0.00005)
+        XCTAssertEqual(access.lon, 0, accuracy: 0.0002)
+        XCTAssertLessThan(access.metres, 40)
+    }
+
+    func testBrokenCoordinateIsOffGraph() {
+        let g = twoHopWalkOnly()
+        let nan = GraphPlan.line(
+            graph: g,
+            from: (lat: .nan, lon: 0),
+            to: (lat: 0, lon: 0.02),
+            mode: .walk
+        )
+        XCTAssertEqual(nan.chrome, GraphPlan.offGraph)
+        XCTAssertTrue(nan.coords.isEmpty)
+        let inf = GraphPlan.line(
+            graph: g,
+            from: (lat: 0, lon: 0),
+            to: (lat: .infinity, lon: 0.02),
+            mode: .drive
+        )
+        XCTAssertEqual(inf.chrome, GraphPlan.offGraph)
+    }
+
     func testRouteGraphLoadRejectsEmptyOrMissing() throws {
         XCTAssertNil(RouteGraph.load(from: nil))
         let empty = FileManager.default.temporaryDirectory.appendingPathComponent("empty-graph-\(UUID().uuidString).json")
@@ -639,6 +802,27 @@ final class RouterTests: XCTestCase {
             [(1, 2, 0), (2, 4, 0), (1, 3, 0), (3, 4, 0)]
         )
         XCTAssertEqual(GraphRouter.route(graph: unknown, from: 1, to: 4, mode: .drive)?.nodeIds, [1, 3, 4])
+    }
+
+    private func oneWayBlock() -> RouteGraph {
+        RouteGraph(
+            nodes: [
+                .init(id: 1, lon: 0, lat: 0),
+                .init(id: 2, lon: 0.01, lat: 0),
+                .init(id: 3, lon: 0, lat: 0.002),
+                .init(id: 4, lon: 0.01, lat: 0.002),
+            ],
+            edges: [
+                .init(a: 1, b: 2, m: 1100, walk: true, drive: true, roadClass: 6),
+                .init(a: 2, b: 1, m: 1100, walk: true, drive: false),
+                .init(a: 1, b: 3, m: 220, walk: true, drive: true, roadClass: 6),
+                .init(a: 3, b: 1, m: 220, walk: true, drive: true, roadClass: 6),
+                .init(a: 3, b: 4, m: 1100, walk: true, drive: true, roadClass: 6),
+                .init(a: 4, b: 3, m: 1100, walk: true, drive: true, roadClass: 6),
+                .init(a: 4, b: 2, m: 220, walk: true, drive: true, roadClass: 6),
+                .init(a: 2, b: 4, m: 220, walk: true, drive: true, roadClass: 6),
+            ]
+        )
     }
 
     private func twoHopWalkOnly() -> RouteGraph {
