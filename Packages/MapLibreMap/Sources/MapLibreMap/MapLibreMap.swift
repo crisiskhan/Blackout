@@ -534,6 +534,10 @@ public enum PackGeometry {
             (south, west),
         ]
     }
+
+    public static func isFinite(south: Double, west: Double, north: Double, east: Double) -> Bool {
+        south.isFinite && west.isFinite && north.isFinite && east.isFinite
+    }
 }
 
 /// Self marker when MapLibre `showsUserLocation` has no GPS fix yet.
@@ -1592,6 +1596,12 @@ public enum PackStyle {
 }
 
 public enum OverlaySync: Sendable {
+    /// PACK switch assigns a new styleURL. Mutating the dying style
+    /// (remove outline, addLayer) is a use-after-free.
+    public static func shouldMutateMap(styleLoading: Bool) -> Bool {
+        !styleLoading
+    }
+
     /// Style mutation is add/remove of sources and layers. GPS ticks must
     /// not request it for YOU or party position — those move in place.
     public static func needsStyleMutation(

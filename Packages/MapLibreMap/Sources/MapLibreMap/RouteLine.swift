@@ -29,7 +29,7 @@ public enum RouteLine {
     }
 
     public static func shouldDraw(_ coords: [(lat: Double, lon: Double)]) -> Bool {
-        coords.count >= 2
+        coords.count >= 2 && coords.allSatisfy { $0.lat.isFinite && $0.lon.isFinite }
     }
 
     public static func needsReapply(

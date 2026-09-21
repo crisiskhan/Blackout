@@ -84,6 +84,9 @@ final class MapLibreMapTests: XCTestCase {
         let ring = PackGeometry.bboxRing(south: 30, west: -82, north: 31, east: -81)
         XCTAssertEqual(ring.count, 5)
         XCTAssertEqual(ring.first?.lat, ring.last?.lat)
+        XCTAssertTrue(PackGeometry.isFinite(south: 30, west: -82, north: 31, east: -81))
+        XCTAssertFalse(PackGeometry.isFinite(south: .nan, west: -82, north: 31, east: -81))
+        XCTAssertFalse(PackGeometry.isFinite(south: 30, west: .infinity, north: 31, east: -81))
     }
 
     func testUserPuckFallsBackToPackCenterWhenGPSMissing() {
@@ -606,6 +609,8 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(RouteLine.shouldDraw([(lat: 31.76, lon: -106.49), (lat: 31.80, lon: -106.50)]))
         XCTAssertFalse(RouteLine.shouldDraw([]))
         XCTAssertFalse(RouteLine.shouldDraw([(lat: 31.76, lon: -106.49)]))
+        XCTAssertFalse(RouteLine.shouldDraw([(lat: .nan, lon: -106.49), (lat: 31.80, lon: -106.50)]))
+        XCTAssertFalse(RouteLine.shouldDraw([(lat: 31.76, lon: .infinity), (lat: 31.80, lon: -106.50)]))
         XCTAssertTrue(
             RouteLine.needsReapply(
                 stored: [],
@@ -1045,6 +1050,8 @@ final class MapLibreMapTests: XCTestCase {
     }
 
     func testOverlaySyncSkipsStyleMutationWhenPuckAndRouteHold() {
+        XCTAssertTrue(OverlaySync.shouldMutateMap(styleLoading: false))
+        XCTAssertFalse(OverlaySync.shouldMutateMap(styleLoading: true))
         XCTAssertFalse(
             OverlaySync.needsStyleMutation(force: false, puckNeedsReapply: false, routeNeedsReapply: false)
         )

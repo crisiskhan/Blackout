@@ -286,6 +286,32 @@ class KeepMapMountedTests(unittest.TestCase):
         self.assertIn("HUDPage", read("Blackout", "ExpeditionTab.swift"))
 
 
+class MapCrashGuardTests(unittest.TestCase):
+    """PACK switch / WALK / LOCK-ON must not crash the mounted globe."""
+
+    def test_style_swap_and_bad_geometry_cannot_kill_the_map(self):
+        overlay = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift")
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        route = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift")
+        self.assertIn("func shouldMutateMap", overlay)
+        self.assertIn("func beginStyleLoad", offline)
+        self.assertIn("styleLoading", offline)
+        draw = route.split("func shouldDraw")[1].split("func needsReapply")[0]
+        self.assertIn("isFinite", draw)
+        self.assertIn("func isFinite", overlay)
+        insert = offline.split("func insertUnderMarks")[1].split("func paintRoute")[0]
+        self.assertIn("layer(withIdentifier: layer.identifier)", insert)
+        self.assertIn("return", insert)
+        update = offline.split("func updateUIView")[1].split("private func applyInteraction")[0]
+        self.assertIn("beginStyleLoad", update)
+        self.assertIn("shouldMutateMap", update)
+        finish = offline.split("didFinishLoading")[1].split("func mapView(")[0]
+        self.assertIn("styleLoading = false", finish)
+        self.assertIn("PackGeometry.isFinite", offline)
+
+
 class PageOpenCloseFadeTests(unittest.TestCase):
     """Pages open, close, and fade with HUD motion. No iOS sheet bounce."""
 
