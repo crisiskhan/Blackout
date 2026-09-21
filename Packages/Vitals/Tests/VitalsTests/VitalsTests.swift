@@ -47,9 +47,10 @@ final class VitalsTests: XCTestCase {
         )
         XCTAssertEqual(PartyVitals(water: 0.2, fatigue: 0.2, weatherExposure: 0.2).rails.count, 5)
         XCTAssertEqual(PartyVitals(water: 0.2, fatigue: 0.2, weatherExposure: 0.2).posRails.count, 6)
-        XCTAssertEqual(PartyVitals.stackYellowToOrange, 2)
-        XCTAssertEqual(PartyVitals.stackYellowToRed, 3)
+        XCTAssertEqual(PartyVitals.stackYellowToOrange, 3)
+        XCTAssertEqual(PartyVitals.stackYellowToRed, 5)
         XCTAssertEqual(PartyVitals.stackOrangeToRed, 2)
+        XCTAssertEqual(PartyVitals.stackOrangeAndYellowToRed, 2)
         XCTAssertEqual(PartyVitals.railSteps, [0, 0.2, 0.45, 0.65, 0.8, 1.0])
         XCTAssertEqual(PartyVitals.snap(0.1), 0.2)
         XCTAssertEqual(PartyVitals.snap(0.625), 0.65)
@@ -84,7 +85,7 @@ final class VitalsTests: XCTestCase {
         )
     }
 
-    func testStackedYellowIsARedBody() {
+    func testStackedYellowIsAnHonestBody() {
         let twoYellow = PartyVitals(
             hunger: 0.45,
             thirst: 0.45,
@@ -93,7 +94,7 @@ final class VitalsTests: XCTestCase {
             fatigue: 0.2,
             weatherExposure: 0.2
         )
-        XCTAssertEqual(twoYellow.band, .orange)
+        XCTAssertEqual(twoYellow.band, .yellow)
         let threeYellow = PartyVitals(
             hunger: 0.45,
             thirst: 0.45,
@@ -102,7 +103,16 @@ final class VitalsTests: XCTestCase {
             fatigue: 0.2,
             weatherExposure: 0.2
         )
-        XCTAssertEqual(threeYellow.band, .red)
+        XCTAssertEqual(threeYellow.band, .orange)
+        let fourYellow = PartyVitals(
+            hunger: 0.45,
+            thirst: 0.45,
+            pain: 0.45,
+            water: 0.2,
+            fatigue: 0.45,
+            weatherExposure: 0.2
+        )
+        XCTAssertEqual(fourYellow.band, .orange)
         let everyYellow = PartyVitals(
             hunger: 0.45,
             thirst: 0.45,
@@ -138,7 +148,16 @@ final class VitalsTests: XCTestCase {
             fatigue: 0.2,
             weatherExposure: 0.2
         )
-        XCTAssertEqual(orangePlusYellow.band, .red)
+        XCTAssertEqual(orangePlusYellow.band, .orange)
+        let orangePlusTwoYellow = PartyVitals(
+            hunger: 0.65,
+            thirst: 0.45,
+            pain: 0.45,
+            water: 0.2,
+            fatigue: 0.2,
+            weatherExposure: 0.2
+        )
+        XCTAssertEqual(orangePlusTwoYellow.band, .red)
         XCTAssertEqual(PartyVitals.orangeLoad * PartyVitals.stackOrangeToRed, 4)
         let oneBlack = PartyVitals(
             hunger: 1.0,

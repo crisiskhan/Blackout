@@ -22,14 +22,16 @@ final class MapLibreMapTests: XCTestCase {
         let marks = [MapMark(id: "m1", lat: 31.76, lon: -106.49, label: "TX WEST")]
         MarkStore.save(marks, defaults: suite)
         let back = MarkStore.load(defaults: suite)
-        XCTAssertEqual(back, marks)
+        let planted = MapMark(id: "m1", lat: 31.76, lon: -106.49, label: "TX WEST", ink: "GREEN")
+        XCTAssertEqual(back, [planted])
         // A mark must come back off disk as the same mark. Deduping the reload
         // through MarkDrop.merging used to mint a fresh id on every launch.
+        // Empty disk ink takes the new-pin GREEN default so pins still read.
         XCTAssertEqual(back.first?.id, "m1")
         XCTAssertEqual(back.first?.name, "")
         XCTAssertEqual(back.first?.note, "")
         XCTAssertEqual(back.first?.emblem, PersonEmblem.fallback.rawValue)
-        XCTAssertEqual(back.first?.ink, "")
+        XCTAssertEqual(back.first?.ink, "GREEN")
         XCTAssertEqual(PlaceMark.body(marks[0]).ink, "GREEN")
         XCTAssertEqual(PlaceMark.parse(PlaceMark.canvasID("m1")), "m1")
         XCTAssertEqual(PlaceMark.setDest, "SET DEST")

@@ -1087,9 +1087,10 @@ YELLOW_AT = 0.45
 ORANGE_AT = 0.65
 RED_AT = 0.8
 BLACK_AT = 1.0
-STACK_YELLOW_TO_ORANGE = 2
-STACK_YELLOW_TO_RED = 3
+STACK_YELLOW_TO_ORANGE = 3
+STACK_YELLOW_TO_RED = 5
 STACK_ORANGE_TO_RED = 2
+STACK_ORANGE_AND_YELLOW_TO_RED = 2
 YELLOW_LOAD = 1
 ORANGE_LOAD = 2
 RED_LOAD = 3
@@ -1136,22 +1137,35 @@ def load_of(value: float) -> int:
 
 
 def band_from_rails(rails: tuple[float, ...], flags: tuple[str, ...] = ()) -> str:
-    """Mirror of PartyVitals.band(rails:flags:). BLACK is the SOS tick, not stacked RED."""
+    """Mirror of PartyVitals.band(rails:flags:). Worst rail, then at most one compounding bump."""
     if any(band_of(value) == "black" for value in rails):
         return "black"
     if "RED" in flags:
         return "red"
-    total = 0
+    yellow = 0
+    orange = 0
+    red = 0
     for value in rails:
-        piece = load_of(value)
-        if piece >= RED_LOAD:
-            return "red"
-        total += piece
-    if total >= STACK_YELLOW_TO_RED:
+        piece = band_of(value)
+        if piece == "red":
+            red += 1
+        elif piece == "orange":
+            orange += 1
+        elif piece == "yellow":
+            yellow += 1
+    if red >= 1:
         return "red"
-    if total >= STACK_YELLOW_TO_ORANGE:
+    if orange >= STACK_ORANGE_TO_RED:
+        return "red"
+    if orange >= 1 and yellow >= STACK_ORANGE_AND_YELLOW_TO_RED:
+        return "red"
+    if orange >= 1:
         return "orange"
-    if total:
+    if yellow >= STACK_YELLOW_TO_RED:
+        return "red"
+    if yellow >= STACK_YELLOW_TO_ORANGE:
+        return "orange"
+    if yellow >= 1:
         return "yellow"
     return "green"
 
@@ -1184,12 +1198,14 @@ class ExpeditionHUDTests(unittest.TestCase):
         self.assertEqual(load_of(1.0), 4)
         self.assertEqual(band_from_rails((0.2,) * 5), "green")
         self.assertEqual(band_from_rails((0.45, 0.2, 0.2, 0.2, 0.2)), "yellow")
-        self.assertEqual(band_from_rails((0.45, 0.45, 0.2, 0.2, 0.2)), "orange")
-        self.assertEqual(band_from_rails((0.45, 0.45, 0.45, 0.2, 0.2)), "red")
+        self.assertEqual(band_from_rails((0.45, 0.45, 0.2, 0.2, 0.2)), "yellow")
+        self.assertEqual(band_from_rails((0.45, 0.45, 0.45, 0.2, 0.2)), "orange")
+        self.assertEqual(band_from_rails((0.45, 0.45, 0.45, 0.45, 0.2)), "orange")
         self.assertEqual(band_from_rails((0.45,) * 5), "red")
         self.assertEqual(band_from_rails((0.65, 0.2, 0.2, 0.2, 0.2)), "orange")
         self.assertEqual(band_from_rails((0.65, 0.65, 0.2, 0.2, 0.2)), "red")
-        self.assertEqual(band_from_rails((0.65, 0.45, 0.2, 0.2, 0.2)), "red")
+        self.assertEqual(band_from_rails((0.65, 0.45, 0.2, 0.2, 0.2)), "orange")
+        self.assertEqual(band_from_rails((0.65, 0.45, 0.45, 0.2, 0.2)), "red")
         self.assertEqual(band_from_rails((0.2, 0.2, 0.2, 0.2, 0.8)), "red")
         self.assertEqual(band_from_rails((0.8, 0.8, 0.2, 0.2, 0.2)), "red")
         self.assertEqual(band_from_rails((0.2, 0.2, 0.2, 0.2, 1.0)), "black")
@@ -1247,11 +1263,13 @@ class ExpeditionHUDTests(unittest.TestCase):
         self.assertIn("stackYellowToOrange", vitals)
         self.assertIn("stackYellowToRed", vitals)
         self.assertIn("stackOrangeToRed", vitals)
+        self.assertIn("stackOrangeAndYellowToRed", vitals)
         self.assertIn("= 3", vitals)
         self.assertIn("func load(of", vitals)
         self.assertIn("band(rails:", vitals)
         self.assertIn("band(of:", vitals)
         self.assertNotIn("band(worst:", vitals)
+        self.assertNotIn("total += piece", vitals)
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("`HUNGER` / `THIRST` / `PAIN` / `FATIGUE` / `EXPOSURE`", qa)
         self.assertNotIn("`HUNGER` / `THIRST` / `PAIN` / `WATER`", qa)
@@ -1316,11 +1334,14 @@ class ExpeditionHUDTests(unittest.TestCase):
         self.assertIn("func partyAlertLine", emit_vitals)
         self.assertIn("stackYellowToRed", emit_vitals)
         self.assertIn("stackYellowToOrange", emit_vitals)
+        self.assertIn("stackOrangeAndYellowToRed", emit_vitals)
         self.assertIn("orangeAt", emit_vitals)
         self.assertIn("band(rails:", emit_vitals)
         self.assertIn("func load(of", emit_vitals)
-        self.assertIn("twoYellow.band, .orange", emit_vitals)
-        self.assertNotIn("twoYellow.band, .yellow", emit_vitals)
+        self.assertIn("twoYellow.band, .yellow", emit_vitals)
+        self.assertNotIn("twoYellow.band, .orange", emit_vitals)
+        self.assertIn("threeYellow.band, .orange", emit_vitals)
+        self.assertNotIn("threeYellow.band, .red", emit_vitals)
 
     def test_page_sections_and_red_plate(self):
         exped = read("Blackout", "ExpeditionTab.swift")
