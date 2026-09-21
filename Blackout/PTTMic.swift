@@ -42,7 +42,7 @@ final class PTTMic {
 
     /// Wired PTT is remembered across category changes. setCategory in
     /// beginRecorder would otherwise drop the preferred input.
-    private var wantWiredPTT = false
+    private var wantWiredPTT = true
 
     func preferWiredPTT(_ on: Bool) {
         wantWiredPTT = on

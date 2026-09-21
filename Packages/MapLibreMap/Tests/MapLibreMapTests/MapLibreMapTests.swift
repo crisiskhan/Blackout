@@ -485,6 +485,44 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(marks[0].name, "CACHE 2")
         XCTAssertEqual(marks[0].note, "dry")
         XCTAssertEqual(marks[0].emblem, "owl")
+        let colored = MapMark(
+            id: keptID,
+            lat: 31.8705,
+            lon: -106.5973,
+            label: PackChrome.offPack,
+            name: "WATER",
+            note: "cistern",
+            emblem: "owl",
+            kind: "",
+            ink: MarkInk.blue.rawValue
+        )
+        marks = MarkDrop.upsert(marks, mark: colored)
+        XCTAssertEqual(marks[0].ink, "BLUE")
+        XCTAssertEqual(marks[0].kind, "")
+        let leftover = MapMark(
+            id: keptID,
+            lat: 31.8705,
+            lon: -106.5973,
+            label: PackChrome.offPack,
+            name: "WATER",
+            kind: EyeDesk.MarkKind.water.rawValue,
+            ink: MarkInk.blue.rawValue
+        )
+        marks = [leftover]
+        marks = MarkDrop.upsert(
+            marks,
+            mark: MapMark(
+                id: keptID,
+                lat: 31.8705,
+                lon: -106.5973,
+                label: PackChrome.offPack,
+                name: "WATER",
+                kind: "",
+                ink: MarkInk.blue.rawValue
+            )
+        )
+        XCTAssertEqual(marks[0].kind, "")
+        XCTAssertEqual(marks[0].ink, "BLUE")
         XCTAssertEqual(MarkDrop.rounded(31.87054), 31.8705)
         XCTAssertTrue(MarkDrop.sameCoord((31.87054, -106.59731), (31.8705, -106.5973)))
     }
@@ -1327,7 +1365,7 @@ final class MapLibreMapTests: XCTestCase {
                 kind: EyeDesk.MarkKind.water.rawValue
             )
         )
-        XCTAssertEqual(water.markKind, "WATER")
+        XCTAssertEqual(water.markKind, "")
         XCTAssertFalse(water.kid)
         let lost = PlaceMark.body(
             MapMark(
@@ -1339,8 +1377,8 @@ final class MapLibreMapTests: XCTestCase {
                 kind: EyeDesk.MarkKind.lostKid.rawValue
             )
         )
-        XCTAssertTrue(lost.kid)
-        XCTAssertEqual(lost.markKind, "LOST KID")
+        XCTAssertFalse(lost.kid)
+        XCTAssertEqual(lost.markKind, "")
     }
 
     func testMarkInkIsChosenLampNotAPresetKind() {
@@ -1368,7 +1406,19 @@ final class MapLibreMapTests: XCTestCase {
         )
         MarkStore.save([planted], defaults: suite)
         XCTAssertEqual(MarkStore.load(defaults: suite).first?.ink, "BLUE")
+        XCTAssertEqual(MarkStore.load(defaults: suite).first?.kind, "")
         XCTAssertEqual(PlaceMark.body(planted).ink, "BLUE")
+        let down = MapMark(
+            id: "down",
+            lat: 31.76,
+            lon: -106.49,
+            label: "DOWN",
+            kind: EyeDesk.MarkKind.down.rawValue
+        )
+        MarkStore.save([down], defaults: suite)
+        let revived = MarkStore.load(defaults: suite)
+        XCTAssertEqual(revived.first?.kind, "")
+        XCTAssertEqual(revived.first?.ink, "RED")
         XCTAssertEqual(
             PlaceMark.body(
                 MapMark(id: "d", lat: 31.76, lon: -106.49, label: "DOWN", kind: "DOWN")

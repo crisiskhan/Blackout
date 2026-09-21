@@ -117,8 +117,6 @@ final class AppRuntime {
     var speechChrome = ""
     /// Mic deny on CALL. Empty unless the last arm failed.
     var commsChrome = ""
-    /// USB-C PTT with no cable. Empty unless the last tap said why not.
-    var instrumentChrome = ""
     /// Last 15s CLIP PCM. PLAY replays it. Empty until a clip records.
     var lastClipPCM: Data?
     /// NOTE field should open after MESSAGE from a profile glass.
@@ -256,6 +254,7 @@ final class AppRuntime {
         guard bootReady else { return }
         armed = true
         fix.arm()
+        PTTMic.shared.preferWiredPTT(true)
         box.log("arming", "activated")
         applyMapKeepAwake()
         listenNet()
@@ -563,7 +562,6 @@ final class AppRuntime {
         let existing = marks.first {
             $0.id == draft.existingID || MarkDrop.sameCoord(($0.lat, $0.lon), (draft.lat, draft.lon))
         }
-        let kind = EyeDesk.MarkKind.parse(named == Inspect.unnamed ? "" : named)?.rawValue ?? ""
         let mark = MapMark(
             id: existing?.id ?? draft.existingID ?? UUID().uuidString,
             lat: draft.lat,
@@ -573,8 +571,8 @@ final class AppRuntime {
             note: note,
             emblem: emblem,
             from: mesh.localID,
-            kind: kind,
-            ink: MarkInk.resolved(ink: draft.ink, kind: kind).rawValue
+            kind: "",
+            ink: MarkInk.resolved(ink: draft.ink, kind: "").rawValue
         )
         marks = MarkDrop.upsert(marks, mark: mark)
         MarkStore.save(marks)
@@ -1281,18 +1279,6 @@ final class AppRuntime {
         fix.requestHeadingCalibration()
     }
 
-    func attachUSB_C_PTT(_ present: Bool) {
-        if present && !PTTMic.shared.hasWiredInput {
-            instrumentChrome = "NO CABLE"
-            instruments.attachUSB_C_PTT(false)
-            PTTMic.shared.preferWiredPTT(false)
-            return
-        }
-        instrumentChrome = ""
-        instruments.attachUSB_C_PTT(present)
-        PTTMic.shared.preferWiredPTT(present)
-    }
-
     func attachGNSSPuck(_ present: Bool) {
         instruments.attachGNSSPuck(present)
         fix.arm()
@@ -1812,7 +1798,6 @@ final class AppRuntime {
                     packName: pack?.name ?? "mark",
                     bbox: bbox
                 )
-                let kind = EyeDesk.MarkKind.parse(parsed.name)?.rawValue ?? ""
                 let mark = MapMark(
                     id: parsed.id.isEmpty ? UUID().uuidString : parsed.id,
                     lat: parsed.lat,
@@ -1822,8 +1807,8 @@ final class AppRuntime {
                     note: parsed.note,
                     emblem: PersonEmblem.resolved(parsed.emblem).rawValue,
                     from: env.from,
-                    kind: kind,
-                    ink: MarkInk.resolved(ink: parsed.ink, kind: kind).rawValue
+                    kind: "",
+                    ink: MarkInk.resolved(ink: parsed.ink, kind: "").rawValue
                 )
                 marks = MarkDrop.upsert(marks, mark: mark)
                 MarkStore.save(marks)
@@ -2237,7 +2222,8 @@ final class AppRuntime {
                 note: m.note,
                 emblem: m.emblem,
                 from: m.from,
-                kind: m.kind
+                kind: "",
+                ink: m.ink
             )
         }
         MarkStore.save(marks)
