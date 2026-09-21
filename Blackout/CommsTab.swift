@@ -188,6 +188,8 @@ struct CommsTab: View {
                 pttPad
                 Button(runtime.clipLive ? "RECORDING" : "15s CLIP") { runtime.captureClip() }
                     .buttonStyle(HUDDockStyle())
+                Button("PLAY") { runtime.playLastClip() }
+                    .buttonStyle(HUDDockStyle())
             }
             .background(Theme.glass())
             .clipShape(Theme.plateRect())

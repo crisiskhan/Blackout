@@ -117,6 +117,10 @@ final class AppRuntime {
     var speechChrome = ""
     /// Mic deny on CALL. Empty unless the last arm failed.
     var commsChrome = ""
+    /// USB-C PTT with no cable. Empty unless the last tap said why not.
+    var instrumentChrome = ""
+    /// Last 15s CLIP PCM. PLAY replays it. Empty until a clip records.
+    var lastClipPCM: Data?
     /// NOTE field should open after MESSAGE from a profile glass.
     var pendingNoteFocus = false
     /// One live inbound CALL or MESSAGE. Newest replaces.
@@ -1278,6 +1282,13 @@ final class AppRuntime {
     }
 
     func attachUSB_C_PTT(_ present: Bool) {
+        if present && !PTTMic.shared.hasWiredInput {
+            instrumentChrome = "NO CABLE"
+            instruments.attachUSB_C_PTT(false)
+            PTTMic.shared.preferWiredPTT(false)
+            return
+        }
+        instrumentChrome = ""
         instruments.attachUSB_C_PTT(present)
         PTTMic.shared.preferWiredPTT(present)
     }
@@ -1704,9 +1715,23 @@ final class AppRuntime {
             commsChrome = "CLIP EMPTY"
             return
         }
+        lastClipPCM = pcm
         if let opus = ptt.last?.opus {
             mesh.sendVoice(from: mesh.localID, opus: opus, to: meshDest)
         }
+        if mesh.nearby.isEmpty {
+            commsChrome = "NO PEERS · LOGGED"
+        }
+    }
+
+    func playLastClip() {
+        if clipLive || ptt.live { return }
+        guard let pcm = lastClipPCM, !pcm.isEmpty else {
+            commsChrome = "CLIP EMPTY"
+            return
+        }
+        commsChrome = ""
+        PTTMic.shared.play(pcm)
     }
 
     func visionBook() -> VisionBook? {

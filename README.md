@@ -2,7 +2,7 @@
 
 Offline-first field vessel for iPhone and iPad. Native SwiftUI, iOS 18 Universal, bundle ID `com.crisiskhan.blackout`.
 
-This tree is a **dump-and-replace** of the MapKit-era foundation. It implements BLACKOUT BUILD BIBLE v3: isolated Swift packages for every §3 module, generated §4 Field / Vision / map packs (TX and NM only), MapLibre Metal offline, graph router (Valhalla costing keys + OSM graph), party mesh + DTN, Field stepper, Vision guess pipeline, Watch companion, Live Activity, Action Button / Control Center.
+This tree is a **dump-and-replace** of the MapKit-era foundation. It implements BLACKOUT BUILD BIBLE v3: isolated Swift packages for every §3 module, generated §4 Field / Vision / map packs (TX and NM only), MapLibre Metal offline, graph router (Valhalla costing keys + OSM graph), party mesh + DTN, Field stepper, Vision guess pipeline. Watch, Live Activity, and Action Button / Control Center targets exist for later — they are not on the scoring phone.
 
 There is **no account, no analytics, no live weather, no sat modem, no nationwide tiles outside TX and NM**.
 
@@ -25,23 +25,23 @@ With a packed bbox on device and Airplane Mode on:
 - Send RED and cancel RED.
 - Run a 2 h water timer (OVERDUE plate is not SOS).
 - Walk a Field stepper with pictures, SPEAK, SEND TO PARTY, Español.
-- Point Vision at a plant: percent + lookalikes. Fungi default LEAVE IT. Never edible unlock.
+- Point Vision at a plant: pack-book name or UNKNOWN. Fungi default LEAVE IT. Never edible unlock. No percent.
 - Switch TX WEST → NM pack. A pack for a state we ship no map for can never become active.
-- Export paper.
+- Share paper from EXPEDITION (Files / copy / print). The dump also stays on the glass.
 
 ## Architecture
 
 ```
 Blackout app          ARMING, four tabs, contextual SOS, I AM OK
-BlackoutWatch         lock-on, SOS, I AM OK, last pip, subject timer
-BlackoutWidgets       Live Activity + Control Center CALL SOS
+BlackoutWatch         target exists; omitted from Internal IPA
+BlackoutWidgets       Live Activity shell; Control Center App Intents omitted
         │
         └── Packages/  isolated Swift modules (see PR checklist)
         └── Vendor/    MapLibre XCFramework, Opus 1.5.2, Valhalla-or-graph note
         └── Resources/ Packs, Field, Vision, Español table
 ```
 
-SOS is 56 pt, hold 800 ms. It sits on Comms, Live Activity, Action Button, and Control Center — not on browse MAP (lock-on on or off), Field, or ARMING. It offers system Emergency SOS and does **not** replace 911.
+SOS is 56 pt, hold 800 ms. It sits on Comms — not on browse MAP (lock-on on or off), Field, or ARMING. It never auto-dials.
 
 ## Packs
 

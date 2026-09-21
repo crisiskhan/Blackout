@@ -151,14 +151,6 @@ struct FieldTab: View {
                                 .font(.system(size: 18, weight: .heavy))
                                 .foregroundStyle(Theme.accent)
                         }
-                        if !g.leaveIt {
-                            ForEach(Array(g.lookalikes.enumerated()), id: \.offset) { _, word in
-                                Text(word)
-                                    .font(.system(size: 13, weight: .heavy))
-                                    .foregroundStyle(Theme.silver)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
                     }
                 }
             }

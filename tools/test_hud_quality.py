@@ -305,7 +305,7 @@ class PageOpenCloseFadeTests(unittest.TestCase):
         inst_line = next(
             line
             for line in qa.splitlines()
-            if "COMPASS CAL" in line and "GNSS PUCK" in line
+            if "COMPASS CAL" in line and "USB-C PTT" in line
         )
         self.assertIn("fade", inst_line.lower())
         self.assertIn("no bounce", inst_line.lower())
@@ -1334,7 +1334,8 @@ class ExpeditionHUDTests(unittest.TestCase):
         self.assertNotIn('Button("APPLY RED BAND")', exped)
         self.assertNotIn('sectionLabel("RED")', exped)
         self.assertIn("cancelSelfRed", exped)
-        self.assertIn('Button("JOIN NAV")', exped)
+        self.assertNotIn('Button("JOIN NAV")', exped)
+        self.assertIn("runtime.cycleSeat", exped)
         self.assertIn('Button("EXPORT PAPER")', exped)
         for section in ("CONDITION", "ROSTER", "TIMERS", "PAPER"):
             self.assertIn(f'sectionLabel("{section}")', exped, section)
@@ -2096,6 +2097,7 @@ class VisionInstrumentTests(unittest.TestCase):
         self.assertIn('L10n.t("vision.leave"', field)
         self.assertNotIn("VISION ADD FRAME", field)
         self.assertNotIn("g.percent", field)
+        self.assertNotIn("g.lookalikes", field)
         self.assertNotIn("edible=", field)
         self.assertNotIn("honesty", field)
         self.assertIn("classify(observations:", vis)
@@ -2247,6 +2249,7 @@ class VisionInstrumentTests(unittest.TestCase):
         self.assertIn("LEAVE IT", qa)
         self.assertIn("NO VISION MODEL", qa)
         self.assertIn("No percent", qa)
+        self.assertIn("No lookalikes", qa)
         self.assertIn("VISION speaks the name", qa)
         self.assertIn("scorpion still is bite", qa)
         self.assertIn("lake still is water", qa)
@@ -2280,12 +2283,12 @@ class HonestyOnTheGlassTests(unittest.TestCase):
 
     def test_field_empty_and_join_nav_say_why(self):
         field = read("Blackout", "FieldTab.swift")
-        exped = read("Blackout", "ExpeditionTab.swift")
+        app = read("Blackout", "AppRuntime.swift")
         mesh = read("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift")
         still = read("Blackout", "VisionStill.swift")
         self.assertIn("FIELD BOOK · NONE", field)
         self.assertIn("guess = nil", field)
-        self.assertIn("NAV · SEATED", exped)
+        self.assertIn(" · SEATED", app)
         self.assertIn("func clearInboundChip", mesh)
         self.assertIn("greaterThanOrEqualToConstant: 44", still)
 
@@ -2301,7 +2304,6 @@ class HonestyOnTheGlassTests(unittest.TestCase):
             "COMPASS CAL",
             "TRUE NORTH",
             "USB-C PTT",
-            "GNSS PUCK",
         ):
             self.assertIn(stamp, inst, stamp)
         self.assertIn('sectionLabel("VOICE")', inst)
@@ -2420,7 +2422,7 @@ def roster_seated_chrome(role: str) -> str:
 
 
 class LiveRosterOnTheGlassTests(unittest.TestCase):
-    """The roster is the live party. One person is one row. JOIN NAV seats YOU."""
+    """The roster is the live party. One person is one row. ROLE cycles seats."""
 
     def test_live_you_is_first_even_solo_and_peers_are_guests(self):
         planted = [{"id": "lead", "name": "Lead", "role": "lead"}]
@@ -2481,14 +2483,15 @@ class LiveRosterOnTheGlassTests(unittest.TestCase):
             "Packages", "RosterRoles", "Tests", "RosterRolesTests", "RosterRolesTests.swift"
         )
         qa = read("docs", "SOLO_QA.md")
-        self.assertIn('Button("JOIN NAV")', exped)
-        self.assertIn("NAV · SEATED", exped)
+        self.assertNotIn('Button("JOIN NAV")', exped)
+        self.assertIn(" · SEATED", app)
         self.assertNotIn('joining("Nav"', exped)
         self.assertNotIn("m.role.rawValue", exped)
         self.assertIn("runtime.liveRoster", exped)
         self.assertIn("row.role.title", exped)
         self.assertIn("row.statusTitle", exped)
-        self.assertIn("runtime.seatNav()", exped)
+        self.assertIn("runtime.cycleSeat", exped)
+        self.assertIn("func seatNav()", app)
         row = exped.split("private func rosterRow")[1].split("private func rosterFace")[0]
         self.assertIn("mapChipHitPoints", row)
         face = exped.split("private func rosterFace")[1].split("private func rosterStatusInk")[0]
@@ -2530,7 +2533,7 @@ class LiveRosterOnTheGlassTests(unittest.TestCase):
         self.assertNotIn('"lead A"', paper_tests)
         self.assertIn("func testLiveYouIsFirstEvenSolo", roster_tests)
         self.assertIn("func testSeatingNavIsStickyAndUnique", roster_tests)
-        self.assertIn("JOIN NAV seats YOU as NAV", qa)
+        self.assertIn("ROLE chip cycles", qa)
         self.assertIn("YOU is the first row", qa)
         self.assertIn("NAME, FACE, ROLE, STATUS", qa)
         self.assertIn("One person is one row", qa)
@@ -3699,7 +3702,9 @@ class InstrumentNorthAndBodyTests(unittest.TestCase):
         self.assertIn("LAMP · NONE", inst)
         self.assertIn("runtime.calibrateCompass()", inst)
         self.assertIn("runtime.attachUSB_C_PTT", inst)
-        self.assertIn("runtime.attachGNSSPuck", inst)
+        self.assertNotIn("runtime.attachGNSSPuck", inst)
+        self.assertNotIn("GNSS PUCK", inst)
+        self.assertIn("instrumentChrome", inst)
         self.assertIn("import Observation", board)
         self.assertIn("@Observable", board)
         auction = read(
@@ -3769,7 +3774,7 @@ class InstrumentNorthAndBodyTests(unittest.TestCase):
         inst_line = next(
             line
             for line in qa.splitlines()
-            if "COMPASS CAL" in line and "GNSS PUCK" in line
+            if "COMPASS CAL" in line and "USB-C PTT" in line
         )
         self.assertIn("RULER —", inst_line)
         self.assertIn("USNG —", inst_line)
@@ -4035,7 +4040,7 @@ class AddressHoldCardTests(unittest.TestCase):
         comms = read("Blackout", "CommsTab.swift")
         self.assertNotIn("ForEach(runtime.mesh.nearby, id: \\.self)", comms)
         field = read("Blackout", "FieldTab.swift")
-        self.assertNotIn("ForEach(g.lookalikes, id: \\.self)", field)
+        self.assertNotIn("g.lookalikes", field)
 
     def test_solo_qa_scores_address_search(self):
         qa = read("docs", "SOLO_QA.md")
@@ -4957,7 +4962,7 @@ class MapHoldScrollAndPlateRailTests(unittest.TestCase):
         inst_line = next(
             line
             for line in qa.splitlines()
-            if "COMPASS CAL" in line and "GNSS PUCK" in line
+            if "COMPASS CAL" in line and "USB-C PTT" in line
         )
         self.assertIn("plate rail", inst_line.lower())
         hold_line = next(
@@ -5021,6 +5026,80 @@ class MeshNearHUDTests(unittest.TestCase):
         self.assertIn("SCAN or JOIN LOCAL NET", qa)
         self.assertIn("SCAN — NO FIX", qa)
         self.assertIn("WALK — NO PLACE", qa)
+
+
+class DeadGlassGoneTests(unittest.TestCase):
+    """Theater that looked live is gone. A tap draws, or it says why not."""
+
+    def test_power_is_pocket_not_an_auction(self):
+        inst = read("Blackout", "InstrumentsView.swift")
+        power = inst.split("private var powerPlate")[1].split("private var lampWord")[0]
+        self.assertIn("POCKET", power)
+        self.assertNotIn("PowerMode.allCases", power)
+        self.assertNotIn("SPARE", power)
+        self.assertNotIn("powerBankWh", power)
+        self.assertNotIn("runtime.power.set(", power)
+        qa = read("docs", "SOLO_QA.md")
+        inst_line = next(
+            line
+            for line in qa.splitlines()
+            if "COMPASS CAL" in line and "USB-C PTT" in line
+        )
+        self.assertNotIn("Auction is QUIET", inst_line)
+        self.assertNotIn("GNSS PUCK", inst_line)
+        self.assertIn("NO CABLE", inst_line)
+        self.assertIn("POCKET", inst_line)
+
+    def test_usb_c_says_no_cable_and_puck_is_off_the_glass(self):
+        inst = read("Blackout", "InstrumentsView.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        mic = read("Blackout", "PTTMic.swift")
+        self.assertIn("USB-C PTT", inst)
+        self.assertNotIn("GNSS PUCK", inst)
+        self.assertIn("instrumentChrome", inst)
+        self.assertIn("hasWiredInput", mic)
+        usb = app.split("func attachUSB_C_PTT(")[1].split("func ", 1)[0]
+        self.assertIn("hasWiredInput", usb)
+        self.assertIn("NO CABLE", usb)
+
+    def test_clip_plays_and_solo_does_not_claim_sent(self):
+        comms = read("Blackout", "CommsTab.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        call = comms.split("private var callPlate")[1].split("private var notePlate")[0]
+        self.assertIn('Button("PLAY")', call)
+        self.assertIn("playLastClip", call)
+        self.assertIn("var lastClipPCM", app)
+        self.assertIn("func playLastClip(", app)
+        finish = app.split("private func finishClip()")[1].split("func ", 1)[0]
+        self.assertIn("lastClipPCM", finish)
+        self.assertIn("NO PEERS · LOGGED", finish)
+        play = app.split("func playLastClip(")[1].split("func ", 1)[0]
+        self.assertIn("PTTMic.shared.play", play)
+        self.assertIn("CLIP EMPTY", play)
+        qa = read("docs", "SOLO_QA.md")
+        clip_line = next(line for line in qa.splitlines() if "15s CLIP" in line)
+        self.assertIn("PLAY", clip_line)
+        self.assertIn("NO PEERS · LOGGED", clip_line)
+
+    def test_paper_shares_and_join_nav_is_gone(self):
+        exped = read("Blackout", "ExpeditionTab.swift")
+        self.assertIn('Button("EXPORT PAPER")', exped)
+        self.assertIn("UIActivityViewController", exped)
+        self.assertIn("PaperShare.present", exped)
+        self.assertNotIn('Button("JOIN NAV")', exped)
+        qa = read("docs", "SOLO_QA.md")
+        roster = next(line for line in qa.splitlines() if "ROLE chip cycles" in line)
+        self.assertIn("NAV · SEATED", roster)
+        self.assertIn("share", roster.lower())
+        self.assertNotIn("JOIN NAV seats YOU", qa)
+
+    def test_vision_glass_does_not_print_lookalikes(self):
+        field = read("Blackout", "FieldTab.swift")
+        self.assertNotIn("g.lookalikes", field)
+        self.assertNotIn("lookalikeWord", field)
+        readme = read("README.md")
+        self.assertNotIn("percent + lookalikes", readme)
+        self.assertNotIn("Watch companion, Live Activity, Action Button", readme)
 
 
 if __name__ == "__main__":
