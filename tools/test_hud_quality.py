@@ -4079,6 +4079,8 @@ class AddressHoldCardTests(unittest.TestCase):
         self.assertIn("shouldSkipApply", apply)
         self.assertIn("boundsSizeChanged", apply)
         self.assertIn("lastBoundsSize", apply)
+        spec = apply.split("struct OverlaySpec")[1].split("var spec:")[0]
+        self.assertIn("static func ==", spec)
 
     def test_hold_address_refuses_a_broken_coordinate(self):
         app = read("Blackout", "AppRuntime.swift")
