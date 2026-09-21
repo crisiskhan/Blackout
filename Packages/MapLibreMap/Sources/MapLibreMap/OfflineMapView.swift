@@ -228,6 +228,7 @@ public struct OfflineMapView: UIViewRepresentable {
 
     public func updateUIView(_ uiView: MLNMapView, context: Context) {
         if uiView.styleURL != styleURL {
+            context.coordinator.beginStyleLoad()
             uiView.styleURL = styleURL
         }
         uiView.shouldRequestAuthorizationToUseLocationServices = trackUser
@@ -244,7 +245,11 @@ public struct OfflineMapView: UIViewRepresentable {
         context.coordinator.onPulse = onPulse
         context.coordinator.trackUser = trackUser
         context.coordinator.interactive = interactive
-        context.coordinator.apply(overlaySpec, on: uiView, force: false)
+        if OverlaySync.shouldMutateMap(styleLoading: context.coordinator.styleLoading) {
+            context.coordinator.apply(overlaySpec, on: uiView, force: false)
+        } else {
+            context.coordinator.spec = overlaySpec
+        }
     }
 
     private func applyInteraction(_ view: MLNMapView) {
@@ -387,6 +392,38 @@ public struct OfflineMapView: UIViewRepresentable {
         var paintedHeading: Double?
         var paintedPipKey: String?
         var storedCams: [CctvMark]?
+        var styleLoading = false
+
+        func beginStyleLoad() {
+            styleLoading = true
+            packOutline = nil
+            routeLine = nil
+            puck = nil
+            partyMarks = []
+            storedPack = nil
+            storedPuck = nil
+            storedRoute = nil
+            storedDestination = nil
+            storedHeld = nil
+            storedPips = nil
+            fittedPack = nil
+            fittedSize = nil
+            fittedFitToken = 0
+            storedLockOn = false
+            storedGodsEye = false
+            followedPuck = nil
+            storedShowYou = false
+            storedMode = nil
+            storedSun = false
+            storedPalette = nil
+            storedEyeLayers = nil
+            paintedShowYou = false
+            paintedEmblem = nil
+            paintedCondition = nil
+            paintedHeading = nil
+            paintedPipKey = nil
+            storedCams = nil
+        }
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             guard interactive, gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
@@ -750,15 +787,24 @@ public struct OfflineMapView: UIViewRepresentable {
                         view.removeAnnotation(old)
                     }
 
-                    var ring = PackGeometry.bboxRing(
+                    if PackGeometry.isFinite(
                         south: spec.packSouth,
                         west: spec.packWest,
                         north: spec.packNorth,
                         east: spec.packEast
-                    ).map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
-                    let outline = MLNPolyline(coordinates: &ring, count: UInt(ring.count))
-                    view.add(outline)
-                    packOutline = outline
+                    ) {
+                        var ring = PackGeometry.bboxRing(
+                            south: spec.packSouth,
+                            west: spec.packWest,
+                            north: spec.packNorth,
+                            east: spec.packEast
+                        ).map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
+                        let outline = MLNPolyline(coordinates: &ring, count: UInt(ring.count))
+                        view.add(outline)
+                        packOutline = outline
+                    } else {
+                        packOutline = nil
+                    }
 
                     if spec.showYou {
                         let you = PersonMarkAnnotation()
@@ -1130,6 +1176,7 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         func applyCamera(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
+            guard OverlaySync.shouldMutateMap(styleLoading: styleLoading) else { return }
             guard view.bounds.width > 1, view.bounds.height > 1 else { return }
             defer {
                 if spec.overview {
@@ -1345,6 +1392,12 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         func fitOverview(_ spec: OverlaySpec, on view: MLNMapView) {
+            guard PackGeometry.isFinite(
+                south: spec.packSouth,
+                west: spec.packWest,
+                north: spec.packNorth,
+                east: spec.packEast
+            ) else { return }
             let packBox = PackCamera.bounds(
                 south: spec.packSouth,
                 west: spec.packWest,
@@ -1374,6 +1427,12 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         func fitPack(_ spec: OverlaySpec, on view: MLNMapView, fly _: Bool) {
+            guard PackGeometry.isFinite(
+                south: spec.packSouth,
+                west: spec.packWest,
+                north: spec.packNorth,
+                east: spec.packEast
+            ) else { return }
             if spec.overview {
                 fitOverview(spec, on: view)
                 return
@@ -1409,6 +1468,7 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         func fitRoute(_ spec: OverlaySpec, on view: MLNMapView) {
+            guard RouteLine.shouldDraw(spec.route) else { return }
             let lats = spec.route.map(\.lat)
             let lons = spec.route.map(\.lon)
             guard var south = lats.min(), var north = lats.max(),
@@ -1437,24 +1497,31 @@ public struct OfflineMapView: UIViewRepresentable {
 
         func syncStyleOverlays(on view: MLNMapView, spec: OverlaySpec) {
             guard let style = view.style else { return }
-            var ring = PackGeometry.bboxRing(
+            if PackGeometry.isFinite(
                 south: spec.packSouth,
                 west: spec.packWest,
                 north: spec.packNorth,
                 east: spec.packEast
-            ).map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
-            let line = MLNPolyline(coordinates: &ring, count: UInt(ring.count))
-            if let src = style.source(withIdentifier: "pack-bbox-src") as? MLNShapeSource {
-                src.shape = line
-            } else {
-                let src = MLNShapeSource(identifier: "pack-bbox-src", shape: line, options: nil)
-                style.addSource(src)
-                let layer = MLNLineStyleLayer(identifier: "pack-bbox-line", source: src)
-                layer.lineColor = NSExpression(
-                    forConstantValue: PackStyle.inkColor(PackStyle.silverInk)
-                )
-                layer.lineWidth = NSExpression(forConstantValue: 3)
-                style.addLayer(layer)
+            ) {
+                var ring = PackGeometry.bboxRing(
+                    south: spec.packSouth,
+                    west: spec.packWest,
+                    north: spec.packNorth,
+                    east: spec.packEast
+                ).map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
+                let line = MLNPolyline(coordinates: &ring, count: UInt(ring.count))
+                if let src = style.source(withIdentifier: "pack-bbox-src") as? MLNShapeSource {
+                    src.shape = line
+                } else {
+                    let src = MLNShapeSource(identifier: "pack-bbox-src", shape: line, options: nil)
+                    style.addSource(src)
+                    let layer = MLNLineStyleLayer(identifier: "pack-bbox-line", source: src)
+                    layer.lineColor = NSExpression(
+                        forConstantValue: PackStyle.inkColor(PackStyle.silverInk)
+                    )
+                    layer.lineWidth = NSExpression(forConstantValue: 3)
+                    style.addLayer(layer)
+                }
             }
 
             let youShape: MLNShape
@@ -1609,6 +1676,7 @@ public struct OfflineMapView: UIViewRepresentable {
         /// Live lines stay under YOU, DEST, HOLD, party, and CCTV so a walk
         /// or a tail cannot cover the pin it is walking to.
         func insertUnderMarks(_ layer: MLNStyleLayer, on style: MLNStyle) {
+            if style.layer(withIdentifier: layer.identifier) != nil { return }
             let marks = [
                 DestinationPin.ringLayerID,
                 HoldPin.ringLayerID,
@@ -1736,6 +1804,7 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         public func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
+            styleLoading = false
             mapView.shouldRequestAuthorizationToUseLocationServices = trackUser
             mapView.showsUserLocation = trackUser
             fittedPack = nil
