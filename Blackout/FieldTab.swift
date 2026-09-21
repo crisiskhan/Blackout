@@ -152,6 +152,10 @@ struct FieldTab: View {
                             Text(L10n.t("vision.leave", runtime.locale))
                                 .font(.system(size: 18, weight: .heavy))
                                 .foregroundStyle(Theme.accent)
+                        } else if InspectField.visionPrepWarns(g.labelId) {
+                            Text(L10n.t("vision.warn", runtime.locale))
+                                .font(.system(size: 18, weight: .heavy))
+                                .foregroundStyle(Theme.accent)
                         }
                     }
                 }

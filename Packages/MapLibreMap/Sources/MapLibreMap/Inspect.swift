@@ -247,6 +247,11 @@ public enum Inspect {
     public static let shelterCard = "shelter-tarp"
     public static let fungiCard = "fungi-leave"
     public static let gameCard = "food-game"
+    public static let birdCard = "animal-bird"
+    public static let fishCard = "animal-fish"
+    public static let lizardCard = "animal-lizard"
+    public static let turtleCard = "animal-turtle"
+    public static let frogCard = "animal-frog"
 
     // State cards that describe one kind of ground exactly. Each is only in
     // the book of the state that wrote it, so each is a preference over a core

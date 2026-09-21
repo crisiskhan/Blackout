@@ -25,6 +25,7 @@ enum L10n {
         "net.none": ["en": "NET · NONE", "es": "RED · NINGUNA"],
         "vision.none": ["en": "NO VISION MODEL", "es": "SIN MODELO DE VISIÓN"],
         "vision.leave": ["en": "LEAVE IT", "es": "DÉJALO"],
+        "vision.warn": ["en": "WARNING", "es": "AVISO"],
         "scan.qr": ["en": "SCAN QR", "es": "ESCANEAR QR"],
         "net.nolog": ["en": "NO PEERS · LOGGED", "es": "SIN PARES · REGISTRADO"],
         "field.search": ["en": "SEARCH", "es": "BUSCAR"],

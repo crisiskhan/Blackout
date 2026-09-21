@@ -2711,6 +2711,11 @@ class HoldToInspect(unittest.TestCase):
         self.assertIn("cave-dark", ids)
         self.assertIn("food-game", ids)
         self.assertIn("animal-bite", ids)
+        self.assertIn("animal-bird", ids)
+        self.assertIn("animal-fish", ids)
+        self.assertIn("animal-lizard", ids)
+        self.assertIn("animal-turtle", ids)
+        self.assertIn("animal-frog", ids)
         field = FIELD_TAB.read_text()
         self.assertIn("runtime.fieldJump", field)
         self.assertIn("InspectField.presentRoute", field)
@@ -3173,6 +3178,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("prickly pear", tx_cactus_do)
         self.assertIn("yucca", tx_cactus_do)
         self.assertIn("glochids", tx_cactus_do)
+        self.assertGreaterEqual(len(tx_cactus_card["steps"]), 4)
+        self.assertIn("WARNING", json.dumps(tx_cactus_card))
+        self.assertIn("pads", json.dumps(tx_cactus_card).lower())
+        self.assertNotIn("edible", json.dumps(tx_cactus_card).lower())
         nm_cactus_card = next(
             c
             for c in json.loads((ROOT / "Resources/Field/field.nm.json").read_text())["cards"]
@@ -3184,6 +3193,8 @@ class GroundFieldSync(unittest.TestCase):
         nm_cactus_do = nm_cactus_card["steps"][0]["do"]["en"].lower()
         self.assertIn("cholla", nm_cactus_do)
         self.assertIn("sotol", nm_cactus_do)
+        self.assertIn("cholla is not food", json.dumps(nm_cactus_card).lower())
+        self.assertNotIn("edible", json.dumps(nm_cactus_card).lower())
         self.assertIn("This is range, not a pin", do)
         self.assertIn("tx-east", do)
         self.assertNotIn("ice and cold cards", do)
@@ -7283,7 +7294,19 @@ class GroundFieldSync(unittest.TestCase):
     def test_the_core_book_ships_the_biome_cards(self):
         book = json.loads((ROOT / "Resources/Field/field.core.json").read_text())
         ids = {card["id"] for card in book["cards"]}
-        for cid in ("plant-use", "cave-dark", "food-game", "plant-unknown", "animal-bite", "fungi-leave"):
+        for cid in (
+            "plant-use",
+            "cave-dark",
+            "food-game",
+            "plant-unknown",
+            "animal-bite",
+            "fungi-leave",
+            "animal-bird",
+            "animal-fish",
+            "animal-lizard",
+            "animal-turtle",
+            "animal-frog",
+        ):
             self.assertIn(cid, ids, cid)
         by_id = {card["id"]: card for card in book["cards"]}
         for cid in ("plant-use", "cave-dark", "food-game"):

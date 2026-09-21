@@ -3,6 +3,7 @@ import FieldCorpus
 import FieldSpeech
 import FieldStepper
 import Foundation
+import MapLibreMap
 import UIKit
 import VisionCoreML
 
@@ -203,6 +204,8 @@ extension AppRuntime {
             line = L10n.t("vision.none", locale)
         } else if g.leaveIt {
             line = "\(g.name). \(L10n.t("vision.leave", locale))"
+        } else if InspectField.visionPrepWarns(g.labelId) {
+            line = "\(g.name). \(L10n.t("vision.warn", locale))"
         } else {
             line = g.name
         }

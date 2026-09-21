@@ -72,6 +72,23 @@
       }
     },
     {
+      "id": "nm-ponderosa",
+      "name": {
+        "en": "Ponderosa pine",
+        "es": "Pino ponderosa"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "pinon-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. High country pine.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Pino de alta montaña."
+      }
+    },
+    {
       "id": "nm-cholla",
       "name": {
         "en": "Cholla",
@@ -84,8 +101,25 @@
       "leaveIt": false,
       "edibleUnlock": false,
       "honesty": {
-        "en": "Vision is a guess. Percent is not ID. Joints hitchhike on skin.",
-        "es": "Vision es una conjetura. El porcentaje no es identificación. Los segmentos se pegan a la piel."
+        "en": "Vision is a guess. Percent is not ID. Joints hitchhike on skin. Not food.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Los segmentos se pegan a la piel. No es comida."
+      }
+    },
+    {
+      "id": "nm-prickly-pear",
+      "name": {
+        "en": "Prickly pear",
+        "es": "Nopal"
+      },
+      "kind": "cactus",
+      "lookalikes": [
+        "cholla-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Spines and glochids. A guess is not a name.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Espinas. Una conjetura no es un nombre."
       }
     },
     {
@@ -118,8 +152,8 @@
       "leaveIt": false,
       "edibleUnlock": false,
       "honesty": {
-        "en": "Vision is a guess. Percent is not ID. Desert rosette.",
-        "es": "Vision es una conjetura. El porcentaje no es identificación. Roseta del desierto."
+        "en": "Vision is a guess. Percent is not ID. Desert rosette. Not a Field meal ticket.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Roseta del desierto. No es un ticket de Field."
       }
     },
     {
@@ -205,6 +239,329 @@
       "honesty": {
         "en": "Vision is a guess. Percent is not ID. Food storage, not photos.",
         "es": "Vision es una conjetura. El porcentaje no es identificación. Guarda comida, no fotos."
+      }
+    },
+    {
+      "id": "nm-coyote",
+      "name": {
+        "en": "Coyote",
+        "es": "Coyote"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "dog-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Wild canid. Do not feed.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Cánido silvestre. No alimentes."
+      }
+    },
+    {
+      "id": "nm-pronghorn",
+      "name": {
+        "en": "Pronghorn",
+        "es": "Berrendo"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "deer-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Dusk roads.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Carreteras al anochecer."
+      }
+    },
+    {
+      "id": "nm-jackrabbit",
+      "name": {
+        "en": "Jackrabbit",
+        "es": "Liebre"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "cottontail-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Dusk roads.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Carreteras al anochecer."
+      }
+    },
+    {
+      "id": "nm-squirrel",
+      "name": {
+        "en": "Squirrel",
+        "es": "Ardilla"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "rat-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Give space.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Da espacio."
+      }
+    },
+    {
+      "id": "nm-fox",
+      "name": {
+        "en": "Fox",
+        "es": "Zorro"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "coyote-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Do not feed.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. No alimentes."
+      }
+    },
+    {
+      "id": "nm-turkey",
+      "name": {
+        "en": "Turkey",
+        "es": "Pavo"
+      },
+      "kind": "bird",
+      "lookalikes": [
+        "vulture-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. A still is a guess. Already-have is the bird card.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Una foto es una conjetura. Si ya lo tienes, la tarjeta de ave."
+      }
+    },
+    {
+      "id": "nm-quail",
+      "name": {
+        "en": "Quail",
+        "es": "Codorniz"
+      },
+      "kind": "bird",
+      "lookalikes": [
+        "dove-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Give it the air.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Cede el aire."
+      }
+    },
+    {
+      "id": "nm-dove",
+      "name": {
+        "en": "Dove",
+        "es": "Paloma"
+      },
+      "kind": "bird",
+      "lookalikes": [
+        "pigeon-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Give it the air.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Cede el aire."
+      }
+    },
+    {
+      "id": "nm-roadrunner",
+      "name": {
+        "en": "Roadrunner",
+        "es": "Correcaminos"
+      },
+      "kind": "bird",
+      "lookalikes": [
+        "cuckoo-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Give it the air.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Cede el aire."
+      }
+    },
+    {
+      "id": "nm-hawk",
+      "name": {
+        "en": "Hawk",
+        "es": "Halcón"
+      },
+      "kind": "bird",
+      "lookalikes": [
+        "eagle-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Raptor. Leave it.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Rapaz. Déjalo."
+      }
+    },
+    {
+      "id": "nm-eagle",
+      "name": {
+        "en": "Eagle",
+        "es": "Águila"
+      },
+      "kind": "bird",
+      "lookalikes": [
+        "hawk-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Raptor. Leave it.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Rapaz. Déjalo."
+      }
+    },
+    {
+      "id": "nm-duck",
+      "name": {
+        "en": "Duck",
+        "es": "Pato"
+      },
+      "kind": "bird",
+      "lookalikes": [
+        "goose-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Water bird. Already-have is the bird card.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Ave de agua. Si ya lo tienes, la tarjeta de ave."
+      }
+    },
+    {
+      "id": "nm-raven",
+      "name": {
+        "en": "Raven",
+        "es": "Cuervo"
+      },
+      "kind": "bird",
+      "lookalikes": [
+        "crow-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Scavenger. Leave it.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Carroñero. Déjalo."
+      }
+    },
+    {
+      "id": "nm-trout",
+      "name": {
+        "en": "Trout",
+        "es": "Trucha"
+      },
+      "kind": "fish",
+      "lookalikes": [
+        "whitefish-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Already-have is the fish card.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Si ya lo tienes, la tarjeta de pez."
+      }
+    },
+    {
+      "id": "nm-catfish",
+      "name": {
+        "en": "Catfish",
+        "es": "Bagre"
+      },
+      "kind": "fish",
+      "lookalikes": [
+        "bullhead-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Skin it. Cook through.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Pélalo. Cocina completo."
+      }
+    },
+    {
+      "id": "nm-gila",
+      "name": {
+        "en": "Gila monster",
+        "es": "Monstruo de Gila"
+      },
+      "kind": "lizard",
+      "lookalikes": [
+        "skink-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Venomous. Leave it.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Venenoso. Déjalo."
+      }
+    },
+    {
+      "id": "nm-horned-lizard",
+      "name": {
+        "en": "Horned lizard",
+        "es": "Camaleón"
+      },
+      "kind": "lizard",
+      "lookalikes": [
+        "toad-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Not food. Leave it.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. No es comida. Déjalo."
+      }
+    },
+    {
+      "id": "nm-turtle",
+      "name": {
+        "en": "Turtle",
+        "es": "Tortuga"
+      },
+      "kind": "turtle",
+      "lookalikes": [
+        "tortoise-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Already-have is the turtle card. Box turtle is not food.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Si ya la tienes, la tarjeta de tortuga. La de caja no es comida."
+      }
+    },
+    {
+      "id": "nm-toad",
+      "name": {
+        "en": "Toad",
+        "es": "Sapo"
+      },
+      "kind": "frog",
+      "lookalikes": [
+        "frog-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Bufotoxin. Leave it.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Bufotoxina. Déjalo."
       }
     },
     {

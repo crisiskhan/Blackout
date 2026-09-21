@@ -342,6 +342,69 @@ final class VisionCoreMLTests: XCTestCase {
         XCTAssertFalse(g.edible)
     }
 
+    func testBirdKindIsBirdNotATree() {
+        let g = VisionCoreML.classify(
+            observations: [
+                VisionObservation(identifier: "Tree", confidence: 0.9),
+                VisionObservation(identifier: "Bird", confidence: 0.36),
+            ],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "BIRD")
+        XCTAssertEqual(g.labelId, "kind:bird")
+        XCTAssertFalse(g.edible)
+        XCTAssertFalse(g.leaveIt)
+        XCTAssertEqual(g.percent, 0)
+    }
+
+    func testTurkeyNameIsStillTheBookName() {
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Wild turkey", confidence: 0.8)],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "TURKEY")
+        XCTAssertEqual(g.labelId, "tx-turkey")
+        XCTAssertFalse(g.edible)
+    }
+
+    func testBassIsFishNotWater() {
+        let g = VisionCoreML.classify(
+            observations: [
+                VisionObservation(identifier: "Lake", confidence: 0.8),
+                VisionObservation(identifier: "Largemouth bass", confidence: 0.4),
+            ],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "FISH")
+        XCTAssertEqual(g.labelId, "kind:fish")
+        XCTAssertNotEqual(g.name, "WATER")
+        XCTAssertFalse(g.edible)
+        XCTAssertFalse(g.leaveIt)
+    }
+
+    func testGilaIsLizardLeaveIt() {
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Gila monster", confidence: 0.8)],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "LIZARD")
+        XCTAssertEqual(g.labelId, "kind:lizard")
+        XCTAssertTrue(g.leaveIt)
+        XCTAssertFalse(g.edible)
+        XCTAssertEqual(g.percent, 0)
+    }
+
+    func testFrogIsLeaveItNotAMeal() {
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Toad", confidence: 0.8)],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "FROG")
+        XCTAssertEqual(g.labelId, "kind:frog")
+        XCTAssertTrue(g.leaveIt)
+        XCTAssertFalse(g.edible)
+    }
+
     func testWoodIsNotACottonwood() {
         let book = VisionBook(
             state: "NM",
@@ -372,6 +435,7 @@ final class VisionCoreMLTests: XCTestCase {
             VisionLabel(id: "tx-yucca", kind: "cacti_yucca", lookalikes: ["sotol-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Yucca"]),
             VisionLabel(id: "tx-coyote", kind: "mammal", lookalikes: ["dog-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Coyote"]),
             VisionLabel(id: "tx-javelina", kind: "mammal", lookalikes: ["feral-hog-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Javelina"]),
+            VisionLabel(id: "tx-turkey", kind: "bird", lookalikes: ["vulture-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Turkey"]),
             VisionLabel(id: "tx-western-diamondback", kind: "snake", lookalikes: ["bullsnake-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Western diamondback"]),
             VisionLabel(id: "tx-amanita", kind: "fungi", lookalikes: ["x"], leaveIt: true, edibleUnlock: false, name: ["en": "Amanita"]),
         ])

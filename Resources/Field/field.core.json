@@ -692,6 +692,54 @@
             "2": "Stagger boil so someone watches.",
             "4": "Two pots or two shifts; no shared half-raw meat."
           }
+        },
+        {
+          "do": {
+            "en": "WARNING. Fish you already have: bleed, gut, scale. Catfish you skin. Cook until the flake is opaque and the bone is hot. No raw. Fuel-smelling water — leave that fish. Gar eggs stay out of the pot.",
+            "es": "AVISO. Pescado que ya tienes: desangra, eviscera, escamas. El bagre se pela. Cocina hasta que la lasca sea opaca y el hueso esté caliente. Nada crudo. Agua que huele a combustible: deja ese pez. Huevos de gaspar fuera de la olla."
+          },
+          "why": {
+            "en": "A lake still is not a name. Heat is the treatment you have.",
+            "es": "Una foto de lago no es un nombre. El calor es el tratamiento que tienes."
+          },
+          "child": {
+            "en": "Child does not help gut and does not eat the raw middle.",
+            "es": "El niño no ayuda a eviscerar y no come el centro crudo."
+          },
+          "stop": {
+            "en": "Stop if it smells like death or fuel.",
+            "es": "Para si huele a muerte o a combustible."
+          },
+          "image": "food-boil.png",
+          "party": {
+            "1": "Gut, then cook through.",
+            "2": "One guts, one watches the pot.",
+            "4": "Gut / cook / no raw / no gar eggs."
+          }
+        },
+        {
+          "do": {
+            "en": "Turtle you already have, not a box turtle: meat off the bone, guts gone, long boil until the meat leaves the shell. Box turtle is not food. No raw turtle. Wash the board.",
+            "es": "Tortuga que ya tienes, no tortuga de caja: carne del hueso, vísceras fuera, hervor largo hasta que suelte. La de caja no es comida. Nada crudo. Lava la tabla."
+          },
+          "why": {
+            "en": "Salmonella lives on the shell. Box turtles store toxins.",
+            "es": "La salmonela vive en el caparazón. Las de caja guardan toxinas."
+          },
+          "child": {
+            "en": "Child stays off the live turtle and off the raw board.",
+            "es": "El niño lejos de la tortuga viva y de la tabla cruda."
+          },
+          "stop": {
+            "en": "Stop if you cannot name it as a box turtle or not — leave it.",
+            "es": "Para si no puedes decir si es de caja o no: déjala."
+          },
+          "image": "food-boil.png",
+          "party": {
+            "1": "Long boil or leave it.",
+            "2": "One cooks, one washes.",
+            "4": "Cook / wash / no box turtle / no raw."
+          }
         }
       ]
     },
@@ -1213,8 +1261,8 @@
         "es": "Carne que ya tienes"
       },
       "situation": {
-        "en": "You have an animal you already took, or someone handed you meat. This is not a hunting map and it does not know where animals are.",
-        "es": "Tienes un animal que ya cazaste, o te pasaron carne. Esto no es un mapa de caza y no sabe dónde están los animales."
+        "en": "You have an animal you already took, or someone handed you meat. WARNING: a still is a guess. This is not a hunting map and it does not know where animals are.",
+        "es": "Tienes un animal que ya cazaste, o te pasaron carne. AVISO: una foto es una conjetura. Esto no es un mapa de caza y no sabe dónde están los animales."
       },
       "stop_if": [
         {
@@ -1235,8 +1283,8 @@
       "steps": [
         {
           "do": {
-            "en": "If you did not see it die, leave it. If you did: keep it cool, gut away from water and camp, cook until the juice runs clear. No raw. Hands and knives washed after.",
-            "es": "Si no lo viste morir, déjalo. Si sí: frío, vísceras lejos del agua y del campamento, cocina hasta que el jugo salga claro. Nada crudo."
+            "en": "WARNING. If you did not see it die, leave it. If you did: keep it cool, gut away from water and camp, cook until the juice runs clear. No raw. Hands and knives washed after.",
+            "es": "AVISO. Si no lo viste morir, déjalo. Si sí: frío, vísceras lejos del agua y del campamento, cocina hasta que el jugo salga claro. Nada crudo."
           },
           "why": {
             "en": "Mystery meat is how camps get sick. Heat and distance from the creek are the field rules.",
@@ -1255,6 +1303,54 @@
             "1": "Cook through or leave it.",
             "2": "One guts away from camp, one watches the pot.",
             "4": "Gut / cook / water / keep animals and kids off the pile."
+          }
+        },
+        {
+          "do": {
+            "en": "On its side, away from water and camp. Open the belly without cutting the gut. Dump the pile downhill and downwind. Save liver only if it is clean, then cook it hard. Hide off if you can. Shade the meat. Flies that have had it — leave it.",
+            "es": "De lado, lejos del agua y del campamento. Abre el vientre sin cortar el intestino. Tira el montón cuesta abajo. Hígado solo si está limpio, luego recio. Cuero fuera si puedes. Sombra. Si ya lo tuvieron las moscas: déjalo."
+          },
+          "why": {
+            "en": "Gut on the meat is tomorrow's gut card.",
+            "es": "Vísceras en la carne son la tarjeta de estómago mañana."
+          },
+          "child": {
+            "en": "Child stays at camp. They do not hold the knife.",
+            "es": "El niño en el campamento. No sostiene el cuchillo."
+          },
+          "stop": {
+            "en": "Stop if the gut spills on meat you cannot wash — that piece is gone.",
+            "es": "Si el intestino moja carne que no puedes lavar: esa pieza se va."
+          },
+          "image": "food-game.png",
+          "party": {
+            "1": "Gut away from water.",
+            "2": "One guts, one keeps the creek clear.",
+            "4": "Gut / shade / creek / no kids."
+          }
+        },
+        {
+          "do": {
+            "en": "Hog-sized game cooks longer than deer-sized. No pink, no bloody juice. Coals or a pot. Juice runs clear. No raw liver. Keep raw off the ready pile. Wash hands and knives.",
+            "es": "La caza grande se cocina más que la chica. Sin rosa, sin jugo de sangre. Brasas u olla. Jugo claro. Nada de hígado crudo. Separa crudo de listo. Lava manos y cuchillos."
+          },
+          "why": {
+            "en": "A pink center is still raw. Heat is the treatment you have.",
+            "es": "Un centro rosa sigue crudo. El calor es el tratamiento que tienes."
+          },
+          "child": {
+            "en": "Child gets the well-done edge, never the middle you are still watching.",
+            "es": "El niño come el borde bien cocido, nunca el centro que aún miras."
+          },
+          "stop": {
+            "en": "Stop if grease fire starts — lid, not water.",
+            "es": "Si prende la grasa: tapa, no agua."
+          },
+          "image": "food-boil.png",
+          "party": {
+            "1": "Cook through. Wash the knife.",
+            "2": "One cooks, one washes.",
+            "4": "Cook / wash / shade / no raw pile."
           }
         }
       ]
@@ -3837,6 +3933,469 @@
             "1": "Give it the water.",
             "2": "One watches the bank, one moves the party.",
             "4": "Bank watch / kids / dogs / no night shoreline."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "animal-bird",
+      "category": "animals",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Bird — WARNING then cook",
+        "es": "Ave — AVISO luego cocina"
+      },
+      "situation": {
+        "en": "Turkey, quail, dove, duck, goose, roadrunner country. A still is a guess. This is range, not a pin, and it is not a hunt.",
+        "es": "País de pavo, codorniz, paloma, pato, ganso, correcaminos. Una foto es una conjetura. Es rango, no un pin, y no es una caza."
+      },
+      "stop_if": [
+        {
+          "en": "The bird is gone and no one is hurt.",
+          "es": "El ave se fue y nadie está herido."
+        },
+        {
+          "en": "You found it already dead and did not take it — leave it.",
+          "es": "Lo encontraste muerto y no lo tomaste: déjalo."
+        }
+      ],
+      "get_to_care": {
+        "en": "Gut illness is care if they cannot keep fluids down. A raptor, vulture, crow, or raven is not this card.",
+        "es": "El mal de estómago va a cuidado si no retienen líquidos. Un rapaz, zopilote, cuervo o grajo no es este paseo."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "WARNING. Give it the air. A still is a guess. Turkey, quail, dove, duck, goose you already have are this card. Hawk, eagle, owl, vulture, raven, crow: leave them. Do not hunt from this map.",
+            "es": "AVISO. Cede el aire. Una foto es una conjetura. Pavo, codorniz, paloma, pato, ganso que ya tienes son esta tarjeta. Halcón, águila, búho, zopilote, cuervo, grajo: déjalos. No caces desde este mapa."
+          },
+          "why": {
+            "en": "Scavengers concentrate what they ate. A guess is not a name.",
+            "es": "Los carroñeros concentran lo que comieron. Una conjetura no es un nombre."
+          },
+          "child": {
+            "en": "Child stays behind the adult. No chasing for a photo.",
+            "es": "El niño detrás del adulto. Sin perseguir para una foto."
+          },
+          "stop": {
+            "en": "Stop if it is a raptor or a scavenger — this card is done.",
+            "es": "Para si es rapaz o carroñero: esta tarjeta acabó."
+          },
+          "image": "animal-bite.png",
+          "party": {
+            "1": "Give it the air.",
+            "2": "One watches, one moves the party.",
+            "4": "Watch / kids / no hunt / leave scavengers."
+          }
+        },
+        {
+          "do": {
+            "en": "If you did not take it, leave it. If you did: pluck or skin, gut away from water and camp. Save the breast and the thighs. Dump the pile downhill. Hang in shade or cook now.",
+            "es": "Si no lo tomaste, déjalo. Si sí: despluma o pela, eviscera lejos del agua y del campamento. Pechuga y muslos. Tira el montón cuesta abajo. Cuelga a la sombra o cocina ya."
+          },
+          "why": {
+            "en": "A bird that sat in the sun is tomorrow's gut card.",
+            "es": "Un ave al sol es la tarjeta de estómago mañana."
+          },
+          "child": {
+            "en": "Child stays at camp. They do not hold the knife or the pile.",
+            "es": "El niño en el campamento. No sostiene el cuchillo ni el montón."
+          },
+          "stop": {
+            "en": "Stop if flies have had it or it smells like death.",
+            "es": "Para si ya lo tuvieron las moscas o huele a muerte."
+          },
+          "image": "food-game.png",
+          "party": {
+            "1": "Pluck or skin, then gut.",
+            "2": "One guts away from camp, one watches the pot.",
+            "4": "Gut / shade / creek / no kids."
+          }
+        },
+        {
+          "do": {
+            "en": "Cook through. No pink at the bone. Waterfowl longer than quail. Coals or a pot until the juice runs clear. No raw liver. Wash hands and knives.",
+            "es": "Cocina completo. Sin rosa en el hueso. El acuático más que la codorniz. Brasas u olla hasta jugo claro. Nada de hígado crudo. Lava manos y cuchillos."
+          },
+          "why": {
+            "en": "Bird bone pink is still raw. Heat is the treatment you have.",
+            "es": "Hueso rosa sigue crudo. El calor es el tratamiento que tienes."
+          },
+          "child": {
+            "en": "Child gets the well-done breast, not the pink bone.",
+            "es": "El niño come la pechuga bien cocida, no el hueso rosa."
+          },
+          "stop": {
+            "en": "Stop if grease fire starts — lid, not water.",
+            "es": "Si prende la grasa: tapa, no agua."
+          },
+          "image": "food-boil.png",
+          "party": {
+            "1": "Cook through. Wash the knife.",
+            "2": "One cooks, one washes.",
+            "4": "Cook / wash / no raw / no scavenger."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "animal-fish",
+      "category": "animals",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Fish — WARNING then cook",
+        "es": "Pez — AVISO luego cocina"
+      },
+      "situation": {
+        "en": "Bass, catfish, trout, sunfish country. A still is a guess. The lake is not a name.",
+        "es": "País de lobina, bagre, trucha, mojarra. Una foto es una conjetura. El lago no es un nombre."
+      },
+      "stop_if": [
+        {
+          "en": "You already have a fish you took, or you are leaving the water alone.",
+          "es": "Ya tienes un pez que tomaste, o dejas el agua en paz."
+        },
+        {
+          "en": "The water smells like fuel or the fish is already bloated — leave it.",
+          "es": "El agua huele a combustible o el pez ya está hinchado: déjalo."
+        }
+      ],
+      "get_to_care": {
+        "en": "Gut illness is care if they cannot keep fluids down. This card does not unlock a catch.",
+        "es": "El mal de estómago va a cuidado si no retienen líquidos. Esta tarjeta no desbloquea una pesca."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "WARNING. Give it the water if it is still swimming and you do not already have it. A still is a guess. Bass, catfish, trout, sunfish you already have are this card. Do not fish from this map.",
+            "es": "AVISO. Cede el agua si aún nada y no lo tienes. Una foto es una conjetura. Lobina, bagre, trucha, mojarra que ya tienes son esta tarjeta. No pesques desde este mapa."
+          },
+          "why": {
+            "en": "A lake still names water first. The fish is the subject only when you already have it.",
+            "es": "Una foto de lago nombra el agua primero. El pez es el sujeto solo cuando ya lo tienes."
+          },
+          "child": {
+            "en": "Child stays on the bank. They do not wade after a fish.",
+            "es": "El niño en la orilla. No entra detrás de un pez."
+          },
+          "stop": {
+            "en": "Stop if the water smells like fuel — that fish is not food.",
+            "es": "Para si el agua huele a combustible: ese pez no es comida."
+          },
+          "image": "animal-bite.png",
+          "party": {
+            "1": "Give it the water unless you have it.",
+            "2": "One watches the bank, one moves the party.",
+            "4": "Bank / kids / no night wade / no fuel water."
+          }
+        },
+        {
+          "do": {
+            "en": "If you already have it: bleed, gut, scale. Catfish you skin. Cut off the head if you want. Keep the meat cool and off the dirt. Gar eggs stay out of the pot — they wreck a gut.",
+            "es": "Si ya lo tienes: desangra, eviscera, escamas. El bagre se pela. Corta la cabeza si quieres. Carne fría y fuera de la tierra. Huevos de gaspar fuera de la olla: destrozan el estómago."
+          },
+          "why": {
+            "en": "Gut left in is how a fish goes off in an hour of sun.",
+            "es": "Las vísceras adentro son cómo se echa a perder en una hora de sol."
+          },
+          "child": {
+            "en": "Child does not hold the knife or the eggs.",
+            "es": "El niño no sostiene el cuchillo ni los huevos."
+          },
+          "stop": {
+            "en": "Stop if it is bloated or the gills are already grey.",
+            "es": "Para si está hinchado o las branquias ya están grises."
+          },
+          "image": "food-game.png",
+          "party": {
+            "1": "Bleed, gut, scale or skin.",
+            "2": "One guts, one keeps the water clean.",
+            "4": "Gut / cool / no gar eggs / no dirt."
+          }
+        },
+        {
+          "do": {
+            "en": "Cook until the flake is opaque and the bone is hot. Coals or a pot. No raw. Wash the board. The next card is cook-through if you need a pot.",
+            "es": "Cocina hasta que la lasca sea opaca y el hueso esté caliente. Brasas u olla. Nada crudo. Lava la tabla. La siguiente tarjeta es cocción si necesitas olla."
+          },
+          "why": {
+            "en": "A clear flake is done. Translucent is still raw.",
+            "es": "Una lasca clara está lista. Translúcida sigue cruda."
+          },
+          "child": {
+            "en": "Child gets the opaque flake, not the raw center.",
+            "es": "El niño come la lasca opaca, no el centro crudo."
+          },
+          "stop": {
+            "en": "Stop if grease fire starts — lid, not water.",
+            "es": "Si prende la grasa: tapa, no agua."
+          },
+          "image": "food-boil.png",
+          "party": {
+            "1": "Cook through. Wash the board.",
+            "2": "One cooks, one washes.",
+            "4": "Cook / wash / no raw / no fuel fish."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "animal-lizard",
+      "category": "animals",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Lizard — leave it",
+        "es": "Lagarto — déjalo"
+      },
+      "situation": {
+        "en": "Gila monster, horned lizard, collared lizard, whiptail country. A still is a guess. This is not a meal.",
+        "es": "País de monstruo de Gila, camaleón, lagartija de collar, huico. Una foto es una conjetura. Esto no es una comida."
+      },
+      "stop_if": [
+        {
+          "en": "The lizard is gone and no one was bitten.",
+          "es": "El lagarto se fue y nadie fue mordido."
+        },
+        {
+          "en": "They are bitten — that is the bite card now.",
+          "es": "Hay mordida: ahora es la tarjeta de mordedura."
+        }
+      ],
+      "get_to_care": {
+        "en": "Gila monster venom is care. A still cannot tell Gila from a lookalike. This card does not unlock a cook.",
+        "es": "El veneno del monstruo de Gila es cuidado. Una foto no distingue Gila de un parecido. Esta tarjeta no desbloquea una cocina."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "LEAVE IT. Gila monster is venomous — give it the ground, do not pin it, do not cook it. Horned lizard is not food. A still cannot tell them apart. If bitten: sit, still the limb, the bite card. No ice, no cut, no suck.",
+            "es": "DÉJALO. El monstruo de Gila es venenoso: cede el suelo, no lo claves, no lo cocines. El camaleón no es comida. Una foto no los distingue. Si hay mordida: sienta, extremidad quieta, la tarjeta de mordedura. Sin hielo, sin cortar, sin chupar."
+          },
+          "why": {
+            "en": "There is no safe lizard meal from a guess. Gila venom is not cooked off.",
+            "es": "No hay comida segura de lagarto desde una conjetura. El veneno no se cocina."
+          },
+          "child": {
+            "en": "Child stays behind the adult. No stick-poking.",
+            "es": "El niño detrás del adulto. Sin pinchar con palo."
+          },
+          "stop": {
+            "en": "Stop chasing it for a photo. A phone photo from far is enough if it is safe.",
+            "es": "No lo persigas para una foto. Una foto de lejos basta si es seguro."
+          },
+          "image": "animal-bite.png",
+          "party": {
+            "1": "Give it the ground.",
+            "2": "One watches, one moves the party.",
+            "4": "Watch / kids / no pin / bite card if hit."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "animal-turtle",
+      "category": "animals",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Turtle — WARNING then cook",
+        "es": "Tortuga — AVISO luego cocina"
+      },
+      "situation": {
+        "en": "Softshell, slider, snapping turtle country. A still is a guess. Box turtle is not food.",
+        "es": "País de caparazón blando, deslizadora, mordedora. Una foto es una conjetura. La tortuga de caja no es comida."
+      },
+      "stop_if": [
+        {
+          "en": "You already gave it the water, or you already have a turtle you took.",
+          "es": "Ya le cediste el agua, o ya tienes una tortuga que tomaste."
+        },
+        {
+          "en": "It is a box turtle, or you cannot tell — leave it.",
+          "es": "Es de caja, o no puedes decirlo: déjala."
+        }
+      ],
+      "get_to_care": {
+        "en": "Salmonella lives on the shell. A snapper bite is the bite card. Gut illness is care.",
+        "es": "La salmonela vive en el caparazón. Una mordida de mordedora es la tarjeta de mordedura. El mal de estómago es cuidado."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "WARNING. Give it the water if it is alive and you do not already have it. A still is a guess. Box turtle — high dome, hinged plastron — is not food. Snapper: keep fingers off the head.",
+            "es": "AVISO. Cede el agua si está viva y no la tienes. Una foto es una conjetura. La de caja — domo alto, plastrón con bisagra — no es comida. Mordedora: dedos lejos de la cabeza."
+          },
+          "why": {
+            "en": "Box turtles store what they ate. A guess is not a name.",
+            "es": "Las de caja guardan lo que comieron. Una conjetura no es un nombre."
+          },
+          "child": {
+            "en": "Pick the child up. They do not 'go look at the shell'.",
+            "es": "Carga al niño. No 'va a ver el caparazón'."
+          },
+          "stop": {
+            "en": "Stop if you cannot tell box from softshell — leave it.",
+            "es": "Para si no distingues caja de caparazón blando: déjala."
+          },
+          "image": "animal-bite.png",
+          "party": {
+            "1": "Give it the water unless you have it.",
+            "2": "One watches, one moves the party.",
+            "4": "Bank / kids / no box turtle / fingers off the head."
+          }
+        },
+        {
+          "do": {
+            "en": "If you already have a softshell or slider you took: kill it dead, then meat off the bone. Guts gone, dump downhill. Discard liver if it looks odd. Wash the board. Box turtle still leaves the pot.",
+            "es": "Si ya tienes una de caparazón blando o deslizadora que tomaste: que esté muerta, luego carne del hueso. Vísceras fuera, cuesta abajo. Tira el hígado si se ve raro. Lava la tabla. La de caja no entra a la olla."
+          },
+          "why": {
+            "en": "The shell is not clean. Salmonella is on your hands until you wash.",
+            "es": "El caparazón no está limpio. La salmonela está en tus manos hasta que laves."
+          },
+          "child": {
+            "en": "Child stays off the live turtle and off the raw board.",
+            "es": "El niño lejos de la viva y de la tabla cruda."
+          },
+          "stop": {
+            "en": "Stop if the guts spill on meat you cannot wash — that piece is gone.",
+            "es": "Si las vísceras mojan carne que no puedes lavar: esa pieza se va."
+          },
+          "image": "food-game.png",
+          "party": {
+            "1": "Meat off the bone. Wash.",
+            "2": "One butchers, one washes.",
+            "4": "Butcher / dump / wash / no box."
+          }
+        },
+        {
+          "do": {
+            "en": "Long boil until the meat leaves the bone. Coals or a pot. No raw. The next card is cook-through if you need a pot. Wash again.",
+            "es": "Hervor largo hasta que la carne suelte el hueso. Brasas u olla. Nada crudo. La siguiente tarjeta es cocción si necesitas olla. Lava otra vez."
+          },
+          "why": {
+            "en": "Turtle takes longer than fish. A pink joint is still raw.",
+            "es": "La tortuga tarda más que el pez. Una coyuntura rosa sigue cruda."
+          },
+          "child": {
+            "en": "Child gets the long-boiled meat, not the first scoop.",
+            "es": "El niño come la carne del hervor largo, no la primera cucharada."
+          },
+          "stop": {
+            "en": "Stop if grease fire starts — lid, not water.",
+            "es": "Si prende la grasa: tapa, no agua."
+          },
+          "image": "food-boil.png",
+          "party": {
+            "1": "Long boil. Wash again.",
+            "2": "One cooks, one washes.",
+            "4": "Boil / wash / no raw / no box."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "animal-frog",
+      "category": "animals",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Frog — leave it",
+        "es": "Rana — déjala"
+      },
+      "situation": {
+        "en": "Toad, bullfrog, treefrog country. A still is a guess. Toads kill. This is not a meal.",
+        "es": "País de sapo, rana toro, ranita. Una foto es una conjetura. Los sapos matan. Esto no es una comida."
+      },
+      "stop_if": [
+        {
+          "en": "The frog is gone and nobody put it in a mouth.",
+          "es": "La rana se fue y nadie se la metió a la boca."
+        },
+        {
+          "en": "They already licked or ate it — this is care now.",
+          "es": "Ya la lamieron o la comieron: esto es cuidado ahora."
+        }
+      ],
+      "get_to_care": {
+        "en": "Bufotoxin is care. A still cannot tell toad from bullfrog. This card does not unlock a cook from a guess.",
+        "es": "La bufotoxina es cuidado. Una foto no distingue sapo de rana toro. Esta tarjeta no desbloquea una cocina desde una conjetura."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "LEAVE IT. A still cannot tell toad from frog. Toads (dry warty skin, parotoid bumps behind the eyes) kill if you lick or cook the skin. Do not pick it up. Wash hands if you already did. If they ate it: save a piece, walk to care.",
+            "es": "DÉJALO. Una foto no distingue sapo de rana. Los sapos (piel seca y verrugosa, bultos detrás de los ojos) matan si lames o cocinas la piel. No lo recojas. Lávate si ya lo hiciste. Si lo comieron: guarda un trozo, camina a cuidado."
+          },
+          "why": {
+            "en": "Cooking does not make a toad safe. The glass cannot name the species.",
+            "es": "Cocinar no vuelve seguro a un sapo. El cristal no nombra la especie."
+          },
+          "child": {
+            "en": "Take it out of a child's hand. No 'tiny lick'.",
+            "es": "Sácalo de la mano del niño. Sin 'lamidita'."
+          },
+          "stop": {
+            "en": "Stop tasting 'to compare'. There is no field test that is honest.",
+            "es": "Nada de probar 'para comparar'. No hay test de campo honesto."
+          },
+          "image": "animal-bite.png",
+          "party": {
+            "1": "Leave it. Wash if you touched it.",
+            "2": "One watches the child, one washes.",
+            "4": "Leave / wash / child / care if they ate it."
+          }
+        },
+        {
+          "do": {
+            "en": "ONLY if you already know it is a bullfrog you took yourself — not a toad, not a still guess: skin off, discard the skin and the head, legs only, cook through until the meat is white and hot. Default is still leave it.",
+            "es": "SOLO si ya sabes que es rana toro que tú tomaste — no un sapo, no una conjetura: pelar, tirar piel y cabeza, solo patas, cocina hasta blanca y caliente. Por defecto déjala."
+          },
+          "why": {
+            "en": "Bullfrog legs are a known food only after a name you already trust. A KIND frog still is not that name.",
+            "es": "Las ancas son comida conocida solo con un nombre que ya confías. Una rana de TIPO no es ese nombre."
+          },
+          "child": {
+            "en": "Child does not help skin and does not touch the discarded skin.",
+            "es": "El niño no ayuda a pelar y no toca la piel tirada."
+          },
+          "stop": {
+            "en": "Stop if you have any doubt it is a toad — this card returns to leave it.",
+            "es": "Para si dudas que sea sapo: esta tarjeta vuelve a déjala."
+          },
+          "image": "food-boil.png",
+          "party": {
+            "1": "Name it first or leave it.",
+            "2": "One names, one stays off the skin.",
+            "4": "Name / skin off / cook / default leave."
           }
         }
       ]
