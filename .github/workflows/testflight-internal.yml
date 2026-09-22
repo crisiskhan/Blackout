@@ -228,6 +228,13 @@ jobs:
               sleep "$wait"
               continue
             fi
+            # 34745993995 / 35745204532: list lagged the transporter.
+            # -19232 means this CPV is already on ASC. Assign existing.
+            if grep -qiE -- '-19232|ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE|previously uploaded version' "$RUNNER_TEMP/altool.log"; then
+              echo "Assign existing CFBundleVersion ${NEXT_BUILD}. Already on ASC. No unique IPA."
+              upload_ok=1
+              break
+            fi
             if grep -qi 'UPLOAD FAILED' "$RUNNER_TEMP/altool.log"; then
               echo "Upload failed. Not faked."
               exit 1

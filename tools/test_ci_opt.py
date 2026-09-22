@@ -176,6 +176,12 @@ def test_altool_binds_primary_app() -> None:
         fail("34846431330: backoff and retry altool HTTP 429")
     if "too many requests" not in step.lower() and "HTTP status code: 429" not in step:
         fail("34846431330: detect altool 429 from the log, not only exit code")
+    # 35745204532: tf-193 reserved 164; list still said next=164; altool -19232.
+    # Assign the existing CPV. Do not fail closed as a missing upload.
+    if "-19232" not in step:
+        fail("35745204532: -19232 duplicate CPV must be detected in the upload step")
+    if "Assign existing" not in step:
+        fail("35745204532: -19232 must assign the existing CPV, not exit 1")
     assign = text.split("Assign existing Internal", 1)
     if len(assign) < 2:
         fail("Assign existing Internal group step missing")
