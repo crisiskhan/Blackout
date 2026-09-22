@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sys
 import unittest
+import urllib.error
 from typing import Any
 
 import tf_asc_assign as assign
@@ -37,6 +38,13 @@ def _build(bid: str, version: str, state: str = "VALID") -> dict:
             }
         ]
     }
+
+
+class TestTransportFailure(unittest.TestCase):
+    def test_urlerror_is_598(self) -> None:
+        st, data = assign.transport_failure(urllib.error.URLError("timed out"))
+        self.assertEqual(st, 598)
+        self.assertIn("timed out", data["raw"])
 
 
 class TestAssignInternalRetries404(unittest.TestCase):
@@ -92,6 +100,61 @@ class TestAssignInternalRetries404(unittest.TestCase):
             deadline=1e18,
         )
         self.assertEqual(rc, 2)
+
+    def test_list_timeout_then_valid_assigns(self) -> None:
+        """35742115500: GET /v1/builds urlopen timed out. Retry, then ASSIGN."""
+        api = FakeAPI(
+            [
+                ("GET", 598, {"raw": "timed out"}),
+                ("GET", 200, _build("b164", "164")),
+                ("POST", 204, {}),
+            ]
+        )
+        sleeps: list[float] = []
+        rc = assign.assign_internal(
+            api=api,
+            app="6806388963",
+            group="28035586-fce6-474f-9bc2-ef0f1f65306e",
+            want="164",
+            sleep=sleeps.append,
+            deadline=1e18,
+        )
+        self.assertEqual(rc, 0)
+        self.assertEqual(sleeps, [30.0])
+        self.assertEqual([c[0] for c in api.calls], ["GET", "GET", "POST"])
+
+    def test_list_500_then_valid_assigns(self) -> None:
+        api = FakeAPI(
+            [
+                ("GET", 500, {"errors": [{"status": "500"}]}),
+                ("GET", 200, _build("b164", "164")),
+                ("POST", 204, {}),
+            ]
+        )
+        sleeps: list[float] = []
+        rc = assign.assign_internal(
+            api=api,
+            app="6806388963",
+            group="28035586-fce6-474f-9bc2-ef0f1f65306e",
+            want="164",
+            sleep=sleeps.append,
+            deadline=1e18,
+        )
+        self.assertEqual(rc, 0)
+        self.assertEqual(sleeps, [30.0])
+
+    def test_list_401_fails_closed(self) -> None:
+        api = FakeAPI([("GET", 401, {"errors": [{"status": "401"}]})])
+        rc = assign.assign_internal(
+            api=api,
+            app="6806388963",
+            group="28035586-fce6-474f-9bc2-ef0f1f65306e",
+            want="164",
+            sleep=lambda _: None,
+            deadline=1e18,
+        )
+        self.assertEqual(rc, 1)
+        self.assertEqual(len(api.calls), 1)
 
     def test_404_exhausts_retries(self) -> None:
         api = FakeAPI(

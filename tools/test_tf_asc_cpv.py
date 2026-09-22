@@ -88,6 +88,24 @@ class TestNextCpvRetries500(unittest.TestCase):
             )
         self.assertEqual(len(api.calls), len(cpv.LIST_BACKOFF) + 1)
 
+    def test_timeout_then_200(self) -> None:
+        """35742115500: GET /v1/builds urlopen timed out. Retry like 500."""
+        api = FakeAPI(
+            [
+                ("GET", 598, {"raw": "timed out"}),
+                ("GET", 200, _builds("164", "163")),
+            ]
+        )
+        sleeps: list[float] = []
+        nxt = cpv.fetch_next_cpv(
+            api=api,
+            app="6806388963",
+            sleep=sleeps.append,
+        )
+        self.assertEqual(nxt, 165)
+        self.assertEqual(sleeps, [15.0])
+        self.assertEqual(len(api.calls), 2)
+
     def test_401_fails_closed_without_retry(self) -> None:
         api = FakeAPI([("GET", 401, {"errors": [{"status": "401"}]})])
         with self.assertRaises(cpv.AscListError):

@@ -996,6 +996,7 @@ def tree_do_en(cid: str) -> str:
         )
     return (
         "Rio Grande cottonwood, juniper, piñon. Juniper and piñon are woodland. Aspen is high country. "
+        "Ponderosa is high country pine. "
         "South-side shade, wind break, deadfall only for fire. "
         "Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin."
     )
@@ -1018,6 +1019,7 @@ def tree_do_es(cid: str) -> str:
         )
     return (
         "Álamo del Río Grande, enebro, piñón. El enebro y el piñón son de arbolado. El álamo temblón es de alta montaña. "
+        "El pino ponderosa es de alta montaña. "
         "Sombra al sur, cortaviento, madera muerta para fuego. "
         "No descortezces vivo. No mastiques semillas ni flores."
     )
@@ -1277,7 +1279,7 @@ def mammal_do_en(cid: str) -> str:
         return (
             "Feral hog charges when cornered — give it the brush, do not get between it and cover. "
             "Coyote: do not feed. White-tailed deer at dusk — give it the road. "
-            "Squirrel and raccoon in the trees — give space. "
+            "Squirrel, raccoon, fox, skunk, armadillo, bobcat: give space. "
             "Food away from camp. If bitten, the bite card. If you already have meat, "
             "the food card. Do not hunt from this map."
         )
@@ -1285,14 +1287,14 @@ def mammal_do_en(cid: str) -> str:
         return (
             "Javelina charges when cornered — give it the brush, do not get between it and cover. "
             "Coyote: do not feed. White-tailed deer at dusk — give it the road. "
-            "Jackrabbit and raccoon: give space. "
+            "Jackrabbit, raccoon, squirrel, fox, skunk, armadillo, bobcat: give space. "
             "Food away from camp. If bitten, the bite card. "
             "If you already have meat, the food card. Do not hunt from this map."
         )
     return (
         "Black bear: do not run, stand large, food sealed and away from camp. "
         "Elk is high country. Elk in rut: give way. Mule deer at dusk — give it the road. "
-        "Coyote and jackrabbit: do not feed. Pronghorn at dusk — give it the road. A maul is trauma. "
+        "Coyote, jackrabbit, squirrel, and fox: do not feed. Pronghorn at dusk — give it the road. A maul is trauma. "
         "If bitten, the bite card. If you already have meat, the food card. "
         "Do not hunt from this map."
     )
@@ -1303,7 +1305,7 @@ def mammal_do_es(cid: str) -> str:
         return (
             "El cerdo asilvestrado embiste si lo acorralas: déjale el matorral, no te pongas entre él y la cubierta. "
             "Coyote: no alimentes. Venado cola blanca al anochecer — cede el camino. "
-            "Ardilla y mapache en los árboles: da espacio. "
+            "Ardilla, mapache, zorro, zorrillo, armadillo, lince: da espacio. "
             "Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. "
             "Si ya tienes carne, la de comida. No caces desde este mapa."
         )
@@ -1311,14 +1313,14 @@ def mammal_do_es(cid: str) -> str:
         return (
             "El pecarí embiste si lo acorralas: déjale el matorral, no te pongas entre él y la cubierta. "
             "Coyote: no alimentes. Venado cola blanca al anochecer — cede el camino. "
-            "Liebre y mapache: da espacio. "
+            "Liebre, mapache, ardilla, zorro, zorrillo, armadillo, lince: da espacio. "
             "Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. "
             "Si ya tienes carne, la de comida. No caces desde este mapa."
         )
     return (
         "Oso negro: no corras, hazte grande, comida sellada y lejos del campamento. "
         "El wapití es de alta montaña. Wapití en celo: cede el paso. Venado bura al anochecer — cede el camino. "
-        "Coyote y liebre: no alimentes. Berrendo al anochecer — cede el camino. "
+        "Coyote, liebre, ardilla y zorro: no alimentes. Berrendo al anochecer — cede el camino. "
         "Un golpe es trauma. Si hay mordida, la tarjeta de mordedura. "
         "Si ya tienes carne, la tarjeta de comida. No caces desde este mapa."
     )
@@ -1463,8 +1465,8 @@ def thickness_state() -> list[dict]:
             ["NM"],
             "New Mexico trees — shade, not a meal",
             "Árboles de Nuevo México — sombra, no comida",
-            "You are in New Mexico woodland, park, or bosque. Rio Grande cottonwood, juniper, piñon. Aspen is high country. Shade and wind. Piñon is not a Field meal ticket.",
-            "Estás en arbolado, parque o bosque de Nuevo México. Álamo del Río Grande, enebro, piñón. El álamo temblón es de alta montaña. Sombra y viento. El piñón no es un ticket de comida de Field.",
+            "You are in New Mexico woodland, park, or bosque. Rio Grande cottonwood, juniper, piñon. Aspen is high country. Ponderosa is high country pine. Shade and wind. Piñon is not a Field meal ticket.",
+            "Estás en arbolado, parque o bosque de Nuevo México. Álamo del Río Grande, enebro, piñón. El álamo temblón es de alta montaña. El pino ponderosa es de alta montaña. Sombra y viento. El piñón no es un ticket de comida de Field.",
             "If they chewed seed or sap is in both eyes, this is care now.",
             "Si masticaron semilla o hay savia en los ojos, esto es cuidado ahora.",
         ),

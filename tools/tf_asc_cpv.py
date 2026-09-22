@@ -2,7 +2,8 @@
 """Read ASC max CFBundleVersion and write next= to GITHUB_OUTPUT.
 
 34264110982: mint OK, then GET /v1/builds HTTP 500. Retry list 500
-with backoff. Auth 401/403 fail closed. No App Review. No External.
+with backoff. 35742115500: urlopen timeout is 598 and retries the same
+way. Auth 401/403 fail closed. No App Review. No External.
 No network unless main() is invoked.
 """
 from __future__ import annotations
@@ -22,7 +23,13 @@ except ImportError:  # unit tests never call _http
     jwt = None
 
 LIST_BACKOFF = (15.0, 30.0, 60.0, 90.0, 120.0)
+LIST_RETRYABLE = frozenset({500, 502, 503, 598})
 ASC_APP = "6806388963"
+
+
+def transport_failure(exc: BaseException) -> tuple[int, dict[str, Any]]:
+    """35742115500: urlopen timeout must not crash next CPV."""
+    return 598, {"raw": str(exc)[:800]}
 
 
 class AscListError(RuntimeError):
@@ -62,10 +69,10 @@ def fetch_next_cpv(
             return nxt
         last = data if isinstance(data, dict) else {"raw": data}
         print("LIST", st, json.dumps(last)[:500])
-        if st == 500 and tries < len(LIST_BACKOFF):
+        if st in LIST_RETRYABLE and tries < len(LIST_BACKOFF):
             wait = LIST_BACKOFF[tries]
             tries += 1
-            print("RETRY list 500 in", int(wait), "s")
+            print("RETRY list", st, "in", int(wait), "s")
             sleep(wait)
             continue
         raise AscListError(f"ASC builds list {st}")
@@ -110,6 +117,8 @@ def _http(
         except Exception:
             parsed = {"raw": raw[:800]}
         return exc.code, parsed
+    except (urllib.error.URLError, TimeoutError) as exc:
+        return transport_failure(exc)
 
 
 def main() -> int:

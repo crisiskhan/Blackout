@@ -30,8 +30,53 @@ LIVE = {
     "javelina", "peccary", "pecari", "hog", "coyote", "deer", "elk", "bear",
     "turkey", "quail", "dove", "bird", "fish", "bass", "lizard", "turtle",
     "frog", "toad",
+    "jackrabbit", "raccoon", "squirrel", "fox", "skunk", "armadillo",
+    "bobcat", "pronghorn", "roadrunner", "hawk", "owl", "eagle", "duck",
+    "vulture", "raven", "catfish", "trout", "sunfish", "gila", "softshell",
+    "bullfrog",
+    "venado", "cerdo", "oso", "wapiti", "berrendo", "zorrillo", "lince",
+    "liebre", "mapache", "ardilla", "zorro", "codorniz", "paloma", "pato",
+    "halcon", "buho", "aguila", "zopilote", "cuervo", "lobina", "bagre",
+    "mojarra", "trucha", "camaleon",
 }
 MEAL = {"meat", "hunt", "cook", "already", "caza", "carne"}
+
+
+def _vision_ask_family(lab: dict) -> set[str]:
+    """Cards a vision English name may open. Pack chapter then filters."""
+    kind = lab["kind"]
+    lid = lab["id"]
+    if kind == "tree":
+        if "loblolly" in lid:
+            return {"tx-east-tree-use"}
+        if lid.startswith("nm-"):
+            return {"nm-tree-use"}
+        return {"tx-tree-use", "tx-east-tree-use"}
+    if kind in {"cactus", "cacti_yucca"}:
+        return {"tx-cactus", "nm-cactus"}
+    if kind == "snake":
+        return {"animal-bite", "tx-snake", "tx-east-snake", "nm-snake"}
+    if kind == "mammal":
+        if "hog" in lid:
+            return {"tx-east-mammal"}
+        if "javelina" in lid:
+            return {"tx-mammal"}
+        if lid.startswith("nm-"):
+            return {"nm-mammal", "tx-mammal", "tx-east-mammal"}
+        return {"tx-mammal", "tx-east-mammal", "nm-mammal"}
+    if kind == "bird":
+        return {"animal-bird"}
+    if kind == "fish":
+        return {"animal-fish"}
+    if kind == "lizard":
+        return {"animal-lizard"}
+    if kind == "turtle":
+        return {"animal-turtle"}
+    if kind == "frog":
+        return {"animal-frog"}
+    if kind == "fungi":
+        return {"fungi-leave"}
+    raise AssertionError(f"unknown vision kind {kind}")
 
 
 def _corpus_src() -> str:
@@ -731,6 +776,21 @@ class FieldRankedBookTests(unittest.TestCase):
         self.assertEqual(BOOST["thirst"][0], "water-disinfect")
         self.assertEqual(BOOST["food"][0], "food-cook")
         self.assertEqual(BOOST["wool"][0], "camp-layers")
+        src = _corpus_src()
+        start = src.index("= [", src.index("private static let boost")) + 2
+        depth = 0
+        block = ""
+        for j, ch in enumerate(src[start:], start):
+            if ch == "[":
+                depth += 1
+            elif ch == "]":
+                depth -= 1
+                if depth == 0:
+                    block = src[start : j + 1]
+                    break
+        keys = re.findall(r'"([^"]+)":\s*\[', block)
+        dups = sorted({k for k in keys if keys.count(k) > 1})
+        self.assertEqual(dups, [], "Swift boost duplicate keys crash xctest: " + ", ".join(dups))
 
     def test_shipped_book_opens_the_procedure(self):
         cards = load_book()
@@ -753,12 +813,57 @@ class FieldRankedBookTests(unittest.TestCase):
         self.assertEqual(first("lizard"), "animal-lizard")
         self.assertEqual(first("turtle"), "animal-turtle")
         self.assertEqual(first("toad"), "animal-frog")
+        self.assertEqual(first("ponderosa"), "nm-tree-use")
+        self.assertEqual(first("softshell"), "animal-turtle")
+        self.assertEqual(first("jackrabbit"), "tx-mammal")
+        self.assertEqual(first("cottonwood"), "tx-tree-use")
+        self.assertEqual(first("mesquite"), "tx-tree-use")
+        self.assertEqual(first("cholla"), "nm-cactus")
+        self.assertEqual(first("roadrunner"), "animal-bird")
+        self.assertEqual(first("sunfish"), "animal-fish")
+        self.assertEqual(first("oak"), "tx-tree-use")
+        self.assertEqual(first("nopal"), "tx-cactus")
+        self.assertEqual(first("encino"), "tx-tree-use")
+        self.assertEqual(first("mezquite"), "tx-tree-use")
+        self.assertEqual(first("venado"), "tx-mammal")
+        self.assertEqual(ask_book(cards, "venado")[0]["category"], "animals")
+        self.assertEqual(first("zorrillo"), "tx-mammal")
+        self.assertEqual(first("hongo"), "fungi-leave")
         self.assertEqual(first("panic"), "tact-breathe")
         self.assertEqual(first("gps"), "nav-lost")
         self.assertEqual(first("sed"), "water-find")
         self.assertEqual(first("comida"), "food-cook")
         self.assertFalse(ask_book(cards, "xyzzy plugh"))
         self.assertEqual(ask_book(cards, "javelina")[0]["category"], "animals")
+
+    def test_a_vision_name_opens_the_same_kind_of_walk(self):
+        """The still and SEARCH of that name open the same kind of card.
+
+        One body word is not a procedure, so the vision English or Spanish
+        name has to be a boost (or title) hit. A ponderosa still is
+        tree-use, not water; SEARCH ponderosa / nopal / venado is the
+        same walk the still opens, not NONE, not the meal.
+        """
+        cards = load_book()
+        wrong: list[str] = []
+        for state in ("tx", "nm"):
+            book = json.loads(
+                (ROOT / "Resources" / "Vision" / f"labels.{state}.json").read_text()
+            )
+            for lab in book["labels"]:
+                expect = _vision_ask_family(lab)
+                for name in (lab["name"]["en"], lab["name"]["es"]):
+                    hits = ask_book(cards, name)
+                    got = hits[0]["id"] if hits else None
+                    if got not in expect:
+                        wrong.append(
+                            f"{lab['id']} {name!r} -> {got} not {sorted(expect)}"
+                        )
+        self.assertEqual(wrong, [], "VISION name / ASK drift:\n" + "\n".join(wrong))
+        src = _corpus_src()
+        live_block = src.split("liveAnimal: Set<String> = [", 1)[1].split("]", 1)[0]
+        swift_live = set(re.findall(r'"([^"]+)"', live_block))
+        self.assertEqual(LIVE, swift_live)
 
     def test_spoken_field_talk_opens_the_procedure(self):
         """A scared human does not type catalog ids. SEARCH still has to open a walk."""

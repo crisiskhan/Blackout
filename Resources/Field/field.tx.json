@@ -533,8 +533,8 @@
       "steps": [
         {
           "do": {
-            "en": "Javelina charges when cornered — give it the brush, do not get between it and cover. Coyote: do not feed. White-tailed deer at dusk — give it the road. Jackrabbit and raccoon: give space. Food away from camp. If bitten, the bite card. If you already have meat, the food card. Do not hunt from this map.",
-            "es": "El pecarí embiste si lo acorralas: déjale el matorral, no te pongas entre él y la cubierta. Coyote: no alimentes. Venado cola blanca al anochecer — cede el camino. Liebre y mapache: da espacio. Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. Si ya tienes carne, la de comida. No caces desde este mapa."
+            "en": "Javelina charges when cornered — give it the brush, do not get between it and cover. Coyote: do not feed. White-tailed deer at dusk — give it the road. Jackrabbit, raccoon, squirrel, fox, skunk, armadillo, bobcat: give space. Food away from camp. If bitten, the bite card. If you already have meat, the food card. Do not hunt from this map.",
+            "es": "El pecarí embiste si lo acorralas: déjale el matorral, no te pongas entre él y la cubierta. Coyote: no alimentes. Venado cola blanca al anochecer — cede el camino. Liebre, mapache, ardilla, zorro, zorrillo, armadillo, lince: da espacio. Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. Si ya tienes carne, la de comida. No caces desde este mapa."
           },
           "why": {
             "en": "Range is the Field book of the open pack. A coordinate is not an animal.",
@@ -594,8 +594,8 @@
       "steps": [
         {
           "do": {
-            "en": "Feral hog charges when cornered — give it the brush, do not get between it and cover. Coyote: do not feed. White-tailed deer at dusk — give it the road. Squirrel and raccoon in the trees — give space. Food away from camp. If bitten, the bite card. If you already have meat, the food card. Do not hunt from this map.",
-            "es": "El cerdo asilvestrado embiste si lo acorralas: déjale el matorral, no te pongas entre él y la cubierta. Coyote: no alimentes. Venado cola blanca al anochecer — cede el camino. Ardilla y mapache en los árboles: da espacio. Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. Si ya tienes carne, la de comida. No caces desde este mapa."
+            "en": "Feral hog charges when cornered — give it the brush, do not get between it and cover. Coyote: do not feed. White-tailed deer at dusk — give it the road. Squirrel, raccoon, fox, skunk, armadillo, bobcat: give space. Food away from camp. If bitten, the bite card. If you already have meat, the food card. Do not hunt from this map.",
+            "es": "El cerdo asilvestrado embiste si lo acorralas: déjale el matorral, no te pongas entre él y la cubierta. Coyote: no alimentes. Venado cola blanca al anochecer — cede el camino. Ardilla, mapache, zorro, zorrillo, armadillo, lince: da espacio. Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. Si ya tienes carne, la de comida. No caces desde este mapa."
           },
           "why": {
             "en": "Range is the Field book of the open pack. A coordinate is not an animal.",

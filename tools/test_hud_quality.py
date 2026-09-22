@@ -2570,6 +2570,29 @@ class VisionInstrumentTests(unittest.TestCase):
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("ponderosa still is tree-use, not water", qa)
         self.assertIn("softshell still is the turtle card", qa)
+        corpus = read(
+            "Packages", "FieldCorpus", "Sources", "FieldCorpus", "FieldCorpus.swift"
+        )
+        self.assertIn('"ponderosa"', corpus)
+        self.assertIn('"softshell"', corpus)
+        self.assertIn('"jackrabbit"', corpus)
+        self.assertIn('"cottonwood"', corpus)
+        nm_tree = json.dumps(
+            json.loads((ROOT / "Resources" / "Field" / "field.nm.json").read_text())
+        ).lower()
+        self.assertIn("ponderosa", nm_tree)
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("same walk the still opens", qa)
+        self.assertIn("nopal", qa)
+        self.assertIn("venado", qa)
+        peak = inspect.split('case "Peak":', 1)[1]
+        peak_nm = peak.split("case .nm:", 1)[1].split("return ", 1)[1].split("\n", 1)[0]
+        self.assertIn("ponderosa", peak_nm.lower())
+        self.assertIn("aspen", peak_nm.lower())
+        wood_nm = inspect.split("private static func treeRangeLine", 1)[1]
+        wood_nm = wood_nm.split("case .nm:", 1)[1].split("return ", 1)[1].split("\n", 1)[0]
+        self.assertNotIn("ponderosa", wood_nm.lower())
+        self.assertNotIn("aspen", wood_nm.lower())
 
 
 class HonestyOnTheGlassTests(unittest.TestCase):

@@ -1130,10 +1130,11 @@ extension Inspect {
     }
 
     /// Woodland and park range: the same trees tree-use SPEAK names,
-    /// plus this pack's animals as range, not a pin. Aspen stays off
-    /// the hold — Field says it is high country. NM elk is the same
+    /// plus this pack's animals as range, not a pin. Aspen and
+    /// ponderosa stay off the picnic hold — Field says they are high
+    /// country. Peak names them next to elk. NM elk is the same
     /// sentence as mammal SPEAK; picnic timber is not elk country.
-    /// Peak still names elk as range. South-side shade is the tree-use
+    /// South-side shade is the tree-use
     /// SPEAK. Give it the road is the mammal SPEAK. Bite is that treat;
     /// food stays on wildlife range, not picnic woodland.
     private static func treeRangeLine(state: String?, pack: String?) -> String {
@@ -1240,7 +1241,7 @@ extension Inspect {
         case "Peak":
             switch PackRange.of(state: state, pack: pack) {
             case .nm:
-                return "High ground. Wind, cold, black bear and elk range. Give it the road. Field has ice and cold."
+                return "High ground. Wind, cold. Aspen and ponderosa, black bear and elk range. Give it the road. Field has ice and cold."
             case .txWest:
                 return "High ground. Wind, javelina, coyote and deer range. Give it the road. Field has animal and cold."
             case .txEast:
