@@ -363,6 +363,10 @@ def ask_book(cards: list[dict], query: str, locale: str = "en") -> list[dict]:
             score += 25
         if "signal" in expanded and card["id"] in {"sig-mirror", "sig-ground"}:
             score += 25
+        if "spark" in expanded and card["id"] == "fire-spark":
+            score += 25
+        if {"stove", "estufa", "canister"} & set(q_tokens) and card["id"] == "fire-stove":
+            score += 25
         preferred = set(_tokens(card["title"]["es"] if prefer_es else card["title"]["en"]))
         score += len(expanded & preferred) * 3
         if len(q_tokens) >= 2:
@@ -376,6 +380,46 @@ def ask_book(cards: list[dict], query: str, locale: str = "en") -> list[dict]:
         scored.append((card, score, _boost_index(card["id"], expanded)))
     scored.sort(key=lambda a: (-a[1], a[2], a[0]["category"], a[0]["title"]["en"]))
     return [c for c, _, _ in scored]
+
+
+def _walk_families() -> list[list[str]]:
+    """Families FieldCorpus.askWalk walks. A title list is not a walk."""
+    src = _corpus_src()
+    start = src.index("private static let walkFamilies")
+    lb = src.index("= [", start) + 2
+    depth = 0
+    end = lb
+    for j, ch in enumerate(src[lb:], lb):
+        if ch == "[":
+            depth += 1
+        elif ch == "]":
+            depth -= 1
+            if depth == 0:
+                end = j
+                break
+    block = src[lb : end + 1]
+    return [re.findall(r'"([^"]+)"', row) for row in re.findall(r"\[(.*?)\]", block, re.S) if '"' in row]
+
+
+def ask_walk(first_id: str, chapter_ids: set[str]) -> list[str]:
+    """First answering card, then the rest of its family that this book has."""
+    family = None
+    for row in _walk_families():
+        if row and row[0] == first_id:
+            family = row
+            break
+    if family is None:
+        for row in _walk_families():
+            if first_id in row:
+                family = row
+                break
+    if not family:
+        return [first_id]
+    out = [first_id]
+    for cid in family:
+        if cid != first_id and cid in chapter_ids:
+            out.append(cid)
+    return out
 
 
 def load_book() -> list[dict]:
@@ -730,7 +774,9 @@ class FieldSearchSayAndStepperTests(unittest.TestCase):
         self.assertIn("UIImage(contentsOfFile:", tab)
         self.assertTrue((ROOT / "Resources/Field/images/bleed-pack.png").is_file())
         self.assertIn("x.next()", tab)
-        self.assertIn("openRoute([first.id]", tab)
+        self.assertIn("FieldCorpus.askWalk", tab)
+        self.assertIn("openRoute(walk", tab)
+        self.assertNotIn("openRoute([first.id]", tab)
         self.assertIn("speakFirst: true", tab)
         self.assertIn("speakFieldStep(", tab)
         self.assertIn("openFieldLive(", read("Blackout", "FieldSession.swift"))
@@ -749,7 +795,8 @@ class FieldSearchSayAndStepperTests(unittest.TestCase):
         self.assertIn("NO MATCH", qa)
         self.assertIn("ASK · LIVE", qa)
         self.assertIn("on this device", qa.lower())
-        self.assertIn("Remaining hits stay out", qa)
+        self.assertIn("Remaining catalog hits stay out", qa)
+        self.assertIn("I need to start a fire", qa)
         self.assertIn("where am I", qa)
         self.assertIn("got bit", qa)
         self.assertIn("not breathing", qa)
@@ -805,6 +852,11 @@ class FieldRankedBookTests(unittest.TestCase):
         self.assertEqual(first("bleeding"), "med-bleed-pack")
         self.assertEqual(first("snake"), "animal-bite")
         self.assertEqual(first("starting from nothing"), "camp-start")
+        self.assertEqual(first("I need to start a fire"), "fire-spark")
+        self.assertEqual(first("how do I make a fire"), "fire-spark")
+        self.assertEqual(first("hacer fuego"), "fire-spark")
+        self.assertEqual(first("stove"), "fire-stove")
+        self.assertEqual(first("estufa"), "fire-stove")
         self.assertEqual(first("wildfire"), "env-wildfire")
         self.assertEqual(first("seep"), "water-seep")
         self.assertEqual(first("mushroom"), "fungi-leave")
@@ -835,6 +887,37 @@ class FieldRankedBookTests(unittest.TestCase):
         self.assertEqual(first("comida"), "food-cook")
         self.assertFalse(ask_book(cards, "xyzzy plugh"))
         self.assertEqual(ask_book(cards, "javelina")[0]["category"], "animals")
+
+    def test_start_a_fire_opens_the_how_then_the_family(self):
+        """Crisis typed I need to start a fire and got stove-site STEP 1 OF 1.
+
+        The answering card is how to light it. NEXT is rain, char, bow,
+        then stove. Wildfire stays off a start-fire walk. A title list
+        stays out.
+        """
+        cards = load_book()
+        have = {c["id"] for c in cards}
+        first = lambda q: ask_book(cards, q)[0]["id"]
+        self.assertEqual(first("I need to start a fire"), "fire-spark")
+        self.assertEqual(first("need to start a fire"), "fire-spark")
+        self.assertEqual(first("light a fire"), "fire-spark")
+        self.assertEqual(first("prender fuego"), "fire-spark")
+        self.assertEqual(first("encender fuego"), "fire-spark")
+        self.assertEqual(first("stove"), "fire-stove")
+        self.assertEqual(first("wildfire"), "env-wildfire")
+        self.assertEqual(first("starting from nothing"), "camp-start")
+        self.assertEqual(
+            ask_walk("fire-spark", have),
+            ["fire-spark", "fire-wet", "fire-char", "fire-bow", "fire-stove"],
+        )
+        self.assertEqual(ask_walk("fire-stove", have)[0], "fire-stove")
+        self.assertIn("fire-spark", ask_walk("fire-stove", have))
+        self.assertNotIn("env-wildfire", ask_walk("fire-spark", have))
+        self.assertEqual(
+            ask_walk("env-wildfire", have),
+            ["env-wildfire", "env-smoke"],
+        )
+        self.assertEqual(ask_walk("med-cpr-adult", have), ["med-cpr-adult"])
 
     def test_a_vision_name_opens_the_same_kind_of_walk(self):
         """The still and SEARCH of that name open the same kind of card.
@@ -907,6 +990,8 @@ class FieldRankedBookTests(unittest.TestCase):
         self.assertEqual(first("sunburn"), "med-burn")
         self.assertEqual(first("throwing up"), "med-gut")
         self.assertEqual(first("is this edible"), "plant-unknown")
+        self.assertEqual(first("I need to start a fire"), "fire-spark")
+        self.assertEqual(first("hacer fuego"), "fire-spark")
         self.assertEqual(first("can I eat this"), "plant-unknown")
         self.assertEqual(first("food stuck"), "med-airway")
         self.assertEqual(first("where's camp"), "nav-lost")
@@ -2870,7 +2955,9 @@ class FieldAskLiveTests(unittest.TestCase):
         self.assertIn("askBusy", session)
         open_ans = tab.split("private func openAnswer(")[1].split("private func jump")[0]
         self.assertIn("listCards.first", open_ans)
-        self.assertIn("openRoute([first.id]", open_ans)
+        self.assertIn("FieldCorpus.askWalk", open_ans)
+        self.assertIn("openRoute(walk", open_ans)
+        self.assertNotIn("openRoute([first.id]", open_ans)
         self.assertIn("speakFirst: true", open_ans)
         self.assertIn("beginFieldAsk", open_ans)
         self.assertIn("cancelFieldAsk", open_ans)

@@ -346,8 +346,10 @@ struct FieldTab: View {
             }
             .buttonStyle(HUDActionStyle(filled: false))
         }
-        if !runtime.speechChrome.isEmpty {
-            Text(runtime.speechChrome).font(.caption).foregroundStyle(Theme.warn)
+        if runtime.speechChrome == "SPEECH FAILED" {
+            Text("SPEECH FAILED")
+                .font(.caption)
+                .foregroundStyle(Theme.warn)
         }
 
         sectionLabel(L10n.t("stop.if", runtime.locale))
@@ -459,6 +461,12 @@ struct FieldTab: View {
                     .font(.system(size: 13, weight: .heavy))
                     .foregroundStyle(Theme.warn)
             }
+            if FieldCorpus.asking(catalogQuery), let hit = listCards.first {
+                Text(loc(hit.title))
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.silver)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 
@@ -507,10 +515,11 @@ struct FieldTab: View {
         runtime.restoreFieldWalk(in: cards)
     }
 
-    /// SEARCH ranked a situation. Open the first answering card's steps.
-    /// Remaining hits stay out — a title list is a menu of cards, not an
-    /// answer. Unknown words open a live ASK walk on the same stepper.
-    /// SEARCH while ASK is building cancels that walk, then starts again.
+    /// SEARCH ranked a situation. Open the first answering card, then the
+    /// family that finishes that walk. A title list of leftover hits stays
+    /// out — that is a menu, not an answer. Unknown words open a live ASK
+    /// walk on the same stepper. SEARCH while ASK is building cancels that
+    /// walk, then starts again.
     private func openAnswer() {
         if runtime.field.askBusy {
             runtime.cancelFieldAsk()
@@ -521,7 +530,9 @@ struct FieldTab: View {
             runtime.field.sayFailed = false
             runtime.field.askFailed = false
             runtime.field.fieldQuery = catalogQuery
-            openRoute([first.id], speakFirst: true)
+            let chapter = FieldCorpus.chapter(cards, pack: runtime.packs?.active?.id)
+            let walk = FieldCorpus.askWalk(first: first, chapter: chapter)
+            openRoute(walk, speakFirst: true)
             return
         }
         runtime.beginFieldAsk(

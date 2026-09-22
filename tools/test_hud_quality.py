@@ -1524,7 +1524,27 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertNotIn('sectionLabel("CARE")', field)
         self.assertIn("s.step.image", field)
         self.assertIn("Field/images", field)
-        self.assertIn("openRoute([first.id]", field)
+        self.assertIn("FieldCorpus.askWalk", field)
+        self.assertIn("openRoute(walk", field)
+        self.assertNotIn("openRoute([first.id]", field)
+        self.assertNotIn("Text(runtime.speechChrome)", field)
+        inspect = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "WaterInspect.swift"
+        )
+        nxt = inspect.split("func nextAction(for cardID: String)")[1].split(
+            "public static func bookWord", 1
+        )[0]
+        self.assertIn('"NEXT · SPARK"', nxt)
+        self.assertIn('"NEXT · RAIN"', nxt)
+        self.assertIn('"NEXT · CHAR"', nxt)
+        self.assertIn('"NEXT · BOW"', nxt)
+        self.assertIn('"NEXT · STOVE"', nxt)
+        corpus = read(
+            "Packages", "FieldCorpus", "Sources", "FieldCorpus", "FieldCorpus.swift"
+        )
+        self.assertIn("func askWalk", corpus)
+        self.assertIn("walkFamilies", corpus)
+        self.assertIn('"fire-spark", "fire-wet", "fire-char", "fire-bow", "fire-stove"', corpus)
         self.assertIn("openFieldLive(", session)
         self.assertIn("FieldAsk.answer", session)
         self.assertIn("import FieldAsk", field)

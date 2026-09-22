@@ -389,6 +389,20 @@ public enum FieldCorpus {
         ("naranja en estante", "lantern"),
         ("falsa colmenilla", "morel"),
         ("correcaminos", "roadrunner"),
+        ("start a fire", "spark"),
+        ("start fire", "spark"),
+        ("make a fire", "spark"),
+        ("make fire", "spark"),
+        ("light a fire", "spark"),
+        ("light fire", "spark"),
+        ("build a fire", "spark"),
+        ("build fire", "spark"),
+        ("need a fire", "spark"),
+        ("prender fuego", "spark"),
+        ("hacer fuego", "spark"),
+        ("necesito fuego", "spark"),
+        ("encender fuego", "spark"),
+        ("enciende fuego", "spark"),
     ]
 
     private static func hasPhrase(_ hay: String, _ needle: String) -> Bool {
@@ -600,6 +614,12 @@ public enum FieldCorpus {
             {
                 score += 25
             }
+            if expanded.contains("spark") && card.id == "fire-spark" { score += 25 }
+            if (qTokens.contains("stove") || qTokens.contains("estufa") || qTokens.contains("canister"))
+                && card.id == "fire-stove"
+            {
+                score += 25
+            }
             let preferredTitle = Set(tokens(preferEs ? card.title.es : card.title.en))
             score += Double(expanded.intersection(preferredTitle).count) * 3
             if qTokens.count >= 2 {
@@ -617,6 +637,37 @@ public enum FieldCorpus {
             return a.0.title.en < b.0.title.en
         }.map(\.0)
     }
+
+    /// First answering card, then the family that finishes that situation.
+    /// A title list of leftover hits is not a walk. Trauma stays one card.
+    public static func askWalk(first: FieldCard, chapter: [FieldCard]) -> [String] {
+        let have = Set(chapter.map(\.id))
+        guard let family = family(for: first.id) else { return [first.id] }
+        var out = [first.id]
+        for id in family where id != first.id && have.contains(id) {
+            out.append(id)
+        }
+        return out
+    }
+
+    private static func family(for id: String) -> [String]? {
+        for row in walkFamilies where row.first == id {
+            return row
+        }
+        for row in walkFamilies where row.contains(id) {
+            return row
+        }
+        return nil
+    }
+
+    private static let walkFamilies: [[String]] = [
+        ["fire-spark", "fire-wet", "fire-char", "fire-bow", "fire-stove"],
+        ["water-disinfect", "water-find", "water-catch", "water-seep", "water-vessel"],
+        ["shelter-site", "shelter-tarp", "shelter-insulate"],
+        ["sig-mirror", "sig-ground"],
+        ["env-cold", "fire-spark", "shelter-insulate", "camp-layers"],
+        ["env-wildfire", "env-smoke"],
+    ]
 
     private static func boostIndex(_ id: String, expanded: Set<String>) -> Int {
         var best = Int.max
@@ -851,15 +902,17 @@ public enum FieldCorpus {
         "meat": ["food-game", "food-cook"],
         "caza": ["food-game"],
         "carne": ["food-game"],
-        "fire": ["fire-stove", "fire-spark"],
-        "flame": ["fire-stove", "fire-spark"],
+        "fire": ["fire-spark", "fire-stove"],
+        "flame": ["fire-spark", "fire-stove"],
         "spark": ["fire-spark"],
         "ferro": ["fire-spark"],
         "tinder": ["fire-spark", "fire-char", "fire-wet"],
         "friction": ["fire-spark", "fire-bow"],
         "bowdrill": ["fire-spark", "fire-bow"],
-        "fuego": ["fire-stove", "fire-spark"],
+        "fuego": ["fire-spark", "fire-stove"],
         "stove": ["fire-stove"],
+        "estufa": ["fire-stove"],
+        "canister": ["fire-stove"],
         "shelter": ["shelter-tarp", "shelter-site"],
         "tarp": ["shelter-tarp"],
         "camp": ["shelter-site", "camp-start"],
