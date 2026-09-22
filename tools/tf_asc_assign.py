@@ -4,6 +4,8 @@
 33986112949: altool uploaded CPV 56, processingState VALID, PATCH 200,
 then POST betaGroups/.../relationships/builds 404 NOT_FOUND on that
 build id. Treat 409 as already assigned. Retry 404 with backoff.
+35742115500: GET /v1/builds urlopen timed out after WAIT no build 164.
+Map transport timeout to 598 and retry. Auth 401/403 fail closed.
 No App Review. No External. No network unless main() is invoked.
 """
 from __future__ import annotations
@@ -23,8 +25,14 @@ except ImportError:  # unit tests never call _http
     jwt = None
 
 ASSIGN_BACKOFF = (15.0, 30.0, 60.0, 90.0, 120.0)
+LIST_RETRYABLE = frozenset({500, 502, 503, 598})
 INTERNAL_GROUP = "28035586-fce6-474f-9bc2-ef0f1f65306e"
 ASC_APP = "6806388963"
+
+
+def transport_failure(exc: BaseException) -> tuple[int, dict[str, Any]]:
+    """35742115500: urlopen timeout must not crash assign."""
+    return 598, {"raw": str(exc)[:800]}
 
 
 def _match_build(payload: dict[str, Any], want: str) -> dict[str, Any] | None:
@@ -55,12 +63,16 @@ def assign_internal(
     target: dict[str, Any] | None = None
     while now() < deadline:
         query = urllib.parse.urlencode(
-            {"filter[app]": app, "limit": "20", "sort": "-uploadedDate"}
+            {"filter[app]": app, "limit": "50", "sort": "-uploadedDate"}
         )
         st, data = api("GET", "https://api.appstoreconnect.apple.com/v1/builds?" + query)
         if st != 200:
             print(f"list {st} {data}")
-            return 1
+            if st in (401, 403) or st not in LIST_RETRYABLE:
+                return 1
+            print("RETRY list", st)
+            sleep(30.0)
+            continue
         match = _match_build(data, want)
         if not match:
             print("WAIT no build", want)
@@ -149,6 +161,8 @@ def _http(
         except Exception:
             parsed = {"raw": raw[:800]}
         return exc.code, parsed
+    except (urllib.error.URLError, TimeoutError) as exc:
+        return transport_failure(exc)
 
 
 def main() -> int:

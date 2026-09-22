@@ -116,8 +116,10 @@ def test_testflight_workflow_invokes_gate() -> None:
     helper = (ROOT / "tools/tf_asc_cpv.py").read_text() if (ROOT / "tools/tf_asc_cpv.py").is_file() else ""
     if "tf_asc_cpv.py" not in ver_step:
         fail("34264110982: next CPV must run tools/tf_asc_cpv.py from git_ref")
-    if "RETRY list 500" not in helper or "LIST_BACKOFF" not in helper:
+    if "RETRY list" not in helper or "LIST_BACKOFF" not in helper:
         fail("34264110982: next CPV must retry ASC builds list 500")
+    if "598" not in helper or "LIST_RETRYABLE" not in helper:
+        fail("35742115500: next CPV must retry ASC builds list timeout")
     if "6806388963" not in text:
         fail("testflight-internal.yml missing app id 6806388963")
     if "28035586-fce6-474f-9bc2-ef0f1f65306e" not in text:
@@ -183,6 +185,8 @@ def test_altool_binds_primary_app() -> None:
         fail("assign step must run tools/tf_asc_assign.py from git_ref")
     if "RETRY assign 404" not in helper or "ASSIGN_BACKOFF" not in helper:
         fail("33986112949: assign must retry betaGroups 404 after VALID")
+    if "RETRY list" not in helper or "598" not in helper:
+        fail("35742115500: assign must retry ASC builds list timeout")
     if "st == 409" not in helper:
         fail("assign must treat 409 as already assigned")
     test_tf_asc_assign.main()
