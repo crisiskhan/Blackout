@@ -537,6 +537,14 @@ public enum InspectField {
     /// hold's route is still waiting. Naming the next procedure is the same
     /// honesty as the hold button: you see the handoff before you take it.
     public static func nextAction(for cardID: String) -> String {
+        switch cardID {
+        case "fire-spark": return "NEXT · SPARK"
+        case "fire-wet": return "NEXT · RAIN"
+        case "fire-char": return "NEXT · CHAR"
+        case "fire-bow": return "NEXT · BOW"
+        case "fire-stove": return "NEXT · STOVE"
+        default: break
+        }
         switch procedure(for: cardID) {
         case .water: return "NEXT · WATER"
         case .plant: return "NEXT · PLANT"

@@ -171,6 +171,31 @@ final class FieldCorpusTests: XCTestCase {
         )
     }
 
+    func testStartAFireOpensSparkThenTheFireFamily() {
+        let spark = card("fire-spark", category: "fire", title: "Fire from what you have")
+        let stove = card("fire-stove", category: "fire", title: "Stove and small fire")
+        let wet = card("fire-wet", category: "fire", title: "Fire in rain")
+        let char = card("fire-char", category: "fire", title: "Char and a bird's nest")
+        let bow = card("fire-bow", category: "fire", title: "Bow or hand drill last")
+        let wild = card("env-wildfire", category: "fire", title: "Leave the fire")
+        let chapter = [stove, spark, wet, char, bow, wild]
+        XCTAssertEqual(
+            FieldCorpus.ask(chapter, query: "I need to start a fire", locale: "en").first?.id,
+            "fire-spark"
+        )
+        XCTAssertEqual(
+            FieldCorpus.ask(chapter, query: "hacer fuego", locale: "es").first?.id,
+            "fire-spark"
+        )
+        XCTAssertEqual(FieldCorpus.ask(chapter, query: "stove", locale: "en").first?.id, "fire-stove")
+        XCTAssertEqual(
+            FieldCorpus.askWalk(first: spark, chapter: chapter),
+            ["fire-spark", "fire-wet", "fire-char", "fire-bow", "fire-stove"]
+        )
+        XCTAssertFalse(FieldCorpus.askWalk(first: spark, chapter: chapter).contains("env-wildfire"))
+        XCTAssertEqual(FieldCorpus.askWalk(first: wild, chapter: chapter).first, "env-wildfire")
+    }
+
     func testDoLinesSplitsTheOpenStepIntoKidTaps() {
         XCTAssertEqual(
             FieldCorpus.doLines("Clear first: settle, then filter cloth. Boil one minute."),
