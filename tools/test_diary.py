@@ -124,24 +124,12 @@ class DiaryGlassTests(unittest.TestCase):
         self.assertIn("testAttendanceIsHereOrSilentForTheLocalDay", tests)
         self.assertIn("testLineStampsTheGivenNow", tests)
 
-    def test_paper_prints_diary_not_due(self):
-        paper = read("Packages", "PaperGen", "Sources", "PaperGen", "PaperGen.swift")
-        tests = read(
-            "Packages", "PaperGen", "Tests", "PaperGenTests", "PaperGenTests.swift"
-        )
+    def test_paper_export_is_gone(self):
         exped = read("Blackout", "ExpeditionTab.swift")
-        self.assertIn("func export(", paper)
-        self.assertIn("diary: DiaryLog", paper)
-        self.assertIn("diary.attend(", paper)
-        self.assertIn("diary.feed()", paper)
-        self.assertNotIn("due ", paper)
-        self.assertNotIn("dueBack", paper)
-        self.assertNotIn("TripSheet", paper)
-        self.assertNotIn("PaperGen.export(diary:", exped)
+        self.assertFalse((ROOT / "Packages" / "PaperGen").exists())
+        self.assertNotIn("PaperGen", exped)
         self.assertNotIn('Button("EXPORT PAPER")', exped)
-        self.assertIn("HERE", tests)
-        self.assertIn("SILENT", tests)
-        self.assertNotIn("TripFactory", tests)
+        self.assertNotIn("TripFactory", exped)
 
     def test_mesh_diary_is_party_only(self):
         mesh = read("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift")

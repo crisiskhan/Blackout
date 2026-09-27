@@ -1698,68 +1698,6 @@ final class VisionCoreMLTests: XCTestCase {
 ''',
     )
 
-    w(PKG / "VisionCapture" / "Package.swift", package_swift("VisionCapture", ["VisionCoreML"]))
-    w(
-        PKG / "VisionCapture" / "Sources" / "VisionCapture" / "VisionCapture.swift",
-        r'''import Foundation
-import VisionCoreML
-
-public struct CaptureFrame: Equatable, Sendable {
-    public var features: [Double]
-    public var added: Bool
-
-    public init(features: [Double], added: Bool) {
-        self.features = features
-        self.added = added
-    }
-}
-
-public struct GuidedCapture: Equatable, Sendable {
-    public var frames: [CaptureFrame] = []
-    public init(frames: [CaptureFrame] = []) { self.frames = frames }
-    public mutating func addFrame(_ features: [Double]) {
-        frames.append(CaptureFrame(features: features, added: true))
-    }
-    public func mergedFeatures() -> [Double] {
-        guard !frames.isEmpty else { return [0, 0, 0] }
-        let width = frames.map(\.features.count).min() ?? 0
-        guard width > 0 else { return [0, 0, 0] }
-        let n = Double(frames.count)
-        return (0..<width).map { i in
-            frames.map { $0.features[i] }.reduce(0, +) / n
-        }
-    }
-    public func guess(book: VisionBook) -> VisionGuess {
-        VisionCoreML.classify(features: mergedFeatures(), book: book)
-    }
-}
-''',
-    )
-    w(
-        PKG / "VisionCapture" / "Tests" / "VisionCaptureTests" / "VisionCaptureTests.swift",
-        r'''import XCTest
-import VisionCoreML
-@testable import VisionCapture
-
-final class VisionCaptureTests: XCTestCase {
-    func testAddFrame() {
-        var g = GuidedCapture()
-        g.addFrame([1, 0, 0])
-        g.addFrame([0, 1, 0])
-        XCTAssertEqual(g.frames.count, 2)
-        XCTAssertEqual(g.mergedFeatures()[0], 0.5, accuracy: 0.01)
-        g.addFrame([1, 0])
-        XCTAssertEqual(g.mergedFeatures().count, 2)
-        XCTAssertEqual(g.mergedFeatures()[0], 2.0 / 3.0, accuracy: 0.01)
-        var empty = GuidedCapture()
-        XCTAssertEqual(empty.mergedFeatures(), [0, 0, 0])
-        empty.addFrame([])
-        XCTAssertEqual(empty.mergedFeatures(), [0, 0, 0])
-    }
-}
-''',
-    )
-
     w(PKG / "KitStore" / "Package.swift", package_swift("KitStore", []))
     w(
         PKG / "KitStore" / "Sources" / "KitStore" / "KitStore.swift",
@@ -1861,16 +1799,6 @@ final class KitStoreTests: XCTestCase {
     w(
         PKG / "TripBrief" / "Tests" / "TripBriefTests" / "TripBriefTests.swift",
         (PKG / "TripBrief" / "Tests" / "TripBriefTests" / "TripBriefTests.swift").read_text(encoding="utf-8"),
-    )
-
-    w(PKG / "PaperGen" / "Package.swift", package_swift("PaperGen", ["TripBrief", "RosterRoles", "PackIO"]))
-    w(
-        PKG / "PaperGen" / "Sources" / "PaperGen" / "PaperGen.swift",
-        (PKG / "PaperGen" / "Sources" / "PaperGen" / "PaperGen.swift").read_text(encoding="utf-8"),
-    )
-    w(
-        PKG / "PaperGen" / "Tests" / "PaperGenTests" / "PaperGenTests.swift",
-        (PKG / "PaperGen" / "Tests" / "PaperGenTests" / "PaperGenTests.swift").read_text(encoding="utf-8"),
     )
 
     w(PKG / "Instruments" / "Package.swift", package_swift("Instruments", ["BlackBox"]))

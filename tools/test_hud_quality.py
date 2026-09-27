@@ -2831,10 +2831,6 @@ class LiveRosterOnTheGlassTests(unittest.TestCase):
         exped = read("Blackout", "ExpeditionTab.swift")
         roles = read("Packages", "RosterRoles", "Sources", "RosterRoles", "RosterRoles.swift")
         app = read("Blackout", "AppRuntime.swift")
-        paper = read("Packages", "PaperGen", "Sources", "PaperGen", "PaperGen.swift")
-        paper_tests = read(
-            "Packages", "PaperGen", "Tests", "PaperGenTests", "PaperGenTests.swift"
-        )
         mesh = read("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift")
         roster_tests = read(
             "Packages", "RosterRoles", "Tests", "RosterRolesTests", "RosterRolesTests.swift"
@@ -2885,9 +2881,6 @@ class LiveRosterOnTheGlassTests(unittest.TestCase):
         self.assertIn("func sendRoster(", mesh)
         self.assertIn('kind: "roster"', mesh)
         self.assertIn('vitals.count == 6', mesh)
-        self.assertIn("role.title", paper)
-        self.assertIn('"LEAD A"', paper_tests)
-        self.assertNotIn('"lead A"', paper_tests)
         self.assertIn("func testLiveYouIsFirstEvenSolo", roster_tests)
         self.assertIn("func testSeatingNavIsStickyAndUnique", roster_tests)
         self.assertIn("ROLE chip cycles", qa)
@@ -5532,6 +5525,7 @@ class DeadGlassGoneTests(unittest.TestCase):
         self.assertNotIn("PaperShare", exped)
         self.assertNotIn("UIActivityViewController", exped)
         self.assertNotIn("import PaperGen", exped)
+        self.assertFalse((ROOT / "Packages" / "PaperGen").exists())
         self.assertNotIn("func paperRoster()", app)
         self.assertNotIn('Button("JOIN NAV")', exped)
         qa = read("docs", "SOLO_QA.md")

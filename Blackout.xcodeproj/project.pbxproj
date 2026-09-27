@@ -23,14 +23,12 @@
 		9A7E35B1798301E7953F6BCD /* FieldSpeech in Frameworks */ = {isa = PBXBuildFile; productRef = 8C1039025E2D17CE92E79C01 /* FieldSpeech */; };
 		BF2D63524A24050AD76A805D /* FieldAsk in Frameworks */ = {isa = PBXBuildFile; productRef = 635D413CD909912F4D333731 /* FieldAsk */; };
 		ADC813334578AEC8BCF18091 /* VisionCoreML in Frameworks */ = {isa = PBXBuildFile; productRef = 23D30BFE8411990E2FC45A88 /* VisionCoreML */; };
-		34908D756253480D4F19D6C7 /* VisionCapture in Frameworks */ = {isa = PBXBuildFile; productRef = CD2EDB7FE0A30DDB03F5ECE0 /* VisionCapture */; };
 		B80C32AD8C6A5802D9E7305E /* KitStore in Frameworks */ = {isa = PBXBuildFile; productRef = 2AA5F25B4520F0497169C09A /* KitStore */; };
 		D353BBFF8674B6F0B60EFC51 /* Vitals in Frameworks */ = {isa = PBXBuildFile; productRef = CB29C7043F09D7DF11FEEACC /* Vitals */; };
 		DB4540FACD5366945D215732 /* RedAlert in Frameworks */ = {isa = PBXBuildFile; productRef = CCBB82BF482F7E55E8AAE363 /* RedAlert */; };
 		9DF70F4121E4E6E680B739CA /* TimerSync in Frameworks */ = {isa = PBXBuildFile; productRef = F0F01B5AD66A37308713FF58 /* TimerSync */; };
 		C8F4354DBAFB1E4686BEE331 /* RosterRoles in Frameworks */ = {isa = PBXBuildFile; productRef = BB0A73C40F1251AB2CBBA317 /* RosterRoles */; };
 		3664B3EB0CD00ECCAAB0D1DB /* TripBrief in Frameworks */ = {isa = PBXBuildFile; productRef = 5AC4E2AB3321B9C7AFE60B65 /* TripBrief */; };
-		86C630E30C053793FFD3918B /* PaperGen in Frameworks */ = {isa = PBXBuildFile; productRef = 4058A145F0541E15FE88E8FD /* PaperGen */; };
 		7CB94E660D9C9983B9CEEA94 /* Almanac in Frameworks */ = {isa = PBXBuildFile; productRef = 373AC51C66DE579F20535CCA /* Almanac */; };
 		0F5C7C23FE54CBF3C90B872B /* NightRed in Frameworks */ = {isa = PBXBuildFile; productRef = 2EEC2750DDE6DD942664AD31 /* NightRed */; };
 		E457536BEB1CFFFC7FE9E688 /* BatteryAuction in Frameworks */ = {isa = PBXBuildFile; productRef = FC847D28FFD57BF7EE7E498C /* BatteryAuction */; };
@@ -52,7 +50,7 @@
 		3BFADFFD5F6800C1D655599B /* Blackout */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				E7C1A94B2F6D8014B3A55E21 /* Exceptions for "Blackout" */,
+				649F9D5206431566578FDB3A /* Exceptions for "Blackout" */,
 			);
 			path = Blackout;
 			sourceTree = "<group>";
@@ -96,14 +94,12 @@
 				9A7E35B1798301E7953F6BCD /* FieldSpeech in Frameworks */,
 				BF2D63524A24050AD76A805D /* FieldAsk in Frameworks */,
 				ADC813334578AEC8BCF18091 /* VisionCoreML in Frameworks */,
-				34908D756253480D4F19D6C7 /* VisionCapture in Frameworks */,
 				B80C32AD8C6A5802D9E7305E /* KitStore in Frameworks */,
 				D353BBFF8674B6F0B60EFC51 /* Vitals in Frameworks */,
 				DB4540FACD5366945D215732 /* RedAlert in Frameworks */,
 				9DF70F4121E4E6E680B739CA /* TimerSync in Frameworks */,
 				C8F4354DBAFB1E4686BEE331 /* RosterRoles in Frameworks */,
 				3664B3EB0CD00ECCAAB0D1DB /* TripBrief in Frameworks */,
-				86C630E30C053793FFD3918B /* PaperGen in Frameworks */,
 				7CB94E660D9C9983B9CEEA94 /* Almanac in Frameworks */,
 				0F5C7C23FE54CBF3C90B872B /* NightRed in Frameworks */,
 				E457536BEB1CFFFC7FE9E688 /* BatteryAuction in Frameworks */,
@@ -204,14 +200,12 @@
 				8C1039025E2D17CE92E79C01 /* FieldSpeech */,
 				635D413CD909912F4D333731 /* FieldAsk */,
 				23D30BFE8411990E2FC45A88 /* VisionCoreML */,
-				CD2EDB7FE0A30DDB03F5ECE0 /* VisionCapture */,
 				2AA5F25B4520F0497169C09A /* KitStore */,
 				CB29C7043F09D7DF11FEEACC /* Vitals */,
 				CCBB82BF482F7E55E8AAE363 /* RedAlert */,
 				F0F01B5AD66A37308713FF58 /* TimerSync */,
 				BB0A73C40F1251AB2CBBA317 /* RosterRoles */,
 				5AC4E2AB3321B9C7AFE60B65 /* TripBrief */,
-				4058A145F0541E15FE88E8FD /* PaperGen */,
 				373AC51C66DE579F20535CCA /* Almanac */,
 				2EEC2750DDE6DD942664AD31 /* NightRed */,
 				FC847D28FFD57BF7EE7E498C /* BatteryAuction */,
@@ -301,14 +295,12 @@
 				1104D0C0A7D1B6CC1D83A8BE /* XCLocalSwiftPackageReference "Packages/FieldSpeech" */,
 				AB685F0E850F09BAF71E9E35 /* XCLocalSwiftPackageReference "Packages/FieldAsk" */,
 				9BF1E9C4B2F60E7940500E21 /* XCLocalSwiftPackageReference "Packages/VisionCoreML" */,
-				6C17E6866D31DB03747A7F74 /* XCLocalSwiftPackageReference "Packages/VisionCapture" */,
 				6E7A6AC1AA7CC534597B0DE9 /* XCLocalSwiftPackageReference "Packages/KitStore" */,
 				B69ADB5DA75C1213D70ADF4A /* XCLocalSwiftPackageReference "Packages/Vitals" */,
 				963F34A583FE7701116215B1 /* XCLocalSwiftPackageReference "Packages/RedAlert" */,
 				56241AEF72F7BA930A9CAC73 /* XCLocalSwiftPackageReference "Packages/TimerSync" */,
 				5872FC58D04D3B49F0D14278 /* XCLocalSwiftPackageReference "Packages/RosterRoles" */,
 				F01CFB8B7C225C06E4C079EA /* XCLocalSwiftPackageReference "Packages/TripBrief" */,
-				328875F5428CC1DA8809671C /* XCLocalSwiftPackageReference "Packages/PaperGen" */,
 				4AED5443EA4254FCFB264540 /* XCLocalSwiftPackageReference "Packages/Almanac" */,
 				1BADFB1C30942929E8CB0088 /* XCLocalSwiftPackageReference "Packages/NightRed" */,
 				491A6E57190CB58B9CC8B69A /* XCLocalSwiftPackageReference "Packages/BatteryAuction" */,
@@ -397,7 +389,7 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		E7C1A94B2F6D8014B3A55E21 /* Exceptions for "Blackout" */ = {
+		649F9D5206431566578FDB3A /* Exceptions for "Blackout" */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -486,7 +478,6 @@
 				buildSettings = {
 					ALWAYS_SEARCH_USER_PATHS = NO;
 					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-					ASSETCATALOG_COMPILER_STANDALONE_ICON_BEHAVIOR = none;
 					CLANG_ANALYZER_NONNULL = YES;
 					CLANG_ENABLE_MODULES = YES;
 					CLANG_ENABLE_OBJC_ARC = YES;
@@ -503,11 +494,12 @@
 					GCC_OPTIMIZATION_LEVEL = 0;
 					GENERATE_INFOPLIST_FILE = YES;
 					INFOPLIST_FILE = Blackout/Info.plist;
-					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
+					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.navigation;
 					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Tens of meters without LoRa. Deny is supported.";
 					INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Mesh uses Bluetooth only when you opt in. Deny is supported.";
+					INFOPLIST_KEY_NSBonjourServices = _blackoutmesh._tcp;
 					INFOPLIST_KEY_NSCameraUsageDescription = "Vision classifies a still on this device. It is a guess. Deny is supported.";
 					INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Mesh uses Bluetooth or peer Wi-Fi only when you join a party. Airplane: no sockets. Deny is supported.";
 					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "GPS for lock-on, dead reckoning start, and last pip. Deny is supported.";
@@ -535,7 +527,6 @@
 					SWIFT_OPTIMIZATION_LEVEL = -Onone;
 					SWIFT_VERSION = 5.0;
 					TARGETED_DEVICE_FAMILY = "1,2";
-					ENABLE_APP_INTENTS_METADATA_GENERATION = NO;
 				};
 				name = Debug;
 		};
@@ -544,7 +535,6 @@
 				buildSettings = {
 					ALWAYS_SEARCH_USER_PATHS = NO;
 					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-					ASSETCATALOG_COMPILER_STANDALONE_ICON_BEHAVIOR = none;
 					CLANG_ANALYZER_NONNULL = YES;
 					CLANG_ENABLE_MODULES = YES;
 					CLANG_ENABLE_OBJC_ARC = YES;
@@ -559,11 +549,12 @@
 					GCC_NO_COMMON_BLOCKS = YES;
 					GENERATE_INFOPLIST_FILE = YES;
 					INFOPLIST_FILE = Blackout/Info.plist;
-					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
+					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.navigation;
 					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Tens of meters without LoRa. Deny is supported.";
 					INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Mesh uses Bluetooth only when you opt in. Deny is supported.";
+					INFOPLIST_KEY_NSBonjourServices = _blackoutmesh._tcp;
 					INFOPLIST_KEY_NSCameraUsageDescription = "Vision classifies a still on this device. It is a guess. Deny is supported.";
 					INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Mesh uses Bluetooth or peer Wi-Fi only when you join a party. Airplane: no sockets. Deny is supported.";
 					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "GPS for lock-on, dead reckoning start, and last pip. Deny is supported.";
@@ -591,7 +582,6 @@
 					SWIFT_VERSION = 5.0;
 					TARGETED_DEVICE_FAMILY = "1,2";
 					VALIDATE_PRODUCT = YES;
-					ENABLE_APP_INTENTS_METADATA_GENERATION = NO;
 				};
 				name = Release;
 		};
@@ -600,7 +590,6 @@
 				buildSettings = {
 					ALWAYS_SEARCH_USER_PATHS = NO;
 					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-					ASSETCATALOG_COMPILER_STANDALONE_ICON_BEHAVIOR = none;
 					CLANG_ANALYZER_NONNULL = YES;
 					CLANG_ENABLE_MODULES = YES;
 					CLANG_ENABLE_OBJC_ARC = YES;
@@ -615,8 +604,8 @@
 					GCC_OPTIMIZATION_LEVEL = 0;
 					GENERATE_INFOPLIST_FILE = YES;
 					INFOPLIST_FILE = BlackoutWatch/Info.plist;
-					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
+					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 					INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.crisiskhan.blackout;
 					INFOPLIST_KEY_WKWatchOnly = YES;
@@ -633,7 +622,6 @@
 					SWIFT_VERSION = 5.0;
 					TARGETED_DEVICE_FAMILY = 4;
 					WATCHOS_DEPLOYMENT_TARGET = 11.0;
-					ENABLE_APP_INTENTS_METADATA_GENERATION = NO;
 				};
 				name = Debug;
 		};
@@ -642,7 +630,6 @@
 				buildSettings = {
 					ALWAYS_SEARCH_USER_PATHS = NO;
 					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-					ASSETCATALOG_COMPILER_STANDALONE_ICON_BEHAVIOR = none;
 					CLANG_ANALYZER_NONNULL = YES;
 					CLANG_ENABLE_MODULES = YES;
 					CLANG_ENABLE_OBJC_ARC = YES;
@@ -655,8 +642,8 @@
 					GCC_NO_COMMON_BLOCKS = YES;
 					GENERATE_INFOPLIST_FILE = YES;
 					INFOPLIST_FILE = BlackoutWatch/Info.plist;
-					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
+					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 					INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.crisiskhan.blackout;
 					INFOPLIST_KEY_WKWatchOnly = YES;
@@ -673,7 +660,6 @@
 					TARGETED_DEVICE_FAMILY = 4;
 					VALIDATE_PRODUCT = YES;
 					WATCHOS_DEPLOYMENT_TARGET = 11.0;
-					ENABLE_APP_INTENTS_METADATA_GENERATION = NO;
 				};
 				name = Release;
 		};
@@ -696,8 +682,8 @@
 					GCC_OPTIMIZATION_LEVEL = 0;
 					GENERATE_INFOPLIST_FILE = YES;
 					INFOPLIST_FILE = BlackoutWidgets/Info.plist;
-					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_CFBundleDisplayName = "Blackout Widgets";
+					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 					LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -712,7 +698,6 @@
 					SWIFT_OPTIMIZATION_LEVEL = -Onone;
 					SWIFT_VERSION = 5.0;
 					TARGETED_DEVICE_FAMILY = "1,2";
-					ENABLE_APP_INTENTS_METADATA_GENERATION = NO;
 				};
 				name = Debug;
 		};
@@ -733,8 +718,8 @@
 					GCC_NO_COMMON_BLOCKS = YES;
 					GENERATE_INFOPLIST_FILE = YES;
 					INFOPLIST_FILE = BlackoutWidgets/Info.plist;
-					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_CFBundleDisplayName = "Blackout Widgets";
+					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 					LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -749,7 +734,6 @@
 					SWIFT_VERSION = 5.0;
 					TARGETED_DEVICE_FAMILY = "1,2";
 					VALIDATE_PRODUCT = YES;
-					ENABLE_APP_INTENTS_METADATA_GENERATION = NO;
 				};
 				name = Release;
 		};
@@ -859,10 +843,6 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/VisionCoreML;
 		};
-		6C17E6866D31DB03747A7F74 /* XCLocalSwiftPackageReference "Packages/VisionCapture" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/VisionCapture;
-		};
 		6E7A6AC1AA7CC534597B0DE9 /* XCLocalSwiftPackageReference "Packages/KitStore" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/KitStore;
@@ -886,10 +866,6 @@
 		F01CFB8B7C225C06E4C079EA /* XCLocalSwiftPackageReference "Packages/TripBrief" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/TripBrief;
-		};
-		328875F5428CC1DA8809671C /* XCLocalSwiftPackageReference "Packages/PaperGen" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/PaperGen;
 		};
 		4AED5443EA4254FCFB264540 /* XCLocalSwiftPackageReference "Packages/Almanac" */ = {
 			isa = XCLocalSwiftPackageReference;
@@ -998,11 +974,6 @@
 			package = 9BF1E9C4B2F60E7940500E21 /* XCLocalSwiftPackageReference "Packages/VisionCoreML" */;
 			productName = VisionCoreML;
 		};
-		CD2EDB7FE0A30DDB03F5ECE0 /* VisionCapture */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 6C17E6866D31DB03747A7F74 /* XCLocalSwiftPackageReference "Packages/VisionCapture" */;
-			productName = VisionCapture;
-		};
 		2AA5F25B4520F0497169C09A /* KitStore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6E7A6AC1AA7CC534597B0DE9 /* XCLocalSwiftPackageReference "Packages/KitStore" */;
@@ -1032,11 +1003,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F01CFB8B7C225C06E4C079EA /* XCLocalSwiftPackageReference "Packages/TripBrief" */;
 			productName = TripBrief;
-		};
-		4058A145F0541E15FE88E8FD /* PaperGen */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 328875F5428CC1DA8809671C /* XCLocalSwiftPackageReference "Packages/PaperGen" */;
-			productName = PaperGen;
 		};
 		373AC51C66DE579F20535CCA /* Almanac */ = {
 			isa = XCSwiftPackageProductDependency;
