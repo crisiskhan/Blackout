@@ -281,6 +281,32 @@ class OverlayTilesTests(unittest.TestCase):
             self.assertIn("MLNVectorTileSource", worked)
 
 
+class ReplacedFeaturesGoneTests(unittest.TestCase):
+    def test_paper_export_and_guided_capture_are_unlinked(self):
+        pbx = read("Blackout.xcodeproj", "project.pbxproj")
+        gen = read("tools", "v3", "generate_project.py")
+        emit = read("tools", "v3", "emit_swift.py")
+        app_emit = read("tools", "v3", "emit_app.py")
+        self.assertFalse((ROOT / "Packages" / "PaperGen").exists())
+        self.assertFalse((ROOT / "Packages" / "VisionCapture").exists())
+        self.assertNotIn("PaperGen", pbx)
+        self.assertNotIn("VisionCapture", pbx)
+        self.assertNotIn('("PaperGen", "PaperGen")', gen)
+        self.assertNotIn('("VisionCapture", "VisionCapture")', gen)
+        self.assertNotIn("Packages/PaperGen", emit)
+        self.assertNotIn("Packages/VisionCapture", emit)
+        self.assertNotIn("import PaperGen", app_emit)
+        self.assertNotIn("import VisionCapture", app_emit)
+        self.assertNotIn("GuidedCapture", app_emit)
+        self.assertNotIn("EXPORT PAPER", app_emit)
+        for path in (ROOT / "Blackout").rglob("*.swift"):
+            blob = path.read_text()
+            self.assertNotIn("import PaperGen", blob, path.name)
+            self.assertNotIn("import VisionCapture", blob, path.name)
+            self.assertNotIn("GuidedCapture", blob, path.name)
+            self.assertNotIn("PaperGen.export", blob, path.name)
+
+
 class WatchStaysOmittedTests(unittest.TestCase):
     def test_watch_target_exists_and_stays_out_of_the_ipa(self):
         pbx = read("Blackout.xcodeproj", "project.pbxproj")

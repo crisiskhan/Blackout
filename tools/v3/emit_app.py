@@ -527,7 +527,6 @@ struct CommsTab: View {
 import FieldCorpus
 import FieldStepper
 import FieldSpeech
-import VisionCapture
 import VisionCoreML
 
 struct FieldTab: View {
@@ -558,17 +557,8 @@ struct FieldTab: View {
                     Button("SEND TO PARTY") { var x = s; x.send(); stepper = x }
                 }
             }
-            Button("VISION ADD FRAME") {
-                var cap = GuidedCapture()
-                cap.addFrame([0.2, 0.7, 0.1])
-                if let url = runtime.packs.flatMap({ _ in Bundle.main.url(forResource: "labels.\\(runtime.packs?.active?.state.lowercased() ?? "tx")", withExtension: "json", subdirectory: "Vision") }),
-                   let data = try? Data(contentsOf: url),
-                   let book = try? VisionCoreML.load(data) {
-                    guess = cap.guess(book: book)
-                }
-            }
             if let g = guess {
-                Text("\\(g.name) \\(g.percent)% lookalikes \\(g.lookalikes.joined(separator: ", ")) edible=\\(g.edible)")
+                Text(g.name)
                     .font(.caption)
             }
         }
@@ -594,7 +584,6 @@ struct FieldTab: View {
         '''import SwiftUI
 import Vitals
 import TimerSync
-import PaperGen
 
 struct ExpeditionTab: View {
     @Bindable var runtime: AppRuntime
@@ -623,10 +612,6 @@ struct ExpeditionTab: View {
                 ForEach(runtime.timers.overduePlate(), id: \\.id) { t in
                     Text("\\(L10n.t("overdue", runtime.locale)) \\(t.task) — not SOS")
                         .foregroundStyle(Color.orange)
-                }
-                Button("EXPORT PAPER") {
-                    let text = PaperGen.export(trip: runtime.trip, roster: runtime.roster, packName: runtime.packs?.active?.name ?? "")
-                    runtime.box.log("paper", text)
                 }
             }
             .padding(12)
