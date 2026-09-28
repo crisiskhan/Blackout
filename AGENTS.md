@@ -76,6 +76,7 @@ python3 tools/test_hud_quality.py
 `test_cctv_stills.py`,
 `test_mesh_cams.py`,
 `test_update_all_cams.py`,
+`test_open_cams.py`,
 `test_mesh_range.py`,
 `test_hud_instrument.py`,
 `test_vision_glass.py`,

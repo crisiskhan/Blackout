@@ -1,1 +1,1226 @@
-[]
+[
+  {
+    "id": "nmdot-SS0yNU5CQE5NNg",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40NM6",
+    "lat": 34.8143888888889,
+    "lon": -106.760561111111,
+    "name": "I-25 NB @ NM 6",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNVNCQE5NNg",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25SB%40NM6",
+    "lat": 34.81476388888888,
+    "lon": -106.76146666666666,
+    "name": "I-25 SB @ NM 6",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNU5CQEJJQTEwNQ",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40BIA105",
+    "lat": 34.8574805555556,
+    "lon": -106.741619444444,
+    "name": "I-25 NB @ BIA 105",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNVNCQEJJQTEwNQ",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25SB%40BIA105",
+    "lat": 34.85782777777778,
+    "lon": -106.74223611111111,
+    "name": "I-25 SB @ BIA 105",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNVNCQE5NMzE0",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25SB%40NM314",
+    "lat": 34.94845,
+    "lon": -106.693480555556,
+    "name": "I-25 @ Isleta Blvd",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNU5CQEJyb2Fkd2F5",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40Broadway",
+    "lat": 34.952166,
+    "lon": -106.664658,
+    "name": "I-25 NB @ Broadway",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNVNCQEJyb2Fkd2F5",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25SB%40Broadway",
+    "lat": 34.952808,
+    "lon": -106.664561,
+    "name": "I-25 SB @ Broadway",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STI1QE5vZkJyb2Fkd2F5",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I25%40NofBroadway",
+    "lat": 34.960342,
+    "lon": -106.657723,
+    "name": "I-25 @ N of Broadway",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-Tk02T25JLTQw",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=NM6OnI-40",
+    "lat": 34.983,
+    "lon": -107.1712,
+    "name": "I-40 @ NM 6",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNU5CQEJvYmJ5Rm9zdGVy",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40BobbyFoster",
+    "lat": 34.988892,
+    "lon": -106.64917,
+    "name": "I-25 NB @ Bobby Foster",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNVNCQEJvYmJ5Rm9zdGVy",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25SB%40BobbyFoster",
+    "lat": 34.99,
+    "lon": -106.65,
+    "name": "I-25 SB @ Bobby Foster",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MFdCQE1vcmlhcnR5RWFzdA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40WB%40MoriartyEast",
+    "lat": 35.005007,
+    "lon": -106.011369,
+    "name": "I-40 WB @ Moriarty East",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEVCQE1vcmlhcnR5RWFzdA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40EB%40MoriartyEast",
+    "lat": 35.005642,
+    "lon": -106.020059,
+    "name": "I-40 EB @ Moriarty East",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-Q2xpbmVzQ29ybmVyc09uSS00MA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=ClinesCornersOnI-40",
+    "lat": 35.008205,
+    "lon": -105.65938,
+    "name": "I-40 @ Clines Corners",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEVCQE1vcmlhcnR5V2VzdA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40EB%40MoriartyWest",
+    "lat": 35.013182,
+    "lon": -106.06741,
+    "name": "I-40 EB @ Moriarty West",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MFdCQE1vcmlhcnR5V2VzdA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40WB%40MoriartyWest",
+    "lat": 35.015537,
+    "lon": -106.072195,
+    "name": "I-40 WB @ Moriarty West",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STI1U291dGhvZlJpb0JyYXZv",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I25SouthofRioBravo",
+    "lat": 35.015573,
+    "lon": -106.639904,
+    "name": "I-25 South of Rio Bravo",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNVNCQFJpb0JyYXZv",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25SB%40RioBravo",
+    "lat": 35.02344444444444,
+    "lon": -106.63860555555556,
+    "name": "I-25 SB @ Rio Bravo",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBSaW9CcmF2bw",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40RioBravo",
+    "lat": 35.023491,
+    "lon": -106.63828,
+    "name": "I-25 @ Rio Bravo",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEVCQE1hcnRpblJvYWQ",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40EB%40MartinRoad",
+    "lat": 35.027204,
+    "lon": -106.102791,
+    "name": "I-40 EB @ Martin Road",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MFdCQE1hcnRpblJvYWQ",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40WB%40MartinRoad",
+    "lat": 35.02904,
+    "lon": -106.105269,
+    "name": "I-40 WB @ Martin Road",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBSaW9QdWVyY29fZmliZXI",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40RioPuerco_fiber",
+    "lat": 35.032766,
+    "lon": -106.945232,
+    "name": "I-40 @ Rio Puerco",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBTdW5wb3J0",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40Sunport",
+    "lat": 35.0476,
+    "lon": -106.63781,
+    "name": "I-25 @ Sunport",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEVCQFdpbGxpYW1zUmFuY2hSb2Fk",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40EB%40WilliamsRanchRoad",
+    "lat": 35.04999,
+    "lon": -106.156195,
+    "name": "I-40 EB @ Williams Ranch Road",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MFdCQFdpbGxpYW1zUmFuY2hSb2Fk",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40WB%40WilliamsRanchRoad",
+    "lat": 35.051009,
+    "lon": -106.157257,
+    "name": "I-40 WB @ Williams Ranch Road",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-QXRyaXNjb1Zpc3RhV2VzdA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=AtriscoVistaWest",
+    "lat": 35.057732,
+    "lon": -106.8162,
+    "name": "I-40 West of Atrisco Vista",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBHaWJzb24",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40Gibson",
+    "lat": 35.059101,
+    "lon": -106.6379,
+    "name": "I-25 @ Gibson",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBDYXJudWVsT3ZlcnBhc3M",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40CarnuelOverpass",
+    "lat": 35.063202,
+    "lon": -106.46776,
+    "name": "I-40 @ Carnuel Overpass",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MFdAUGFzZW9EZWxWb2xjYW4",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40W%40PaseoDelVolcan",
+    "lat": 35.064919,
+    "lon": -106.78721,
+    "name": "I-40 @ Atrisco Vista",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBDYXJudWVsX2ZpYmVy",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40Carnuel_fiber",
+    "lat": 35.066101,
+    "lon": -106.42228,
+    "name": "I-40 @ Carnuel",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEVAVHJhbXdheQ",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40E%40Tramway",
+    "lat": 35.06776,
+    "lon": -106.49289,
+    "name": "I-40 @ Tramway Onramp",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBUcmFtd2F5",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40Tramway",
+    "lat": 35.069172,
+    "lon": -106.49654,
+    "name": "I-40 @ Tramway",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBDZXNhckNoYXZleg",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40CesarChavez",
+    "lat": 35.06982,
+    "lon": -106.63956,
+    "name": "I-25 @ Cesar Chavez",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBXZXN0b2ZFZGdld29vZA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40WestofEdgewood",
+    "lat": 35.0716638888889,
+    "lon": -106.213841666667,
+    "name": "I-40 @ West of Edgewood",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEVCQEp1YW5UYWJv",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40EB%40JuanTabo",
+    "lat": 35.076199,
+    "lon": -106.51483,
+    "name": "I-40 EB @ Juan Tabo",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MFdCQEp1YW5UYWJv",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40WB%40JuanTabo",
+    "lat": 35.077207,
+    "lon": -106.515334,
+    "name": "I-40 WB @ Juan Tabo",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBDb2Fs",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40Coal",
+    "lat": 35.078548,
+    "lon": -106.63746,
+    "name": "I-25 @ Coal",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBMZWFk",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40Lead",
+    "lat": 35.080009,
+    "lon": -106.63697,
+    "name": "I-25 @ Lead",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNU5CQENlbnRyYWw",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40Central",
+    "lat": 35.083,
+    "lon": -106.636,
+    "name": "I-25NB @ Central",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STI1U0JAQ2VudHJhbA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I25SB%40Central",
+    "lat": 35.083055,
+    "lon": -106.636843,
+    "name": "I-25 SB @ Central",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBFdWJhbms",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40Eubank",
+    "lat": 35.08437,
+    "lon": -106.53216,
+    "name": "I-40 @ Eubank",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNVNCQE1MSw",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25SB%40MLK",
+    "lat": 35.084897,
+    "lon": -106.636482,
+    "name": "I-25 SB @ MLK",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNU5CQE1MSw",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40MLK",
+    "lat": 35.085,
+    "lon": -106.6361,
+    "name": "I-25 NB @ MLK",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBOTTE0X2ZpYmVy",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40NM14_fiber",
+    "lat": 35.085304,
+    "lon": -106.38063,
+    "name": "I-40 @ NM 14",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEA5OHRoU3Q",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%4098thSt",
+    "lat": 35.085773,
+    "lon": -106.74665,
+    "name": "I-40 @ 98th St",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-VHJhbXdheUBMb21hcw",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=Tramway%40Lomas",
+    "lat": 35.086472,
+    "lon": -106.49755,
+    "name": "Tramway @ Lomas",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STQwRUJATG9tYXM",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I40EB%40Lomas",
+    "lat": 35.08699,
+    "lon": -106.54337,
+    "name": "I-40 EB @ Lomas",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STQwV0JATG9tYXM",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I40WB%40Lomas",
+    "lat": 35.0873777777778,
+    "lon": -106.542483333333,
+    "name": "I-40 WB @ Lomas",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEVCQFd5b21pbmc",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40EB%40Wyoming",
+    "lat": 35.089928,
+    "lon": -106.55068,
+    "name": "I-40 @ Wyoming",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEVCQE10VmFsbGV5",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40EB%40MtValley",
+    "lat": 35.091157,
+    "lon": -106.262083,
+    "name": "I-40 EB @ Mountain Valley",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBMb21hcw",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40Lomas",
+    "lat": 35.091244,
+    "lon": -106.63457,
+    "name": "I-25 @ Lomas",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STQwV0JATXRWYWxsZXk",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I40WB%40MtValley",
+    "lat": 35.091752,
+    "lon": -106.261363,
+    "name": "I-40 WB @ Mountain Valley",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEAzMzdfZmliZXI",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40337_fiber",
+    "lat": 35.092701,
+    "lon": -106.3718,
+    "name": "I-40 @ Zamora Road",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBQZW5uc3lsdmFuaWE",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40Pennsylvania",
+    "lat": 35.093739,
+    "lon": -106.55954,
+    "name": "I-40 @ Pennsylvania",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBVbnNlcg",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40Unser",
+    "lat": 35.094109,
+    "lon": -106.73,
+    "name": "I-40 @ Unser",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBMb3Vpc2lhbmE",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40Louisiana",
+    "lat": 35.097527,
+    "lon": -106.56889,
+    "name": "I-40 @ Louisiana",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-Q29vcnNAR2xlbnJpbw",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=Coors%40Glenrio",
+    "lat": 35.097546,
+    "lon": -106.70802,
+    "name": "Coors @ Glenrio",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBTZWRpbGxvSGlsbA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40SedilloHill",
+    "lat": 35.100498,
+    "lon": -106.281,
+    "name": "I-40 @ Sedillo Hill WB",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEVCQFNlZGlsbG9fSGlsbF9maWJlcg",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40EB%40Sedillo_Hill_fiber",
+    "lat": 35.100554,
+    "lon": -106.283376,
+    "name": "I-40 EB @ Sedillo",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STQwRUJAU2FuUGVkcm8",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I40EB%40SanPedro",
+    "lat": 35.10122,
+    "lon": -106.578017,
+    "name": "I-40 EB @ San Pedro",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MFdCQFNhblBlZHJv",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40WB%40SanPedro",
+    "lat": 35.1014805555556,
+    "lon": -106.577766666667,
+    "name": "I-40 WB @ San Pedro",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBTb2ZCaWdJ",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40SofBigI",
+    "lat": 35.101913,
+    "lon": -106.63014,
+    "name": "I-25 @ S of Big I",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STQwQFdlc3RvZkNvb3Jz",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I40%40WestofCoors",
+    "lat": 35.101936,
+    "lon": -106.714487,
+    "name": "I-40 @ West of Coors",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEVCQFp1emF4",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40EB%40Zuzax",
+    "lat": 35.102329,
+    "lon": -106.34878,
+    "name": "I-40 @ Zuzax",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MFdCdG9JMjVTQg",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40WBtoI25SB",
+    "lat": 35.10314,
+    "lon": -106.631429,
+    "name": "I-40 WB to I-25 SB",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-Q29vcnNASWxpZmY",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=Coors%40Iliff",
+    "lat": 35.103718,
+    "lon": -106.70595,
+    "name": "Coors @ Iliff",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBTYW5NYXRlbw",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40SanMateo",
+    "lat": 35.103828,
+    "lon": -106.58755,
+    "name": "I-40 @ San Mateo",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBXYXNoaW5ndG9u",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40Washington",
+    "lat": 35.103981,
+    "lon": -106.5955,
+    "name": "I-40 @ Washington",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEVCL0ktMjVHb3Jl",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40EB%2FI-25Gore",
+    "lat": 35.105,
+    "lon": -106.634,
+    "name": "I-40 @ I-25",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBDYXJsaXNsZQ",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40Carlisle",
+    "lat": 35.105026,
+    "lon": -106.60422,
+    "name": "I-40 @ Carlisle",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBSaW9HcmFuZGU",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40RioGrande",
+    "lat": 35.105148,
+    "lon": -106.67075,
+    "name": "I-40 @ Rio Grande Blvd",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEA0dGhTdA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%404thSt",
+    "lat": 35.106171,
+    "lon": -106.64751,
+    "name": "I-40 @ 4th St",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEAxMnRoU3Q",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%4012thSt",
+    "lat": 35.10627,
+    "lon": -106.65823,
+    "name": "I-40 @ 12th St",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBSaW9HcmFuZGVSaXZlcg",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40RioGrandeRiver",
+    "lat": 35.1063,
+    "lon": -106.69275,
+    "name": "I-40 @ Rio Grande River",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MFdlc3RUb0ktMjU",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40WestToI-25",
+    "lat": 35.106425,
+    "lon": -106.625132,
+    "name": "I-40 West To I-25",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STI1U0J0b0ktNDBFQg",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I25SBtoI-40EB",
+    "lat": 35.10651,
+    "lon": -106.630041,
+    "name": "I-25 SB to I-40 EB",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-Q29vcnNAQXRyaXNjbw",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=Coors%40Atrisco",
+    "lat": 35.106571,
+    "lon": -106.7,
+    "name": "Coors @ Atrisco",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-Q29vcnNASS00MFNHb3Jl",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=Coors%40I-40SGore",
+    "lat": 35.106598,
+    "lon": -106.7045,
+    "name": "I-40 @ Coors",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEVCQDdUSFNU",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40EB%407THST",
+    "lat": 35.1067555555556,
+    "lon": -106.652063888889,
+    "name": "I-40 EB @ 7Th St",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STQwQEVhc3RvZkNvb3Jz",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I40%40EastofCoors",
+    "lat": 35.107222,
+    "lon": -106.701202,
+    "name": "I-40 @ East of Coors",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBVbml2ZXJzaXR5",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40University",
+    "lat": 35.107796,
+    "lon": -106.61685,
+    "name": "I-40 @ University",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEVCQFF1YXJyeVJk",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40EB%40QuarryRd",
+    "lat": 35.107857,
+    "lon": -106.30463,
+    "name": "I-40 @ Quarry Rd",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNU5CL0dvcmU",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%2FGore",
+    "lat": 35.107995,
+    "lon": -106.628156,
+    "name": "I-25 @ N of Big I",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-Q29vcnNATm9mSS00MA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=Coors%40NofI-40",
+    "lat": 35.108345,
+    "lon": -106.70341,
+    "name": "Coors @ N of I-40",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS00MEBTdW5zZXRDYW55b24",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40SunsetCanyon",
+    "lat": 35.115318,
+    "lon": -106.32838,
+    "name": "I-40 @ Sunset Canyon",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STI1U0JGcm9udGFnZVJkQENhbmRlbGFyaWE",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I25SBFrontageRd%40Candelaria",
+    "lat": 35.116174,
+    "lon": -106.625584,
+    "name": "I-25 SB Frontage Rd @ Candelaria",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBDb21hbmNoZQ",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40Comanche",
+    "lat": 35.12381,
+    "lon": -106.62186,
+    "name": "I-25 @ Comanche",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBDb21hbmNoZU9uUmFtcA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40ComancheOnRamp",
+    "lat": 35.127632,
+    "lon": -106.61762,
+    "name": "I-25 @ Comanche on Ramp",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBNb25nb21lcnk",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40Mongomery",
+    "lat": 35.132748,
+    "lon": -106.60971,
+    "name": "I-25 @ Montgomery",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBKZWZmZXJzb24",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40Jefferson",
+    "lat": 35.141708,
+    "lon": -106.59502,
+    "name": "I-25 @ Jefferson",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STI1TkJGcm9udGFnZVJkQE9zdW5h",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I25NBFrontageRd%40Osuna",
+    "lat": 35.145113,
+    "lon": -106.590434,
+    "name": "I-25 NB Frontage Rd @ Osuna",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBTYW5NYXRlbw",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40SanMateo",
+    "lat": 35.153252,
+    "lon": -106.58856,
+    "name": "I-25 @ San Mateo",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBTYW5BbnRvbmlv",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40SanAntonio",
+    "lat": 35.160198,
+    "lon": -106.5871,
+    "name": "I-25 @ San Antonio",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-Tk01MzZATk0xNA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=NM536%40NM14",
+    "lat": 35.16340283333,
+    "lon": -106.34927933333,
+    "name": "NM 536 @ NM 14",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STI1U0JAUERO",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I25SB%40PDN",
+    "lat": 35.173489,
+    "lon": -106.584378,
+    "name": "I-25 SB @ PDN",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-VHJhbXdheUBQRE4",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=Tramway%40PDN",
+    "lat": 35.174,
+    "lon": -106.4961,
+    "name": "Tramway @ PDN",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBQYXNlb0RlbE5vcnRl",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40PaseoDelNorte",
+    "lat": 35.17429,
+    "lon": -106.58386,
+    "name": "I-25 @ Paseo Del Norte",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-UERORUJARURJVEg",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=PDNEB%40EDITH",
+    "lat": 35.17454166666666,
+    "lon": -106.60626666666666,
+    "name": "PDN EB @ Edith",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-UEROV0JARWRpdGg",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=PDNWB%40Edith",
+    "lat": 35.174838888888885,
+    "lon": -106.60638333333333,
+    "name": "PDN WB @ Edith",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SmVmZmVyc29uQFBETg",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=Jefferson%40PDN",
+    "lat": 35.175,
+    "lon": -106.593,
+    "name": "Jefferson @ PDN",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBOb2ZQYXNlb0RlbE5vcnRl",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40NofPaseoDelNorte",
+    "lat": 35.178,
+    "lon": -106.5828,
+    "name": "I-25 @ N of Paseo del Norte",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-UGFzZW9EZWxOb3J0ZUF0NHRo",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=PaseoDelNorteAt4th",
+    "lat": 35.179001,
+    "lon": -106.628,
+    "name": "Paseo Del Norte @ 4th St",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-UGFzZW9EZWxOb3J0ZUF0Q29vcnM",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=PaseoDelNorteAtCoors",
+    "lat": 35.181,
+    "lon": -106.668,
+    "name": "Paseo Del Norte @ Coors",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-UEROQFdlc3RvZlJpb0dyYW5kZVJpdmVy",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=PDN%40WestofRioGrandeRiver",
+    "lat": 35.181554,
+    "lon": -106.65511,
+    "name": "PDN @ West of Rio Grande River",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-UEROQFJpb0dyYW5kZQ",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=PDN%40RioGrande",
+    "lat": 35.182758,
+    "lon": -106.64335,
+    "name": "Paseo Del Norte @ Rio Grande Blvd",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STI1QEFsYW1lZGE",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I25%40Alameda",
+    "lat": 35.18514566667,
+    "lon": -106.5811535,
+    "name": "I-25 @ Alameda",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-VHJhbXdheQ",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=Tramway",
+    "lat": 35.196884,
+    "lon": -106.57841,
+    "name": "I-25 @ S of Tramway",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNU5CVHJhbXdheQ",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NBTramway",
+    "lat": 35.204189,
+    "lon": -106.57683,
+    "name": "I-25 @ Tramway",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-NTI4U291dGhlcm4",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=528Southern",
+    "lat": 35.241018,
+    "lon": -106.656146,
+    "name": "NM 528 @ Southern Blvd",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-NTI4U2FiYW5h",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=528Sabana",
+    "lat": 35.243564,
+    "lon": -106.654938,
+    "name": "NM 528 @ Sabana Grande Ave",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-NTI4aGlnaHJlc29ydA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=528highresort",
+    "lat": 35.248541,
+    "lon": -106.652691,
+    "name": "NM 528 @ High Resort Blvd",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-NTI4cmlkZ2VjcmVzdA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=528ridgecrest",
+    "lat": 35.253254,
+    "lon": -106.647589,
+    "name": "NM 528 @ Ridgecrest Dr.",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNU5CQEJlcm5hbGlsbG8",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40Bernalillo",
+    "lat": 35.2803305555556,
+    "lon": -106.553341666667,
+    "name": "I-25 NB @ Bernalillo",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBCZXJuYWxpbGxv",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40Bernalillo",
+    "lat": 35.280682,
+    "lon": -106.55362,
+    "name": "I-25 @ Bernalillo",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-VVM1NTBASS0yNQ",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=US550%40I-25",
+    "lat": 35.316078,
+    "lon": -106.53457,
+    "name": "I-25 SB @ US 550",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNU5CQFVTLTU1MA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40US-550",
+    "lat": 35.316403,
+    "lon": -106.533697,
+    "name": "I-25 NB @ US-550",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-VVM1NTBATk0zMTM",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=US550%40NM313",
+    "lat": 35.318001,
+    "lon": -106.545,
+    "name": "US 550 @ NM 313",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-VVM1NTBAV29mcml2ZXJicmlkZ2U",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=US550%40Wofriverbridge",
+    "lat": 35.322651,
+    "lon": -106.560138,
+    "name": "US 550 @ W of River Bridge",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-VVM1NTBFQE5NNTI4",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=US550E%40NM528",
+    "lat": 35.330294,
+    "lon": -106.571893,
+    "name": "US 550 East @ NM 528",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-VVM1NTBXQE5NNTI4",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=US550W%40NM528",
+    "lat": 35.33055,
+    "lon": -106.57141,
+    "name": "US 550 West @ NM 528",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBSb3dlTkI",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40RoweNB",
+    "lat": 35.494961,
+    "lon": -105.673428,
+    "name": "I-25 @ Rowe NB",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STI1QFJvd2VTQg",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I25%40RoweSB",
+    "lat": 35.495325,
+    "lon": -105.672867,
+    "name": "I-25 @ Rowe SB",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBMYV9CYWphZGFfTG93ZXI",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40La_Bajada_Lower",
+    "lat": 35.506001,
+    "lon": -106.244,
+    "name": "I-25 @ Lower La Bajada",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBMYV9CYWphZGFfVXBwZXI",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40La_Bajada_Upper",
+    "lat": 35.521,
+    "lon": -106.168,
+    "name": "I-25 @ Upper La Bajada",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNU5CQExhQ2llbmVnYQ",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40LaCienega",
+    "lat": 35.552654,
+    "lon": -106.118403,
+    "name": "I-25 NB @ La Cienega",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-aTI1c2JAbGFjaWVuZWdh",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=i25sb%40lacienega",
+    "lat": 35.553655,
+    "lon": -106.1193,
+    "name": "I-25 SB @ La Cienega",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-R2xvcmlldHRh",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=Glorietta",
+    "lat": 35.591301,
+    "lon": -105.7764,
+    "name": "I-25 @ Glorieta",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNU5CQENlcnJpbGxvc19Sb2Fk",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40Cerrillos_Road",
+    "lat": 35.6046,
+    "lon": -106.0353,
+    "name": "I-25 NB @ Cerrillos Road",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBDZXJyaWxsb3NfUm9hZA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40Cerrillos_Road",
+    "lat": 35.6048,
+    "lon": -106.037,
+    "name": "I-25 SB @ Cerrillos Road",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNW5iQFJpY2hhcmRzQXZl",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25nb%40RichardsAve",
+    "lat": 35.620175,
+    "lon": -106.000891666666,
+    "name": "I-25 NB @ Richards Ave",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNVNCQFJpY2hhcmRz",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25SB%40Richards",
+    "lat": 35.6217,
+    "lon": -106.0013,
+    "name": "I-25 SB @ Richards Ave.",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNU5CQFN0X0ZyYW5jaXM",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40St_Francis",
+    "lat": 35.634075,
+    "lon": -105.955655555556,
+    "name": "I-25 NB @ St. Francis",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNVNCQFN0X0ZyYW5jaXNfRHI",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25SB%40St_Francis_Dr",
+    "lat": 35.635273,
+    "lon": -105.95575,
+    "name": "I-25 SB @ St. Francis Dr.",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-aTI1bmJAb2xkcGVjb3N0cmFpbA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=i25nb%40oldpecostrail",
+    "lat": 35.6362,
+    "lon": -105.9308,
+    "name": "I-25 NB @ Old Pecos Trail",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-aS0yNXNiQG9sZHBlY29zdHJhaWw",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=i-25sb%40oldpecostrail",
+    "lat": 35.63720278,
+    "lon": -105.9303694,
+    "name": "I-25 SB @ Old Pecos Trail",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-VVM4NC0yODVATk01MDI",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=US84-285%40NM502",
+    "lat": 35.890781,
+    "lon": -106.02326,
+    "name": "US 285 @ Pojoaque",
+    "ink": "blue",
+    "provider": "NMDOT"
+  }
+]

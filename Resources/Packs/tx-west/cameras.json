@@ -279,15 +279,6 @@
     "provider": "TxDOT"
   },
   {
-    "id": "txdot-elp-Sm9lIEJhdHRsZSBAIEdhdGV3YXkgV2VzdA",
-    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=Joe%20Battle%20%40%20Gateway%20West&districtCode=ELP",
-    "lat": 31.702795,
-    "lon": -106.28389999999999,
-    "name": "Joe Battle @ Gateway West",
-    "ink": "blue",
-    "provider": "TxDOT"
-  },
-  {
     "id": "txdot-elp-SUgtMTAgQCBMUC0zNzUgSE0gUw",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20LP-375%20HM%20S&districtCode=ELP",
     "lat": 31.702827,
@@ -576,15 +567,6 @@
     "provider": "TxDOT"
   },
   {
-    "id": "txdot-elp-SUgtMTAgQCBZYXJicm91Z2g",
-    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Yarbrough&districtCode=ELP",
-    "lat": 31.752637999999997,
-    "lon": -106.345722,
-    "name": "IH-10 @ Yarbrough",
-    "ink": "blue",
-    "provider": "TxDOT"
-  },
-  {
     "id": "txdot-elp-TFAtMzc1IEAgTmV3IFdvcmxk",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20New%20World&districtCode=ELP",
     "lat": 31.754189,
@@ -707,15 +689,6 @@
     "lat": 31.761893999999998,
     "lon": -106.445483,
     "name": "LP-375 @ US-54/BH",
-    "ink": "blue",
-    "provider": "TxDOT"
-  },
-  {
-    "id": "txdot-elp-U0gtMjAvTWVzYSBAIFd5b21pbmc",
-    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FMesa%20%40%20Wyoming&districtCode=ELP",
-    "lat": 31.762321999999998,
-    "lon": -106.49037299999999,
-    "name": "SH-20/Mesa @ Wyoming",
     "ink": "blue",
     "provider": "TxDOT"
   },
@@ -1089,6 +1062,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "txdot-elp-SUgtMTAgQCBUcm93YnJpZGdl",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Trowbridge&districtCode=ELP",
+    "lat": 31.782466,
+    "lon": -106.413776,
+    "name": "IH-10 @ Trowbridge",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
     "id": "txdot-elp-VVMtNTQgQCBNb250YW5h",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Montana&districtCode=ELP",
     "lat": 31.783416,
@@ -1292,6 +1274,15 @@
     "lat": 31.805481999999998,
     "lon": -106.541247,
     "name": "LP 375 @ Racetrack",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUyBNb250YW5h",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20S%20Montana&districtCode=ELP",
+    "lat": 31.805746,
+    "lon": -106.268558,
+    "name": "LP-375 @ S Montana",
     "ink": "blue",
     "provider": "TxDOT"
   },
@@ -1584,11 +1575,29 @@
     "provider": "TxDOT"
   },
   {
+    "id": "txdot-elp-U0gtMTc4L0FydGNyYWZ0IEAgV2VzdHNpZGU",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-178%2FArtcraft%20%40%20Westside&districtCode=ELP",
+    "lat": 31.878757,
+    "lon": -106.62547699999999,
+    "name": "SH-178/Artcraft @ Westside",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
     "id": "txdot-elp-U0gtMTc4L0FydGNyYWZ0IEAgRG9uaXBoYW4",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-178%2FArtcraft%20%40%20Doniphan&districtCode=ELP",
     "lat": 31.879089999999998,
     "lon": -106.593871,
     "name": "SH-178/Artcraft @ Doniphan",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U0gtMTc4L0FydGNyYWZ0IEAgVXBwZXIgdmFsbGV5",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-178%2FArtcraft%20%40%20Upper%20valley&districtCode=ELP",
+    "lat": 31.879509,
+    "lon": -106.611086,
+    "name": "SH-178/Artcraft @ Upper valley",
     "ink": "blue",
     "provider": "TxDOT"
   },
@@ -1897,5 +1906,167 @@
     "name": "US-54 @ State Line",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "nmdot-STEwTWVzcXVpdGU",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I10Mesquite",
+    "lat": 32.174077,
+    "lon": -106.670372,
+    "name": "I-10 @ Mesquite",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STEwX0kyNV9JbnRlcmNoYW5nZV8x",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I10_I25_Interchange_1",
+    "lat": 32.261501,
+    "lon": -106.733,
+    "name": "I-10 / I-25 Interchange I-10",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STEwX0kyNV9JbnRlcmNoYW5nZV8y",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I10_I25_Interchange_2",
+    "lat": 32.261501,
+    "lon": -106.73,
+    "name": "I-10 / I-25 Interchange I-25",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STEwRUJVbmlvbkxhc0NydWNlcw",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I10EBUnionLasCruces",
+    "lat": 32.2770111111111,
+    "lon": -106.761691666667,
+    "name": "I-10 EB @ Union",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STEwV0JVbmlvbkxhc0NydWNlcw",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I10WBUnionLasCruces",
+    "lat": 32.2772972222222,
+    "lon": -106.761472222222,
+    "name": "I-10 WB @ Union",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0xMEBTTWFpblN0RUI",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-10%40SMainStEB",
+    "lat": 32.281541,
+    "lon": -106.77114,
+    "name": "I-10 @ S Main St EB",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0xMEBTTWFpblN0V0I",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-10%40SMainStWB",
+    "lat": 32.281881,
+    "lon": -106.7713,
+    "name": "I-10 @ S Main St WB",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-TGFzQ3J1Y2VzUmVzdEFyZWE",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=LasCrucesRestArea",
+    "lat": 32.282341,
+    "lon": -106.86707,
+    "name": "I-10 @ E of US 70",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBVbml2ZXJzaXR5U0I",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40UniversitySB",
+    "lat": 32.286436,
+    "lon": -106.738744,
+    "name": "I-25 @ University SB",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0yNUBVbml2ZXJzaXR5TkI",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40UniversityNB",
+    "lat": 32.286559,
+    "lon": -106.73747,
+    "name": "I-25 @ University NB",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0xMEBBdmVuaWRhRGVNZXNpbGxhRUI",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-10%40AvenidaDeMesillaEB",
+    "lat": 32.289608,
+    "lon": -106.790942,
+    "name": "I-10 @ Avenida De Mesilla EB",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-SS0xMEBBdmVuaWRhRGVNZXNpbGxhV0I",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-10%40AvenidaDeMesillaWB",
+    "lat": 32.28982,
+    "lon": -106.790876,
+    "name": "I-10 @ Avenida De Mesilla WB",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-TGFzQ3J1Y2VzTW90ZWxEcml2ZQ",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=LasCrucesMotelDrive",
+    "lat": 32.294,
+    "lon": -106.81,
+    "name": "I-10 @ Motel Drive",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STI1U0JMb2htYW5MYXNDcnVjZXM",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I25SBLohmanLasCruces",
+    "lat": 32.31363,
+    "lon": -106.747549,
+    "name": "I-25 SB @ Lohman",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-STI1TkJMb2htYW5MYXNDcnVjZXM",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I25NBLohmanLasCruces",
+    "lat": 32.313847,
+    "lon": -106.74669,
+    "name": "I-25 NB @ Lohman",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-TGFzQ3J1Y2VzSS0yNVNCQFVTNzA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=LasCrucesI-25SB%40US70",
+    "lat": 32.348,
+    "lon": -106.77,
+    "name": "I-25 SB @ US 70",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-TGFzQ3J1Y2VzSS0yNVVTNzA",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=LasCrucesI-25US70",
+    "lat": 32.3486,
+    "lon": -106.7696,
+    "name": "I-25 NB @ US 70",
+    "ink": "blue",
+    "provider": "NMDOT"
+  },
+  {
+    "id": "nmdot-VVM3MEBPcmdhbk1vdW50YWluUGFzcw",
+    "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=US70%40OrganMountainPass",
+    "lat": 32.42493888888889,
+    "lon": -106.56596388888889,
+    "name": "US 70 @ Organ Mountain Pass",
+    "ink": "blue",
+    "provider": "NMDOT"
   }
 ]

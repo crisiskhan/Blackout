@@ -1391,6 +1391,7 @@ def main() -> None:
     cctv_stills()
     mesh_cams()
     update_all_cams()
+    open_cams()
     mesh_range()
     hud_instrument()
     vision_glass()
@@ -1572,6 +1573,20 @@ def update_all_cams() -> None:
         bad(f"update-all-cams contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
     ok("Done: UPDATE SNAPs every reachable camera")
+
+
+def open_cams() -> None:
+    """Official HTTPS still catalogs. NMDOT + every TxDOT district. Never a stream."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_open_cams.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"open camera contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: NMDOT + every TxDOT still on the packed desk")
 
 
 def mesh_range() -> None:

@@ -1,8 +1,9 @@
-"""Public CCTV catalogs for the packed extracts.
+"""Public still catalogs for the packed extracts.
 
 God's Eye View already talks to TxDOT ITS and Austin Open Data. This writes
 the same still URLs into cameras.json so UPDATE can SNAP them on the phone.
-Never a live stream. NM has no public camera JSON — empty list is honest.
+NMDOT 511 GetCameraInfo / GetCameraImage fills NM and Las Cruces. Every
+TxDOT district is fetched and clipped to the pack. Never a live stream.
 """
 from __future__ import annotations
 
@@ -11,6 +12,7 @@ import json
 import re
 import urllib.parse
 import urllib.request
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -20,12 +22,36 @@ TXDOT_ORIGIN = "https://its.txdot.gov"
 AUSTIN_ROWS_URL = (
     "https://data.austintexas.gov/api/views/b4k4-adkb/rows.json?accessType=DOWNLOAD"
 )
+NMDOT_INFO_URL = "https://servicev5.nmroads.com/RealMapWAR/GetCameraInfo"
+NMDOT_STILL = "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage"
 POINT_RE = re.compile(r"POINT\s*\(\s*([-\d.]+)\s+([-\d.]+)\s*\)", re.I)
-PACK_DISTRICTS = {
-    "tx-west": ("ELP",),
-    "tx-east": ("AUS",),
-    "nm": (),
-}
+TXDOT_DISTRICTS = (
+    "ABI",
+    "AMA",
+    "ATL",
+    "AUS",
+    "BMT",
+    "BRY",
+    "BWD",
+    "CHS",
+    "CRP",
+    "DAL",
+    "ELP",
+    "FTW",
+    "HOU",
+    "LRD",
+    "LBB",
+    "LFK",
+    "ODA",
+    "PAR",
+    "PHR",
+    "SAT",
+    "SJT",
+    "TYL",
+    "WAC",
+    "WFS",
+    "YKM",
+)
 
 
 def still_jpeg(data: bytes) -> bytes | None:
@@ -73,7 +99,17 @@ def _txdot_url(district: str, icd: str) -> str:
     )
 
 
-def load_txdot(district: str) -> list[dict[str, Any]]:
+def _nmdot_id(name: str) -> str:
+    token = base64.urlsafe_b64encode(name.encode()).decode().rstrip("=")
+    return f"nmdot-{token}"
+
+
+def _nmdot_url(name: str) -> str:
+    return f"{NMDOT_STILL}?ts=0&cameraName={urllib.parse.quote(name, safe='')}"
+
+
+@lru_cache(maxsize=None)
+def load_txdot(district: str) -> tuple[dict[str, Any], ...]:
     raw = _get(
         f"{TXDOT_ORIGIN}/its/DistrictIts/GetCctvStatusListByDistrict"
         f"?districtCode={urllib.parse.quote(district)}"
@@ -83,7 +119,7 @@ def load_txdot(district: str) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     seen: set[str] = set()
     if not isinstance(roads, dict):
-        return out
+        return tuple(out)
     for rows in roads.values():
         if not isinstance(rows, list):
             continue
@@ -116,7 +152,7 @@ def load_txdot(district: str) -> list[dict[str, Any]]:
                     "provider": "TxDOT",
                 }
             )
-    return out
+    return tuple(out)
 
 
 def load_austin() -> list[dict[str, Any]]:
@@ -135,7 +171,7 @@ def load_austin() -> list[dict[str, Any]]:
         if status.upper() != "TURNED_ON":
             continue
         shot = str(row[idx["screenshot_address"]] or "").strip()
-        if not shot.startswith("http"):
+        if not shot.startswith("https://"):
             continue
         loc = row[idx["location"]]
         lat = lon = None
@@ -164,17 +200,76 @@ def load_austin() -> list[dict[str, Any]]:
     return out
 
 
+def parse_nmdot(payload: dict[str, Any] | list[Any]) -> list[dict[str, Any]]:
+    """NMDOT 511 catalog → HTTPS stills. Never the rtmp stream or http snapshot."""
+    if isinstance(payload, list):
+        raw_rows = payload
+    elif isinstance(payload, dict):
+        raw_rows = payload.get("cameraInfo") or []
+    else:
+        return []
+    if not isinstance(raw_rows, list):
+        return []
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for row in raw_rows:
+        if not isinstance(row, dict):
+            continue
+        if row.get("mobile") is True:
+            continue
+        if row.get("enabled") is False:
+            continue
+        name = str(row.get("name") or "").strip()
+        if not name or name in seen:
+            continue
+        try:
+            lat = float(row.get("lat"))
+            lon = float(row.get("lon"))
+        except (TypeError, ValueError):
+            continue
+        if not (-90 < lat < 90 and -180 < lon < 180) or (lat == 0 and lon == 0):
+            continue
+        seen.add(name)
+        title = str(row.get("title") or "").strip() or name
+        out.append(
+            {
+                "id": _nmdot_id(name),
+                "url": _nmdot_url(name),
+                "lat": lat,
+                "lon": lon,
+                "name": title,
+                "ink": "blue",
+                "provider": "NMDOT",
+            }
+        )
+    return out
+
+
+@lru_cache(maxsize=None)
+def load_nmdot() -> tuple[dict[str, Any], ...]:
+    raw = _get(NMDOT_INFO_URL)
+    return tuple(parse_nmdot(json.loads(raw)))
+
+
 def clip(rows: list[dict[str, Any]], bbox: dict) -> list[dict[str, Any]]:
     return [row for row in rows if _in_bbox(row["lat"], row["lon"], bbox)]
 
 
 def pack_cameras(pack_id: str, bbox: dict) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    for district in PACK_DISTRICTS.get(pack_id, ()):
+    for district in TXDOT_DISTRICTS:
         rows.extend(load_txdot(district))
     if pack_id == "tx-east":
         rows.extend(load_austin())
-    clipped = clip(rows, bbox)
+    rows.extend(load_nmdot())
+    by_id: dict[str, dict[str, Any]] = {}
+    for row in clip(rows, bbox):
+        cid = str(row.get("id") or "")
+        url = str(row.get("url") or "")
+        if not cid or not url.startswith("https://"):
+            continue
+        by_id[cid] = row
+    clipped = list(by_id.values())
     clipped.sort(key=lambda row: (row["lat"], row["lon"], row["id"]))
     return clipped
 

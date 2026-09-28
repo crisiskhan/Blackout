@@ -99,15 +99,6 @@
     "provider": "TxDOT"
   },
   {
-    "id": "txdot-aus-U0gtMTMwIEAgRk0tODEyIDYwMw",
-    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-130%20%40%20FM-812%20603&districtCode=AUS",
-    "lat": 30.140935,
-    "lon": -97.664571,
-    "name": "SH-130 @ FM-812",
-    "ink": "blue",
-    "provider": "TxDOT"
-  },
-  {
     "id": "austin-1299",
     "url": "https://cctv.austinmobility.io/image/1299.jpg",
     "lat": 30.142811,
@@ -1035,6 +1026,15 @@
     "provider": "Austin"
   },
   {
+    "id": "austin-1539",
+    "url": "https://cctv.austinmobility.io/image/1539.jpg",
+    "lat": 30.204231,
+    "lon": -97.741994,
+    "name": "PLEASANT VALLEY RD / PLEASANT VALLEY RD (Travis Association for the Blind)",
+    "ink": "red",
+    "provider": "Austin"
+  },
+  {
     "id": "austin-443",
     "url": "https://cctv.austinmobility.io/image/443.jpg",
     "lat": 30.204942,
@@ -1395,6 +1395,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "txdot-aus-U0gtNzEgV0IgQCBFIFJpdmVyc2lkZSBEciA3NzAw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-71%20WB%20%40%20E%20Riverside%20Dr%207700&districtCode=AUS",
+    "lat": 30.21894,
+    "lon": -97.69089,
+    "name": "SH-71 WB @ E Riverside Dr",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
     "id": "austin-289",
     "url": "https://cctv.austinmobility.io/image/289.jpg",
     "lat": 30.219666,
@@ -1575,6 +1584,15 @@
     "provider": "Austin"
   },
   {
+    "id": "txdot-aus-VVMtMjkwIEAgUyAxc3QgU3QgKDYwMCkgNTc2",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-290%20%40%20S%201st%20St%20%28600%29%20576&districtCode=AUS",
+    "lat": 30.226715,
+    "lon": -97.769125,
+    "name": "US-290 @ S 1st St",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
     "id": "austin-410",
     "url": "https://cctv.austinmobility.io/image/410.jpg",
     "lat": 30.227024,
@@ -1609,6 +1627,15 @@
     "name": "OLTORF ST / PLEASANT VALLEY RD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "txdot-aus-VVMtMjkwIEAgQmFuaXN0ZXIgTG4gKDEzMDApIDU3NQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-290%20%40%20Banister%20Ln%20%281300%29%20575&districtCode=AUS",
+    "lat": 30.227559,
+    "lon": -97.779738,
+    "name": "US-290 @ Banister Ln",
+    "ink": "blue",
+    "provider": "TxDOT"
   },
   {
     "id": "austin-1506",
@@ -1665,6 +1692,15 @@
     "provider": "Austin"
   },
   {
+    "id": "txdot-aus-VVMtMjkwIEAgTWFuY2hhY2EgUmQgKDIwMDApIDU3Mw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-290%20%40%20Manchaca%20Rd%20%282000%29%20573&districtCode=AUS",
+    "lat": 30.230123,
+    "lon": -97.788052,
+    "name": "US-290 @ Manchaca Rd",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
     "id": "austin-1449",
     "url": "https://cctv.austinmobility.io/image/1449.jpg",
     "lat": 30.23036,
@@ -1681,6 +1717,15 @@
     "name": "OLTORF ST / BURLESON RD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "txdot-aus-VVMtMjkwIEAgUGFja3NhZGRsZSBQYXNzICgyMjAwKSA1NzI",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-290%20%40%20Packsaddle%20Pass%20%282200%29%20572&districtCode=AUS",
+    "lat": 30.231502,
+    "lon": -97.79206599999999,
+    "name": "US-290 @ Packsaddle Pass",
+    "ink": "blue",
+    "provider": "TxDOT"
   },
   {
     "id": "austin-1529",
@@ -1764,6 +1809,24 @@
     "provider": "Austin"
   },
   {
+    "id": "txdot-aus-VVMtMjkwIEAgQnJvZGllIExuICg0ODAwKQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-290%20%40%20Brodie%20Ln%20%284800%29&districtCode=AUS",
+    "lat": 30.232799999999997,
+    "lon": -97.81824999999999,
+    "name": "US-290 @ Brodie Ln",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-aus-VVMtMjkwIEAgQnVyZ2VyIEN0ciAoNDYwMCk",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-290%20%40%20Burger%20Ctr%20%284600%29&districtCode=AUS",
+    "lat": 30.233279999999997,
+    "lon": -97.80912,
+    "name": "US-290 @ Burger Ctr",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
     "id": "austin-236",
     "url": "https://cctv.austinmobility.io/image/236.jpg",
     "lat": 30.233343,
@@ -1841,6 +1904,15 @@
     "lat": 30.234219999999997,
     "lon": -97.79693999999999,
     "name": "US-290 @ LP-360",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-aus-VVMtMjkwIEAgTiBTTC0xICg1MDAwKQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-290%20%40%20N%20SL-1%20%285000%29&districtCode=AUS",
+    "lat": 30.23452,
+    "lon": -97.82458,
+    "name": "US-290 @ N SL-1",
     "ink": "blue",
     "provider": "TxDOT"
   },
@@ -1926,6 +1998,15 @@
     "provider": "Austin"
   },
   {
+    "id": "txdot-aus-VVMtMjkwIEAgU0wtMSAoNTEwMCk",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-290%20%40%20SL-1%20%285100%29&districtCode=AUS",
+    "lat": 30.23649,
+    "lon": -97.82533,
+    "name": "US-290 @ S SL-1",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
     "id": "txdot-aus-VVMtMjkwIEAgV2VzdGNyZWVrIERyICg1NTAwKQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-290%20%40%20Westcreek%20Dr%20%285500%29&districtCode=AUS",
     "lat": 30.23668,
@@ -1996,6 +2077,15 @@
     "name": "PLEASANT VALLEY RD / ELMONT DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "txdot-aus-TFAtMzYwIEAgR3VzIEZydWggUGFyaw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-360%20%40%20Gus%20Fruh%20Park&districtCode=AUS",
+    "lat": 30.23939,
+    "lon": -97.79974999999999,
+    "name": "LP-360 @ Gus Fruh Park",
+    "ink": "blue",
+    "provider": "TxDOT"
   },
   {
     "id": "austin-1462",
@@ -3193,15 +3283,6 @@
     "name": "7TH ST / WALLER ST (WESTERLY INTERSECTION)",
     "ink": "red",
     "provider": "Austin"
-  },
-  {
-    "id": "txdot-aus-SUgtMzUgQCA2dGggKDA1MDAp",
-    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-35%20%40%206th%20%280500%29&districtCode=AUS",
-    "lat": 30.26553,
-    "lon": -97.73439599999999,
-    "name": "IH-35 @ 6th",
-    "ink": "blue",
-    "provider": "TxDOT"
   },
   {
     "id": "austin-357",
