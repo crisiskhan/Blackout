@@ -11,6 +11,16 @@ enum FieldPlate: String, CaseIterable, Sendable, Hashable {
     case walk, care
 }
 
+/// Normalized still crop, UI origin top-left. The well draws this box.
+struct VisionCrop: Sendable, Equatable {
+    var x: Double
+    var y: Double
+    var w: Double
+    var h: Double
+
+    var rect: CGRect { CGRect(x: x, y: y, width: w, height: h) }
+}
+
 enum FieldWalkStore {
     static let key = "field.walk"
 
@@ -63,6 +73,8 @@ struct FieldSession: Sendable {
     var fieldQuery = ""
     var guess: VisionGuess?
     var stillJPEG: Data?
+    var visionBusy = false
+    var visionCrop: VisionCrop?
     var sayFailed = false
     var askBusy = false
     var askFailed = false
@@ -89,6 +101,8 @@ struct FieldSession: Sendable {
         query = ""
         guess = nil
         stillJPEG = nil
+        visionBusy = false
+        visionCrop = nil
         sayFailed = false
         visionSeq += 1
         leaveCard()
@@ -172,12 +186,23 @@ extension AppRuntime {
         let seq = field.visionSeq
         guard let image else {
             field.stillJPEG = nil
+            field.visionCrop = nil
+            field.visionBusy = false
             let next = VisionCoreML.noModelGuess()
             field.guess = next
             speakFieldVision(next)
             return
         }
         field.stillJPEG = UIImage(cgImage: image).jpegData(compressionQuality: 0.82)
+        field.guess = nil
+        field.visionBusy = true
+        if let box = SystemVision.subjectNormalizedBox(from: image) {
+            field.visionCrop = VisionCrop(
+                x: box.minX, y: box.minY, w: box.width, h: box.height
+            )
+        } else {
+            field.visionCrop = nil
+        }
         let book = visionBook()
         let locale = locale
         DispatchQueue.global(qos: .userInitiated).async {
@@ -197,6 +222,7 @@ extension AppRuntime {
             DispatchQueue.main.async {
                 guard seq == self.field.visionSeq else { return }
                 self.field.guess = next
+                self.field.visionBusy = false
                 self.speakFieldVision(next)
             }
         }

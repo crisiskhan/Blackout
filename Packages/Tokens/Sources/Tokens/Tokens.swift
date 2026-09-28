@@ -3,6 +3,8 @@ import Foundation
 public enum BlackoutTokens: Sendable {
     public enum Chrome {
         public static let sosDiameter: Double = 64
+        /// VISION shutter. Same thumb as SOS. Whole word CAPTURE.
+        public static let visionShutterPoints: Double = 64
         public static let sosHoldMs: Int = 800
         public static let tabCount: Int = 4
         public static let tabCaptionPoints: Double = 10
