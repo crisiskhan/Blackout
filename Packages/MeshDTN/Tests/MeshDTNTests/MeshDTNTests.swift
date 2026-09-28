@@ -774,5 +774,11 @@ final class MeshDTNTests: XCTestCase {
             nodes: [MeshRange.Node(lat: closed.lat, lon: closed.lon, hop: false, spoke: false)]
         )
         XCTAssertEqual(closedMeters ?? 0, 90, accuracy: 2)
+        XCTAssertNil(MeshRange.quantize(nil))
+        XCTAssertNil(MeshRange.quantize(0))
+        XCTAssertEqual(MeshRange.quantize(401), 400)
+        XCTAssertEqual(MeshRange.quantize(409), 400)
+        XCTAssertEqual(MeshRange.quantize(12), 25)
+        XCTAssertEqual(MeshRange.quantize(401), MeshRange.quantize(409))
     }
 }
