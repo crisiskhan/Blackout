@@ -110,7 +110,8 @@ class HudAndSnapTests(unittest.TestCase):
     def test_update_snaps_nearest_stills_not_a_live_pipe(self):
         sock = read("Blackout", "UpdateSocket.swift")
         self.assertIn("func stillJPEG", sock)
-        self.assertIn("CctvMarks.snapCap", sock)
+        self.assertIn("func snapTargets(", sock)
+        self.assertIn("CctvMarks.snapAtOnce", sock)
         self.assertIn("snippet", sock)
         self.assertNotIn("AVPlayer", sock)
         self.assertNotIn("WKWebView", sock)

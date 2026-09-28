@@ -1390,6 +1390,7 @@ def main() -> None:
     phone_trim()
     cctv_stills()
     mesh_cams()
+    update_all_cams()
     mesh_range()
     sys.exit(fail)
 
@@ -1555,6 +1556,20 @@ def mesh_cams() -> None:
         bad(f"mesh camera contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
     ok("Done: hop cameras pink/orange + SNAP stills")
+
+
+def update_all_cams() -> None:
+    """UPDATE SNAPs every packed + hop HTTPS camera. Not the nearest 16."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_update_all_cams.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"update-all-cams contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: UPDATE SNAPs every reachable camera")
 
 
 def mesh_range() -> None:
