@@ -78,6 +78,7 @@ python3 tools/test_hud_quality.py
 `test_update_all_cams.py`,
 `test_mesh_range.py`,
 `test_hud_instrument.py`,
+`test_vision_glass.py`,
 `test_khan_eye.py`,
 `test_mesh_presence.py` and
 `test_diary.py`. That chain is the

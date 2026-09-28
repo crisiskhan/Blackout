@@ -789,6 +789,24 @@ public enum InspectField {
         return nil
     }
 
+    /// Kind chip under the still. A missing guess has no chip.
+    public static func visionKindChip(_ labelId: String) -> String? {
+        guard let ground = visionGround(labelId: labelId) else { return nil }
+        switch ground {
+        case .fungi: return "FUNGI"
+        case .snake, .sting: return "BITE"
+        case .mammal, .gator, .bird, .fish, .lizard, .turtle, .frog: return "ANIMAL"
+        case .tree, .cactus: return "PLANT"
+        case .water: return "WATER"
+        case .fire, .smoke: return "FIRE"
+        case .flood: return "FLOOD"
+        case .ice: return "COLD"
+        case .lightning: return "STORM"
+        case .shelter: return "SHELTER"
+        case .wound: return "BLEED"
+        }
+    }
+
     /// Cactus, game, bird, fish, turtle: WARNING then the prep walk.
     /// Fungi, snake, lizard, frog, unknown: no meal.
     public static func visionPrepWarns(_ labelId: String) -> Bool {

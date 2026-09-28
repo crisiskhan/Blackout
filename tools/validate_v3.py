@@ -494,8 +494,8 @@ def vision() -> None:
         bad("Field tab still presents a fake Vision ID")
     elif "edible=" in field_tab:
         bad("Field still dumps edible debug")
-    elif 'Button("VISION")' not in field_tab:
-        bad("FIELD missing VISION capture")
+    elif "openVision()" not in field_tab or "VISION" not in field_tab:
+        bad("FIELD missing VISION well")
     else:
         ok("Field tab does not present a fake Vision percent")
     if "classify(observations:" not in vis:
@@ -1393,6 +1393,7 @@ def main() -> None:
     update_all_cams()
     mesh_range()
     hud_instrument()
+    vision_glass()
     sys.exit(fail)
 
 
@@ -1599,6 +1600,20 @@ def hud_instrument() -> None:
         bad(f"HUD instrument contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
     ok("Done: HUD instrument — maneuver, one move, radio, hold thing, classified ask")
+
+
+def vision_glass() -> None:
+    """VISION is a still well. The finder is a reticle. The crop is visible."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_vision_glass.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"VISION glass contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: VISION glass — still well, HUD finder, crop you can see")
 
 
 def khan_eye() -> None:

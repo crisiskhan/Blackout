@@ -2213,7 +2213,8 @@ class VisionInstrumentTests(unittest.TestCase):
         field = read("Blackout", "FieldTab.swift")
         vis = read("Packages", "VisionCoreML", "Sources", "VisionCoreML", "VisionCoreML.swift")
         still = read("Blackout", "VisionStill.swift")
-        self.assertIn('Button("VISION")', field)
+        self.assertIn("openVision()", field)
+        self.assertIn("VISION", field.split("private var visionHUD")[1])
         self.assertIn("VisionStill", field)
         self.assertIn('L10n.t("vision.none"', field)
         self.assertIn('L10n.t("vision.leave"', field)
@@ -2250,7 +2251,8 @@ class VisionInstrumentTests(unittest.TestCase):
         self.assertIn("commitConfiguration", still)
         start = still.split("func startSession")[1].split("func installChrome")[0]
         self.assertIn("canAddOutput", start)
-        self.assertIn("failClosed()", start)
+        self.assertIn('setStatus("WAIT")', start)
+        self.assertNotIn("failClosed()", start)
 
     def test_matcher_needles_are_in_the_package(self):
         vis = read("Packages", "VisionCoreML", "Sources", "VisionCoreML", "VisionCoreML.swift").lower()
@@ -2641,11 +2643,12 @@ class HonestyOnTheGlassTests(unittest.TestCase):
 
     def test_field_empty_and_join_nav_say_why(self):
         field = read("Blackout", "FieldTab.swift")
+        session = read("Blackout", "FieldSession.swift")
         app = read("Blackout", "AppRuntime.swift")
         mesh = read("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift")
         still = read("Blackout", "VisionStill.swift")
         self.assertIn("FIELD BOOK · NONE", field)
-        self.assertIn("guess = nil", field)
+        self.assertIn("guess = nil", session.split("func applyFieldVision")[1])
         self.assertIn(" · SEATED", app)
         self.assertIn("func clearInboundChip", mesh)
         self.assertIn("greaterThanOrEqualToConstant: 44", still)

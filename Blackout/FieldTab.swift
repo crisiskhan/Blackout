@@ -86,6 +86,7 @@ struct FieldTab: View {
     private var fieldStatus: String {
         if runtime.speech.listening { return L10n.t("field.say", runtime.locale) }
         if runtime.field.askBusy { return L10n.t("field.ask", runtime.locale) }
+        if runtime.field.visionBusy { return L10n.t("chip.wait", runtime.locale) }
         if runtime.speechChrome == "SPEECH FAILED" { return "SPEECH FAILED" }
         if let s = runtime.field.stepper {
             // A hold named a trail of plant / bite / use cards. STEP 1 OF 1
@@ -122,52 +123,123 @@ struct FieldTab: View {
 
     @ViewBuilder
     private var visionHUD: some View {
-        sectionLabel("VISION")
-        Button("VISION") {
-            runtime.field.guess = nil
-            runtime.field.stillJPEG = nil
-            #if canImport(AVFoundation) && canImport(UIKit)
-            showVision = true
-            #else
-            runtime.applyFieldVision(image: nil)
-            #endif
+        Button {
+            openVision()
+        } label: {
+            visionWell
         }
-        .buttonStyle(HUDActionStyle(filled: true))
+        .buttonStyle(.plain)
+        .accessibilityLabel(visionWellWord)
+        if let g = runtime.field.guess,
+           !g.noModel,
+           let chip = InspectField.visionKindChip(g.labelId)
+        {
+            Text(chip)
+                .font(.system(size: 11, weight: .heavy))
+                .foregroundStyle(Theme.silver)
+                .padding(.horizontal, 8)
+                .frame(minHeight: 22)
+                .background(Theme.glass())
+                .clipShape(Theme.plateRect())
+        }
         if let g = runtime.field.guess {
             visionFieldButton(g)
-            HUDGlassCard {
-                VStack(alignment: .leading, spacing: 8) {
-                    if let data = runtime.field.stillJPEG, let ui = UIImage(data: data) {
-                        Image(uiImage: ui)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity, maxHeight: 220)
-                            .clipShape(Theme.plateRect())
-                            .accessibilityLabel("STILL")
-                    }
-                    if g.noModel {
-                        Text(L10n.t("vision.none", runtime.locale))
-                            .font(.system(size: 18, weight: .heavy))
-                            .foregroundStyle(Theme.warn)
-                            .fixedSize(horizontal: false, vertical: true)
-                    } else {
-                        Text(g.name)
-                            .font(.system(size: 18, weight: .heavy))
-                            .foregroundStyle(g.leaveIt ? Theme.accent : Theme.silver)
-                            .fixedSize(horizontal: false, vertical: true)
-                        if g.leaveIt {
-                            Text(L10n.t("vision.leave", runtime.locale))
-                                .font(.system(size: 18, weight: .heavy))
-                                .foregroundStyle(Theme.accent)
-                        } else if InspectField.visionPrepWarns(g.labelId) {
-                            Text(L10n.t("vision.warn", runtime.locale))
-                                .font(.system(size: 18, weight: .heavy))
-                                .foregroundStyle(Theme.accent)
-                        }
-                    }
-                }
+        }
+    }
+
+    private var visionWellWord: String {
+        if runtime.field.visionBusy { return L10n.t("chip.wait", runtime.locale) }
+        if let g = runtime.field.guess {
+            if g.noModel { return L10n.t("vision.none", runtime.locale) }
+            if g.leaveIt { return "\(g.name) · \(L10n.t("vision.leave", runtime.locale))" }
+            if InspectField.visionPrepWarns(g.labelId) {
+                return "\(g.name) · \(L10n.t("vision.warn", runtime.locale))"
+            }
+            return g.name
+        }
+        return "VISION"
+    }
+
+    private var visionWell: some View {
+        ZStack(alignment: .bottomLeading) {
+            Theme.void
+            if let data = runtime.field.stillJPEG, let ui = UIImage(data: data) {
+                Image(uiImage: ui)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity, maxHeight: 240)
+                    .overlay { visionCropMark }
+                    .accessibilityLabel("STILL")
+            }
+            visionWellCaption
+        }
+        .frame(maxWidth: .infinity, minHeight: 80, maxHeight: 240)
+        .clipShape(Theme.plateRect())
+        .overlay(
+            Theme.plateRect()
+                .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
+        )
+    }
+
+    @ViewBuilder
+    private var visionCropMark: some View {
+        if let crop = runtime.field.visionCrop {
+            GeometryReader { geo in
+                let r = CGRect(
+                    x: crop.x * geo.size.width,
+                    y: crop.y * geo.size.height,
+                    width: crop.w * geo.size.width,
+                    height: crop.h * geo.size.height
+                )
+                Rectangle()
+                    .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1))
+                    .frame(width: max(8, r.width), height: max(8, r.height))
+                    .position(x: r.midX, y: r.midY)
+                    .accessibilityLabel("CROP")
             }
         }
+    }
+
+    @ViewBuilder
+    private var visionWellCaption: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            if runtime.field.visionBusy {
+                Text(L10n.t("chip.wait", runtime.locale))
+                    .foregroundStyle(Theme.silver)
+            } else if let g = runtime.field.guess {
+                if g.noModel {
+                    Text(L10n.t("vision.none", runtime.locale))
+                        .foregroundStyle(Theme.warn)
+                } else {
+                    Text(g.name)
+                        .foregroundStyle(g.leaveIt ? Theme.accent : Theme.silver)
+                    if g.leaveIt {
+                        Text(L10n.t("vision.leave", runtime.locale))
+                            .foregroundStyle(Theme.accent)
+                    } else if InspectField.visionPrepWarns(g.labelId) {
+                        Text(L10n.t("vision.warn", runtime.locale))
+                            .foregroundStyle(Theme.accent)
+                    }
+                }
+            } else {
+                Text("VISION")
+                    .foregroundStyle(Theme.silver)
+            }
+        }
+        .font(.system(size: 18, weight: .heavy))
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.void.opacity(runtime.field.stillJPEG == nil ? 0 : 0.72))
+    }
+
+    /// Retake keeps the last still until the new one lands.
+    private func openVision() {
+        #if canImport(AVFoundation) && canImport(UIKit)
+        showVision = true
+        #else
+        runtime.applyFieldVision(image: nil)
+        #endif
     }
 
     /// The still named a kind. Offer the same procedure the hold would —
