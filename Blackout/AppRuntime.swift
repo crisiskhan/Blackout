@@ -2526,7 +2526,7 @@ final class AppRuntime {
         for pip in mesh.pips where pip.from != mesh.localID && pip.lat.isFinite && pip.lon.isFinite {
             nodes.append(MeshRange.Node(lat: pip.lat, lon: pip.lon, hop: true, spoke: false))
         }
-        return MeshRange.meters(you: (you.lat, you.lon), nodes: nodes)
+        return MeshRange.quantize(MeshRange.meters(you: (you.lat, you.lon), nodes: nodes))
     }
 
     func eyeFrameWater() -> [(lat: Double, lon: Double)] {
