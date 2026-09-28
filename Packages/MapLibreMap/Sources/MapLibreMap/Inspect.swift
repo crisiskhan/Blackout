@@ -231,6 +231,7 @@ public enum Inspect {
         PartyPips.haloLayerID, PartyPips.coreLayerID, PartyPips.markLayerID,
         EyeDesk.tailsLayerID, EyeDesk.ringsLayerID,
         CctvMarks.layerID,
+        MeshCamMarks.layerID,
     ]
 
     // Core Field cards, which every state ships, so a hold can never open a
