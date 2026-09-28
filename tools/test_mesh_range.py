@@ -35,6 +35,17 @@ def reach_meters(rssi: int) -> float:
 
 
 RADIO_MAX_M = reach_meters(-100)
+QUANTIZE_STEP_M = 25.0
+
+
+def mesh_range_quantize(meters: float | None) -> float | None:
+    """25 m steps so RSSI prune cannot flip OverlaySpec during SEARCH type."""
+    if meters is None:
+        return None
+    if not math.isfinite(meters) or meters <= 0:
+        return None
+    stepped = round(meters / QUANTIZE_STEP_M) * QUANTIZE_STEP_M
+    return stepped if stepped > 0 else QUANTIZE_STEP_M
 
 
 def mesh_range_meters(
@@ -132,6 +143,16 @@ class MeshRangeMathTests(unittest.TestCase):
         )
         self.assertAlmostEqual(meters, 90.0, delta=2.0)
 
+    def test_quantize_snaps_chatter_so_search_does_not_see_it(self):
+        self.assertIsNone(mesh_range_quantize(None))
+        self.assertIsNone(mesh_range_quantize(0))
+        self.assertIsNone(mesh_range_quantize(-4))
+        self.assertEqual(mesh_range_quantize(401.0), 400.0)
+        self.assertEqual(mesh_range_quantize(409.0), 400.0)
+        self.assertEqual(mesh_range_quantize(412.6), 425.0)
+        self.assertEqual(mesh_range_quantize(12.0), QUANTIZE_STEP_M)
+        self.assertEqual(mesh_range_quantize(401.0), mesh_range_quantize(409.0))
+
 
 class MeshRangeHudTests(unittest.TestCase):
     def test_map_paints_one_blue_line_around_you(self):
@@ -164,12 +185,34 @@ class MeshRangeHudTests(unittest.TestCase):
             "private static func keepsCircle"
         )[0]
         self.assertIn("meshRangeLayerID", keep)
+        self.assertIn("static func quantize(", presence)
+        self.assertIn("quantizeStepMeters", presence)
+        self.assertIn("MeshRange.quantize", app)
+        paint = offline.split("func paintMeshRange")[1].split("func syncRoute")[0]
+        self.assertIn("RouteLine.casingLayerID", paint)
+        self.assertIn("insertLayer(layer, below:", paint)
+        self.assertLess(paint.find("RouteLine.casingLayerID"), paint.find("insertUnderMarks"))
+        self.assertIn("storedMeshRange", offline)
+        self.assertIn("func placeMeshRangeUnderRoute", offline)
+        route_paint = offline.split("func paintRoute(")[1].split("func partyShape")[0]
+        self.assertIn("placeMeshRangeUnderRoute", route_paint)
+        seat = offline.split("func placeMeshRangeUnderRoute")[1].split("func ")[0]
+        self.assertIn("removeLayer", seat)
+        self.assertIn("RouteLine.casingLayerID", seat)
+        fit = offline.split("func fitRoute")[1].split("func syncStyleOverlays")[0]
+        self.assertIn("spec.route", fit)
+        self.assertNotIn("meshRange", fit)
+        self.assertNotIn("frameExtra", fit)
+        self.assertNotIn("ringPoints", fit)
 
     def test_device_script_scores_the_blue_mesh_ring(self):
         qa = read("docs", "SOLO_QA.md")
         agents = read("AGENTS.md")
         self.assertIn("blue", qa.lower())
         self.assertIn("mesh range", qa.lower())
+        mesh_row = next(line for line in qa.splitlines() if "mesh range ring" in line.lower())
+        self.assertIn("silver", mesh_row.lower())
+        self.assertIn("SEARCH", mesh_row)
         self.assertIn("test_mesh_range.py", agents)
         validate = read("tools", "validate_v3.py")
         self.assertIn("test_mesh_range.py", validate)
