@@ -1392,6 +1392,7 @@ def main() -> None:
     mesh_cams()
     update_all_cams()
     mesh_range()
+    hud_instrument()
     sys.exit(fail)
 
 
@@ -1584,6 +1585,20 @@ def mesh_range() -> None:
         bad(f"mesh range contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
     ok("Done: blue mesh range ring through hops")
+
+
+def hud_instrument() -> None:
+    """WALK/DRIVE keep the maneuver up. FIELD is one move. COMMS is the radio."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_hud_instrument.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"HUD instrument contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: HUD instrument — maneuver, one move, radio, hold thing, classified ask")
 
 
 def khan_eye() -> None:

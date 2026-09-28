@@ -371,8 +371,7 @@ struct MapTab: View {
             ForEach(Array(hits.prefix(BlackoutTokens.Chrome.mapSearchHitCap).enumerated()), id: \.offset) { _, h in
                 let word = SearchHUDWord.from(packed: h.kind).title
                 let range = h.meters.map { SearchIndex.rangeLabel($0) }
-                let label = [h.name, word, range].compactMap { $0 }.joined(separator: " · ")
-                Button(label) {
+                Button {
                     if runtime.enterOverviewPack(lat: h.lat, lon: h.lon) {
                         hits = []
                         query = ""
@@ -386,11 +385,33 @@ struct MapTab: View {
                     }
                     hits = []
                     query = ""
+                } label: {
+                    HStack(alignment: .center, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(h.name)
+                                .font(.system(size: 13, weight: .heavy))
+                                .foregroundStyle(Theme.silver)
+                                .lineLimit(2)
+                                .minimumScaleFactor(1)
+                            HStack(spacing: 8) {
+                                Text(word)
+                                    .font(.system(size: 11, weight: .heavy))
+                                    .foregroundStyle(Theme.silver)
+                                    .padding(.horizontal, 8)
+                                    .frame(minHeight: 22)
+                                    .background(Theme.glass())
+                                    .clipShape(Theme.plateRect())
+                                if let range {
+                                    Text(range)
+                                        .font(.system(size: 11, weight: .heavy))
+                                        .foregroundStyle(Theme.fix)
+                                }
+                            }
+                        }
+                        Spacer(minLength: 0)
+                    }
                 }
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(Theme.silver)
-                .lineLimit(2)
-                .minimumScaleFactor(1)
+                .buttonStyle(.plain)
                 .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
                 .padding(.horizontal, 12)
             }
@@ -476,6 +497,11 @@ struct MapTab: View {
                             MapFieldDestRail(
                                 dest: point,
                                 nextTurn: runtime.speakNextHUD,
+                                remaining: VoiceNav.remainingHUD(runtime.routeCoords),
+                                navigating: MapFieldChrome.maneuverLive(
+                                    hasDestination: dest != nil,
+                                    hasRoute: !runtime.routeCoords.isEmpty
+                                ),
                                 onTurns: { runtime.toggleSpeakTurns() }
                             )
                         }
@@ -490,6 +516,8 @@ struct MapTab: View {
     private struct MapFieldDestRail: View {
         var dest: (lat: Double, lon: Double)?
         var nextTurn: String
+        var remaining: String
+        var navigating: Bool
         var onTurns: () -> Void
         @State private var beat: Double = 0.28
 
@@ -497,32 +525,59 @@ struct MapTab: View {
             let field = MapFieldChrome.destValue(point: dest)
             let fieldInk = destInk(MapFieldDestMode.coordinates)
             let turn = nextTurn.trimmingCharacters(in: .whitespacesAndNewlines)
+            let remain = remaining.trimmingCharacters(in: .whitespacesAndNewlines)
             return VStack(alignment: .leading, spacing: 6) {
-                if !turn.isEmpty {
+                if navigating || !turn.isEmpty {
                     chip(MapFieldDestMode.turns)
                 }
-                Text(field)
-                    .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
-                    .foregroundStyle(fieldInk)
-                    .lineLimit(1)
-                    .minimumScaleFactor(1)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .shadow(color: Theme.void.opacity(0.95), radius: 3)
-                    .shadow(color: fieldInk.opacity(0.28 + 0.42 * beat), radius: 5 + 5 * beat)
-                    .accessibilityLabel(MapFieldDestMode.coordinates.title)
-                    .accessibilityValue(field)
-                if !turn.isEmpty {
-                    Text(turn)
-                        .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
-                        .foregroundStyle(destInk(MapFieldDestMode.turns))
+                if navigating {
+                    if !turn.isEmpty {
+                        Text(turn)
+                            .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
+                            .foregroundStyle(destInk(MapFieldDestMode.turns))
+                            .lineLimit(1)
+                            .minimumScaleFactor(1)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .shadow(color: Theme.void.opacity(0.95), radius: 3)
+                            .accessibilityLabel(MapFieldDestMode.turns.title)
+                            .accessibilityValue(turn)
+                    }
+                    if !remain.isEmpty {
+                        Text(remain)
+                            .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
+                            .foregroundStyle(fieldInk)
+                            .lineLimit(1)
+                            .minimumScaleFactor(1)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .shadow(color: Theme.void.opacity(0.95), radius: 3)
+                            .shadow(color: fieldInk.opacity(0.28 + 0.42 * beat), radius: 5 + 5 * beat)
+                            .accessibilityLabel("REMAINING")
+                            .accessibilityValue(remain)
+                    }
+                    Text(field)
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(fieldInk)
                         .lineLimit(1)
                         .minimumScaleFactor(1)
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .shadow(color: Theme.void.opacity(0.95), radius: 3)
-                        .accessibilityLabel(MapFieldDestMode.turns.title)
-                        .accessibilityValue(turn)
+                        .accessibilityLabel(MapFieldDestMode.coordinates.title)
+                        .accessibilityValue(field)
+                } else {
+                    Text(field)
+                        .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
+                        .foregroundStyle(fieldInk)
+                        .lineLimit(1)
+                        .minimumScaleFactor(1)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .shadow(color: Theme.void.opacity(0.95), radius: 3)
+                        .shadow(color: fieldInk.opacity(0.28 + 0.42 * beat), radius: 5 + 5 * beat)
+                        .accessibilityLabel(MapFieldDestMode.coordinates.title)
+                        .accessibilityValue(field)
                 }
             }
             .padding(.vertical, 6)

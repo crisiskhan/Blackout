@@ -1578,8 +1578,8 @@ class FieldInstrumentTests(unittest.TestCase):
         )
         self.assertRegex(
             open_fn,
-            r"maxHeight:\s*1[0-6]\d",
-            "open-card picture must stay short so DO and NEXT fit",
+            r"maxHeight:\s*2[0-9]\d",
+            "open-card picture fills the plate",
         )
         self.assertNotIn("visionHUD", open_fn)
         body = field.split("var body:")[1].split("private var fieldStatus")[0]
@@ -1600,7 +1600,8 @@ class FieldInstrumentTests(unittest.TestCase):
         walk = field.split("private func walkPlate")[1].split("private func carePlate")[0]
         care = field.split("private func carePlate")[1].split("private func sectionLabel")[0]
         self.assertIn('sectionLabel("DO")', walk)
-        self.assertIn('L10n.t("stop.if"', walk)
+        self.assertNotIn('L10n.t("stop.if"', walk)
+        self.assertIn('L10n.t("stop.if"', care)
         self.assertIn('sectionLabel("GET-TO-CARE")', care)
         self.assertIn('L10n.t("field.send"', care)
         self.assertNotIn("GET-TO-CARE", walk)
@@ -1655,7 +1656,7 @@ class CommsInstrumentTests(unittest.TestCase):
         comms = read("Blackout", "CommsTab.swift")
         state = read("Packages", "CommsUI", "Sources", "CommsUI", "CommsUI.swift")
         l10n = read("Blackout", "L10n.swift")
-        plate = comms.split("private var chipsPlate")[1].split("private var pageStatus")[0]
+        plate = comms.split("private var radioPlate")[1].split("private var partyPlate")[0]
         self.assertIn("ForEach(Chip.rail", plate)
         self.assertNotIn("Chip.allCases", plate)
         self.assertNotIn("sendPartyChip(.formUp)", comms)
@@ -5340,7 +5341,7 @@ class MapHoldScrollAndPlateRailTests(unittest.TestCase):
         self.assertNotIn(".ignoresSafeArea()", overlay)
         comms = read("Blackout", "CommsTab.swift")
         self.assertIn("enum CommsPlate", comms)
-        self.assertIn("pendingNoteFocus { plate = .note }", comms)
+        self.assertIn("pendingNoteFocus { plate = .party }", comms)
         exped = read("Blackout", "ExpeditionTab.swift")
         self.assertIn("enum ExpeditionPlate", exped)
         tab = read("Blackout", "MapTab.swift")
@@ -5501,7 +5502,7 @@ class DeadGlassGoneTests(unittest.TestCase):
     def test_clip_plays_and_solo_does_not_claim_sent(self):
         comms = read("Blackout", "CommsTab.swift")
         app = read("Blackout", "AppRuntime.swift")
-        call = comms.split("private var callPlate")[1].split("private var notePlate")[0]
+        call = comms.split("private var radioPlate")[1].split("private var partyPlate")[0]
         self.assertIn('Button("PLAY")', call)
         self.assertIn("playLastClip", call)
         self.assertIn("var lastClipPCM", app)

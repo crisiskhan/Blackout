@@ -101,6 +101,19 @@ public enum VoiceNav: Sendable {
         return ""
     }
 
+    /// Meters left on the drawn street line. Empty coords are zero.
+    public static func remainingMeters(_ coords: [(lat: Double, lon: Double)]) -> Double {
+        zip(coords, coords.dropFirst()).reduce(0.0) { acc, pair in
+            acc + GraphRouter.haversine(pair.0.lat, pair.0.lon, pair.1.lat, pair.1.lon)
+        }
+    }
+
+    /// Remaining distance for the dest rail. Empty when there is no line.
+    public static func remainingHUD(_ coords: [(lat: Double, lon: Double)]) -> String {
+        guard coords.count >= 2 else { return "" }
+        return BlackoutTokens.Distance.hud(remainingMeters(coords))
+    }
+
     private static func walk(
         _ coords: [(lat: Double, lon: Double)],
         travelMode: TravelMode,

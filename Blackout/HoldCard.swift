@@ -231,6 +231,7 @@ struct HoldCardView: View {
 
     private var rows: some View {
         VStack(alignment: .leading, spacing: 8) {
+            row(key: "DO", value: nil, note: held.card.doLine, hint: nil)
             // SURE is confidence in the record.
             row(
                 key: "SURE",
@@ -238,7 +239,6 @@ struct HoldCardView: View {
                 note: held.card.why,
                 hint: nil
             )
-            row(key: "DO", value: nil, note: held.card.doLine, hint: nil)
             if let book = InspectField.bookLine(for: fieldRoute) {
                 row(key: "BOOK", value: nil, note: book, hint: nil)
             }
@@ -264,8 +264,8 @@ struct HoldCardView: View {
                     // Woodland deadfall and wildlife cook-through are the
                     // Field SPEAK. Four lines clips them on a phone.
                     Text(note)
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(Theme.silver)
+                        .font(.system(size: key == "DO" ? 18 : 13, weight: key == "DO" ? .heavy : .medium))
+                        .foregroundStyle(key == "DO" ? Color.white : Theme.silver)
                         .lineLimit(6)
                 }
             }

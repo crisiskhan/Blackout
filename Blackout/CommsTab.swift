@@ -6,15 +6,12 @@ import MapLibreMap
 import UIKit
 
 private enum CommsPlate: String, CaseIterable {
-    case party, net, call, note, chips
+    case radio, party
 
     var title: String {
         switch self {
+        case .radio: return "RADIO"
         case .party: return "PARTY"
-        case .net: return "NET"
-        case .call: return "CALL"
-        case .note: return "NOTE"
-        case .chips: return "CHIPS"
         }
     }
 }
@@ -24,7 +21,7 @@ struct CommsTab: View {
     @State private var scanQR = false
     @State private var pttDown = false
     @State private var note = ""
-    @State private var plate: CommsPlate = .party
+    @State private var plate: CommsPlate = .radio
 
     var body: some View {
         HUDPage(
@@ -69,11 +66,11 @@ struct CommsTab: View {
         }
         .animation(Theme.Motion.heavy, value: scanQR)
         .onAppear {
-            if runtime.pendingNoteFocus { plate = .note }
+            if runtime.pendingNoteFocus { plate = .party }
             openPendingNote()
         }
         .onChange(of: runtime.pendingNoteFocus) { _, now in
-            if now { plate = .note }
+            if now { plate = .party }
             openPendingNote()
         }
     }
@@ -90,41 +87,51 @@ struct CommsTab: View {
     @ViewBuilder
     private var plateBody: some View {
         switch plate {
+        case .radio:
+            radioPlate
         case .party:
-            sectionLabel("PARTY")
-            partyCard
-        case .net:
-            netPlate
-        case .call:
-            callPlate
-        case .note:
-            notePlate
-        case .chips:
-            chipsPlate
+            partyPlate
         }
     }
 
-    private var netPlate: some View {
+    private var radioPlate: some View {
         VStack(alignment: .leading, spacing: 16) {
-            sectionLabel("NET")
-            Button(runtime.mesh.joined ? "LEAVE NET" : "JOIN LOCAL NET") {
-                if runtime.mesh.joined {
-                    runtime.leaveNet()
-                } else {
-                    runtime.joinNet()
-                }
+            sectionLabel("CALL")
+            pttPad
+            HStack(spacing: 1) {
+                Button(runtime.clipLive ? "RECORDING" : "15s CLIP") { runtime.captureClip() }
+                    .buttonStyle(HUDDockStyle())
+                Button("PLAY") { runtime.playLastClip() }
+                    .buttonStyle(HUDDockStyle())
+                Button("RADIO CHECK") { runtime.radioCheckParty() }
+                    .buttonStyle(HUDDockStyle())
             }
-            .buttonStyle(HUDActionStyle(filled: !runtime.mesh.joined))
-            Button("SCAN") { runtime.scanMesh() }
-                .buttonStyle(HUDActionStyle(filled: runtime.mesh.placing))
-            Button(runtime.mesh.listening ? "QUIET" : "LISTEN") {
-                if runtime.mesh.listening {
-                    runtime.quietRadio()
-                } else {
-                    runtime.listenNet()
+            .background(Theme.glass())
+            .clipShape(Theme.plateRect())
+            .overlay(
+                Theme.plateRect()
+                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
+            )
+            HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                Button(runtime.mesh.listening ? "QUIET" : "LISTEN") {
+                    if runtime.mesh.listening {
+                        runtime.quietRadio()
+                    } else {
+                        runtime.listenNet()
+                    }
                 }
+                .buttonStyle(HUDOverlayChipStyle(filled: runtime.mesh.listening && !runtime.mesh.joined))
+                Button("SCAN") { runtime.scanMesh() }
+                    .buttonStyle(HUDOverlayChipStyle(filled: runtime.mesh.placing))
+                Button(runtime.mesh.joined ? "LEAVE NET" : "JOIN LOCAL NET") {
+                    if runtime.mesh.joined {
+                        runtime.leaveNet()
+                    } else {
+                        runtime.joinNet()
+                    }
+                }
+                .buttonStyle(HUDOverlayChipStyle(filled: !runtime.mesh.joined))
             }
-            .buttonStyle(HUDActionStyle(filled: runtime.mesh.listening && !runtime.mesh.joined))
             if !runtime.commsChrome.isEmpty {
                 Text(runtime.commsChrome)
                     .font(.system(size: 13, weight: .heavy))
@@ -174,38 +181,25 @@ struct CommsTab: View {
                     }
                 }
             }
-        }
-    }
-
-    private var callPlate: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            sectionLabel("CALL")
-            HStack(spacing: 1) {
-                pttPad
-                Button(runtime.clipLive ? "RECORDING" : "15s CLIP") { runtime.captureClip() }
-                    .buttonStyle(HUDDockStyle())
-                Button("PLAY") { runtime.playLastClip() }
-                    .buttonStyle(HUDDockStyle())
+            sectionLabel("CHIPS")
+            HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                ForEach(Chip.rail, id: \.self) { c in
+                    chip(L10n.t(c.wordKey, runtime.locale)) {
+                        runtime.sendPartyChip(c)
+                    }
+                }
             }
-            .background(Theme.glass())
-            .clipShape(Theme.plateRect())
-            .overlay(
-                Theme.plateRect()
-                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
-            )
-            Button("RADIO CHECK") { runtime.radioCheckParty() }
-                .buttonStyle(HUDActionStyle(filled: runtime.comms.radioCheckOK && runtime.mesh.joined))
-            if !runtime.commsChrome.isEmpty {
-                Text(runtime.commsChrome)
-                    .font(.system(size: 13, weight: .heavy))
-                    .foregroundStyle(Theme.warn)
-                    .fixedSize(horizontal: false, vertical: true)
+            if !runtime.comms.chips.isEmpty || !runtime.mesh.inboundChips.isEmpty {
+                sectionLabel("LOG")
+                HUDGlassCard { log }
             }
         }
     }
 
-    private var notePlate: some View {
+    private var partyPlate: some View {
         VStack(alignment: .leading, spacing: 16) {
+            sectionLabel("PARTY")
+            partyCard
             sectionLabel("NOTE")
             HUDGlassCard {
                 HStack(spacing: 8) {
@@ -224,23 +218,6 @@ struct CommsTab: View {
                 }
                 .padding(.horizontal, 10)
                 .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-            }
-        }
-    }
-
-    private var chipsPlate: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            sectionLabel("CHIPS")
-            HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                ForEach(Chip.rail, id: \.self) { c in
-                    chip(L10n.t(c.wordKey, runtime.locale)) {
-                        runtime.sendPartyChip(c)
-                    }
-                }
-            }
-            if !runtime.comms.chips.isEmpty || !runtime.mesh.inboundChips.isEmpty {
-                sectionLabel("LOG")
-                HUDGlassCard { log }
             }
         }
     }
@@ -318,7 +295,6 @@ struct CommsTab: View {
     }
 
     private var pttPad: some View {
-        let hit = BlackoutTokens.Chrome.mapChipHitPoints
         let liveFill = runtime.ptt.live ? Theme.silver : Theme.void
         return Text(runtime.ptt.live ? "RELEASE PTT" : "HOLD PTT")
             .font(.system(size: 12, weight: .heavy))
@@ -326,7 +302,7 @@ struct CommsTab: View {
             .minimumScaleFactor(1)
             .fixedSize(horizontal: false, vertical: true)
             .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity, minHeight: hit, maxHeight: hit)
+            .frame(maxWidth: .infinity, minHeight: 64, maxHeight: 64)
             .contentShape(Rectangle())
             .foregroundStyle(runtime.ptt.live ? Theme.void : Theme.silver)
             .background {

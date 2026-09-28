@@ -24,9 +24,7 @@ struct FieldTab: View {
                 // VISION stays on SEARCH so the open procedure is the book.
                 Group {
                     if let s = runtime.field.stepper {
-                        ScrollView {
-                            open(s)
-                        }
+                        open(s)
                     } else {
                         if cards.isEmpty {
                             HUDGlassCard {
@@ -127,6 +125,7 @@ struct FieldTab: View {
         sectionLabel("VISION")
         Button("VISION") {
             runtime.field.guess = nil
+            runtime.field.stillJPEG = nil
             #if canImport(AVFoundation) && canImport(UIKit)
             showVision = true
             #else
@@ -138,6 +137,14 @@ struct FieldTab: View {
             visionFieldButton(g)
             HUDGlassCard {
                 VStack(alignment: .leading, spacing: 8) {
+                    if let data = runtime.field.stillJPEG, let ui = UIImage(data: data) {
+                        Image(uiImage: ui)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, maxHeight: 220)
+                            .clipShape(Theme.plateRect())
+                            .accessibilityLabel("STILL")
+                    }
                     if g.noModel {
                         Text(L10n.t("vision.none", runtime.locale))
                             .font(.system(size: 18, weight: .heavy))
@@ -222,15 +229,60 @@ struct FieldTab: View {
                 Button(L10n.t("field.search", runtime.locale)) { leaveCard() }
                     .buttonStyle(HUDOverlayChipStyle())
             }
+            sectionLabel("SITUATION")
+            Text(loc(s.card.situation))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Theme.silver.opacity(0.7))
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+            if !runtime.field.trailBook.isEmpty {
+                Text(runtime.field.trailBook)
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(Theme.silver.opacity(0.5))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             plateRail
             switch runtime.field.plate {
             case .walk:
-                walkPlate(s)
+                ScrollView {
+                    walkPlate(s)
+                }
+                .scrollIndicators(.hidden)
+                .scrollBounceBehavior(.basedOnSize)
+                HStack(spacing: 8) {
+                    Button(stepTitle(s)) {
+                        if s.isLast {
+                            advanceTrail()
+                        } else {
+                            var x = s
+                            x.next()
+                            runtime.field.stepper = x
+                            runtime.persistFieldWalk()
+                        }
+                    }
+                    .buttonStyle(HUDActionStyle(filled: true))
+                    Button("SPEAK") {
+                        var x = s
+                        x.speak()
+                        runtime.field.stepper = x
+                        runtime.speakFieldStep(s.card, step: s.index)
+                    }
+                    .buttonStyle(HUDActionStyle(filled: false))
+                }
+                if runtime.speechChrome == "SPEECH FAILED" {
+                    Text("SPEECH FAILED")
+                        .font(.caption)
+                        .foregroundStyle(Theme.warn)
+                }
             case .care:
-                carePlate(s)
+                ScrollView {
+                    carePlate(s)
+                }
+                .scrollIndicators(.hidden)
+                .scrollBounceBehavior(.basedOnSize)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }
 
     private var plateRail: some View {
@@ -251,17 +303,6 @@ struct FieldTab: View {
 
     @ViewBuilder
     private func walkPlate(_ s: StepperState) -> some View {
-        sectionLabel("SITUATION")
-        Text(loc(s.card.situation))
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(Theme.silver.opacity(0.7))
-            .fixedSize(horizontal: false, vertical: true)
-        if !runtime.field.trailBook.isEmpty {
-            Text(runtime.field.trailBook)
-                .font(.system(size: 11, weight: .heavy))
-                .foregroundStyle(Theme.silver.opacity(0.5))
-                .fixedSize(horizontal: false, vertical: true)
-        }
         causeChips(s)
 
         sectionLabel("DO")
@@ -274,8 +315,8 @@ struct FieldTab: View {
                     Image(uiImage: ui)
                         .resizable()
                         .scaledToFit()
-                        .frame(maxHeight: 120)
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        .frame(maxHeight: 240)
+                        .clipShape(Theme.plateRect())
                         .accessibilityHidden(true)
                 }
                 if s.card.steps.count > 1 {
@@ -290,7 +331,7 @@ struct FieldTab: View {
                             .foregroundStyle(Theme.silver)
                             .frame(minWidth: 18, alignment: .leading)
                         Text(line)
-                            .font(.system(size: 18, weight: .heavy))
+                            .font(.system(size: n == 0 ? 18 : 15, weight: .heavy))
                             .foregroundStyle(Theme.silver)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -299,14 +340,6 @@ struct FieldTab: View {
                 Text(loc(s.step.child))
                     .font(.system(size: 18, weight: .heavy))
                     .foregroundStyle(Theme.silver)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(loc(s.step.why))
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Theme.silver.opacity(0.7))
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(loc(s.step.stop))
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(Theme.accent)
                     .fixedSize(horizontal: false, vertical: true)
                 if let tick = s.step.tickSeconds {
                     Text("TICK \(tick)s")
@@ -320,38 +353,18 @@ struct FieldTab: View {
                 }
             }
         }
-        HStack(spacing: 8) {
-            // On the last step NEXT did nothing at all, which reads as a
-            // broken button rather than the end of the card. A hold that
-            // named a trail of plant / bite / use cards still has work
-            // after this one — name that procedure the same way the hold
-            // button did, then open it. SEARCH dumps the rest and
-            // returns to the catalog field.
-            Button(stepTitle(s)) {
-                if s.isLast {
-                    advanceTrail()
-                } else {
-                    var x = s
-                    x.next()
-                    runtime.field.stepper = x
-                    runtime.persistFieldWalk()
-                }
-            }
-            .buttonStyle(HUDActionStyle(filled: true))
-            Button("SPEAK") {
-                var x = s
-                x.speak()
-                runtime.field.stepper = x
-                runtime.speakFieldStep(s.card, step: s.index)
-            }
-            .buttonStyle(HUDActionStyle(filled: false))
-        }
-        if runtime.speechChrome == "SPEECH FAILED" {
-            Text("SPEECH FAILED")
-                .font(.caption)
-                .foregroundStyle(Theme.warn)
-        }
+    }
 
+    @ViewBuilder
+    private func carePlate(_ s: StepperState) -> some View {
+        Text(loc(s.step.why))
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(Theme.silver.opacity(0.7))
+            .fixedSize(horizontal: false, vertical: true)
+        Text(loc(s.step.stop))
+            .font(.caption.weight(.bold))
+            .foregroundStyle(Theme.accent)
+            .fixedSize(horizontal: false, vertical: true)
         sectionLabel(L10n.t("stop.if", runtime.locale))
         ForEach(Array(s.card.stop_if.enumerated()), id: \.offset) { _, line in
             Text(loc(line))
@@ -367,10 +380,6 @@ struct FieldTab: View {
                         .strokeBorder(Theme.accent.opacity(0.55), lineWidth: Theme.strokeWidth(1))
                 )
         }
-    }
-
-    @ViewBuilder
-    private func carePlate(_ s: StepperState) -> some View {
         sectionLabel("GET-TO-CARE")
         Text(loc(s.card.get_to_care))
             .font(.system(size: 13, weight: .heavy))

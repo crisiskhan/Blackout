@@ -44,6 +44,16 @@ enum HUDFocus: Equatable {
 }
 
 enum HUDPulse {
+    static func sleepBlocked(
+        crisis: Bool,
+        incoming: Bool,
+        arranging: Bool,
+        holding: Bool,
+        maneuver: Bool
+    ) -> Bool {
+        crisis || incoming || arranging || holding || maneuver
+    }
+
     static func opacity(awake: Bool, crisis: Bool, arranging: Bool) -> Double {
         if crisis || arranging { return 1 }
         return awake ? 1 : BlackoutTokens.Chrome.chromeAsleepOpacity

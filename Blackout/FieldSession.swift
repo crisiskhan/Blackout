@@ -62,6 +62,7 @@ struct FieldSession: Sendable {
     var fork: [FieldCard] = []
     var fieldQuery = ""
     var guess: VisionGuess?
+    var stillJPEG: Data?
     var sayFailed = false
     var askBusy = false
     var askFailed = false
@@ -87,6 +88,7 @@ struct FieldSession: Sendable {
     mutating func clearInstrument() {
         query = ""
         guess = nil
+        stillJPEG = nil
         sayFailed = false
         visionSeq += 1
         leaveCard()
@@ -169,11 +171,13 @@ extension AppRuntime {
         field.visionSeq += 1
         let seq = field.visionSeq
         guard let image else {
+            field.stillJPEG = nil
             let next = VisionCoreML.noModelGuess()
             field.guess = next
             speakFieldVision(next)
             return
         }
+        field.stillJPEG = UIImage(cgImage: image).jpegData(compressionQuality: 0.82)
         let book = visionBook()
         let locale = locale
         DispatchQueue.global(qos: .userInitiated).async {

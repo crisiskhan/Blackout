@@ -403,6 +403,12 @@ public enum MapFieldChrome: Sendable {
         joined([lock, route, tool])
     }
 
+    /// A live WALK / DRIVE line owns the dest rail. LOCK-ON without DEST
+    /// is not a maneuver.
+    public static func maneuverLive(hasDestination: Bool, hasRoute: Bool) -> Bool {
+        hasDestination && hasRoute
+    }
+
     /// COORDINATES mount for a dest pin or a live YOU fix. LOCK-ON or a drawn
     /// route without a dest does not invent a dest pin.
     public static func destRailVisible(

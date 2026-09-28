@@ -759,8 +759,8 @@ class FieldSearchSayAndStepperTests(unittest.TestCase):
         )
         self.assertRegex(
             open_fn,
-            r"maxHeight:\s*1[0-6]\d",
-            "open-card picture must stay short so DO and NEXT fit on the glass",
+            r"maxHeight:\s*2[0-9]\d",
+            "open-card picture fills the plate",
         )
         body = tab.split("var body:")[1].split("private var fieldStatus")[0]
         self.assertNotRegex(
