@@ -104,7 +104,7 @@ final class UpdateSocket {
         }
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 8
-        config.timeoutIntervalForResource = 12
+        config.timeoutIntervalForResource = 20
         config.waitsForConnectivity = false
         config.allowsExpensiveNetworkAccess = true
         config.allowsConstrainedNetworkAccess = true
@@ -162,43 +162,67 @@ final class UpdateSocket {
             off.append(SnapKind.osmDelta.offTitle)
         }
 
-        var byURL: [String: PackCam] = [:]
-        for cam in packCams(packRoot) {
-            byURL[cam.id] = cam
-        }
-        for cam in extraCams where !cam.id.isEmpty && cam.url.hasPrefix("https://") {
-            if byURL[cam.id] == nil { byURL[cam.id] = cam }
-        }
-        let packedCams = Array(byURL.values)
-        if packedCams.isEmpty {
+        let targets = Self.snapTargets(pack: packCams(packRoot), extra: extraCams)
+            .sorted { range2($0, lat: lat, lon: lon) < range2($1, lat: lat, lon: lon) }
+        if targets.isEmpty {
             off.append(SnapKind.cams.offTitle)
         } else {
-            let nearest = packedCams
-                .sorted { range2($0, lat: lat, lon: lon) < range2($1, lat: lat, lon: lon) }
-                .prefix(CctvMarks.snapCap)
+            session.invalidateAndCancel()
+            let camConfig = URLSessionConfiguration.ephemeral
+            camConfig.timeoutIntervalForRequest = 8
+            camConfig.timeoutIntervalForResource = Self.snapResourceSeconds(count: targets.count)
+            camConfig.waitsForConnectivity = false
+            camConfig.allowsExpensiveNetworkAccess = true
+            camConfig.allowsConstrainedNetworkAccess = true
+            camConfig.tlsMinimumSupportedProtocolVersion = .TLSv12
+            let camSession = URLSession(configuration: camConfig)
+            self.session = camSession
             var byID: [String: SnapCam] = [:]
             if let old = lastManifest?.cams {
                 for cam in old where !cam.id.isEmpty {
                     byID[cam.id] = cam
                 }
             }
-            for cam in nearest {
-                if let data = await get(session, cam.url),
-                   let jpeg = Self.stillJPEG(data),
-                   jpeg.count > 32
-                {
-                    let name = "cam-\(cam.id).jpg"
-                    write(name, jpeg)
-                    files.append(name)
-                    byID[cam.id] = SnapCam(
-                        id: cam.id,
-                        lat: cam.lat,
-                        lon: cam.lon,
-                        file: name,
-                        at: Date()
-                    )
-                    onSnapStill?(cam.id, jpeg)
+            var fetched: [(order: Int, cam: PackCam, data: Data?)] = []
+            await withTaskGroup(of: (Int, PackCam, Data?).self) { group in
+                var next = 0
+                var inflight = 0
+                func enqueue() {
+                    while inflight < CctvMarks.snapAtOnce, next < targets.count {
+                        let order = next
+                        let cam = targets[order]
+                        next += 1
+                        inflight += 1
+                        group.addTask {
+                            let data = await UpdateSocket.fetch(camSession, cam.url)
+                            return (order, cam, data)
+                        }
+                    }
                 }
+                enqueue()
+                for await row in group {
+                    fetched.append((order: row.0, cam: row.1, data: row.2))
+                    inflight -= 1
+                    enqueue()
+                }
+            }
+            for row in fetched.sorted(by: { $0.order < $1.order }) {
+                guard
+                    let data = row.data,
+                    let jpeg = Self.stillJPEG(data),
+                    jpeg.count > 32
+                else { continue }
+                let name = "cam-\(row.cam.id).jpg"
+                write(name, jpeg)
+                files.append(name)
+                byID[row.cam.id] = SnapCam(
+                    id: row.cam.id,
+                    lat: row.cam.lat,
+                    lon: row.cam.lon,
+                    file: name,
+                    at: Date()
+                )
+                onSnapStill?(row.cam.id, jpeg)
             }
             camStill = Array(byID.values)
             for cam in camStill where !files.contains(cam.file) {
@@ -221,6 +245,9 @@ final class UpdateSocket {
         }
         off.append(SnapKind.highlights.offTitle)
 
+        if self.session !== session {
+            self.session?.invalidateAndCancel()
+        }
         session.invalidateAndCancel()
         self.session = nil
 
@@ -239,7 +266,29 @@ final class UpdateSocket {
         chrome = EyeDesk.updatedChrome(pipe: true, at: at)
     }
 
+    static func snapTargets(pack: [PackCam], extra: [PackCam]) -> [PackCam] {
+        var byID: [String: PackCam] = [:]
+        for cam in pack where !cam.id.isEmpty && cam.url.hasPrefix("https://") {
+            byID[cam.id] = cam
+        }
+        for cam in extra where !cam.id.isEmpty && cam.url.hasPrefix("https://") {
+            if byID[cam.id] == nil { byID[cam.id] = cam }
+        }
+        return Array(byID.values)
+    }
+
+    static func snapResourceSeconds(count: Int, atOnce: Int = CctvMarks.snapAtOnce) -> TimeInterval {
+        let n = max(0, count)
+        let batch = max(1, atOnce)
+        let batches = max(1, n == 0 ? 1 : (n + batch - 1) / batch)
+        return TimeInterval(8 * batches + 30)
+    }
+
     private func get(_ session: URLSession, _ raw: String) async -> Data? {
+        await Self.fetch(session, raw)
+    }
+
+    nonisolated static func fetch(_ session: URLSession, _ raw: String) async -> Data? {
         guard let url = URL(string: raw), url.scheme?.lowercased() == "https" else { return nil }
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData

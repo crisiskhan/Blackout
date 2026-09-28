@@ -650,7 +650,8 @@ public enum CctvMarks {
     public static let sourceID = "cctv-src"
     public static let layerID = "cctv-mark"
     public static let imageName = "cctv-dot"
-    public static let snapCap = 16
+    /// How many HTTPS stills fire at once. Every reachable camera still SNAPs.
+    public static let snapAtOnce = 8
 }
 
 /// Hop-reachable cameras. Split pink/orange disc. Same SNAP stills, never a stream.
