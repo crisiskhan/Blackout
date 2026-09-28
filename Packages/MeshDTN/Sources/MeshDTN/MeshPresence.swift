@@ -507,6 +507,8 @@ public enum MeshPresence {
 /// A spoke NEAR dot is already at hear range. Silence is no ring.
 public enum MeshRange {
     public static let radioMaxMeters = MeshPresence.reachMeters(rssi: -100)
+    /// RSSI prune on a hop must not flip OverlaySpec while SEARCH types.
+    public static let quantizeStepMeters = 25.0
 
     public struct Node: Equatable, Sendable {
         public var lat: Double
@@ -543,5 +545,11 @@ public enum MeshRange {
         }
         guard any, reach > 0 else { return nil }
         return reach
+    }
+
+    public static func quantize(_ meters: Double?) -> Double? {
+        guard let meters, meters.isFinite, meters > 0 else { return nil }
+        let stepped = (meters / quantizeStepMeters).rounded() * quantizeStepMeters
+        return stepped > 0 ? stepped : quantizeStepMeters
     }
 }
