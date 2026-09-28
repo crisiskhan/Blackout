@@ -468,6 +468,7 @@ public struct OfflineMapView: UIViewRepresentable {
         var paintedPipKey: String?
         var storedCams: [CctvMark]?
         var storedMeshCams: [CctvMark]?
+        var storedMeshRange: (lat: Double, lon: Double, meters: Double?)?
         var styleLoading = false
 
         func beginStyleLoad() {
@@ -500,6 +501,7 @@ public struct OfflineMapView: UIViewRepresentable {
             paintedPipKey = nil
             storedCams = nil
             storedMeshCams = nil
+            storedMeshRange = nil
         }
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
@@ -1307,8 +1309,22 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         func paintMeshRange(on style: MLNStyle, spec: OverlaySpec) {
+            let meters: Double?
+            if spec.showYou, let raw = spec.meshRangeMeters, raw > 0 {
+                meters = raw
+            } else {
+                meters = nil
+            }
+            if let stored = storedMeshRange,
+               stored.lat == spec.puckLat,
+               stored.lon == spec.puckLon,
+               stored.meters == meters
+            {
+                return
+            }
+            storedMeshRange = (lat: spec.puckLat, lon: spec.puckLon, meters: meters)
             let pts: [(lat: Double, lon: Double)]
-            if spec.showYou, let meters = spec.meshRangeMeters, meters > 0 {
+            if let meters {
                 pts = EyeDesk.ringPoints(lat: spec.puckLat, lon: spec.puckLon, meters: meters)
             } else {
                 pts = []
@@ -1344,7 +1360,11 @@ public struct OfflineMapView: UIViewRepresentable {
                     forConstantValue: UIColor(red: 61.0 / 255.0, green: 158.0 / 255.0, blue: 1, alpha: 0.85)
                 )
                 layer.lineWidth = NSExpression(forConstantValue: 2)
-                insertUnderMarks(layer, on: style)
+                if let route = style.layer(withIdentifier: RouteLine.casingLayerID) {
+                    style.insertLayer(layer, below: route)
+                } else {
+                    insertUnderMarks(layer, on: style)
+                }
             }
         }
 
@@ -1946,6 +1966,17 @@ public struct OfflineMapView: UIViewRepresentable {
                 core = layer
             }
             stroke(core, color: accent, width: RouteLine.coreWidth, dashed: true)
+            placeMeshRangeUnderRoute(on: style)
+        }
+
+        /// A city-sized blue ring must sit under the silver walk line. If the
+        /// ring was already on the desk, WALK / DRIVE still parks it there.
+        func placeMeshRangeUnderRoute(on style: MLNStyle) {
+            guard let ring = style.layer(withIdentifier: EyeDesk.meshRangeLayerID),
+                  let route = style.layer(withIdentifier: RouteLine.casingLayerID)
+            else { return }
+            style.removeLayer(ring)
+            style.insertLayer(ring, below: route)
         }
 
         /// Silver bodies. MapLibre's Swift overlay does not import the ObjC
