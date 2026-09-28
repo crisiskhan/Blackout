@@ -2076,10 +2076,16 @@ def pack_stats(fc: dict, graph: dict) -> dict:
 def write_catalog(root: Path) -> None:
     packs = []
     order = [PRIMARY_PACK_ID] + [pid for pid in PACKS if pid != PRIMARY_PACK_ID]
+    if "states" not in order:
+        order.append("states")
     for pid in order:
         man = root / pid / "manifest.json"
-        if man.is_file():
-            packs.append(json.loads(man.read_text()))
+        if not man.is_file():
+            continue
+        pack = json.loads(man.read_text())
+        if pid != "states":
+            pack.setdefault("overview", False)
+        packs.append(pack)
     states: list[str] = []
     for pack in packs:
         state = pack.get("state")
