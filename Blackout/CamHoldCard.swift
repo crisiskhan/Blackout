@@ -15,12 +15,10 @@ struct CamHoldCard: View {
                 Rectangle()
                     .fill(Theme.silver.opacity(0.22))
                     .frame(height: 1)
+                stillWell
                 actions
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 10) {
-                        stillWell
-                        rows
-                    }
+                    rows
                 }
                 .holdScroll()
             }
@@ -51,7 +49,7 @@ struct CamHoldCard: View {
                 Image(uiImage: still)
                     .resizable()
                     .scaledToFit()
-                    .frame(maxWidth: .infinity, maxHeight: 180)
+                    .frame(maxWidth: .infinity, maxHeight: 240)
             } else {
                 Text("NO STILL")
                     .font(.system(size: 15, weight: .heavy))
@@ -59,7 +57,7 @@ struct CamHoldCard: View {
                     .frame(maxWidth: .infinity, minHeight: 80)
             }
         }
-        .frame(maxWidth: .infinity, minHeight: 80, maxHeight: 180)
+        .frame(maxWidth: .infinity, minHeight: 80, maxHeight: 240)
         .clipShape(Theme.plateRect())
         .overlay(
             Theme.plateRect()

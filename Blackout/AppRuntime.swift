@@ -1424,7 +1424,17 @@ final class AppRuntime {
         pulseTask = Task { @MainActor in
             try? await Task.sleep(for: .seconds(BlackoutTokens.Chrome.chromeIdleSeconds))
             if Task.isCancelled { return }
-            if hudCrisis || incoming != nil || hudLayoutMode || held != nil || heldParty != nil || heldAddress != nil || heldCam != nil || heldNear != nil || markDraft != nil || heldMark != nil { return }
+            if HUDPulse.sleepBlocked(
+                crisis: hudCrisis,
+                incoming: incoming != nil,
+                arranging: hudLayoutMode,
+                holding: held != nil || heldParty != nil || heldAddress != nil
+                    || heldCam != nil || heldNear != nil || markDraft != nil || heldMark != nil,
+                maneuver: MapFieldChrome.maneuverLive(
+                    hasDestination: routeTarget != nil,
+                    hasRoute: !routeCoords.isEmpty
+                )
+            ) { return }
             hudFocus = .none
             chromeAwake = false
         }

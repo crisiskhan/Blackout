@@ -39,6 +39,11 @@ struct AddressHoldCard: View {
                 .foregroundStyle(Theme.silver)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
+            Text(whatLine)
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(Theme.silver)
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
