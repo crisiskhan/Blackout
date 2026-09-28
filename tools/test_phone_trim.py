@@ -205,6 +205,8 @@ class BootActivePackTests(unittest.TestCase):
         self.assertIn("warmupActiveGraph", app)
         switch = app.split("func switchPack")[1].split("func applyMapKeepAwake")[0]
         self.assertIn("warmupActiveGraph", switch)
+        self.assertIn("showInstruments = false", switch)
+        self.assertIn("lockOn = false", switch)
 
 
 class PauseOffMapTests(unittest.TestCase):

@@ -1872,7 +1872,7 @@ class PartyPlaceMarkTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 181)
+        self.assertEqual(count, 182)
         self.assertIn("var name: String", marks)
         self.assertIn("var note: String", marks)
         self.assertIn("var emblem: String", marks)
@@ -3316,7 +3316,7 @@ class PartyHoldCardTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 181)
+        self.assertEqual(count, 182)
         self.assertIn("var onPersonHold", offline)
         self.assertIn("onPersonHold:", tab)
         self.assertIn("func personMark(at:", offline)
@@ -4334,7 +4334,7 @@ class AddressHoldCardTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 181)
+        self.assertEqual(count, 182)
         self.assertIn("struct HeldAddress", hold)
         self.assertIn("struct AddressHoldCard", card)
         self.assertIn("var heldAddress", app)
@@ -4699,10 +4699,14 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("PackCamera.liveLockOn", camera)
         self.assertIn("PackCamera.followHeading", camera)
         self.assertIn("godsEye: spec.godsEye", camera)
-        fit_token = camera.split("if spec.fitToken != fittedFitToken")[1].split("return")[0]
+        fit_token = camera.split("if spec.fitToken != fittedFitToken")[1].split(
+            "if PackCamera.shouldLeavePack"
+        )[0]
         self.assertIn("PackCamera.shouldHoldPack", fit_token)
         self.assertIn("fitPack", fit_token)
         self.assertIn("godsEye: spec.godsEye", fit_token)
+        self.assertIn("PackCamera.openDesk", fit_token)
+        self.assertIn("PackCamera.openZoom", fit_token)
         fit = offline.split("func fitPack")[1].split("func fitRoute")[0]
         self.assertNotIn("PackCamera.packPaddingPoints", fit)
         self.assertNotIn("PackCamera.packSidePaddingPoints", fit)
@@ -4751,8 +4755,9 @@ class MapCanvasHonestyTests(unittest.TestCase):
         count = 0
         for path in ROOT.joinpath("Packages", "MapLibreMap", "Tests").rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 181)
+        self.assertEqual(count, 182)
         self.assertIn("testPackCameraHoldsGodsEyeOverDestAndYou", tests)
+        self.assertIn("testPackSwitchOpensDeskOnThisExtract", tests)
         self.assertNotIn("if !runtime.godsEye", tab)
         self.assertIn("khanShadeOpacity", desk)
         self.assertIn("khanShadeOpacity", offline)
@@ -5663,6 +5668,54 @@ class DeskHoldTests(unittest.TestCase):
         self.assertIn("restoreFieldWalk", load)
         jump = field.split("private func jump()")[1].split("private func openRoute")[0]
         self.assertIn("speakFirst: true", jump)
+
+
+def open_desk(you, pack_home, box):
+    """Mirror of PackCamera.openDesk. Off-pack YOU cannot keep the glass."""
+    if you is not None:
+        lat, lon = you
+        if box["south"] <= lat <= box["north"] and box["west"] <= lon <= box["east"]:
+            return you
+    return pack_home
+
+
+class PackSwitchDeskTests(unittest.TestCase):
+    """INSTRUMENTS → PACKS must open that extract, not stare at El Paso."""
+
+    def test_off_pack_you_opens_pack_home(self):
+        austin = (30.28, -97.73)
+        el_paso = (31.76, -106.49)
+        east = {"south": 30.05, "west": -97.95, "north": 30.5, "east": -97.2}
+        self.assertEqual(open_desk(el_paso, austin, east), austin)
+        self.assertEqual(open_desk(austin, austin, east), austin)
+        self.assertEqual(open_desk(None, austin, east), austin)
+
+    def test_pack_tap_closes_instruments_and_opens_the_desk(self):
+        cam = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift")
+        self.assertIn("static func openDesk(", cam)
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        fit = offline.split("if spec.fitToken != fittedFitToken")[1].split(
+            "if PackCamera.shouldLeavePack"
+        )[0]
+        self.assertIn("PackCamera.openDesk", fit)
+        self.assertIn("PackCamera.openZoom", fit)
+        self.assertIn("deskLat", offline)
+        tab = read("Blackout", "MapTab.swift")
+        self.assertIn("deskLat:", tab)
+        self.assertIn("deskLon:", tab)
+        app = read("Blackout", "AppRuntime.swift")
+        switch = app.split("func switchPack")[1].split("func applyMapKeepAwake")[0]
+        self.assertIn("showInstruments = false", switch)
+        self.assertIn("lockOn = false", switch)
+        inst = read("Blackout", "InstrumentsView.swift")
+        packs = inst.split("private var packsPlate")[1].split("private var hudPlate")[0]
+        self.assertIn("runtime.switchPack(p.id)", packs)
+        qa = read("docs", "SOLO_QA.md")
+        line = next(row for row in qa.splitlines() if "INSTRUMENTS → PACKS switches" in row)
+        self.assertIn("closes", line.lower())
+        self.assertIn("pack home", line.lower())
 
 
 if __name__ == "__main__":

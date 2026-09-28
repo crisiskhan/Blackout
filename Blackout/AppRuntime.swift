@@ -2111,6 +2111,8 @@ final class AppRuntime {
     func switchPack(_ id: String) {
         try? packs?.switchTo(id)
         UserDefaults.standard.set(id, forKey: "pack.id")
+        showInstruments = false
+        lockOn = false
         routeTarget = nil
         DestinationPin.clear()
         DeskNav.clear()

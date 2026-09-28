@@ -1202,6 +1202,45 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertFalse(PackCamera.destIsOnGlass(x: 195, y: 620, width: 390, height: 640))
     }
 
+    func testPackSwitchOpensDeskOnThisExtract() {
+        let austin = (lat: 30.28, lon: -97.73)
+        let elPaso = (lat: 31.76, lon: -106.49)
+        let eastSouth = 30.05
+        let eastWest = -97.95
+        let eastNorth = 30.5
+        let eastEast = -97.2
+        let offPack = PackCamera.openDesk(
+            you: elPaso,
+            packHome: austin,
+            south: eastSouth,
+            west: eastWest,
+            north: eastNorth,
+            east: eastEast
+        )
+        XCTAssertEqual(offPack.lat, austin.lat, accuracy: 0.0001)
+        XCTAssertEqual(offPack.lon, austin.lon, accuracy: 0.0001)
+        let onPack = PackCamera.openDesk(
+            you: austin,
+            packHome: austin,
+            south: eastSouth,
+            west: eastWest,
+            north: eastNorth,
+            east: eastEast
+        )
+        XCTAssertEqual(onPack.lat, austin.lat, accuracy: 0.0001)
+        XCTAssertEqual(onPack.lon, austin.lon, accuracy: 0.0001)
+        let noYou = PackCamera.openDesk(
+            you: nil,
+            packHome: austin,
+            south: eastSouth,
+            west: eastWest,
+            north: eastNorth,
+            east: eastEast
+        )
+        XCTAssertEqual(noYou.lat, austin.lat, accuracy: 0.0001)
+        XCTAssertEqual(noYou.lon, austin.lon, accuracy: 0.0001)
+    }
+
     func testPackCameraHoldsGodsEyeOverDestAndYou() {
         XCTAssertFalse(PackCamera.shouldHoldPack(godsEye: true))
         XCTAssertFalse(PackCamera.shouldHoldPack(godsEye: false))
