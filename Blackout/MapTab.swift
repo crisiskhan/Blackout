@@ -116,6 +116,7 @@ struct MapTab: View {
                     eyePalette: runtime.eyePalette,
                     trails: runtime.eyeTrails(),
                     rings: runtime.eyeRings(),
+                    meshRangeMeters: runtime.eyeMeshRangeMeters(),
                     offAerial: !runtime.packHasAerial,
                     onCctvHold: { id, lat, lon in
                         runtime.holdCam(id: id, lat: lat, lon: lon)

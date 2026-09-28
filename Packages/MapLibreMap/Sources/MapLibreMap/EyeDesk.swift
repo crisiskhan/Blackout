@@ -43,6 +43,7 @@ public enum EyeDesk {
     public static let lockTitle = "LOCK"
     public static let tailsLayerID = "eye-tails-line"
     public static let ringsLayerID = "eye-rings-line"
+    public static let meshRangeLayerID = "mesh-range-line"
 
     public enum Age: String, Sendable {
         case live

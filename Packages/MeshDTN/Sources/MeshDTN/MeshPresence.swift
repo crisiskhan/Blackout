@@ -502,3 +502,54 @@ public enum MeshPresence {
         return 2 * r * asin(min(1, sqrt(h)))
     }
 }
+
+/// Farthest talk from YOU through hops we already have a fix for.
+/// A spoke NEAR dot is already at hear range. Silence is no ring.
+public enum MeshRange {
+    public static let radioMaxMeters = MeshPresence.reachMeters(rssi: -100)
+    /// RSSI prune on a hop must not flip OverlaySpec while SEARCH types.
+    public static let quantizeStepMeters = 25.0
+
+    public struct Node: Equatable, Sendable {
+        public var lat: Double
+        public var lon: Double
+        public var hop: Bool
+        public var spoke: Bool
+
+        public init(lat: Double, lon: Double, hop: Bool, spoke: Bool) {
+            self.lat = lat
+            self.lon = lon
+            self.hop = hop
+            self.spoke = spoke
+        }
+    }
+
+    public static func meters(
+        you: (lat: Double, lon: Double)?,
+        nodes: [Node]
+    ) -> Double? {
+        guard let you, you.lat.isFinite, you.lon.isFinite, !nodes.isEmpty else { return nil }
+        var reach = 0.0
+        var any = false
+        for node in nodes {
+            guard node.lat.isFinite, node.lon.isFinite else { continue }
+            let dist = MeshPresence.meters(you.lat, you.lon, node.lat, node.lon)
+            any = true
+            if node.spoke {
+                reach = max(reach, dist)
+            } else if node.hop {
+                reach = max(reach, dist + radioMaxMeters)
+            } else {
+                reach = max(reach, dist)
+            }
+        }
+        guard any, reach > 0 else { return nil }
+        return reach
+    }
+
+    public static func quantize(_ meters: Double?) -> Double? {
+        guard let meters, meters.isFinite, meters > 0 else { return nil }
+        let stepped = (meters / quantizeStepMeters).rounded() * quantizeStepMeters
+        return stepped > 0 ? stepped : quantizeStepMeters
+    }
+}

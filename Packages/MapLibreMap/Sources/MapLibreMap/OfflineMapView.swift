@@ -64,6 +64,8 @@ public struct OfflineMapView: UIViewRepresentable {
     public var followID: String?
     public var trails: [[(lat: Double, lon: Double)]]
     public var rings: [EyeDesk.Ring]
+    /// Blue mesh talk range around YOU. Nil when no other devices are on the desk.
+    public var meshRangeMeters: Double?
     public var frameExtra: [(lat: Double, lon: Double)]
     public var offAerial: Bool
     /// Packed CCTV access. Tap or hold opens the still card, not DEST.
@@ -111,6 +113,7 @@ public struct OfflineMapView: UIViewRepresentable {
         followID: String? = nil,
         trails: [[(lat: Double, lon: Double)]] = [],
         rings: [EyeDesk.Ring] = [],
+        meshRangeMeters: Double? = nil,
         frameExtra: [(lat: Double, lon: Double)] = [],
         offAerial: Bool = false,
         onCctvHold: ((String, Double, Double) -> Void)? = nil,
@@ -155,6 +158,7 @@ public struct OfflineMapView: UIViewRepresentable {
         self.followID = followID
         self.trails = trails
         self.rings = rings
+        self.meshRangeMeters = meshRangeMeters
         self.frameExtra = frameExtra
         self.offAerial = offAerial
         self.onCctvHold = onCctvHold
@@ -321,6 +325,7 @@ public struct OfflineMapView: UIViewRepresentable {
             followID: followID,
             trails: trails,
             rings: rings,
+            meshRangeMeters: meshRangeMeters,
             frameExtra: frameExtra,
             offAerial: offAerial,
             cams: cams,
@@ -357,6 +362,7 @@ public struct OfflineMapView: UIViewRepresentable {
             var followID: String?
             var trails: [[(lat: Double, lon: Double)]]
             var rings: [EyeDesk.Ring]
+            var meshRangeMeters: Double?
             var frameExtra: [(lat: Double, lon: Double)]
             var offAerial: Bool
             var cams: [CctvMark]
@@ -391,6 +397,7 @@ public struct OfflineMapView: UIViewRepresentable {
                     && lhs.trails.count == rhs.trails.count
                     && zip(lhs.trails, rhs.trails).allSatisfy { sameLine($0, $1) }
                     && lhs.rings == rhs.rings
+                    && lhs.meshRangeMeters == rhs.meshRangeMeters
                     && sameLine(lhs.frameExtra, rhs.frameExtra)
                     && lhs.offAerial == rhs.offAerial
                     && lhs.cams == rhs.cams
@@ -461,6 +468,7 @@ public struct OfflineMapView: UIViewRepresentable {
         var paintedPipKey: String?
         var storedCams: [CctvMark]?
         var storedMeshCams: [CctvMark]?
+        var storedMeshRange: (lat: Double, lon: Double, meters: Double?)?
         var styleLoading = false
 
         func beginStyleLoad() {
@@ -493,6 +501,7 @@ public struct OfflineMapView: UIViewRepresentable {
             paintedPipKey = nil
             storedCams = nil
             storedMeshCams = nil
+            storedMeshRange = nil
         }
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
@@ -1296,6 +1305,67 @@ public struct OfflineMapView: UIViewRepresentable {
                 layer.lineWidth = NSExpression(forConstantValue: 2)
                 insertUnderMarks(layer, on: style)
             }
+            paintMeshRange(on: style, spec: spec)
+        }
+
+        func paintMeshRange(on style: MLNStyle, spec: OverlaySpec) {
+            let meters: Double?
+            if spec.showYou, let raw = spec.meshRangeMeters, raw > 0 {
+                meters = raw
+            } else {
+                meters = nil
+            }
+            if let stored = storedMeshRange,
+               stored.lat == spec.puckLat,
+               stored.lon == spec.puckLon,
+               stored.meters == meters
+            {
+                return
+            }
+            storedMeshRange = (lat: spec.puckLat, lon: spec.puckLon, meters: meters)
+            let pts: [(lat: Double, lon: Double)]
+            if let meters {
+                pts = EyeDesk.ringPoints(lat: spec.puckLat, lon: spec.puckLon, meters: meters)
+            } else {
+                pts = []
+            }
+            let features: [[String: Any]]
+            if OverlaySync.shouldDrawOverlayLine(pts), pts.count >= 8 {
+                features = [[
+                    "type": "Feature",
+                    "geometry": [
+                        "type": "LineString",
+                        "coordinates": pts.map { [$0.lon, $0.lat] },
+                    ],
+                ]]
+            } else {
+                features = []
+            }
+            let blob: [String: Any] = ["type": "FeatureCollection", "features": features]
+            let shape: MLNShape
+            if let data = try? JSONSerialization.data(withJSONObject: blob),
+               let drawn = try? MLNShape(data: data, encoding: String.Encoding.utf8.rawValue)
+            {
+                shape = drawn
+            } else {
+                shape = emptyOverlayShape()
+            }
+            if let src = style.source(withIdentifier: "mesh-range-src") as? MLNShapeSource {
+                src.shape = shape
+            } else {
+                let src = MLNShapeSource(identifier: "mesh-range-src", shape: shape, options: nil)
+                style.addSource(src)
+                let layer = MLNLineStyleLayer(identifier: EyeDesk.meshRangeLayerID, source: src)
+                layer.lineColor = NSExpression(
+                    forConstantValue: UIColor(red: 61.0 / 255.0, green: 158.0 / 255.0, blue: 1, alpha: 0.85)
+                )
+                layer.lineWidth = NSExpression(forConstantValue: 2)
+                if let route = style.layer(withIdentifier: RouteLine.casingLayerID) {
+                    style.insertLayer(layer, below: route)
+                } else {
+                    insertUnderMarks(layer, on: style)
+                }
+            }
         }
 
         func syncRoute(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
@@ -1896,6 +1966,17 @@ public struct OfflineMapView: UIViewRepresentable {
                 core = layer
             }
             stroke(core, color: accent, width: RouteLine.coreWidth, dashed: true)
+            placeMeshRangeUnderRoute(on: style)
+        }
+
+        /// A city-sized blue ring must sit under the silver walk line. If the
+        /// ring was already on the desk, WALK / DRIVE still parks it there.
+        func placeMeshRangeUnderRoute(on style: MLNStyle) {
+            guard let ring = style.layer(withIdentifier: EyeDesk.meshRangeLayerID),
+                  let route = style.layer(withIdentifier: RouteLine.casingLayerID)
+            else { return }
+            style.removeLayer(ring)
+            style.insertLayer(ring, below: route)
         }
 
         /// Silver bodies. MapLibre's Swift overlay does not import the ObjC
@@ -2552,6 +2633,7 @@ extension PackStyle {
     }
 
     private static func keepsLine(_ id: String) -> Bool {
+        if id == EyeDesk.meshRangeLayerID { return true }
         if id == "roads-arterial-casing" || id == "hazards" { return true }
         if id == RouteLine.coreLayerID { return true }
         if id.hasPrefix("water") { return true }
@@ -2707,6 +2789,7 @@ extension PackStyle {
             || layer.identifier == PartyPips.markLayerID
             || layer.identifier == CctvMarks.layerID
             || layer.identifier == MeshCamMarks.layerID
+            || layer.identifier == EyeDesk.meshRangeLayerID
         {
             return
         }
