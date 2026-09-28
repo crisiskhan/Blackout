@@ -750,4 +750,29 @@ final class MeshDTNTests: XCTestCase {
         net.sendCamStill(from: net.localID, id: "peer-open-1", jpeg: jpeg)
         XCTAssertTrue(net.store.contains(where: { $0.kind == "cam.still" }))
     }
+
+    func testMeshRangeHopAddsOneRadioAndSpokeDoesNot() {
+        let you = (lat: 31.76190, lon: -106.49000)
+        XCTAssertNil(MeshRange.meters(you: nil, nodes: []))
+        XCTAssertNil(MeshRange.meters(you: you, nodes: []))
+        let spoke = MeshPresence.offset(lat: you.lat, lon: you.lon, meters: 100, bearingDegrees: 45)
+        let spokeMeters = MeshRange.meters(
+            you: you,
+            nodes: [MeshRange.Node(lat: spoke.lat, lon: spoke.lon, hop: true, spoke: true)]
+        )
+        XCTAssertEqual(spokeMeters ?? 0, 100, accuracy: 2)
+        let hop = MeshPresence.offset(lat: you.lat, lon: you.lon, meters: 400, bearingDegrees: 90)
+        let hopMeters = MeshRange.meters(
+            you: you,
+            nodes: [MeshRange.Node(lat: hop.lat, lon: hop.lon, hop: true, spoke: false)]
+        )
+        XCTAssertEqual(hopMeters ?? 0, 400 + MeshRange.radioMaxMeters, accuracy: 3)
+        XCTAssertGreaterThan(hopMeters ?? 0, 200)
+        let closed = MeshPresence.offset(lat: you.lat, lon: you.lon, meters: 90, bearingDegrees: 10)
+        let closedMeters = MeshRange.meters(
+            you: you,
+            nodes: [MeshRange.Node(lat: closed.lat, lon: closed.lon, hop: false, spoke: false)]
+        )
+        XCTAssertEqual(closedMeters ?? 0, 90, accuracy: 2)
+    }
 }

@@ -1390,6 +1390,7 @@ def main() -> None:
     phone_trim()
     cctv_stills()
     mesh_cams()
+    mesh_range()
     sys.exit(fail)
 
 
@@ -1554,6 +1555,20 @@ def mesh_cams() -> None:
         bad(f"mesh camera contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
     ok("Done: hop cameras pink/orange + SNAP stills")
+
+
+def mesh_range() -> None:
+    """Blue ring around YOU is farthest hop plus one radio. Silence is no ring."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_mesh_range.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"mesh range contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: blue mesh range ring through hops")
 
 
 def khan_eye() -> None:

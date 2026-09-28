@@ -75,6 +75,7 @@ python3 tools/test_hud_quality.py
 `test_phone_trim.py`,
 `test_cctv_stills.py`,
 `test_mesh_cams.py`,
+`test_mesh_range.py`,
 `test_khan_eye.py`,
 `test_mesh_presence.py` and
 `test_diary.py`. That chain is the

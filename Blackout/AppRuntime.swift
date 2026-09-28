@@ -2514,6 +2514,21 @@ final class AppRuntime {
         return rings
     }
 
+    func eyeMeshRangeMeters() -> Double? {
+        guard let you = fieldYou, you.lat.isFinite, you.lon.isFinite else { return nil }
+        var nodes: [MeshRange.Node] = []
+        for mark in mesh.presenceMarks(you: (you.lat, you.lon)) {
+            let hop = mark.kinds.contains("hop") || mark.radios.contains(where: \.hop)
+            nodes.append(
+                MeshRange.Node(lat: mark.lat, lon: mark.lon, hop: hop, spoke: !mark.placed)
+            )
+        }
+        for pip in mesh.pips where pip.from != mesh.localID && pip.lat.isFinite && pip.lon.isFinite {
+            nodes.append(MeshRange.Node(lat: pip.lat, lon: pip.lon, hop: true, spoke: false))
+        }
+        return MeshRange.meters(you: (you.lat, you.lon), nodes: nodes)
+    }
+
     func eyeFrameWater() -> [(lat: Double, lon: Double)] {
         var extra: [(lat: Double, lon: Double)] = []
         let you = fieldYou

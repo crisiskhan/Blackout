@@ -230,6 +230,7 @@ public enum Inspect {
         HoldPin.ringLayerID, HoldPin.coreLayerID,
         PartyPips.haloLayerID, PartyPips.coreLayerID, PartyPips.markLayerID,
         EyeDesk.tailsLayerID, EyeDesk.ringsLayerID,
+        EyeDesk.meshRangeLayerID,
         CctvMarks.layerID,
         MeshCamMarks.layerID,
     ]
