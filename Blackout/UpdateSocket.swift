@@ -45,9 +45,13 @@ final class UpdateSocket {
         east: Double,
         lat: Double,
         lon: Double,
-        packRoot: URL?
+        packRoot: URL?,
+        extraCams: [PackCam] = [],
+        hopStills: [(id: String, jpeg: Data)] = [],
+        onSnapStill: ((String, Data) -> Void)? = nil
     ) {
         guard !busy else { return }
+        applyHopStills(hopStills)
         if !pipe {
             chrome = EyeDesk.noPipe
             return
@@ -62,8 +66,23 @@ final class UpdateSocket {
                 east: east,
                 lat: lat,
                 lon: lon,
-                packRoot: packRoot
+                packRoot: packRoot,
+                extraCams: extraCams,
+                onSnapStill: onSnapStill
             )
+        }
+    }
+
+    func applyHopStills(_ hopStills: [(id: String, jpeg: Data)]) {
+        var wrote = false
+        for still in hopStills {
+            let id = still.id.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !id.isEmpty, let jpeg = Self.stillJPEG(still.jpeg), jpeg.count > 32 else { continue }
+            write("cam-\(id).jpg", jpeg)
+            wrote = true
+        }
+        if wrote {
+            updatedAt = Date()
         }
     }
 
@@ -74,7 +93,9 @@ final class UpdateSocket {
         east: Double,
         lat: Double,
         lon: Double,
-        packRoot: URL?
+        packRoot: URL?,
+        extraCams: [PackCam] = [],
+        onSnapStill: ((String, Data) -> Void)? = nil
     ) async {
         defer { busy = false }
         guard pipe else {
@@ -141,7 +162,14 @@ final class UpdateSocket {
             off.append(SnapKind.osmDelta.offTitle)
         }
 
-        let packedCams = packCams(packRoot)
+        var byURL: [String: PackCam] = [:]
+        for cam in packCams(packRoot) {
+            byURL[cam.id] = cam
+        }
+        for cam in extraCams where !cam.id.isEmpty && cam.url.hasPrefix("https://") {
+            if byURL[cam.id] == nil { byURL[cam.id] = cam }
+        }
+        let packedCams = Array(byURL.values)
         if packedCams.isEmpty {
             off.append(SnapKind.cams.offTitle)
         } else {
@@ -169,6 +197,7 @@ final class UpdateSocket {
                         file: name,
                         at: Date()
                     )
+                    onSnapStill?(cam.id, jpeg)
                 }
             }
             camStill = Array(byID.values)
@@ -374,6 +403,24 @@ struct PackCam: Codable, Sendable {
         name = try c.decodeIfPresent(String.self, forKey: .name) ?? id
         ink = try c.decodeIfPresent(String.self, forKey: .ink) ?? "blue"
         provider = try c.decodeIfPresent(String.self, forKey: .provider) ?? ""
+    }
+
+    init(
+        id: String,
+        url: String,
+        lat: Double,
+        lon: Double,
+        name: String,
+        ink: String,
+        provider: String
+    ) {
+        self.id = id
+        self.url = url
+        self.lat = lat
+        self.lon = lon
+        self.name = name
+        self.ink = ink
+        self.provider = provider
     }
 
     func encode(to encoder: Encoder) throws {

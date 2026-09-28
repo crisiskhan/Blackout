@@ -321,6 +321,111 @@ public enum MeshDiaryBody {
     }
 }
 
+/// An open camera a hop can reach. Not a heard radio.
+public struct MeshCamRecord: Equatable, Sendable {
+    public var id: String
+    public var lat: Double
+    public var lon: Double
+    public var name: String
+    public var url: String
+    public var provider: String
+
+    public init(
+        id: String,
+        lat: Double,
+        lon: Double,
+        name: String,
+        url: String,
+        provider: String
+    ) {
+        self.id = id
+        self.lat = lat
+        self.lon = lon
+        self.name = name
+        self.url = url
+        self.provider = provider
+    }
+}
+
+/// One TSV line per camera. A batch is one envelope of those lines.
+public enum MeshCamBody {
+    public static func encode(_ cam: MeshCamRecord) -> String {
+        [
+            clean(cam.id),
+            String(cam.lat),
+            String(cam.lon),
+            clean(cam.name),
+            clean(cam.url),
+            clean(cam.provider),
+        ].joined(separator: "\t")
+    }
+
+    public static func encodeBatch(_ cams: [MeshCamRecord]) -> String {
+        cams.map(encode).joined(separator: "\n")
+    }
+
+    public static func parse(_ raw: String) -> MeshCamRecord? {
+        let parts = raw.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+        guard parts.count >= 6 else { return nil }
+        let id = parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !id.isEmpty, let lat = Double(parts[1]), let lon = Double(parts[2]) else { return nil }
+        guard lat.isFinite, lon.isFinite else { return nil }
+        return MeshCamRecord(
+            id: id,
+            lat: lat,
+            lon: lon,
+            name: parts[3],
+            url: parts[4],
+            provider: parts[5]
+        )
+    }
+
+    public static func parseBatch(_ raw: String) -> [MeshCamRecord] {
+        raw.split(whereSeparator: \.isNewline).compactMap { parse(String($0)) }
+    }
+
+    public static func clean(_ raw: String) -> String {
+        MeshMarkBody.clean(raw)
+    }
+}
+
+/// `id` then a newline then the JPEG. Nothing else.
+public enum MeshCamStillBody {
+    public static func encode(id: String, jpeg: Data) -> Data {
+        var out = Data(id.utf8)
+        out.append(0x0A)
+        out.append(jpeg)
+        return out
+    }
+
+    public static func parse(_ data: Data) -> (id: String, jpeg: Data)? {
+        guard let nl = data.firstIndex(of: 0x0A), nl > data.startIndex else { return nil }
+        let id = String(data: data[data.startIndex..<nl], encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let jpeg = data[data.index(after: nl)...]
+        guard !id.isEmpty, jpeg.count >= 3, jpeg[jpeg.startIndex] == 0xFF, jpeg[jpeg.index(after: jpeg.startIndex)] == 0xD8 else {
+            return nil
+        }
+        return (id, Data(jpeg))
+    }
+}
+
+/// Hop cameras that are not already packed CCTV. Silence stays empty.
+public enum MeshCamPaint {
+    public static func visible(packIDs: Set<String>, hops: [MeshCamRecord]) -> [MeshCamRecord] {
+        var seen = Set<String>()
+        var out: [MeshCamRecord] = []
+        for cam in hops {
+            let id = cam.id.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !id.isEmpty, !packIDs.contains(id), !seen.contains(id) else { continue }
+            guard cam.lat.isFinite, cam.lon.isFinite else { continue }
+            seen.insert(id)
+            out.append(cam)
+        }
+        return out
+    }
+}
+
 public struct MeshTimerEvent: Equatable, Sendable, Identifiable {
     public var id: String
     public var from: String
@@ -789,6 +894,18 @@ public final class MeshNet: @unchecked Sendable {
         enqueue(make(from: from, kind: "diary", body: Data(body.utf8)))
     }
 
+    public func sendCams(from: String, cams: [MeshCamRecord]) {
+        let body = MeshCamBody.encodeBatch(cams)
+        guard !body.isEmpty else { return }
+        enqueue(make(from: from, kind: "cam", body: Data(body.utf8)))
+    }
+
+    public func sendCamStill(from: String, id: String, jpeg: Data) {
+        let clean = id.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !clean.isEmpty, jpeg.count > 32, jpeg.count >= 3, jpeg[0] == 0xFF, jpeg[1] == 0xD8 else { return }
+        enqueue(make(from: from, kind: "cam.still", body: MeshCamStillBody.encode(id: clean, jpeg: jpeg)))
+    }
+
     public func linkKind() -> LinkKind {
         if loRaBrickPresent { return .optionalLoRaBrick }
         if joined { return .bleTensOfMeters }
@@ -1008,7 +1125,7 @@ public final class MeshNet: @unchecked Sendable {
                     )
                 )
             }
-        case "mark", "mark.gone", "kit", "voice", "roster":
+        case "mark", "mark.gone", "kit", "voice", "roster", "cam", "cam.still":
             break
         default:
             break

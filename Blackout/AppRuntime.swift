@@ -90,6 +90,9 @@ final class AppRuntime {
     var heldNear: NearHold?
     /// Packed cameras for the open extract. Empty is honest (NM).
     var packCams: [PackCam] = []
+    /// Hop-advertised cameras. Packed ids stay on the red/blue layer.
+    var meshCams: [MeshCamRecord] = []
+    private var advertisedCamPackID: String?
     /// Party place composer. NAME / NOTE / COLOR / FACE live here until DROP.
     var markDraft: MapMarkDraft?
     /// Planted place the thumb is holding. Mutually exclusive with ground and party.
@@ -238,6 +241,7 @@ final class AppRuntime {
             Task { @MainActor in
                 self?.sendPOSIfPossible()
                 self?.sendRosterSeat()
+                self?.advertisePackCams()
             }
         }
         roster = roster.rebindingLead(to: mesh.localID, name: displayYouName)
@@ -733,14 +737,25 @@ final class AppRuntime {
         heldAddress = nil
         heldNear = nil
         let packed = packCams.first { $0.id == id }
-        let named = packed?.name.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let hop = meshCams.first { $0.id == id }
+        let named = (packed?.name ?? hop?.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let provider: String
+        if let packed, !packed.provider.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            provider = packed.provider
+        } else if let hop, !hop.provider.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            provider = hop.provider
+        } else if hop != nil {
+            provider = "HOP"
+        } else {
+            provider = ""
+        }
         heldCam = HeldCam(
             id: id,
             name: named.isEmpty ? id : named,
-            lat: packed?.lat ?? lat,
-            lon: packed?.lon ?? lon,
-            ink: packed?.ink ?? "blue",
-            provider: packed?.provider ?? ""
+            lat: packed?.lat ?? hop?.lat ?? lat,
+            lon: packed?.lon ?? hop?.lon ?? lon,
+            ink: packed?.ink ?? "pink",
+            provider: provider
         )
     }
 
@@ -1293,7 +1308,23 @@ final class AppRuntime {
             east: pack.bbox.east,
             lat: you?.lat ?? home.lat,
             lon: you?.lon ?? home.lon,
-            packRoot: packs?.packRoot(id: pack.id)
+            packRoot: packs?.packRoot(id: pack.id),
+            extraCams: meshCams.map {
+                PackCam(
+                    id: $0.id,
+                    url: $0.url,
+                    lat: $0.lat,
+                    lon: $0.lon,
+                    name: $0.name,
+                    ink: "pink",
+                    provider: $0.provider
+                )
+            },
+            hopStills: hopCamStills(),
+            onSnapStill: { [weak self] id, jpeg in
+                guard let self else { return }
+                self.mesh.sendCamStill(from: self.mesh.localID, id: id, jpeg: jpeg)
+            }
         )
     }
 
@@ -1953,6 +1984,14 @@ final class AppRuntime {
                 )
                 persistDiary()
             }
+        case "cam":
+            if let raw = String(data: env.body, encoding: .utf8) {
+                for row in MeshCamBody.parseBatch(raw) {
+                    upsertMeshCam(row)
+                }
+            }
+        case "cam.still":
+            break
         default:
             break
         }
@@ -2227,6 +2266,7 @@ final class AppRuntime {
     func loadPackCams() {
         guard let pack = packs?.active, let root = packs?.packRoot(id: pack.id) else {
             packCams = []
+            advertisedCamPackID = nil
             return
         }
         let url = root.appendingPathComponent("cameras.json")
@@ -2235,9 +2275,56 @@ final class AppRuntime {
             let rows = try? JSONDecoder().decode([PackCam].self, from: data)
         else {
             packCams = []
+            advertisedCamPackID = nil
             return
         }
         packCams = rows.filter { !$0.id.isEmpty && $0.lat.isFinite && $0.lon.isFinite }
+        advertisedCamPackID = nil
+        advertisePackCams()
+    }
+
+    func advertisePackCams() {
+        guard let pack = packs?.active, !packCams.isEmpty else { return }
+        if advertisedCamPackID == pack.id { return }
+        advertisedCamPackID = pack.id
+        mesh.sendCams(
+            from: mesh.localID,
+            cams: packCams.map {
+                MeshCamRecord(
+                    id: $0.id,
+                    lat: $0.lat,
+                    lon: $0.lon,
+                    name: $0.name,
+                    url: $0.url,
+                    provider: $0.provider
+                )
+            }
+        )
+    }
+
+    func hopCamStills() -> [(id: String, jpeg: Data)] {
+        var byID: [String: Data] = [:]
+        for env in mesh.inbox where env.kind == "cam.still" {
+            if let parsed = MeshCamStillBody.parse(env.body) {
+                byID[parsed.id] = parsed.jpeg
+            }
+        }
+        for env in mesh.store where env.kind == "cam.still" {
+            if let parsed = MeshCamStillBody.parse(env.body) {
+                byID[parsed.id] = parsed.jpeg
+            }
+        }
+        return byID.map { ($0.key, $0.value) }
+    }
+
+    private func upsertMeshCam(_ row: MeshCamRecord) {
+        let id = row.id.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !id.isEmpty, row.lat.isFinite, row.lon.isFinite else { return }
+        if let i = meshCams.firstIndex(where: { $0.id == id }) {
+            meshCams[i] = row
+        } else {
+            meshCams.append(row)
+        }
     }
 
     private func warmupActiveGraph() {

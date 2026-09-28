@@ -1389,6 +1389,7 @@ def main() -> None:
     field_tree()
     phone_trim()
     cctv_stills()
+    mesh_cams()
     sys.exit(fail)
 
 
@@ -1539,6 +1540,20 @@ def cctv_stills() -> None:
         bad(f"CCTV stills contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
     ok("Done: packed CCTV dots + SNAP stills")
+
+
+def mesh_cams() -> None:
+    """Hop cameras as pink/orange discs. TAP UPDATE SNAPs stills the same way."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_mesh_cams.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"mesh camera contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: hop cameras pink/orange + SNAP stills")
 
 
 def khan_eye() -> None:

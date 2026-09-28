@@ -70,6 +70,8 @@ public struct OfflineMapView: UIViewRepresentable {
     public var onCctvHold: ((String, Double, Double) -> Void)?
     public var onCctvTap: ((String, Double, Double) -> Void)?
     public var cams: [CctvMark]
+    /// Hop-reachable cameras. Pink/orange. Packed CCTV stays in `cams`.
+    public var meshCams: [CctvMark]
 
     public init(
         styleURL: URL,
@@ -113,7 +115,8 @@ public struct OfflineMapView: UIViewRepresentable {
         offAerial: Bool = false,
         onCctvHold: ((String, Double, Double) -> Void)? = nil,
         onCctvTap: ((String, Double, Double) -> Void)? = nil,
-        cams: [CctvMark] = []
+        cams: [CctvMark] = [],
+        meshCams: [CctvMark] = []
     ) {
         self.styleURL = styleURL
         self.centerLat = centerLat
@@ -157,6 +160,7 @@ public struct OfflineMapView: UIViewRepresentable {
         self.onCctvHold = onCctvHold
         self.onCctvTap = onCctvTap
         self.cams = cams
+        self.meshCams = meshCams
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -319,7 +323,8 @@ public struct OfflineMapView: UIViewRepresentable {
             rings: rings,
             frameExtra: frameExtra,
             offAerial: offAerial,
-            cams: cams
+            cams: cams,
+            meshCams: meshCams
         )
     }
 
@@ -355,6 +360,7 @@ public struct OfflineMapView: UIViewRepresentable {
             var frameExtra: [(lat: Double, lon: Double)]
             var offAerial: Bool
             var cams: [CctvMark]
+            var meshCams: [CctvMark]
 
             static func == (lhs: OverlaySpec, rhs: OverlaySpec) -> Bool {
                 lhs.puckLat == rhs.puckLat
@@ -388,6 +394,7 @@ public struct OfflineMapView: UIViewRepresentable {
                     && sameLine(lhs.frameExtra, rhs.frameExtra)
                     && lhs.offAerial == rhs.offAerial
                     && lhs.cams == rhs.cams
+                    && lhs.meshCams == rhs.meshCams
             }
 
             private static func samePoint(
@@ -453,6 +460,7 @@ public struct OfflineMapView: UIViewRepresentable {
         var paintedHeading: Double?
         var paintedPipKey: String?
         var storedCams: [CctvMark]?
+        var storedMeshCams: [CctvMark]?
         var styleLoading = false
 
         func beginStyleLoad() {
@@ -484,6 +492,7 @@ public struct OfflineMapView: UIViewRepresentable {
             paintedHeading = nil
             paintedPipKey = nil
             storedCams = nil
+            storedMeshCams = nil
         }
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
@@ -496,6 +505,11 @@ public struct OfflineMapView: UIViewRepresentable {
                 return
             }
             if let cam = cctvMark(at: point, on: view) {
+                onCctvTap?(cam.id, cam.lat, cam.lon)
+                onPulse?()
+                return
+            }
+            if let cam = meshCamMark(at: point, on: view) {
                 onCctvTap?(cam.id, cam.lat, cam.lon)
                 onPulse?()
                 return
@@ -522,6 +536,13 @@ public struct OfflineMapView: UIViewRepresentable {
                 return
             }
             if let cam = cctvMark(at: point, on: view) {
+                holdTick.impactOccurred()
+                onCctvHold?(cam.id, cam.lat, cam.lon)
+                onPulse?()
+                liftIntoView(point, on: view)
+                return
+            }
+            if let cam = meshCamMark(at: point, on: view) {
                 holdTick.impactOccurred()
                 onCctvHold?(cam.id, cam.lat, cam.lon)
                 onPulse?()
@@ -561,6 +582,27 @@ public struct OfflineMapView: UIViewRepresentable {
         /// Packed CCTV wins over dest and inspect. Person emblems still win.
         func cctvMark(at: CGPoint, on view: MLNMapView) -> CctvMark? {
             guard let cams = spec?.cams, !cams.isEmpty else { return nil }
+            let reach = CGFloat(Inspect.holdProbePoints) / 2
+            var hit: CctvMark?
+            var best = CGFloat.greatestFiniteMagnitude
+            for cam in cams {
+                let coordinate = CLLocationCoordinate2D(latitude: cam.lat, longitude: cam.lon)
+                guard CLLocationCoordinate2DIsValid(coordinate) else { continue }
+                let screen = view.convert(coordinate, toPointTo: view)
+                let dx = screen.x - at.x
+                let dy = screen.y - at.y
+                let d = (dx * dx + dy * dy).squareRoot()
+                if d <= reach, d < best {
+                    best = d
+                    hit = cam
+                }
+            }
+            return hit
+        }
+
+        /// Hop cameras after packed CCTV. Person emblems still win.
+        func meshCamMark(at: CGPoint, on view: MLNMapView) -> CctvMark? {
+            guard let cams = spec?.meshCams, !cams.isEmpty else { return nil }
             let reach = CGFloat(Inspect.holdProbePoints) / 2
             var hit: CctvMark?
             var best = CGFloat.greatestFiniteMagnitude
@@ -895,6 +937,7 @@ public struct OfflineMapView: UIViewRepresentable {
             }
             syncPersonMarks(on: view, spec: spec, force: force)
             paintCctv(on: view, spec: spec, force: force)
+            paintMeshCams(on: view, spec: spec, force: force)
             if let style = view.style {
                 let paletteFlip = storedPalette != spec.eyePalette
                 storedPalette = spec.eyePalette
@@ -1103,6 +1146,41 @@ public struct OfflineMapView: UIViewRepresentable {
             {
                 let layer = MLNSymbolStyleLayer(identifier: CctvMarks.layerID, source: src)
                 layer.iconImageName = NSExpression(forConstantValue: CctvMarks.imageName)
+                paintMarkSymbol(layer)
+                layer.iconRotationAlignment = NSExpression(forConstantValue: "viewport")
+                if let you = style.layer(withIdentifier: UserPuck.markLayerID) {
+                    style.insertLayer(layer, below: you)
+                } else {
+                    style.addLayer(layer)
+                }
+            }
+        }
+
+        func paintMeshCams(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
+            guard let style = view.style else { return }
+            if !force,
+               let stored = storedMeshCams,
+               stored == spec.meshCams,
+               style.layer(withIdentifier: MeshCamMarks.layerID) != nil
+            {
+                return
+            }
+            storedMeshCams = spec.meshCams
+            if force || style.layer(withIdentifier: MeshCamMarks.layerID) == nil {
+                style.setImage(MeshCamArt.dot(), forName: MeshCamMarks.imageName)
+            }
+            let shape = cctvShape(spec.meshCams)
+            if let src = style.source(withIdentifier: MeshCamMarks.sourceID) as? MLNShapeSource {
+                src.shape = shape
+            } else {
+                let src = MLNShapeSource(identifier: MeshCamMarks.sourceID, shape: shape, options: nil)
+                style.addSource(src)
+            }
+            if let src = style.source(withIdentifier: MeshCamMarks.sourceID),
+               style.layer(withIdentifier: MeshCamMarks.layerID) == nil
+            {
+                let layer = MLNSymbolStyleLayer(identifier: MeshCamMarks.layerID, source: src)
+                layer.iconImageName = NSExpression(forConstantValue: MeshCamMarks.imageName)
                 paintMarkSymbol(layer)
                 layer.iconRotationAlignment = NSExpression(forConstantValue: "viewport")
                 if let you = style.layer(withIdentifier: UserPuck.markLayerID) {
@@ -1745,6 +1823,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 DestinationPin.ringLayerID,
                 HoldPin.ringLayerID,
                 CctvMarks.layerID,
+                MeshCamMarks.layerID,
                 PartyPips.markLayerID,
                 UserPuck.markLayerID,
             ]
@@ -2466,7 +2545,10 @@ extension PackStyle {
     }
 
     private static func keepsSymbol(_ id: String) -> Bool {
-        id == UserPuck.markLayerID || id == PartyPips.markLayerID || id == CctvMarks.layerID
+        id == UserPuck.markLayerID
+            || id == PartyPips.markLayerID
+            || id == CctvMarks.layerID
+            || id == MeshCamMarks.layerID
     }
 
     private static func keepsLine(_ id: String) -> Bool {
@@ -2624,6 +2706,7 @@ extension PackStyle {
         if layer.identifier == UserPuck.markLayerID
             || layer.identifier == PartyPips.markLayerID
             || layer.identifier == CctvMarks.layerID
+            || layer.identifier == MeshCamMarks.layerID
         {
             return
         }

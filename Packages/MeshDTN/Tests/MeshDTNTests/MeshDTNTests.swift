@@ -692,4 +692,62 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertEqual(MeshMarkBody.parse(legacy)?.name, "CACHE")
         XCTAssertNil(MeshMarkBody.parse("short"))
     }
+
+    func testCamBodyRoundtripAndPaintSkipsPackedIds() {
+        let cam = MeshCamRecord(
+            id: "peer-open-1",
+            lat: 31.8705,
+            lon: -106.5973,
+            name: "Loop 375",
+            url: "https://its.txdot.gov/a.jpg",
+            provider: "TxDOT"
+        )
+        let packed = MeshCamBody.encode(cam)
+        let parsed = MeshCamBody.parse(packed)
+        XCTAssertEqual(parsed?.id, "peer-open-1")
+        XCTAssertEqual(parsed?.name, "Loop 375")
+        XCTAssertEqual(parsed?.url, "https://its.txdot.gov/a.jpg")
+        XCTAssertNil(MeshCamBody.parse("only-one-field"))
+        let jpeg = Data([0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46] + [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D])
+        let still = MeshCamStillBody.encode(id: "peer-open-1", jpeg: jpeg)
+        let stillParsed = MeshCamStillBody.parse(still)
+        XCTAssertEqual(stillParsed?.id, "peer-open-1")
+        XCTAssertEqual(stillParsed?.jpeg.prefix(3), jpeg.prefix(3))
+        XCTAssertNil(MeshCamStillBody.parse(Data("peer-open-1\n<html>nope</html>".utf8)))
+        let hops = [
+            cam,
+            MeshCamRecord(id: "open-2", lat: 31.88, lon: -106.58, name: "Open", url: "", provider: "HOP"),
+        ]
+        let shown = MeshCamPaint.visible(packIDs: ["peer-open-1"], hops: hops)
+        XCTAssertEqual(shown.map(\.id), ["open-2"])
+        XCTAssertTrue(MeshCamPaint.visible(packIDs: [], hops: []).isEmpty)
+    }
+
+    func testSendCamsLogsWhenSolo() {
+        let box = EventLog()
+        let net = MeshNet(box: box)
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.startLocal()
+        net.sendCams(
+            from: net.localID,
+            cams: [
+                MeshCamRecord(
+                    id: "peer-open-1",
+                    lat: 31.8705,
+                    lon: -106.5973,
+                    name: "Loop 375",
+                    url: "https://its.txdot.gov/a.jpg",
+                    provider: "TxDOT"
+                )
+            ]
+        )
+        XCTAssertTrue(radio.sent.isEmpty)
+        XCTAssertEqual(net.chromeNet, "NO PEERS · LOGGED")
+        XCTAssertTrue(net.store.contains(where: { $0.kind == "cam" }))
+        var jpeg = Data([0xFF, 0xD8, 0xFF])
+        jpeg.append(Data(repeating: 0x11, count: 40))
+        net.sendCamStill(from: net.localID, id: "peer-open-1", jpeg: jpeg)
+        XCTAssertTrue(net.store.contains(where: { $0.kind == "cam.still" }))
+    }
 }
