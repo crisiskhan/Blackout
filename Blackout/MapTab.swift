@@ -64,6 +64,8 @@ struct MapTab: View {
                     styleURL: styleURL,
                     centerLat: camera.lat,
                     centerLon: camera.lon,
+                    deskLat: home.lat,
+                    deskLon: home.lon,
                     puckLat: you?.lat ?? camera.lat,
                     puckLon: you?.lon ?? camera.lon,
                     showYou: you != nil,

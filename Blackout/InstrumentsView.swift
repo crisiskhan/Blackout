@@ -99,24 +99,35 @@ struct InstrumentsView: View {
     private var packsPlate: some View {
         if let packs = runtime.packs {
             ForEach(packs.catalog.packs, id: \.id) { p in
+                let on = runtime.packs?.active?.id == p.id
                 Button {
                     runtime.switchPack(p.id)
                 } label: {
                     HStack {
                         Text("\(p.name) · \(p.bytes >= 1_000_000 ? "\(p.bytes / 1_000_000) MB" : "<1 MB")")
                         Spacer()
-                        if runtime.packs?.active?.id == p.id {
+                        if on {
                             Text("PACK")
-                                .foregroundStyle(Theme.silver)
                         }
                     }
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
                 .font(.system(size: 13, weight: .heavy))
                 .foregroundStyle(Theme.silver)
                 .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                 .padding(.horizontal, 12)
                 .background(Theme.glass())
                 .clipShape(Theme.plateRect())
+                .overlay {
+                    if on {
+                        Theme.plateRect()
+                            .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1.5))
+                    } else {
+                        Theme.plateRect()
+                            .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
+                    }
+                }
             }
         } else {
             Text("PACKS · NONE")

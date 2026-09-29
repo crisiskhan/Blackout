@@ -913,6 +913,31 @@ public enum PackCamera {
         return RouteLine.needsReapply(stored: stored, route: route)
     }
 
+    /// PACK switch. YOU keeps the glass only on this extract. Off-pack YOU
+    /// would stare at empty tiles in the last city.
+    public static func openDesk(
+        you: (lat: Double, lon: Double)?,
+        packHome: (lat: Double, lon: Double),
+        south: Double,
+        west: Double,
+        north: Double,
+        east: Double
+    ) -> (lat: Double, lon: Double) {
+        if let you, UserPuck.shouldPaint(lat: you.lat, lon: you.lon),
+           UserPuck.contains(
+            lat: you.lat,
+            lon: you.lon,
+            south: south,
+            west: west,
+            north: north,
+            east: east
+           )
+        {
+            return you
+        }
+        return packHome
+    }
+
     public static func shouldHoldPack(godsEye _: Bool = false, overview: Bool = false) -> Bool {
         overview
     }

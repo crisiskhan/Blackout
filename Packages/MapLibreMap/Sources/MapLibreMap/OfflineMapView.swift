@@ -10,6 +10,9 @@ public struct OfflineMapView: UIViewRepresentable {
     public var styleURL: URL
     public var centerLat: Double
     public var centerLon: Double
+    /// Pack metro home. PACK switch opens here when YOU is off this extract.
+    public var deskLat: Double
+    public var deskLon: Double
     public var puckLat: Double
     public var puckLon: Double
     /// GNSS YOU mark. Pack center may rest the camera, but it is never YOU.
@@ -79,6 +82,8 @@ public struct OfflineMapView: UIViewRepresentable {
         styleURL: URL,
         centerLat: Double,
         centerLon: Double,
+        deskLat: Double = .nan,
+        deskLon: Double = .nan,
         puckLat: Double,
         puckLon: Double,
         showYou: Bool = true,
@@ -124,6 +129,8 @@ public struct OfflineMapView: UIViewRepresentable {
         self.styleURL = styleURL
         self.centerLat = centerLat
         self.centerLon = centerLon
+        self.deskLat = deskLat.isFinite ? deskLat : centerLat
+        self.deskLon = deskLon.isFinite ? deskLon : centerLon
         self.puckLat = puckLat
         self.puckLon = puckLon
         self.showYou = showYou
@@ -313,8 +320,8 @@ public struct OfflineMapView: UIViewRepresentable {
             youHeading: youHeading,
             youEmblem: youEmblem,
             youCondition: youCondition,
-            homeLat: centerLat,
-            homeLon: centerLon,
+            homeLat: deskLat,
+            homeLon: deskLon,
             lockOn: lockOn,
             godsEye: godsEye,
             overview: overview,
@@ -1419,6 +1426,29 @@ public struct OfflineMapView: UIViewRepresentable {
                 fittedFitToken = spec.fitToken
                 if PackCamera.shouldHoldPack(godsEye: spec.godsEye, overview: spec.overview) {
                     fitPack(spec, on: view, fly: true)
+                    fittedPack = pack
+                    fittedSize = size
+                    storedLockOn = spec.lockOn
+                    storedGodsEye = spec.godsEye
+                    followedPuck = nil
+                    return
+                }
+                let desk = PackCamera.openDesk(
+                    you: spec.showYou ? (spec.puckLat, spec.puckLon) : nil,
+                    packHome: (spec.homeLat, spec.homeLon),
+                    south: spec.packSouth,
+                    west: spec.packWest,
+                    north: spec.packNorth,
+                    east: spec.packEast
+                )
+                let deskCoord = CLLocationCoordinate2D(latitude: desk.lat, longitude: desk.lon)
+                if CLLocationCoordinate2DIsValid(deskCoord) {
+                    view.setCenter(
+                        deskCoord,
+                        zoomLevel: PackCamera.openZoom,
+                        direction: PackCamera.godsEyeHeading,
+                        animated: false
+                    )
                     fittedPack = pack
                     fittedSize = size
                     storedLockOn = spec.lockOn
