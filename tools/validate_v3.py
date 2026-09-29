@@ -1392,6 +1392,7 @@ def main() -> None:
     mesh_cams()
     update_all_cams()
     open_cams()
+    map_snap()
     mesh_range()
     hud_instrument()
     vision_glass()
@@ -1587,6 +1588,20 @@ def open_cams() -> None:
         bad(f"open camera contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
     ok("Done: NMDOT + every TxDOT still on the packed desk")
+
+
+def map_snap() -> None:
+    """MAP desk SNAPs cameras to date. Same one-shot pipe as TAP UPDATE."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_map_snap.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"map-snap contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: MAP desk SNAPs cameras to date")
 
 
 def mesh_range() -> None:

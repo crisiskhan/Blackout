@@ -18,6 +18,7 @@ final class UpdateSocket {
     private let monitor = NWPathMonitor()
     private let monitorQueue = DispatchQueue(label: "blackout.update.path")
     private var session: URLSession?
+    private var queued: SnapRequest?
 
     func start() {
         lastManifest = SnapManifest.load()
@@ -50,27 +51,71 @@ final class UpdateSocket {
         hopStills: [(id: String, jpeg: Data)] = [],
         onSnapStill: ((String, Data) -> Void)? = nil
     ) {
-        guard !busy else { return }
         applyHopStills(hopStills)
         if !pipe {
             chrome = EyeDesk.noPipe
+            queued = nil
+            return
+        }
+        let request = SnapRequest(
+            south: south,
+            west: west,
+            north: north,
+            east: east,
+            lat: lat,
+            lon: lon,
+            packRoot: packRoot,
+            extraCams: extraCams,
+            hopStills: hopStills,
+            onSnapStill: onSnapStill
+        )
+        if busy {
+            queued = request
             return
         }
         busy = true
         chrome = EyeDesk.updatingTitle
         Task {
             await burst(
-                south: south,
-                west: west,
-                north: north,
-                east: east,
-                lat: lat,
-                lon: lon,
-                packRoot: packRoot,
-                extraCams: extraCams,
-                onSnapStill: onSnapStill
+                south: request.south,
+                west: request.west,
+                north: request.north,
+                east: request.east,
+                lat: request.lat,
+                lon: request.lon,
+                packRoot: request.packRoot,
+                extraCams: request.extraCams,
+                onSnapStill: request.onSnapStill
             )
+            if let next = queued {
+                queued = nil
+                tap(
+                    south: next.south,
+                    west: next.west,
+                    north: next.north,
+                    east: next.east,
+                    lat: next.lat,
+                    lon: next.lon,
+                    packRoot: next.packRoot,
+                    extraCams: next.extraCams,
+                    hopStills: next.hopStills,
+                    onSnapStill: next.onSnapStill
+                )
+            }
         }
+    }
+
+    private struct SnapRequest {
+        var south: Double
+        var west: Double
+        var north: Double
+        var east: Double
+        var lat: Double
+        var lon: Double
+        var packRoot: URL?
+        var extraCams: [PackCam]
+        var hopStills: [(id: String, jpeg: Data)]
+        var onSnapStill: ((String, Data) -> Void)?
     }
 
     func applyHopStills(_ hopStills: [(id: String, jpeg: Data)]) {

@@ -295,6 +295,7 @@ final class AppRuntime {
         applyMapKeepAwake()
         listenNet()
         pulse()
+        pullMapSnap()
     }
 
     func listenNet() {
@@ -1293,6 +1294,19 @@ final class AppRuntime {
         applySpeechTone()
     }
 
+    func showTab(_ next: BlackoutTab) {
+        let was = tab
+        tab = next
+        if next == .map, was != .map {
+            pullMapSnap()
+        }
+    }
+
+    /// Same one-shot SNAP as TAP UPDATE. Opening the desk pulls stills to date.
+    func pullMapSnap() {
+        tapUpdate()
+    }
+
     func tapUpdate() {
         touch(.overlay)
         guard let pack = packs?.active else {
@@ -2144,6 +2158,7 @@ final class AppRuntime {
         field.clearInstrument()
         heldCam = nil
         heldNear = nil
+        pullMapSnap()
     }
 
     func applyMapKeepAwake() {

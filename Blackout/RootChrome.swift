@@ -205,7 +205,7 @@ struct RootChrome: View {
     private func tabButton(_ t: BlackoutTab) -> some View {
         Button {
             runtime.touch(.tabs)
-            runtime.tab = t
+            runtime.showTab(t)
         } label: {
             VStack(spacing: 3) {
                 Text(t.title)
