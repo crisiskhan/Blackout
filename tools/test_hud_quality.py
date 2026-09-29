@@ -5163,12 +5163,12 @@ class HUDKeyboardTests(unittest.TestCase):
         self.assertIn("Theme.metalStroke", board)
         self.assertNotRegex(
             board,
-            r"\? Theme\.accent : Theme\.metalStroke",
+            r"\?\s*Theme\.accent\s*:\s*Theme\.metalStroke",
             "Xcode 26 archive rejects Color vs LinearGradient in one ternary; stroke live with accent, idle with metal",
         )
         self.assertNotRegex(
             board,
-            r"\? Theme\.metalStroke : Theme\.accent",
+            r"\?\s*Theme\.metalStroke\s*:\s*Theme\.accent",
             "Xcode 26 archive rejects Color vs LinearGradient in one ternary",
         )
         self.assertNotIn(".spring(", board)
@@ -5245,6 +5245,21 @@ class HUDKeyboardTests(unittest.TestCase):
         hud_tap(mixed, ("glyph", "a"))
         self.assertEqual(mixed["text"], "Mo A")
         self.assertFalse(mixed["shift"])
+
+    def test_no_color_vs_gradient_stroke_ternary_in_blackout(self):
+        """HUDKeyboard-only regex missed INSTRUMENTS PACKS (PR 72 device compile)."""
+        accent_metal = re.compile(r"\?\s*Theme\.accent\s*:\s*Theme\.metalStroke")
+        metal_accent = re.compile(r"\?\s*Theme\.metalStroke\s*:\s*Theme\.accent")
+        hits = []
+        for path in sorted((ROOT / "Blackout").glob("*.swift")):
+            body = path.read_text()
+            if accent_metal.search(body) or metal_accent.search(body):
+                hits.append(path.name)
+        self.assertEqual(
+            hits,
+            [],
+            "Xcode 16/26 reject Color vs LinearGradient in one ternary: " + ", ".join(hits),
+        )
 
 
 def hud_tap(state: dict, key) -> None:
@@ -5712,6 +5727,12 @@ class PackSwitchDeskTests(unittest.TestCase):
         inst = read("Blackout", "InstrumentsView.swift")
         packs = inst.split("private var packsPlate")[1].split("private var hudPlate")[0]
         self.assertIn("runtime.switchPack(p.id)", packs)
+        self.assertIn("if on {", packs)
+        self.assertNotRegex(
+            packs,
+            r"\?\s*Theme\.accent\s*:\s*Theme\.metalStroke",
+            "PACKS row stroke must if/else Color vs LinearGradient (tf-110–114 / PR 72 device compile)",
+        )
         qa = read("docs", "SOLO_QA.md")
         line = next(row for row in qa.splitlines() if "INSTRUMENTS → PACKS switches" in row)
         self.assertIn("closes", line.lower())

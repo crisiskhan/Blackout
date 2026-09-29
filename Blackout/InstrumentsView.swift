@@ -120,11 +120,13 @@ struct InstrumentsView: View {
                 .background(Theme.glass())
                 .clipShape(Theme.plateRect())
                 .overlay {
-                    Theme.plateRect()
-                        .strokeBorder(
-                            on ? Theme.accent : Theme.metalStroke,
-                            lineWidth: Theme.strokeWidth(on ? 1.5 : 1)
-                        )
+                    if on {
+                        Theme.plateRect()
+                            .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1.5))
+                    } else {
+                        Theme.plateRect()
+                            .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
+                    }
                 }
             }
         } else {
