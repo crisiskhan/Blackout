@@ -2,7 +2,8 @@ import SwiftUI
 import UIKit
 import Tokens
 
-/// EXPEDITION TV. SNAP stills nearest to farthest. Never a live stream.
+/// EXPEDITION TV. SNAP stills in TRAFFIC / BRIDGE / AIRPORT / VENUE / HOP.
+/// Nearest to farthest inside each section. Never a live stream.
 struct TvPlate: View {
     @Bindable var runtime: AppRuntime
 
@@ -29,8 +30,17 @@ struct TvPlate: View {
                             .textCase(.uppercase)
                             .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
                     }
-                    ForEach(feeds) { row in
-                        feedRow(row)
+                }
+            }
+            ForEach(sections) { block in
+                Text(block.kind.rawValue)
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(Theme.silver.opacity(0.5))
+                HUDGlassCard {
+                    VStack(alignment: .leading, spacing: 10) {
+                        ForEach(block.feeds) { row in
+                            feedRow(row)
+                        }
                     }
                 }
             }
@@ -48,12 +58,25 @@ struct TvPlate: View {
         }
     }
 
-    private var feeds: [CamDesk.Feed] {
+    private var you: (lat: Double, lon: Double)? {
         let pack = runtime.packs?.active
         let home = pack?.home ?? pack?.center
-        let you = runtime.fieldYou ?? home.map { (lat: $0.lat, lon: $0.lon) }
+        return runtime.fieldYou ?? home.map { (lat: $0.lat, lon: $0.lon) }
+    }
+
+    private var feeds: [CamDesk.Feed] {
         guard let you else { return [] }
         return CamDesk.feeds(
+            pack: runtime.packCams,
+            hops: runtime.meshCams,
+            lat: you.lat,
+            lon: you.lon
+        )
+    }
+
+    private var sections: [CamDesk.Section] {
+        guard let you else { return [] }
+        return CamDesk.sections(
             pack: runtime.packCams,
             hops: runtime.meshCams,
             lat: you.lat,

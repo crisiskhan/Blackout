@@ -9,6 +9,14 @@ enum CamDesk {
     /// How often TV pulls the same one-shot SNAP while a pipe exists.
     static let watchSeconds: TimeInterval = 12
 
+    enum Kind: String, CaseIterable {
+        case traffic = "TRAFFIC"
+        case bridge = "BRIDGE"
+        case airport = "AIRPORT"
+        case venue = "VENUE"
+        case hop = "HOP"
+    }
+
     struct Feed: Identifiable, Equatable {
         var id: String
         var name: String
@@ -17,6 +25,13 @@ enum CamDesk {
         var provider: String
         var meters: Double
         var range: String
+        var kind: Kind
+    }
+
+    struct Section: Identifiable, Equatable {
+        var kind: Kind
+        var feeds: [Feed]
+        var id: String { kind.rawValue }
     }
 
     /// Packed cameras plus hop cameras the mesh can reach. Pack wins a shared id.
@@ -49,6 +64,22 @@ enum CamDesk {
         reachable(pack: pack, hops: hops).map { CctvMark(id: $0.id, lat: $0.lat, lon: $0.lon) }
     }
 
+    /// HOP first. BOTA / PASO DEL NORTE are BRIDGE. AIRPORT is AIRPORT.
+    /// Zaragoza streets and Paseo Del Norte stay TRAFFIC. VENUE is reserved.
+    static func kind(_ cam: PackCam) -> Kind {
+        let provider = cam.provider.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        if provider == "HOP" { return .hop }
+        let named = cam.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let token = (named.isEmpty ? cam.id : named).uppercased()
+        if token.contains("BOTA") || token.contains("PASO DEL NORTE") {
+            return .bridge
+        }
+        if token.contains("AIRPORT") {
+            return .airport
+        }
+        return .traffic
+    }
+
     static func feeds(
         pack: [PackCam],
         hops: [MeshCamRecord],
@@ -66,9 +97,23 @@ enum CamDesk {
                     lon: cam.lon,
                     provider: cam.provider,
                     meters: meters,
-                    range: BlackoutTokens.Distance.hud(meters)
+                    range: BlackoutTokens.Distance.hud(meters),
+                    kind: kind(cam)
                 )
             }
             .sorted { $0.meters < $1.meters }
+    }
+
+    static func sections(
+        pack: [PackCam],
+        hops: [MeshCamRecord],
+        lat: Double,
+        lon: Double
+    ) -> [Section] {
+        let all = feeds(pack: pack, hops: hops, lat: lat, lon: lon)
+        return Kind.allCases.compactMap { kind in
+            let rows = all.filter { $0.kind == kind }
+            return rows.isEmpty ? nil : Section(kind: kind, feeds: rows)
+        }
     }
 }
