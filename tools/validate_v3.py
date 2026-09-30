@@ -1393,6 +1393,7 @@ def main() -> None:
     update_all_cams()
     open_cams()
     map_snap()
+    expedition_tv()
     mesh_range()
     hud_instrument()
     vision_glass()
@@ -1549,7 +1550,7 @@ def cctv_stills() -> None:
 
 
 def mesh_cams() -> None:
-    """Hop cameras as pink/orange discs. TAP UPDATE SNAPs stills the same way."""
+    """Hop cameras as the same red/blue discs. TAP UPDATE SNAPs stills the same way."""
     contracts = subprocess.run(
         [sys.executable, str(ROOT / "tools" / "test_mesh_cams.py")],
         cwd=ROOT,
@@ -1559,7 +1560,7 @@ def mesh_cams() -> None:
     if contracts.returncode != 0:
         bad(f"mesh camera contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
-    ok("Done: hop cameras pink/orange + SNAP stills")
+    ok("Done: hop cameras red/blue + SNAP stills")
 
 
 def update_all_cams() -> None:
@@ -1588,6 +1589,20 @@ def open_cams() -> None:
         bad(f"open camera contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
     ok("Done: NMDOT + every TxDOT still on the packed desk")
+
+
+def expedition_tv() -> None:
+    """Every pack camera is a red/blue disc. EXPEDITION TV is SNAP stills."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_expedition_tv.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"expedition TV contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: one red/blue disc + EXPEDITION TV SNAP gallery")
 
 
 def map_snap() -> None:

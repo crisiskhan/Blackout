@@ -1,7 +1,6 @@
 import SwiftUI
 import UIKit
 import MapLibreMap
-import MeshDTN
 import Search
 import Router
 import Tokens
@@ -126,11 +125,8 @@ struct MapTab: View {
                     onCctvTap: { id, lat, lon in
                         runtime.holdCam(id: id, lat: lat, lon: lon)
                     },
-                    cams: runtime.packCams.map { CctvMark(id: $0.id, lat: $0.lat, lon: $0.lon) },
-                    meshCams: MeshCamPaint.visible(
-                        packIDs: Set(runtime.packCams.map(\.id)),
-                        hops: runtime.meshCams
-                    ).map { CctvMark(id: $0.id, lat: $0.lat, lon: $0.lon) }
+                    cams: CamDesk.marks(pack: runtime.packCams, hops: runtime.meshCams),
+                    meshCams: []
                 )
                 .ignoresSafeArea()
                 .transaction { $0.animation = nil }

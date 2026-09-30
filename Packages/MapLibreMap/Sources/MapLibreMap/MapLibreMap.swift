@@ -654,7 +654,7 @@ public enum CctvMarks {
     public static let snapAtOnce = 8
 }
 
-/// Hop-reachable cameras. Split pink/orange disc. Same SNAP stills, never a stream.
+/// Hop-reachable cameras. Same red/blue disc. Same SNAP stills, never a stream.
 public enum MeshCamMarks {
     public static let sourceID = "mesh-cam-src"
     public static let layerID = "mesh-cam-mark"
