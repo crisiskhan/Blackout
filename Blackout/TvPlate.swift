@@ -3,7 +3,8 @@ import UIKit
 import Tokens
 
 /// EXPEDITION TV. SNAP stills in TRAFFIC / BRIDGE / AIRPORT / VENUE / HOP.
-/// N/A is a 10s hold, then official live HLS. Other sections never a live stream.
+/// Official city / zoo HLS play on BRIDGE / VENUE. TRAFFIC / AIRPORT / HOP
+/// stay stills. N/A is a 10s hold, adult only.
 struct TvPlate: View {
     @Bindable var runtime: AppRuntime
     @State private var naUnlocked = false
@@ -38,13 +39,20 @@ struct TvPlate: View {
                     }
                 }
             }
-            ForEach(sections) { block in
+            ForEach(openBlocks) { block in
                 Text(block.kind.rawValue)
                     .font(.system(size: 11, weight: .heavy))
                     .foregroundStyle(Theme.silver.opacity(0.5))
                 HUDGlassCard {
                     VStack(alignment: .leading, spacing: 10) {
-                        ForEach(block.feeds) { row in
+                        ForEach(block.lives) { row in
+                            NaLiveWell(
+                                row: row,
+                                pipe: runtime.updateSocket.pipe,
+                                playingID: $naPlayingID
+                            )
+                        }
+                        ForEach(block.stills) { row in
                             feedRow(row)
                         }
                     }
@@ -89,6 +97,25 @@ struct TvPlate: View {
             lat: you.lat,
             lon: you.lon
         )
+    }
+
+    private struct OpenBlock: Identifiable {
+        var kind: CamDesk.Kind
+        var stills: [CamDesk.Feed]
+        var lives: [NaLive.Row]
+        var id: String { kind.rawValue }
+    }
+
+    private var openBlocks: [OpenBlock] {
+        guard let you else { return [] }
+        let snap = Dictionary(uniqueKeysWithValues: sections.map { ($0.kind, $0.feeds) })
+        return CamDesk.Kind.allCases.compactMap { kind in
+            if kind == .na { return nil }
+            let stills = snap[kind] ?? []
+            let lives = DeskLive.rows(kind: kind, lat: you.lat, lon: you.lon)
+            if stills.isEmpty && lives.isEmpty { return nil }
+            return OpenBlock(kind: kind, stills: stills, lives: lives)
+        }
     }
 
     private var naFeeds: [CamDesk.Feed] {

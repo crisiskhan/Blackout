@@ -4,8 +4,9 @@ import SwiftUI
 import Tokens
 import UIKit
 
-/// N/A live exception. Official City of El Paso / zoo HTTPS HLS only.
-/// SNAP sections stay stills. AVPlayer layer only. No web view.
+/// N/A is adult only after the 10s hold. No street, bridge, or zoo.
+/// Official city / zoo HLS lives on the open BRIDGE / VENUE sections.
+/// AVPlayer layer only. No web view.
 enum NaLive {
     struct Stream: Identifiable, Equatable {
         var id: String
@@ -23,72 +24,8 @@ enum NaLive {
         var range: String
     }
 
-    /// City bridge page plus the zoo host's own public cams. 404 Stanton 1/2 stay off.
-    static let streams: [Stream] = [
-        Stream(
-            id: "na-stanton-3",
-            name: "STANTON BRIDGE 3",
-            url: "https://zoocams.elpasozoo.org/BridgeStanton3.m3u8",
-            lat: 31.7598,
-            lon: -106.4826
-        ),
-        Stream(
-            id: "na-pdn-1",
-            name: "PASO DEL NORTE 1",
-            url: "https://zoocams.elpasozoo.org/bridgepdn1.m3u8",
-            lat: 31.7580,
-            lon: -106.4870
-        ),
-        Stream(
-            id: "na-santa-fe-3",
-            name: "SANTA FE 3",
-            url: "https://zoocams.elpasozoo.org/bridgesantafe3.m3u8",
-            lat: 31.7576,
-            lon: -106.4874
-        ),
-        Stream(
-            id: "na-santa-fe-4",
-            name: "SANTA FE 4",
-            url: "https://zoocams.elpasozoo.org/bridgesantafe4.m3u8",
-            lat: 31.7574,
-            lon: -106.4876
-        ),
-        Stream(
-            id: "na-zaragoza-1",
-            name: "ZARAGOZA 1",
-            url: "https://zoocams.elpasozoo.org/BridgeZaragoza1.m3u8",
-            lat: 31.6714,
-            lon: -106.3378
-        ),
-        Stream(
-            id: "na-zaragoza-2",
-            name: "ZARAGOZA 2",
-            url: "https://zoocams.elpasozoo.org/BridgeZaragoza2.m3u8",
-            lat: 31.6712,
-            lon: -106.3374
-        ),
-        Stream(
-            id: "na-zaragoza-3",
-            name: "ZARAGOZA 3",
-            url: "https://zoocams.elpasozoo.org/BridgeZaragoza3.m3u8",
-            lat: 31.6710,
-            lon: -106.3370
-        ),
-        Stream(
-            id: "na-zoo-gf",
-            name: "ZOO GF",
-            url: "https://zoocams.elpasozoo.org/ZOOGF.m3u8",
-            lat: 31.7688,
-            lon: -106.4434
-        ),
-        Stream(
-            id: "na-zoo-m",
-            name: "ZOO M",
-            url: "https://zoocams.elpasozoo.org/ZooM.m3u8",
-            lat: 31.7684,
-            lon: -106.4430
-        ),
-    ]
+    /// Adult catalog. Empty until a packable 18+ HTTPS HLS exists.
+    static let streams: [Stream] = []
 
     static func rows(lat: Double, lon: Double) -> [Row] {
         streams
