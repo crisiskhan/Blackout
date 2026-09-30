@@ -755,7 +755,7 @@ final class AppRuntime {
             name: named.isEmpty ? id : named,
             lat: packed?.lat ?? hop?.lat ?? lat,
             lon: packed?.lon ?? hop?.lon ?? lon,
-            ink: packed?.ink ?? "pink",
+            ink: packed?.ink ?? "blue",
             provider: provider
         )
     }
@@ -1330,7 +1330,7 @@ final class AppRuntime {
                     lat: $0.lat,
                     lon: $0.lon,
                     name: $0.name,
-                    ink: "pink",
+                    ink: "blue",
                     provider: $0.provider
                 )
             },

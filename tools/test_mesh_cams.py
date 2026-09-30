@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Hop-reachable cameras on MAP as pink/orange discs. Stills SNAP the same way.
+"""Hop-reachable cameras on MAP as the same red/blue discs. Stills SNAP the same way.
 
-Packed CCTV stays red/blue. A hop radio is not a camera. Silence is not a camera.
+Packed CCTV and hop cameras share one disc. A hop radio is not a camera.
+Silence is not a camera.
 """
 from __future__ import annotations
 
@@ -273,7 +274,7 @@ class MeshCamSnapTests(unittest.TestCase):
 
 
 class MeshCamHudTests(unittest.TestCase):
-    def test_map_paints_a_pink_and_orange_disc_per_hop_camera(self):
+    def test_map_paints_the_same_red_and_blue_disc_per_hop_camera(self):
         art = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "MeshCamArt.swift")
         offline = read(
             "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
@@ -282,11 +283,10 @@ class MeshCamHudTests(unittest.TestCase):
         inspect = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "Inspect.swift")
         self.assertIn("enum MeshCamArt", art)
         self.assertIn("static func dot(", art)
-        self.assertIn("64.0 / 255.0", art)
-        self.assertIn("160.0 / 255.0", art)
-        self.assertIn("128.0 / 255.0", art)
-        self.assertNotIn("225.0 / 255.0", art)
-        self.assertNotIn("61.0 / 255.0", art)
+        self.assertIn("CctvArt.dot()", art)
+        self.assertNotIn("64.0 / 255.0", art)
+        self.assertNotIn("160.0 / 255.0", art)
+        self.assertNotIn("128.0 / 255.0", art)
         self.assertIn("mesh-cam-mark", swift + offline + art)
         self.assertIn("enum MeshCamMarks", swift)
         self.assertIn("var meshCams: [CctvMark]", offline)
@@ -350,10 +350,12 @@ class MeshCamHudTests(unittest.TestCase):
         self.assertIn("NO PIPE", card)
         self.assertIn("cam-", card)
 
-    def test_device_script_scores_pink_orange_hop_discs(self):
+    def test_device_script_scores_one_red_blue_disc(self):
         qa = read("docs", "SOLO_QA.md")
         agents = read("AGENTS.md")
-        self.assertIn("half pink half orange", qa.lower())
+        hop = next(line for line in qa.splitlines() if "Hop cameras" in line)
+        self.assertIn("red/blue", hop)
+        self.assertNotIn("pink", hop.lower())
         self.assertIn("TAP UPDATE", qa)
         self.assertIn("test_mesh_cams.py", agents)
         validate = read("tools", "validate_v3.py")

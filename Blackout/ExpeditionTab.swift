@@ -15,7 +15,7 @@ private struct KitAssignPerson: Identifiable {
 }
 
 private enum ExpeditionPlate: String, CaseIterable {
-    case condition, roster, timers, inventory
+    case condition, roster, timers, inventory, tv
 
     var title: String {
         switch self {
@@ -23,6 +23,7 @@ private enum ExpeditionPlate: String, CaseIterable {
         case .roster: return "ROSTER"
         case .timers: return "TIMERS"
         case .inventory: return "INVENTORY"
+        case .tv: return "TV"
         }
     }
 }
@@ -43,7 +44,7 @@ struct ExpeditionTab: View {
     var body: some View {
         HUDPage(
             title: "EXPEDITION",
-            status: "CONDITION \(runtime.vitals.band.rawValue.uppercased())",
+            status: pageStatus,
             statusTone: statusTone
         ) {
             VStack(alignment: .leading, spacing: 10) {
@@ -65,8 +66,13 @@ struct ExpeditionTab: View {
     private var plateRail: some View {
         HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
             ForEach(ExpeditionPlate.allCases, id: \.self) { item in
-                Button(item.title) { plate = item }
-                    .buttonStyle(HUDOverlayChipStyle(filled: plate == item))
+                Button(item.title) {
+                    plate = item
+                    if item == .tv {
+                        runtime.pullMapSnap()
+                    }
+                }
+                .buttonStyle(HUDOverlayChipStyle(filled: plate == item))
             }
         }
     }
@@ -82,6 +88,8 @@ struct ExpeditionTab: View {
             timersPlate
         case .inventory:
             inventoryPlate
+        case .tv:
+            TvPlate(runtime: runtime)
         }
     }
 
@@ -293,6 +301,28 @@ struct ExpeditionTab: View {
                 }
             }
         }
+    }
+
+    private var pageStatus: String {
+        if plate == .tv {
+            if tvFeeds.isEmpty { return "NO CAMERAS" }
+            if !runtime.updateSocket.pipe { return "NO PIPE" }
+            return "TV · \(tvFeeds.count)"
+        }
+        return "CONDITION \(runtime.vitals.band.rawValue.uppercased())"
+    }
+
+    private var tvFeeds: [CamDesk.Feed] {
+        let pack = runtime.packs?.active
+        let home = pack?.home ?? pack?.center
+        let you = runtime.fieldYou ?? home.map { (lat: $0.lat, lon: $0.lon) }
+        guard let you else { return [] }
+        return CamDesk.feeds(
+            pack: runtime.packCams,
+            hops: runtime.meshCams,
+            lat: you.lat,
+            lon: you.lon
+        )
     }
 
     private var statusTone: HUDStatusTone {
