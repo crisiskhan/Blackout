@@ -3,7 +3,7 @@ import UIKit
 import Tokens
 
 /// EXPEDITION TV. SNAP stills in TRAFFIC / BRIDGE / AIRPORT / VENUE / HOP.
-/// N/A is a 10s hold. Nearest to farthest inside each section. Never a live stream.
+/// N/A is a 10s hold, then official live HLS. Other sections never a live stream.
 struct TvPlate: View {
     @Bindable var runtime: AppRuntime
     @State private var naUnlocked = false
@@ -11,6 +11,7 @@ struct TvPlate: View {
     @State private var naPress = 0
     @State private var naStarted: Date?
     @State private var naChrome: String?
+    @State private var naPlayingID: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -100,6 +101,11 @@ struct TvPlate: View {
         )
     }
 
+    private var naLiveRows: [NaLive.Row] {
+        guard let you else { return [] }
+        return NaLive.rows(lat: you.lat, lon: you.lon)
+    }
+
     private var naGate: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("N/A")
@@ -109,13 +115,20 @@ struct TvPlate: View {
                 VStack(alignment: .leading, spacing: 10) {
                     naHoldRow
                     if naUnlocked {
-                        if naFeeds.isEmpty {
+                        if naLiveRows.isEmpty && naFeeds.isEmpty {
                             Text("NO CAMERAS")
                                 .font(.system(size: 13, weight: .heavy))
                                 .foregroundStyle(Theme.silver)
                                 .textCase(.uppercase)
                                 .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
                         } else {
+                            ForEach(naLiveRows) { row in
+                                NaLiveWell(
+                                    row: row,
+                                    pipe: runtime.updateSocket.pipe,
+                                    playingID: $naPlayingID
+                                )
+                            }
                             ForEach(naFeeds) { row in
                                 feedRow(row)
                             }

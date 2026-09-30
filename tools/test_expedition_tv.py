@@ -218,6 +218,7 @@ class OneDiscTests(unittest.TestCase):
         self.assertNotIn("rtmp", tv.lower())
         self.assertNotIn("AVPlayer", sock)
         self.assertNotIn("WKWebView", sock)
+        self.assertIn("NaLive", tv)
         self.assertIn("func pullMapSnap(", app)
         self.assertIn("tapUpdate()", app.split("func pullMapSnap")[1].split("func tapUpdate")[0])
         self.assertIn("CamDesk.sections", tv)
@@ -406,6 +407,41 @@ class NaHoldTests(unittest.TestCase):
         self.assertNotIn("WKWebView", tv)
 
 
+class NaLiveTests(unittest.TestCase):
+    def test_na_live_is_official_https_hls_after_hold(self):
+        live = read("Blackout", "NaLive.swift")
+        tv = read("Blackout", "TvPlate.swift")
+        self.assertIn("enum NaLive", live)
+        self.assertIn("AVPlayer", live)
+        self.assertNotIn("WKWebView", live)
+        self.assertNotIn("rtmp", live.lower())
+        self.assertIn("zoocams.elpasozoo.org", live)
+        for url in (
+            "https://zoocams.elpasozoo.org/BridgeStanton3.m3u8",
+            "https://zoocams.elpasozoo.org/bridgepdn1.m3u8",
+            "https://zoocams.elpasozoo.org/bridgesantafe3.m3u8",
+            "https://zoocams.elpasozoo.org/bridgesantafe4.m3u8",
+            "https://zoocams.elpasozoo.org/BridgeZaragoza1.m3u8",
+            "https://zoocams.elpasozoo.org/BridgeZaragoza2.m3u8",
+            "https://zoocams.elpasozoo.org/BridgeZaragoza3.m3u8",
+            "https://zoocams.elpasozoo.org/ZOOGF.m3u8",
+            "https://zoocams.elpasozoo.org/ZooM.m3u8",
+        ):
+            self.assertIn(url, live)
+        self.assertNotIn("stantonbridge1.m3u8", live.lower().replace("bridgestanton3", ""))
+        self.assertNotIn("BridgeStanton2", live)
+        self.assertNotIn("truelook", live.lower())
+        self.assertNotIn("earthcam", live.lower())
+        self.assertNotIn("insecam", live.lower())
+        self.assertNotIn("chaturbate", live.lower())
+        self.assertIn("static func rows(", live)
+        self.assertIn("NaLive.rows", tv)
+        self.assertIn("NaLiveWell", tv)
+        self.assertIn("TAP PLAY", live)
+        self.assertIn("NO STREAM", live)
+        self.assertIn("NO PIPE", live)
+
+
 class ClosedSourcesTests(unittest.TestCase):
     def test_tv_and_harvest_refuse_unsecured_alpr_and_streams(self):
         paths = (
@@ -454,6 +490,7 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("`N/A`", tv)
         self.assertIn("HOLD 10", tv)
         self.assertIn("10s hold", tv)
+        self.assertIn("live", tv.lower())
         self.assertIn("section", tv.lower())
         self.assertIn("test_expedition_tv.py", agents)
         self.assertIn("test_expedition_tv.py", validate)
