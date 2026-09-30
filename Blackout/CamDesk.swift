@@ -8,12 +8,15 @@ import Tokens
 enum CamDesk {
     /// How often TV pulls the same one-shot SNAP while a pipe exists.
     static let watchSeconds: TimeInterval = 12
+    /// N/A stays closed until this hold. A tap is HOLD 10, not a dead chip.
+    static let naHoldSeconds: TimeInterval = 10
 
     enum Kind: String, CaseIterable {
         case traffic = "TRAFFIC"
         case bridge = "BRIDGE"
         case airport = "AIRPORT"
         case venue = "VENUE"
+        case na = "N/A"
         case hop = "HOP"
     }
 
@@ -64,11 +67,16 @@ enum CamDesk {
         reachable(pack: pack, hops: hops).map { CctvMark(id: $0.id, lat: $0.lat, lon: $0.lon) }
     }
 
-    /// HOP first. BOTA / PASO DEL NORTE are BRIDGE. AIRPORT is AIRPORT.
-    /// Zaragoza streets and Paseo Del Norte stay TRAFFIC. VENUE is reserved.
+    static func naUnlocks(elapsed: TimeInterval) -> Bool {
+        elapsed >= naHoldSeconds
+    }
+
+    /// HOP first. N/A is provider N/A only. BOTA / PASO DEL NORTE are BRIDGE.
+    /// AIRPORT is AIRPORT. Zaragoza streets and Paseo Del Norte stay TRAFFIC.
     static func kind(_ cam: PackCam) -> Kind {
         let provider = cam.provider.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         if provider == "HOP" { return .hop }
+        if provider == "N/A" || provider == "NA" { return .na }
         let named = cam.name.trimmingCharacters(in: .whitespacesAndNewlines)
         let token = (named.isEmpty ? cam.id : named).uppercased()
         if token.contains("BOTA") || token.contains("PASO DEL NORTE") {
@@ -112,8 +120,18 @@ enum CamDesk {
     ) -> [Section] {
         let all = feeds(pack: pack, hops: hops, lat: lat, lon: lon)
         return Kind.allCases.compactMap { kind in
+            if kind == .na { return nil }
             let rows = all.filter { $0.kind == kind }
             return rows.isEmpty ? nil : Section(kind: kind, feeds: rows)
         }
+    }
+
+    static func naFeeds(
+        pack: [PackCam],
+        hops: [MeshCamRecord],
+        lat: Double,
+        lon: Double
+    ) -> [Feed] {
+        feeds(pack: pack, hops: hops, lat: lat, lon: lon).filter { $0.kind == .na }
     }
 }

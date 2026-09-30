@@ -3,7 +3,8 @@
 
 Packs populate on open. Hop cameras use the same disc and the same SNAP
 rules. TV is TRAFFIC / BRIDGE / AIRPORT / VENUE / HOP, nearest to farthest
-inside each section. Empty sections omit. Never a live stream.
+inside each section. Empty sections omit. N/A is a 10s hold. Never a live
+stream.
 """
 from __future__ import annotations
 
@@ -16,7 +17,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-KINDS = ("TRAFFIC", "BRIDGE", "AIRPORT", "VENUE", "HOP")
+KINDS = ("TRAFFIC", "BRIDGE", "AIRPORT", "VENUE", "N/A", "HOP")
+NA_HOLD_SECONDS = 10
 
 
 def read(*parts: str) -> str:
@@ -69,10 +71,13 @@ def section(cam: dict) -> str:
     """HOP first. BOTA / PASO DEL NORTE are BRIDGE. AIRPORT is AIRPORT.
 
     Zaragoza street cams and Paseo Del Norte stay TRAFFIC. VENUE is reserved.
+    N/A is provider N/A only — never a street name. Open sections omit N/A.
     """
     provider = str(cam.get("provider") or "").strip().upper()
     if provider == "HOP":
         return "HOP"
+    if provider in ("N/A", "NA"):
+        return "N/A"
     name = str(cam.get("name") or "").strip().upper()
     if not name:
         name = str(cam.get("id") or "").strip().upper()
@@ -89,7 +94,19 @@ def sectioned(
     buckets: dict[str, list[dict]] = {kind: [] for kind in KINDS}
     for row in tv_rows(pack, hops, lat, lon):
         buckets[section(row)].append(row)
-    return [(kind, buckets[kind]) for kind in KINDS if buckets[kind]]
+    return [
+        (kind, buckets[kind])
+        for kind in KINDS
+        if kind != "N/A" and buckets[kind]
+    ]
+
+
+def na_rows(pack: list[dict], hops: list[dict], lat: float, lon: float) -> list[dict]:
+    return [row for row in tv_rows(pack, hops, lat, lon) if section(row) == "N/A"]
+
+
+def na_unlocks(elapsed: float) -> bool:
+    return elapsed >= NA_HOLD_SECONDS
 
 
 YOU = (31.87050, -106.59732)
@@ -213,9 +230,14 @@ class OneDiscTests(unittest.TestCase):
         self.assertIn('"BRIDGE"', desk)
         self.assertIn('"AIRPORT"', desk)
         self.assertIn('"VENUE"', desk)
+        self.assertIn('"N/A"', desk)
         self.assertIn('"HOP"', desk)
         self.assertIn("BOTA", desk)
         self.assertIn("PASO DEL NORTE", desk)
+        self.assertIn("naHoldSeconds", desk)
+        self.assertIn("HOLD 10", tv)
+        self.assertIn("naHoldSeconds", tv)
+        self.assertIn("naUnlocks", tv + desk)
 
 
 class SectionTests(unittest.TestCase):
@@ -232,6 +254,9 @@ class SectionTests(unittest.TestCase):
         self.assertEqual(section({"name": "IH-10 @ Airway", "provider": "TxDOT"}), "TRAFFIC")
         self.assertEqual(section({"name": "Airport @ Founders", "provider": "HOP"}), "HOP")
         self.assertEqual(section({"name": "US-62/Paisano East @ BOTA", "provider": "hop"}), "HOP")
+        self.assertEqual(section({"name": "Club", "provider": "N/A"}), "N/A")
+        self.assertEqual(section({"name": "Club", "provider": "NA"}), "N/A")
+        self.assertEqual(section({"name": "Doniphan @ Club", "provider": "TxDOT"}), "TRAFFIC")
 
     def test_sections_omit_empty_and_sort_inside(self):
         pack = [
@@ -321,6 +346,7 @@ class SectionTests(unittest.TestCase):
         self.assertEqual(by_kind["HOP"][0], "hop-mid")
         self.assertIn("hop-air", by_kind["HOP"])
         self.assertNotIn("VENUE", [kind for kind, _ in got])
+        self.assertNotIn("N/A", [kind for kind, _ in got])
         for _kind, rows in got:
             meters = [
                 haversine_m(YOU, (float(row["lat"]), float(row["lon"])))
@@ -340,6 +366,44 @@ class SectionTests(unittest.TestCase):
         self.assertEqual(section(by_name["FM-659/Zaragoza @ Pellicano"]), "TRAFFIC")
         self.assertEqual(section(by_name["IH-10 @ Airway"]), "TRAFFIC")
         self.assertEqual(section(by_name["IH-10 @ Zaragoza"]), "TRAFFIC")
+        for row in cams:
+            self.assertNotEqual(section(row), "N/A")
+
+
+class NaHoldTests(unittest.TestCase):
+    def test_na_is_gated_and_ten_seconds(self):
+        self.assertFalse(na_unlocks(0))
+        self.assertFalse(na_unlocks(9.99))
+        self.assertTrue(na_unlocks(10))
+        self.assertTrue(na_unlocks(12))
+        pack = [
+            {
+                "id": "na-near",
+                "lat": 31.871,
+                "lon": -106.597,
+                "name": "Club",
+                "provider": "N/A",
+            },
+            {
+                "id": "near",
+                "lat": 31.8706,
+                "lon": -106.5974,
+                "name": "IH-10 @ Artcraft",
+                "provider": "TxDOT",
+            },
+        ]
+        open_kinds = [kind for kind, _ in sectioned(pack, [], YOU[0], YOU[1])]
+        self.assertEqual(open_kinds, ["TRAFFIC"])
+        self.assertEqual([row["id"] for row in na_rows(pack, [], YOU[0], YOU[1])], ["na-near"])
+        desk = desk_text()
+        self.assertIn("static let naHoldSeconds", desk)
+        self.assertIn("= 10", desk.split("naHoldSeconds")[1].split("\n")[0])
+        self.assertIn("static func naUnlocks", desk)
+        tv = read("Blackout", "TvPlate.swift")
+        self.assertIn("HOLD 10", tv)
+        self.assertIn("N/A", tv)
+        self.assertNotIn("AVPlayer", tv)
+        self.assertNotIn("WKWebView", tv)
 
 
 class ClosedSourcesTests(unittest.TestCase):
@@ -357,6 +421,10 @@ class ClosedSourcesTests(unittest.TestCase):
             "flocksafety",
             "earthcam",
             "truelook",
+            "chaturbate",
+            "stripchat",
+            "cam4",
+            "onlyfans",
             ".m3u8",
             "rtmp://",
         )
@@ -383,6 +451,9 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("TRAFFIC", tv)
         self.assertIn("BRIDGE", tv)
         self.assertIn("AIRPORT", tv)
+        self.assertIn("`N/A`", tv)
+        self.assertIn("HOLD 10", tv)
+        self.assertIn("10s hold", tv)
         self.assertIn("section", tv.lower())
         self.assertIn("test_expedition_tv.py", agents)
         self.assertIn("test_expedition_tv.py", validate)
