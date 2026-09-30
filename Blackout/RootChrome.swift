@@ -32,6 +32,13 @@ struct RootChrome: View {
                 sosFlashVeil
             }
         }
+        .overlay {
+            if let name = runtime.zoomStillName {
+                StillZoom(name: name, onClose: runtime.closeStill)
+                    .transition(.opacity)
+            }
+        }
+        .animation(Theme.Motion.heavy, value: runtime.zoomStillName)
         .tint(Theme.silver)
         .preferredColorScheme(runtime.lamp == .sun ? .light : .dark)
         .onAppear {
@@ -48,6 +55,7 @@ struct RootChrome: View {
             if !now {
                 runtime.hudKeys.close()
                 runtime.closeMark()
+                runtime.closeStill()
                 runtime.clearIncoming()
                 runtime.haltSOSFlash()
                 runtime.showInstruments = false

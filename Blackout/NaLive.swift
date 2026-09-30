@@ -1,46 +1,30 @@
 import AVFoundation
-import Router
 import SwiftUI
 import Tokens
 import UIKit
 
-/// N/A is adult only after the 10s hold. No street, bridge, or zoo.
-/// Official city / zoo HLS lives on the open BRIDGE / VENUE sections.
+/// N/A is adult HTTPS HLS after the 10s hold. Open sections stay stills.
 /// AVPlayer layer only. No web view.
 enum NaLive {
-    struct Stream: Identifiable, Equatable {
-        var id: String
-        var name: String
-        var url: String
-        var lat: Double
-        var lon: Double
-    }
-
     struct Row: Identifiable, Equatable {
         var id: String
         var name: String
         var url: String
-        var meters: Double
+        var viewers: Int
         var range: String
     }
 
-    /// Adult catalog. Empty until a packable 18+ HTTPS HLS exists.
-    static let streams: [Stream] = []
-
-    static func rows(lat: Double, lon: Double) -> [Row] {
-        streams
-            .compactMap { stream -> Row? in
-                guard let parsed = URL(string: stream.url), parsed.scheme == "https" else { return nil }
-                let meters = GraphRouter.haversine(lat, lon, stream.lat, stream.lon)
-                return Row(
-                    id: stream.id,
-                    name: stream.name,
-                    url: stream.url,
-                    meters: meters,
-                    range: BlackoutTokens.Distance.hud(meters)
-                )
-            }
-            .sorted { $0.meters < $1.meters }
+    static func rows(_ rooms: [AdultDesk.Room]) -> [Row] {
+        rooms.compactMap { room in
+            guard let parsed = URL(string: room.url), parsed.scheme == "https" else { return nil }
+            return Row(
+                id: room.id,
+                name: room.name,
+                url: room.url,
+                viewers: room.viewers,
+                range: "LIVE"
+            )
+        }
     }
 }
 
@@ -121,6 +105,7 @@ struct NaLiveWell: View {
         }
         guard pipe, let url = URL(string: row.url), url.scheme == "https" else { return }
         let next = AVPlayer(url: url)
+        next.automaticallyWaitsToMinimizeStalling = true
         next.play()
         player = next
         playingID = row.id

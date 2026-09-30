@@ -3,14 +3,15 @@
 
 Packs populate on open. Hop cameras use the same disc and the same SNAP
 rules. TV is TRAFFIC / BRIDGE / AIRPORT / VENUE / HOP, nearest to farthest
-inside each section. Empty sections omit. Official city/zoo HLS play on
-BRIDGE / VENUE. N/A is a 10s hold for adult only. TRAFFIC / AIRPORT / HOP
-never a live stream.
+inside each section. Empty sections omit. Open sections never a live
+stream — JPEG SNAP only. N/A is a 10s hold, then adult HTTPS HLS.
+Tap a still to pinch-zoom the packed JPEG.
 """
 from __future__ import annotations
 
 import json
 import math
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -108,6 +109,110 @@ def na_rows(pack: list[dict], hops: list[dict], lat: float, lon: float) -> list[
 
 def na_unlocks(elapsed: float) -> bool:
     return elapsed >= NA_HOLD_SECONDS
+
+
+ADULT_CAP = 48
+ADULT_BLOCKED = (
+    "teen",
+    "underage",
+    "child",
+    "loli",
+    "shota",
+    "jailbait",
+    "preteen",
+    "pedo",
+    "minor",
+    "under18",
+    "younggirl",
+)
+
+
+def adult_playlist(raw: str) -> str | None:
+    """HTTPS only. Strip a quality suffix so the player can take the master."""
+    text = str(raw or "").strip()
+    if not text.lower().startswith("https://"):
+        return None
+    stripped = re.sub(r"_\d+p\.m3u8$", ".m3u8", text, flags=re.IGNORECASE)
+    stripped = re.sub(r"_high\.m3u8$", ".m3u8", stripped, flags=re.IGNORECASE)
+    if not stripped.lower().startswith("https://"):
+        return None
+    return stripped
+
+
+def adult_allows(name: str) -> bool:
+    blob = str(name or "").lower()
+    if not blob.strip():
+        return False
+    return not any(token in blob for token in ADULT_BLOCKED)
+
+
+def adult_rooms(payload: object) -> list[dict]:
+    """Live public HTTPS rooms, highest viewers first, cap ADULT_CAP."""
+    models: list[object] = []
+    if isinstance(payload, list):
+        models = payload
+    elif isinstance(payload, dict):
+        raw = payload.get("models")
+        if raw is None:
+            raw = payload.get("items")
+        if isinstance(raw, dict):
+            raw = raw.get("models") or raw.get("items") or []
+        if isinstance(raw, list):
+            models = raw
+    rooms: list[dict] = []
+    seen: set[str] = set()
+    for model in models:
+        if not isinstance(model, dict):
+            continue
+        live = model.get("isLive")
+        if live in (True, 1, "1", "true", "True"):
+            pass
+        else:
+            continue
+        status = str(model.get("status") or "").strip().lower()
+        if status != "public":
+            continue
+        name = str(model.get("username") or model.get("alias") or "").strip()
+        if not adult_allows(name):
+            continue
+        raw_id = model.get("id")
+        if raw_id is None:
+            token = name
+        else:
+            token = str(raw_id).strip()
+        if not token:
+            continue
+        rid = f"adult-{token}"
+        if rid in seen:
+            continue
+        playlist = adult_playlist(
+            str(
+                model.get("hlsPlaylist")
+                or model.get("hlsStreamUrl")
+                or model.get("streamUrl")
+                or ""
+            )
+        )
+        if not playlist:
+            continue
+        viewers = model.get("viewersCount")
+        if viewers is None:
+            viewers = model.get("viewers")
+        try:
+            count = int(viewers)
+        except (TypeError, ValueError):
+            count = 0
+        seen.add(rid)
+        rooms.append(
+            {
+                "id": rid,
+                "name": name.upper(),
+                "url": playlist,
+                "viewers": count,
+            }
+        )
+    rooms.sort(key=lambda row: (-int(row["viewers"]), str(row["name"])))
+    return rooms[:ADULT_CAP]
 
 
 YOU = (31.87050, -106.59732)
@@ -220,6 +325,7 @@ class OneDiscTests(unittest.TestCase):
         self.assertNotIn("AVPlayer", sock)
         self.assertNotIn("WKWebView", sock)
         self.assertIn("NaLive", tv)
+        self.assertIn("openStill", tv)
         self.assertIn("func pullMapSnap(", app)
         self.assertIn("tapUpdate()", app.split("func pullMapSnap")[1].split("func tapUpdate")[0])
         self.assertIn("CamDesk.sections", tv)
@@ -408,49 +514,132 @@ class NaHoldTests(unittest.TestCase):
         self.assertNotIn("WKWebView", tv)
 
 
-OFFICIAL_HLS = (
-    "https://zoocams.elpasozoo.org/BridgeStanton3.m3u8",
-    "https://zoocams.elpasozoo.org/bridgepdn1.m3u8",
-    "https://zoocams.elpasozoo.org/bridgesantafe3.m3u8",
-    "https://zoocams.elpasozoo.org/bridgesantafe4.m3u8",
-    "https://zoocams.elpasozoo.org/BridgeZaragoza1.m3u8",
-    "https://zoocams.elpasozoo.org/BridgeZaragoza2.m3u8",
-    "https://zoocams.elpasozoo.org/BridgeZaragoza3.m3u8",
-    "https://zoocams.elpasozoo.org/ZOOGF.m3u8",
-    "https://zoocams.elpasozoo.org/ZooM.m3u8",
-)
-
-
-class DeskLiveTests(unittest.TestCase):
-    def test_official_hls_plays_on_open_bridge_and_venue(self):
-        desk = read("Blackout", "DeskLive.swift")
-        live = read("Blackout", "NaLive.swift")
+class OpenStillTests(unittest.TestCase):
+    def test_open_sections_are_snap_stills_only(self):
         tv = read("Blackout", "TvPlate.swift")
-        self.assertIn("enum DeskLive", desk)
-        self.assertIn("import Foundation", desk)
+        live = read("Blackout", "NaLive.swift")
+        sock = read("Blackout", "UpdateSocket.swift")
+        self.assertFalse((ROOT / "Blackout" / "DeskLive.swift").exists())
+        open_tv = open_body(tv)
+        self.assertNotIn("DeskLive", tv)
+        self.assertNotIn("NaLiveWell", open_tv)
+        self.assertNotIn("TAP PLAY", open_tv)
+        self.assertNotIn("AVPlayer", tv)
+        self.assertNotIn("WKWebView", tv)
+        self.assertNotIn("rtmp", tv.lower())
+        self.assertNotIn("zoocams.elpasozoo.org", tv.lower())
+        self.assertNotIn("zoocams.elpasozoo.org", live.lower())
+        self.assertNotIn("zoocams.elpasozoo.org", sock.lower())
+        self.assertIn("TAP UPDATE", tv)
+        self.assertIn("NO STILL", tv)
+        self.assertIn("CamDesk.sections", tv)
+        self.assertIn("openStill", tv)
         self.assertIn("AVPlayer", live)
-        self.assertNotIn("WKWebView", desk)
-        self.assertNotIn("WKWebView", live)
-        self.assertNotIn("rtmp", desk.lower())
-        self.assertNotIn("rtmp", live.lower())
-        for url in OFFICIAL_HLS:
-            self.assertIn(url, desk)
-            self.assertNotIn(url, live)
-        self.assertIn("zoocams.elpasozoo.org", desk)
-        self.assertNotIn("zoocams.elpasozoo.org", live)
-        self.assertNotIn("stantonbridge1.m3u8", desk.lower().replace("bridgestanton3", ""))
-        self.assertNotIn("BridgeStanton2", desk)
-        for word in ("truelook", "earthcam", "insecam", "chaturbate", "stripchat", "lovescape"):
-            self.assertNotIn(word, desk.lower())
-            self.assertNotIn(word, live.lower())
-        self.assertIn("case .bridge", desk)
-        self.assertIn("case .venue", desk)
-        self.assertIn("DeskLive.rows", tv)
-        self.assertIn("NaLiveWell", tv)
-        self.assertNotIn("DeskLive.rows", na_gate_body(tv))
         self.assertIn("TAP PLAY", live)
         self.assertIn("NO STREAM", live)
         self.assertIn("NO PIPE", live)
+
+
+class AdultDeskTests(unittest.TestCase):
+    def test_directory_keeps_live_public_https_and_strips_quality(self):
+        payload = {
+            "models": [
+                {
+                    "id": 11,
+                    "username": "alpha",
+                    "isLive": True,
+                    "status": "public",
+                    "viewersCount": 900,
+                    "hlsPlaylist": "https://edge-hls.example/hls/a/master/a_240p.m3u8",
+                },
+                {
+                    "id": 12,
+                    "username": "teenstar",
+                    "isLive": True,
+                    "status": "public",
+                    "viewersCount": 5000,
+                    "hlsPlaylist": "https://edge-hls.example/hls/b/master/b.m3u8",
+                },
+                {
+                    "id": 13,
+                    "username": "beta",
+                    "isLive": True,
+                    "status": "private",
+                    "viewersCount": 800,
+                    "hlsPlaylist": "https://edge-hls.example/hls/c/master/c.m3u8",
+                },
+                {
+                    "id": 14,
+                    "username": "gamma",
+                    "isLive": False,
+                    "status": "public",
+                    "viewersCount": 10,
+                    "hlsPlaylist": "https://edge-hls.example/hls/d/master/d.m3u8",
+                },
+                {
+                    "id": 15,
+                    "username": "delta",
+                    "isLive": True,
+                    "status": "public",
+                    "viewersCount": 100,
+                    "hlsPlaylist": "http://insecure.example/x.m3u8",
+                },
+                {
+                    "id": 16,
+                    "username": "echo",
+                    "isLive": True,
+                    "status": "public",
+                    "viewersCount": 400,
+                    "hlsPlaylist": "https://edge-hls.example/hls/e/master/e_720p.m3u8",
+                },
+            ]
+        }
+        got = adult_rooms(payload)
+        self.assertEqual([row["id"] for row in got], ["adult-11", "adult-16"])
+        self.assertEqual(got[0]["name"], "ALPHA")
+        self.assertEqual(got[0]["url"], "https://edge-hls.example/hls/a/master/a.m3u8")
+        self.assertEqual(got[1]["url"], "https://edge-hls.example/hls/e/master/e.m3u8")
+        self.assertTrue(adult_allows("alpha"))
+        self.assertFalse(adult_allows("teenstar"))
+        self.assertIsNone(adult_playlist("http://insecure.example/x.m3u8"))
+        desk = read("Blackout", "AdultDesk.swift")
+        sock = read("Blackout", "UpdateSocket.swift")
+        live = read("Blackout", "NaLive.swift")
+        tv = read("Blackout", "TvPlate.swift")
+        self.assertIn("enum AdultDesk", desk)
+        self.assertIn("static let cap", desk)
+        self.assertIn("= 48", desk)
+        self.assertIn("static func parse(", desk)
+        self.assertIn("static func playlist(", desk)
+        self.assertIn("static func directory(", desk)
+        self.assertIn("lovescape.cam", desk.lower())
+        self.assertIn("primaryTag", desk)
+        self.assertIn("girls", desk)
+        self.assertIn("func pullAdult(", sock)
+        self.assertIn("fetchAdult", sock)
+        self.assertIn("adultRooms", sock)
+        self.assertIn("AdultDesk.parse", sock)
+        self.assertIn("User-Agent", sock)
+        self.assertNotIn("lovescape", sock.lower())
+        self.assertNotIn("WKWebView", desk)
+        self.assertNotIn("WKWebView", sock)
+        self.assertNotIn("URLSession", desk)
+        self.assertNotIn("AVPlayer", sock)
+        self.assertNotIn("AVPlayer", desk)
+        self.assertIn("NaLive.rows", tv)
+        self.assertIn("adultRooms", tv)
+        self.assertIn("pullAdult", tv)
+        gate = na_gate_body(tv)
+        self.assertIn("NaLiveWell", gate)
+        self.assertIn("naLiveRows", gate)
+        self.assertNotIn("NaLiveWell", open_body(tv))
+        self.assertIn("LIVE", live)
+        self.assertIn("AdultDesk.Room", live)
+        self.assertNotIn("zoocams.elpasozoo.org", live.lower())
+        for word in ("truelook", "earthcam", "insecam", "chaturbate", "stripchat"):
+            self.assertNotIn(word, desk.lower())
+            self.assertNotIn(word, live.lower())
+            self.assertNotIn(word, sock.lower())
 
 
 class NaLiveTests(unittest.TestCase):
@@ -462,14 +651,37 @@ class NaLiveTests(unittest.TestCase):
         self.assertNotIn("WKWebView", live)
         self.assertNotIn("rtmp", live.lower())
         self.assertNotIn("zoocams.elpasozoo.org", live)
-        for url in OFFICIAL_HLS:
-            self.assertNotIn(url, live)
         self.assertIn("NaLive.rows", tv)
         self.assertIn("NaLiveWell", tv)
         self.assertIn("HOLD 10", tv)
         gate = na_gate_body(tv)
         self.assertIn("naLiveRows", gate)
-        self.assertNotIn("DeskLive.rows", gate)
+        self.assertNotIn("DeskLive", gate)
+
+
+class StillZoomTests(unittest.TestCase):
+    def test_still_tap_opens_native_pinch_zoom(self):
+        zoom = read("Blackout", "StillZoom.swift")
+        tv = read("Blackout", "TvPlate.swift")
+        card = read("Blackout", "CamHoldCard.swift")
+        root = read("Blackout", "RootChrome.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        self.assertIn("struct StillZoom", zoom)
+        self.assertIn("UIScrollView", zoom)
+        self.assertIn("maximumZoomScale", zoom)
+        self.assertIn("CLOSE", zoom)
+        self.assertIn("contentsOfFile", zoom)
+        self.assertNotIn("fullScreenCover", zoom)
+        self.assertNotIn(".spring(", zoom)
+        self.assertNotIn("WKWebView", zoom)
+        self.assertIn("openStill", tv)
+        self.assertIn("openStill", card)
+        self.assertIn("zoomStillName", app)
+        self.assertIn("func openStill(", app)
+        self.assertIn("func closeStill(", app)
+        self.assertIn("StillZoom", root)
+        self.assertIn("closeStill", root)
+        self.assertNotIn("fullScreenCover", root)
 
 
 class ClosedSourcesTests(unittest.TestCase):
@@ -522,10 +734,10 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("HOLD 10", tv)
         self.assertIn("10s hold", tv)
         self.assertIn("adult", tv.lower())
-        self.assertIn("city", tv.lower())
-        self.assertIn("zoo", tv.lower())
+        self.assertIn("zoom", tv.lower())
         self.assertIn("section", tv.lower())
         self.assertNotIn("insecam", tv.lower())
+        self.assertNotIn("best in class", tv.lower())
         self.assertIn("test_expedition_tv.py", agents)
         self.assertIn("test_expedition_tv.py", validate)
         self.assertIn("expedition_tv()", validate)
@@ -539,6 +751,10 @@ def na_gate_body(tv: str) -> str:
     start = tv.index("private var naGate")
     end = tv.index("private var naHoldRow", start)
     return tv[start:end]
+
+
+def open_body(tv: str) -> str:
+    return tv.split("private var naGate")[0]
 
 
 if __name__ == "__main__":

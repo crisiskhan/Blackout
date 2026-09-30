@@ -3070,6 +3070,10 @@ class HUDSeductionTests(unittest.TestCase):
             "ARMINGView.swift",
             "Theme.swift",
             "HUDLayout.swift",
+            "TvPlate.swift",
+            "StillZoom.swift",
+            "NaLive.swift",
+            "AdultDesk.swift",
         ):
             body = read("Blackout", name)
             self.assertNotIn("Color(white:", body, name)
@@ -4975,6 +4979,10 @@ class FacetedMetalHUDTests(unittest.TestCase):
         "CamHoldCard.swift",
         "NearHoldCard.swift",
         "SpeakTurnCard.swift",
+        "TvPlate.swift",
+        "StillZoom.swift",
+        "NaLive.swift",
+        "AdultDesk.swift",
         "SOSHold.swift",
         "InstrumentsView.swift",
         "HUDKeyboard.swift",
