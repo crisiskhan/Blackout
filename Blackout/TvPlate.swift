@@ -3,8 +3,7 @@ import UIKit
 import Tokens
 
 /// EXPEDITION TV. SNAP stills in TRAFFIC / BRIDGE / AIRPORT / VENUE / HOP.
-/// Official city / zoo HLS play on BRIDGE / VENUE. TRAFFIC / AIRPORT / HOP
-/// stay stills. N/A is a 10s hold, adult only.
+/// Those sections never a live stream. N/A is a 10s hold, then adult HLS.
 struct TvPlate: View {
     @Bindable var runtime: AppRuntime
     @State private var naUnlocked = false
@@ -21,8 +20,11 @@ struct TvPlate: View {
                 .foregroundStyle(Theme.silver.opacity(0.5))
             HUDGlassCard {
                 VStack(alignment: .leading, spacing: 10) {
-                    Button("TAP UPDATE") { runtime.pullMapSnap() }
-                        .buttonStyle(HUDActionStyle(filled: runtime.updateSocket.busy))
+                    Button("TAP UPDATE") {
+                        runtime.pullMapSnap()
+                        if naUnlocked { runtime.updateSocket.pullAdult() }
+                    }
+                    .buttonStyle(HUDActionStyle(filled: runtime.updateSocket.busy))
                     if !runtime.updateSocket.pipe {
                         Text("NO PIPE")
                             .font(.system(size: 13, weight: .heavy))
@@ -45,20 +47,16 @@ struct TvPlate: View {
                     .foregroundStyle(Theme.silver.opacity(0.5))
                 HUDGlassCard {
                     VStack(alignment: .leading, spacing: 10) {
-                        ForEach(block.lives) { row in
-                            NaLiveWell(
-                                row: row,
-                                pipe: runtime.updateSocket.pipe,
-                                playingID: $naPlayingID
-                            )
-                        }
-                        ForEach(block.stills) { row in
+                        ForEach(block.feeds) { row in
                             feedRow(row)
                         }
                     }
                 }
             }
             naGate
+        }
+        .onChange(of: naUnlocked) { _, ok in
+            if ok { runtime.updateSocket.pullAdult() }
         }
         .task {
             runtime.pullMapSnap()
@@ -68,6 +66,9 @@ struct TvPlate: View {
                 guard !Task.isCancelled else { return }
                 if runtime.updateSocket.pipe, !runtime.updateSocket.busy {
                     runtime.pullMapSnap()
+                }
+                if naUnlocked, runtime.updateSocket.pipe {
+                    runtime.updateSocket.pullAdult()
                 }
             }
         }
@@ -99,23 +100,8 @@ struct TvPlate: View {
         )
     }
 
-    private struct OpenBlock: Identifiable {
-        var kind: CamDesk.Kind
-        var stills: [CamDesk.Feed]
-        var lives: [NaLive.Row]
-        var id: String { kind.rawValue }
-    }
-
-    private var openBlocks: [OpenBlock] {
-        guard let you else { return [] }
-        let snap = Dictionary(uniqueKeysWithValues: sections.map { ($0.kind, $0.feeds) })
-        return CamDesk.Kind.allCases.compactMap { kind in
-            if kind == .na { return nil }
-            let stills = snap[kind] ?? []
-            let lives = DeskLive.rows(kind: kind, lat: you.lat, lon: you.lon)
-            if stills.isEmpty && lives.isEmpty { return nil }
-            return OpenBlock(kind: kind, stills: stills, lives: lives)
-        }
+    private var openBlocks: [CamDesk.Section] {
+        sections
     }
 
     private var naFeeds: [CamDesk.Feed] {
@@ -129,8 +115,7 @@ struct TvPlate: View {
     }
 
     private var naLiveRows: [NaLive.Row] {
-        guard let you else { return [] }
-        return NaLive.rows(lat: you.lat, lon: you.lon)
+        NaLive.rows(runtime.updateSocket.adultRooms)
     }
 
     private var naGate: some View {
@@ -257,6 +242,7 @@ struct TvPlate: View {
             if let still = still(id: id) {
                 Image(uiImage: still)
                     .resizable()
+                    .interpolation(.high)
                     .scaledToFit()
                     .frame(maxWidth: .infinity, maxHeight: 180)
             } else {
@@ -272,7 +258,15 @@ struct TvPlate: View {
             Theme.plateRect()
                 .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
         )
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if still(id: id) != nil {
+                runtime.openStill(id: id)
+            }
+        }
         .accessibilityLabel(still(id: id) == nil ? "NO STILL" : "STILL")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint("TAP")
     }
 
     private func still(id: String) -> UIImage? {

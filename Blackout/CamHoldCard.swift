@@ -48,6 +48,7 @@ struct CamHoldCard: View {
             if let still {
                 Image(uiImage: still)
                     .resizable()
+                    .interpolation(.high)
                     .scaledToFit()
                     .frame(maxWidth: .infinity, maxHeight: 240)
             } else {
@@ -63,7 +64,13 @@ struct CamHoldCard: View {
             Theme.plateRect()
                 .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
         )
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if still != nil { runtime.openStill(id: cam.id) }
+        }
         .accessibilityLabel(still == nil ? "NO STILL" : "STILL")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint("TAP")
     }
 
     private var rows: some View {

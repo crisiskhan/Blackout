@@ -4,7 +4,7 @@ import MapLibreMap
 import Network
 import Observation
 
-/// The only network socket. Airplane keeps last SNAP. Never a live stream.
+/// The only network socket. Airplane keeps last SNAP. SNAP is never a live stream.
 @MainActor
 @Observable
 final class UpdateSocket {
@@ -14,6 +14,8 @@ final class UpdateSocket {
     var updatedAt: Date?
     var offLabels: [String] = SnapKind.allCases.map(\.offTitle)
     var lastManifest: SnapManifest?
+    var adultRooms: [AdultDesk.Room] = []
+    private var adultBusy = false
 
     private let monitor = NWPathMonitor()
     private let monitorQueue = DispatchQueue(label: "blackout.update.path")
@@ -116,6 +118,34 @@ final class UpdateSocket {
         var extraCams: [PackCam]
         var hopStills: [(id: String, jpeg: Data)]
         var onSnapStill: ((String, Data) -> Void)?
+    }
+
+    func pullAdult() {
+        guard pipe else { return }
+        if adultBusy { return }
+        adultBusy = true
+        Task { await loadAdult() }
+    }
+
+    private func loadAdult() async {
+        defer { adultBusy = false }
+        guard pipe else { return }
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = 8
+        config.timeoutIntervalForResource = 20
+        config.waitsForConnectivity = false
+        config.allowsExpensiveNetworkAccess = true
+        config.allowsConstrainedNetworkAccess = true
+        config.tlsMinimumSupportedProtocolVersion = .TLSv12
+        let session = URLSession(configuration: config)
+        var batches: [[AdultDesk.Room]] = []
+        for tag in AdultDesk.tags {
+            if let data = await Self.fetchAdult(session, AdultDesk.directory(tag: tag)) {
+                batches.append(AdultDesk.parse(data))
+            }
+        }
+        session.invalidateAndCancel()
+        adultRooms = AdultDesk.merge(batches)
     }
 
     func applyHopStills(_ hopStills: [(id: String, jpeg: Data)]) {
@@ -338,6 +368,25 @@ final class UpdateSocket {
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.timeoutInterval = 8
+        do {
+            let (data, response) = try await session.data(for: request)
+            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                return nil
+            }
+            return data
+        } catch {
+            return nil
+        }
+    }
+
+    nonisolated static func fetchAdult(_ session: URLSession, _ raw: String) async -> Data? {
+        guard let url = URL(string: raw), url.scheme?.lowercased() == "https" else { return nil }
+        var request = URLRequest(url: url)
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        request.timeoutInterval = 8
+        request.setValue(AdultDesk.agent, forHTTPHeaderField: "User-Agent")
+        request.setValue(AdultDesk.origin, forHTTPHeaderField: "Referer")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
         do {
             let (data, response) = try await session.data(for: request)
             guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {

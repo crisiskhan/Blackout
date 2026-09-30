@@ -86,6 +86,8 @@ final class AppRuntime {
     var heldAddress: HeldAddress?
     /// A packed CCTV still. Mutually exclusive with ground, party, and doors.
     var heldCam: HeldCam?
+    /// Packed JPEG name under SNAP. Full-field pinch zoom. Nil when closed.
+    var zoomStillName: String?
     /// Clustered heard phones. Not a party body.
     var heldNear: NearHold?
     /// Packed cameras for the open extract. Empty is honest (NM).
@@ -724,6 +726,16 @@ final class AppRuntime {
         heldNear = nil
         pickingEmblem = false
         pulse()
+    }
+
+    func openStill(id: String) {
+        let token = id.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !token.isEmpty else { return }
+        zoomStillName = "cam-\(token).jpg"
+    }
+
+    func closeStill() {
+        zoomStillName = nil
     }
 
     func holdCam(id: String, lat: Double, lon: Double) {
