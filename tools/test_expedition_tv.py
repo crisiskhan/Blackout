@@ -427,6 +427,7 @@ class DeskLiveTests(unittest.TestCase):
         live = read("Blackout", "NaLive.swift")
         tv = read("Blackout", "TvPlate.swift")
         self.assertIn("enum DeskLive", desk)
+        self.assertIn("import Foundation", desk)
         self.assertIn("AVPlayer", live)
         self.assertNotIn("WKWebView", desk)
         self.assertNotIn("WKWebView", live)

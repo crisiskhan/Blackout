@@ -53,7 +53,7 @@ unfinished tabs.
 trunk carries a commit message starting with `tf:`, or on a `tf-*` tag. Nothing else fires
 it, and a merge commit counts.
 
-- Never write `tf:` unless Crisis asked for a build. Use `map:`, `fix(map):`, `docs(tf):`.
+- After every tip update, mint Internal (`tf-*` tag on the tip SHA) unless Crisis says not to. Never write `tf:` on a non-trunk commit. Use `map:`, `fix(map):`, `docs(tf):`. A trunk commit starting with `tf:` still fires upload.
 - Internal group only. No External, no App Review, no production.
 - Tree `CURRENT_PROJECT_VERSION` stays **1** across all six configs. TestFlight injects the
   next CPV on the xcodebuild command line and never commits it.
