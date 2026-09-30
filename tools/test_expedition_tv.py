@@ -2,10 +2,12 @@
 """Every pack camera is a red/blue disc. EXPEDITION TV is SNAP stills.
 
 Packs populate on open. Hop cameras use the same disc and the same SNAP
-rules. TV is nearest to farthest. Never a live stream.
+rules. TV is TRAFFIC / BRIDGE / AIRPORT / VENUE / HOP, nearest to farthest
+inside each section. Empty sections omit. Never a live stream.
 """
 from __future__ import annotations
 
+import json
 import math
 import sys
 import unittest
@@ -13,6 +15,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
+
+KINDS = ("TRAFFIC", "BRIDGE", "AIRPORT", "VENUE", "HOP")
 
 
 def read(*parts: str) -> str:
@@ -51,11 +55,41 @@ def tv_rows(
         if not _finite(cam.get("lat")) or not _finite(cam.get("lon")):
             continue
         seen.add(cid)
-        by_id[cid] = cam
+        row = dict(cam)
+        if not str(row.get("provider") or "").strip():
+            row["provider"] = "HOP"
+        by_id[cid] = row
     return sorted(
         by_id.values(),
         key=lambda cam: haversine_m((lat, lon), (float(cam["lat"]), float(cam["lon"]))),
     )
+
+
+def section(cam: dict) -> str:
+    """HOP first. BOTA / PASO DEL NORTE are BRIDGE. AIRPORT is AIRPORT.
+
+    Zaragoza street cams and Paseo Del Norte stay TRAFFIC. VENUE is reserved.
+    """
+    provider = str(cam.get("provider") or "").strip().upper()
+    if provider == "HOP":
+        return "HOP"
+    name = str(cam.get("name") or "").strip().upper()
+    if not name:
+        name = str(cam.get("id") or "").strip().upper()
+    if "BOTA" in name or "PASO DEL NORTE" in name:
+        return "BRIDGE"
+    if "AIRPORT" in name:
+        return "AIRPORT"
+    return "TRAFFIC"
+
+
+def sectioned(
+    pack: list[dict], hops: list[dict], lat: float, lon: float
+) -> list[tuple[str, list[dict]]]:
+    buckets: dict[str, list[dict]] = {kind: [] for kind in KINDS}
+    for row in tv_rows(pack, hops, lat, lon):
+        buckets[section(row)].append(row)
+    return [(kind, buckets[kind]) for kind in KINDS if buckets[kind]]
 
 
 YOU = (31.87050, -106.59732)
@@ -169,6 +203,167 @@ class OneDiscTests(unittest.TestCase):
         self.assertNotIn("WKWebView", sock)
         self.assertIn("func pullMapSnap(", app)
         self.assertIn("tapUpdate()", app.split("func pullMapSnap")[1].split("func tapUpdate")[0])
+        self.assertIn("CamDesk.sections", tv)
+        self.assertIn("kind.rawValue", tv)
+        desk = desk_text()
+        self.assertIn("enum Kind", desk)
+        self.assertIn("static func kind(", desk)
+        self.assertIn("static func sections(", desk)
+        self.assertIn('"TRAFFIC"', desk)
+        self.assertIn('"BRIDGE"', desk)
+        self.assertIn('"AIRPORT"', desk)
+        self.assertIn('"VENUE"', desk)
+        self.assertIn('"HOP"', desk)
+        self.assertIn("BOTA", desk)
+        self.assertIn("PASO DEL NORTE", desk)
+
+
+class SectionTests(unittest.TestCase):
+    def test_kind_tokens_are_honest(self):
+        self.assertEqual(section({"name": "US-62/Paisano East @ BOTA", "provider": "TxDOT"}), "BRIDGE")
+        self.assertEqual(section({"name": "Paso del Norte", "provider": "TxDOT"}), "BRIDGE")
+        self.assertEqual(section({"name": "Airway Blvd @ Airport", "provider": "TxDOT"}), "AIRPORT")
+        self.assertEqual(section({"name": "Airport @ Founders", "provider": "TxDOT"}), "AIRPORT")
+        self.assertEqual(section({"name": "SP-601 @ Airport", "provider": "TxDOT"}), "AIRPORT")
+        self.assertEqual(section({"name": "LP-375 @ Paseo Del Norte", "provider": "TxDOT"}), "TRAFFIC")
+        self.assertEqual(section({"name": "LP-375 @ Zaragoza", "provider": "TxDOT"}), "TRAFFIC")
+        self.assertEqual(section({"name": "FM-659/Zaragoza @ Pellicano", "provider": "TxDOT"}), "TRAFFIC")
+        self.assertEqual(section({"name": "IH-10 @ Zaragoza", "provider": "TxDOT"}), "TRAFFIC")
+        self.assertEqual(section({"name": "IH-10 @ Airway", "provider": "TxDOT"}), "TRAFFIC")
+        self.assertEqual(section({"name": "Airport @ Founders", "provider": "HOP"}), "HOP")
+        self.assertEqual(section({"name": "US-62/Paisano East @ BOTA", "provider": "hop"}), "HOP")
+
+    def test_sections_omit_empty_and_sort_inside(self):
+        pack = [
+            {
+                "id": "near",
+                "lat": 31.8706,
+                "lon": -106.5974,
+                "name": "IH-10 @ Artcraft",
+                "provider": "TxDOT",
+            },
+            {
+                "id": "paseo",
+                "lat": 31.90,
+                "lon": -106.58,
+                "name": "LP-375 @ Paseo Del Norte",
+                "provider": "TxDOT",
+            },
+            {
+                "id": "z-street",
+                "lat": 31.75,
+                "lon": -106.32,
+                "name": "FM-659/Zaragoza @ Pellicano",
+                "provider": "TxDOT",
+            },
+            {
+                "id": "bota",
+                "lat": 31.764,
+                "lon": -106.451,
+                "name": "US-62/Paisano East @ BOTA",
+                "provider": "TxDOT",
+            },
+            {
+                "id": "pdn",
+                "lat": 31.76,
+                "lon": -106.48,
+                "name": "Paso del Norte",
+                "provider": "TxDOT",
+            },
+            {
+                "id": "air-near",
+                "lat": 31.80,
+                "lon": -106.40,
+                "name": "Airway Blvd @ Airport",
+                "provider": "TxDOT",
+            },
+            {
+                "id": "air-far",
+                "lat": 32.0,
+                "lon": -106.3,
+                "name": "SP-601 @ Airport",
+                "provider": "TxDOT",
+            },
+            {
+                "id": "airway",
+                "lat": 31.78,
+                "lon": -106.42,
+                "name": "IH-10 @ Airway",
+                "provider": "TxDOT",
+            },
+        ]
+        hops = [
+            {
+                "id": "hop-mid",
+                "lat": 31.88,
+                "lon": -106.60,
+                "name": "Peer",
+                "url": "https://peer.example/a.jpg",
+            },
+            {
+                "id": "hop-air",
+                "lat": 31.81,
+                "lon": -106.41,
+                "name": "Airport @ Founders",
+                "provider": "HOP",
+            },
+        ]
+        got = sectioned(pack, hops, YOU[0], YOU[1])
+        self.assertEqual([kind for kind, _ in got], ["TRAFFIC", "BRIDGE", "AIRPORT", "HOP"])
+        by_kind = {kind: [row["id"] for row in rows] for kind, rows in got}
+        self.assertEqual(by_kind["TRAFFIC"][0], "near")
+        self.assertLess(
+            haversine_m(YOU, (31.80, -106.40)),
+            haversine_m(YOU, (32.0, -106.3)),
+        )
+        self.assertEqual(by_kind["AIRPORT"], ["air-near", "air-far"])
+        self.assertEqual(by_kind["BRIDGE"], ["pdn", "bota"])
+        self.assertEqual(by_kind["HOP"][0], "hop-mid")
+        self.assertIn("hop-air", by_kind["HOP"])
+        self.assertNotIn("VENUE", [kind for kind, _ in got])
+        for _kind, rows in got:
+            meters = [
+                haversine_m(YOU, (float(row["lat"]), float(row["lon"])))
+                for row in rows
+            ]
+            self.assertEqual(meters, sorted(meters))
+
+    def test_tx_west_el_paso_names_section_honestly(self):
+        cams = json.loads(read("Resources", "Packs", "tx-west", "cameras.json"))
+        by_name = {row["name"]: row for row in cams}
+        self.assertEqual(section(by_name["US-62/Paisano East @ BOTA"]), "BRIDGE")
+        self.assertEqual(section(by_name["Airway Blvd @ Airport"]), "AIRPORT")
+        self.assertEqual(section(by_name["Airport @ Founders"]), "AIRPORT")
+        self.assertEqual(section(by_name["SP-601 @ Airport"]), "AIRPORT")
+        self.assertEqual(section(by_name["LP-375 @ Paseo Del Norte"]), "TRAFFIC")
+        self.assertEqual(section(by_name["LP-375 @ Zaragoza"]), "TRAFFIC")
+        self.assertEqual(section(by_name["FM-659/Zaragoza @ Pellicano"]), "TRAFFIC")
+        self.assertEqual(section(by_name["IH-10 @ Airway"]), "TRAFFIC")
+        self.assertEqual(section(by_name["IH-10 @ Zaragoza"]), "TRAFFIC")
+
+
+class ClosedSourcesTests(unittest.TestCase):
+    def test_tv_and_harvest_refuse_unsecured_alpr_and_streams(self):
+        paths = (
+            ("tools", "v3", "cams.py"),
+            ("Blackout", "CamDesk.swift"),
+            ("Blackout", "TvPlate.swift"),
+            ("Blackout", "UpdateSocket.swift"),
+            ("Resources", "Packs", "tx-west", "cameras.json"),
+        )
+        banned = (
+            "insecam",
+            "deflock",
+            "flocksafety",
+            "earthcam",
+            "truelook",
+            ".m3u8",
+            "rtmp://",
+        )
+        for parts in paths:
+            blob = read(*parts).lower()
+            for word in banned:
+                self.assertNotIn(word, blob, parts)
 
 
 class DeviceScriptTests(unittest.TestCase):
@@ -185,6 +380,10 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("SNAP", tv)
         self.assertIn("nearest", tv.lower())
         self.assertIn("never a live stream", tv.lower())
+        self.assertIn("TRAFFIC", tv)
+        self.assertIn("BRIDGE", tv)
+        self.assertIn("AIRPORT", tv)
+        self.assertIn("section", tv.lower())
         self.assertIn("test_expedition_tv.py", agents)
         self.assertIn("test_expedition_tv.py", validate)
         self.assertIn("expedition_tv()", validate)
