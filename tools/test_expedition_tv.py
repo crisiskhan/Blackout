@@ -3,8 +3,9 @@
 
 Packs populate on open. Hop cameras use the same disc and the same SNAP
 rules. TV is TRAFFIC / BRIDGE / AIRPORT / VENUE / HOP, nearest to farthest
-inside each section. Empty sections omit. N/A is a 10s hold. Never a live
-stream.
+inside each section. Empty sections omit. Official city/zoo HLS play on
+BRIDGE / VENUE. N/A is a 10s hold for adult only. TRAFFIC / AIRPORT / HOP
+never a live stream.
 """
 from __future__ import annotations
 
@@ -407,39 +408,68 @@ class NaHoldTests(unittest.TestCase):
         self.assertNotIn("WKWebView", tv)
 
 
+OFFICIAL_HLS = (
+    "https://zoocams.elpasozoo.org/BridgeStanton3.m3u8",
+    "https://zoocams.elpasozoo.org/bridgepdn1.m3u8",
+    "https://zoocams.elpasozoo.org/bridgesantafe3.m3u8",
+    "https://zoocams.elpasozoo.org/bridgesantafe4.m3u8",
+    "https://zoocams.elpasozoo.org/BridgeZaragoza1.m3u8",
+    "https://zoocams.elpasozoo.org/BridgeZaragoza2.m3u8",
+    "https://zoocams.elpasozoo.org/BridgeZaragoza3.m3u8",
+    "https://zoocams.elpasozoo.org/ZOOGF.m3u8",
+    "https://zoocams.elpasozoo.org/ZooM.m3u8",
+)
+
+
+class DeskLiveTests(unittest.TestCase):
+    def test_official_hls_plays_on_open_bridge_and_venue(self):
+        desk = read("Blackout", "DeskLive.swift")
+        live = read("Blackout", "NaLive.swift")
+        tv = read("Blackout", "TvPlate.swift")
+        self.assertIn("enum DeskLive", desk)
+        self.assertIn("import Foundation", desk)
+        self.assertIn("AVPlayer", live)
+        self.assertNotIn("WKWebView", desk)
+        self.assertNotIn("WKWebView", live)
+        self.assertNotIn("rtmp", desk.lower())
+        self.assertNotIn("rtmp", live.lower())
+        for url in OFFICIAL_HLS:
+            self.assertIn(url, desk)
+            self.assertNotIn(url, live)
+        self.assertIn("zoocams.elpasozoo.org", desk)
+        self.assertNotIn("zoocams.elpasozoo.org", live)
+        self.assertNotIn("stantonbridge1.m3u8", desk.lower().replace("bridgestanton3", ""))
+        self.assertNotIn("BridgeStanton2", desk)
+        for word in ("truelook", "earthcam", "insecam", "chaturbate", "stripchat", "lovescape"):
+            self.assertNotIn(word, desk.lower())
+            self.assertNotIn(word, live.lower())
+        self.assertIn("case .bridge", desk)
+        self.assertIn("case .venue", desk)
+        self.assertIn("DeskLive.rows", tv)
+        self.assertIn("NaLiveWell", tv)
+        self.assertNotIn("DeskLive.rows", na_gate_body(tv))
+        self.assertIn("TAP PLAY", live)
+        self.assertIn("NO STREAM", live)
+        self.assertIn("NO PIPE", live)
+
+
 class NaLiveTests(unittest.TestCase):
-    def test_na_live_is_official_https_hls_after_hold(self):
+    def test_na_is_adult_only_after_hold(self):
         live = read("Blackout", "NaLive.swift")
         tv = read("Blackout", "TvPlate.swift")
         self.assertIn("enum NaLive", live)
         self.assertIn("AVPlayer", live)
         self.assertNotIn("WKWebView", live)
         self.assertNotIn("rtmp", live.lower())
-        self.assertIn("zoocams.elpasozoo.org", live)
-        for url in (
-            "https://zoocams.elpasozoo.org/BridgeStanton3.m3u8",
-            "https://zoocams.elpasozoo.org/bridgepdn1.m3u8",
-            "https://zoocams.elpasozoo.org/bridgesantafe3.m3u8",
-            "https://zoocams.elpasozoo.org/bridgesantafe4.m3u8",
-            "https://zoocams.elpasozoo.org/BridgeZaragoza1.m3u8",
-            "https://zoocams.elpasozoo.org/BridgeZaragoza2.m3u8",
-            "https://zoocams.elpasozoo.org/BridgeZaragoza3.m3u8",
-            "https://zoocams.elpasozoo.org/ZOOGF.m3u8",
-            "https://zoocams.elpasozoo.org/ZooM.m3u8",
-        ):
-            self.assertIn(url, live)
-        self.assertNotIn("stantonbridge1.m3u8", live.lower().replace("bridgestanton3", ""))
-        self.assertNotIn("BridgeStanton2", live)
-        self.assertNotIn("truelook", live.lower())
-        self.assertNotIn("earthcam", live.lower())
-        self.assertNotIn("insecam", live.lower())
-        self.assertNotIn("chaturbate", live.lower())
-        self.assertIn("static func rows(", live)
+        self.assertNotIn("zoocams.elpasozoo.org", live)
+        for url in OFFICIAL_HLS:
+            self.assertNotIn(url, live)
         self.assertIn("NaLive.rows", tv)
         self.assertIn("NaLiveWell", tv)
-        self.assertIn("TAP PLAY", live)
-        self.assertIn("NO STREAM", live)
-        self.assertIn("NO PIPE", live)
+        self.assertIn("HOLD 10", tv)
+        gate = na_gate_body(tv)
+        self.assertIn("naLiveRows", gate)
+        self.assertNotIn("DeskLive.rows", gate)
 
 
 class ClosedSourcesTests(unittest.TestCase):
@@ -487,11 +517,15 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("TRAFFIC", tv)
         self.assertIn("BRIDGE", tv)
         self.assertIn("AIRPORT", tv)
+        self.assertIn("VENUE", tv)
         self.assertIn("`N/A`", tv)
         self.assertIn("HOLD 10", tv)
         self.assertIn("10s hold", tv)
-        self.assertIn("live", tv.lower())
+        self.assertIn("adult", tv.lower())
+        self.assertIn("city", tv.lower())
+        self.assertIn("zoo", tv.lower())
         self.assertIn("section", tv.lower())
+        self.assertNotIn("insecam", tv.lower())
         self.assertIn("test_expedition_tv.py", agents)
         self.assertIn("test_expedition_tv.py", validate)
         self.assertIn("expedition_tv()", validate)
@@ -499,6 +533,12 @@ class DeviceScriptTests(unittest.TestCase):
 
 def desk_text() -> str:
     return read("Blackout", "CamDesk.swift")
+
+
+def na_gate_body(tv: str) -> str:
+    start = tv.index("private var naGate")
+    end = tv.index("private var naHoldRow", start)
+    return tv[start:end]
 
 
 if __name__ == "__main__":
