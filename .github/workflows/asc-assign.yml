@@ -7,13 +7,6 @@ on:
         description: "CFBundleVersion to assign (empty = newest VALID needing sync)"
         required: false
         default: "11"
-  # 36924273852: IPA 174 uploaded; workflow_dispatch is 403 from this box.
-  # One-shot push on this tip assigns 174 with the 45 min helper.
-  push:
-    branches:
-      - cursor/adult-stream-1b22
-    paths:
-      - ".github/workflows/asc-assign.yml"
 
 jobs:
   assign:
@@ -23,7 +16,7 @@ jobs:
       APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
       APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
       APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-      WANT_BUILD: ${{ github.event_name == 'push' && '174' || inputs.build }}
+      WANT_BUILD: ${{ inputs.build }}
       ASC_APP_ID: "6806388963"
       ASC_INTERNAL_GROUP_ID: "28035586-fce6-474f-9bc2-ef0f1f65306e"
     steps:
