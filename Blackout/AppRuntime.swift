@@ -88,6 +88,8 @@ final class AppRuntime {
     var heldCam: HeldCam?
     /// Packed JPEG name under SNAP. Full-field pinch zoom. Nil when closed.
     var zoomStillName: String?
+    /// Adult HLS row in the full-field player. Nil when closed.
+    var zoomLive: NaLive.Row?
     /// Clustered heard phones. Not a party body.
     var heldNear: NearHold?
     /// Packed cameras for the open extract. Empty is honest (NM).
@@ -731,11 +733,22 @@ final class AppRuntime {
     func openStill(id: String) {
         let token = id.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !token.isEmpty else { return }
+        zoomLive = nil
         zoomStillName = "cam-\(token).jpg"
     }
 
     func closeStill() {
         zoomStillName = nil
+    }
+
+    func openLive(_ row: NaLive.Row) {
+        guard let url = URL(string: row.url), url.scheme == "https" else { return }
+        zoomStillName = nil
+        zoomLive = row
+    }
+
+    func closeLive() {
+        zoomLive = nil
     }
 
     func holdCam(id: String, lat: Double, lon: Double) {

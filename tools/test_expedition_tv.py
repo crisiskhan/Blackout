@@ -111,7 +111,7 @@ def na_unlocks(elapsed: float) -> bool:
     return elapsed >= NA_HOLD_SECONDS
 
 
-ADULT_CAP = 48
+ADULT_CAP = 600
 ADULT_BLOCKED = (
     "teen",
     "underage",
@@ -608,10 +608,13 @@ class AdultDeskTests(unittest.TestCase):
         tv = read("Blackout", "TvPlate.swift")
         self.assertIn("enum AdultDesk", desk)
         self.assertIn("static let cap", desk)
-        self.assertIn("= 48", desk)
+        self.assertIn("= 600", desk)
+        self.assertIn("static let pageSize", desk)
+        self.assertIn("static let pages", desk)
         self.assertIn("static func parse(", desk)
         self.assertIn("static func playlist(", desk)
         self.assertIn("static func directory(", desk)
+        self.assertIn("offset", desk)
         self.assertIn("lovescape.cam", desk.lower())
         self.assertIn("primaryTag", desk)
         self.assertIn("girls", desk)
@@ -619,6 +622,8 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("fetchAdult", sock)
         self.assertIn("adultRooms", sock)
         self.assertIn("AdultDesk.parse", sock)
+        self.assertIn("AdultDesk.pages", sock)
+        self.assertIn("offset:", sock)
         self.assertIn("User-Agent", sock)
         self.assertNotIn("lovescape", sock.lower())
         self.assertNotIn("WKWebView", desk)
@@ -684,6 +689,32 @@ class StillZoomTests(unittest.TestCase):
         self.assertNotIn("fullScreenCover", root)
 
 
+class LiveZoomTests(unittest.TestCase):
+    def test_live_tap_opens_full_field_pinch(self):
+        zoom = read("Blackout", "LiveZoom.swift")
+        live = read("Blackout", "NaLive.swift")
+        tv = read("Blackout", "TvPlate.swift")
+        root = read("Blackout", "RootChrome.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        self.assertIn("struct LiveZoom", zoom)
+        self.assertIn("AVPlayer", zoom)
+        self.assertIn("UIScrollView", zoom)
+        self.assertIn("maximumZoomScale", zoom)
+        self.assertIn("CLOSE", zoom)
+        self.assertIn("TAP FULL", live)
+        self.assertIn("onFull", live)
+        self.assertIn("openLive", tv)
+        self.assertIn("zoomLive", app)
+        self.assertIn("func openLive(", app)
+        self.assertIn("func closeLive(", app)
+        self.assertIn("LiveZoom", root)
+        self.assertIn("closeLive", root)
+        self.assertNotIn("fullScreenCover", zoom)
+        self.assertNotIn("WKWebView", zoom)
+        self.assertNotIn(".spring(", zoom)
+        self.assertNotIn("rtmp", zoom.lower())
+
+
 class ClosedSourcesTests(unittest.TestCase):
     def test_tv_and_harvest_refuse_unsecured_alpr_and_streams(self):
         paths = (
@@ -734,6 +765,7 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("HOLD 10", tv)
         self.assertIn("10s hold", tv)
         self.assertIn("adult", tv.lower())
+        self.assertIn("TAP FULL", tv)
         self.assertIn("zoom", tv.lower())
         self.assertIn("section", tv.lower())
         self.assertNotIn("insecam", tv.lower())
