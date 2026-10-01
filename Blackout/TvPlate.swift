@@ -12,6 +12,7 @@ struct TvPlate: View {
     @State private var naStarted: Date?
     @State private var naChrome: String?
     @State private var naPlayingID: String?
+    @State private var naOffset = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -41,6 +42,7 @@ struct TvPlate: View {
                     }
                 }
             }
+            if naUnlocked { naGate }
             ForEach(openBlocks) { block in
                 Text(block.kind.rawValue)
                     .font(.system(size: 11, weight: .heavy))
@@ -53,10 +55,16 @@ struct TvPlate: View {
                     }
                 }
             }
-            naGate
+            if !naUnlocked { naGate }
         }
         .onChange(of: naUnlocked) { _, ok in
-            if ok { runtime.updateSocket.pullAdult() }
+            if ok {
+                naOffset = 0
+                runtime.updateSocket.pullAdult()
+            }
+        }
+        .onChange(of: runtime.updateSocket.adultRooms.count) { _, _ in
+            clampNaOffset()
         }
         .task {
             runtime.pullMapSnap()
@@ -66,9 +74,6 @@ struct TvPlate: View {
                 guard !Task.isCancelled else { return }
                 if runtime.updateSocket.pipe, !runtime.updateSocket.busy {
                     runtime.pullMapSnap()
-                }
-                if naUnlocked, runtime.updateSocket.pipe {
-                    runtime.updateSocket.pullAdult()
                 }
             }
         }
@@ -118,6 +123,18 @@ struct TvPlate: View {
         NaLive.rows(runtime.updateSocket.adultRooms)
     }
 
+    private var naPageRows: [NaLive.Row] {
+        NaLive.page(runtime.updateSocket.adultRooms, offset: naOffset)
+    }
+
+    private var naHasMore: Bool {
+        naOffset + NaLive.screen < naLiveRows.count
+    }
+
+    private var naHasBack: Bool {
+        naOffset > 0
+    }
+
     private var naGate: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("N/A")
@@ -127,14 +144,16 @@ struct TvPlate: View {
                 VStack(alignment: .leading, spacing: 10) {
                     naHoldRow
                     if naUnlocked {
-                        if naLiveRows.isEmpty && naFeeds.isEmpty {
-                            Text("NO CAMERAS")
-                                .font(.system(size: 13, weight: .heavy))
-                                .foregroundStyle(Theme.silver)
-                                .textCase(.uppercase)
-                                .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
+                        if naPageRows.isEmpty && naFeeds.isEmpty {
+                            if runtime.updateSocket.adultReady {
+                                Text("NO CAMERAS")
+                                    .font(.system(size: 13, weight: .heavy))
+                                    .foregroundStyle(Theme.silver)
+                                    .textCase(.uppercase)
+                                    .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
+                            }
                         } else {
-                            ForEach(naLiveRows) { row in
+                            ForEach(naPageRows) { row in
                                 NaLiveWell(
                                     row: row,
                                     pipe: runtime.updateSocket.pipe,
@@ -143,6 +162,7 @@ struct TvPlate: View {
                                     onFull: { runtime.openLive($0) }
                                 )
                             }
+                            naPageRail
                             ForEach(naFeeds) { row in
                                 feedRow(row)
                             }
@@ -150,6 +170,36 @@ struct TvPlate: View {
                     }
                 }
             }
+        }
+    }
+
+    private var naPageRail: some View {
+        HStack(spacing: 8) {
+            if naHasBack {
+                Button("BACK") {
+                    naPlayingID = nil
+                    naOffset = max(0, naOffset - NaLive.screen)
+                }
+                .buttonStyle(HUDActionStyle(filled: false))
+            }
+            if naHasMore {
+                Button("MORE") {
+                    naPlayingID = nil
+                    naOffset += NaLive.screen
+                }
+                .buttonStyle(HUDActionStyle(filled: false))
+            }
+        }
+    }
+
+    private func clampNaOffset() {
+        let total = naLiveRows.count
+        if total == 0 {
+            naOffset = 0
+            return
+        }
+        if naOffset >= total {
+            naOffset = (max(0, total - 1) / NaLive.screen) * NaLive.screen
         }
     }
 

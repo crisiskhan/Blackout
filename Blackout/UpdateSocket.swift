@@ -15,6 +15,7 @@ final class UpdateSocket {
     var offLabels: [String] = SnapKind.allCases.map(\.offTitle)
     var lastManifest: SnapManifest?
     var adultRooms: [AdultDesk.Room] = []
+    var adultReady = false
     private var adultBusy = false
     private var adultPlay: [String: String] = [:]
 
@@ -129,7 +130,10 @@ final class UpdateSocket {
     }
 
     private func loadAdult() async {
-        defer { adultBusy = false }
+        defer {
+            adultBusy = false
+            adultReady = true
+        }
         guard pipe else { return }
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 8
@@ -139,17 +143,39 @@ final class UpdateSocket {
         config.allowsConstrainedNetworkAccess = true
         config.tlsMinimumSupportedProtocolVersion = .TLSv12
         let session = URLSession(configuration: config)
+        var batches = await fetchAdultPages(session, from: 0, count: 1)
+        adultRooms = AdultDesk.merge(batches)
+        if AdultDesk.pages > 1 {
+            let rest = await fetchAdultPages(session, from: 1, count: AdultDesk.pages - 1)
+            if !rest.isEmpty {
+                batches.append(contentsOf: rest)
+                adultRooms = AdultDesk.merge(batches)
+            }
+        }
+        session.invalidateAndCancel()
+        adultPlay = adultPlay.filter { key, _ in adultRooms.contains { $0.id == key } }
+    }
+
+    private func fetchAdultPages(
+        _ session: URLSession,
+        from start: Int,
+        count: Int
+    ) async -> [[AdultDesk.Room]] {
+        let first = max(0, start)
+        let last = first + max(0, count)
         var batches: [[AdultDesk.Room]] = []
         await withTaskGroup(of: [AdultDesk.Room].self) { group in
             for tag in AdultDesk.tags {
-                for page in 0..<AdultDesk.pages {
+                for page in first..<last {
                     group.addTask {
                         let offset = page * AdultDesk.pageSize
                         guard let data = await UpdateSocket.fetchAdult(
                             session,
                             AdultDesk.directory(tag: tag, offset: offset)
                         ) else { return [] }
-                        return AdultDesk.parse(data)
+                        return await Task.detached(priority: .utility) {
+                            AdultDesk.parse(data)
+                        }.value
                     }
                 }
             }
@@ -157,9 +183,7 @@ final class UpdateSocket {
                 if !batch.isEmpty { batches.append(batch) }
             }
         }
-        session.invalidateAndCancel()
-        adultRooms = AdultDesk.merge(batches)
-        adultPlay = adultPlay.filter { key, _ in adultRooms.contains { $0.id == key } }
+        return batches
     }
 
     func liveAdult(_ row: NaLive.Row) async -> String? {

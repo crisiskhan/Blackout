@@ -15,6 +15,8 @@ enum NaLive {
         var range: String
     }
 
+    static let screen = 12
+
     static func rows(_ rooms: [AdultDesk.Room]) -> [Row] {
         rooms.compactMap { room in
             let handle = room.handle.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -28,6 +30,11 @@ enum NaLive {
                 range: "LIVE"
             )
         }
+    }
+
+    static func page(_ rooms: [AdultDesk.Room], offset: Int) -> [Row] {
+        let start = max(0, offset)
+        return Array(rows(rooms).dropFirst(start).prefix(screen))
     }
 }
 

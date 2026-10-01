@@ -112,6 +112,7 @@ def na_unlocks(elapsed: float) -> bool:
 
 
 ADULT_CAP = 600
+ADULT_SCREEN = 12
 ADULT_BLOCKED = (
     "teen",
     "underage",
@@ -232,6 +233,16 @@ def adult_rooms(payload: object) -> list[dict]:
         )
     rooms.sort(key=lambda row: (-int(row["viewers"]), str(row["name"])))
     return rooms[:ADULT_CAP]
+
+
+def adult_page(
+    rooms: list[dict], offset: int = 0, limit: int = ADULT_SCREEN
+) -> list[dict]:
+    """One screen of live rooms. TV never mounts the whole directory."""
+    start = max(0, int(offset))
+    if limit <= 0:
+        return []
+    return rooms[start : start + limit]
 
 
 YOU = (31.87050, -106.59732)
@@ -710,7 +721,31 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("AdultDesk.Room", live)
         self.assertIn("onPlay", live)
         self.assertIn("handle", live)
+        self.assertIn("static let screen", live)
+        self.assertIn("static func page(", live)
+        self.assertIn("= 12", live)
         self.assertNotIn("zoocams.elpasozoo.org", live.lower())
+        self.assertIn("ForEach(naPageRows)", tv)
+        self.assertNotIn("ForEach(naLiveRows)", tv)
+        self.assertIn("MORE", gate)
+        self.assertIn("BACK", gate)
+        self.assertIn("adultReady", tv)
+        self.assertIn("if naUnlocked { naGate }", tv)
+        self.assertLess(tv.find("if naUnlocked { naGate }"), tv.find("ForEach(openBlocks)"))
+        self.assertIn("adultReady", sock)
+        self.assertIn("fetchAdultPages", sock)
+        self.assertIn("Task.detached", sock)
+        watch = tv.split(".task")[1].split("private var you")[0]
+        self.assertNotIn("pullAdult", watch)
+        rooms = [
+            {"id": f"adult-{index}", "name": f"R{index}", "handle": f"r{index}", "url": "", "viewers": 100 - index}
+            for index in range(30)
+        ]
+        self.assertEqual([row["id"] for row in adult_page(rooms)], [f"adult-{index}" for index in range(12)])
+        self.assertEqual(len(adult_page(rooms, offset=12)), 12)
+        self.assertEqual([row["id"] for row in adult_page(rooms, offset=24)], ["adult-24", "adult-25", "adult-26", "adult-27", "adult-28", "adult-29"])
+        self.assertEqual(adult_page(rooms, offset=30), [])
+        self.assertEqual(adult_page(rooms, offset=-4)[0]["id"], "adult-0")
         for word in ("truelook", "earthcam", "insecam", "stripchat"):
             self.assertNotIn(word, desk.lower())
             self.assertNotIn(word, live.lower())
