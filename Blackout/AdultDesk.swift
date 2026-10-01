@@ -2,7 +2,9 @@ import Foundation
 
 /// Adult directory for N/A after the 10s hold. JSON only. No player.
 enum AdultDesk {
-    static let cap = 48
+    static let cap = 600
+    static let pageSize = 100
+    static let pages = 6
     static let origin = "https://lovescape.cam"
     static let tags = ["girls", "couples", "men", "trans"]
     static let agent =
@@ -29,8 +31,9 @@ enum AdultDesk {
         var viewers: Int
     }
 
-    static func directory(tag: String) -> String {
-        "\(origin)/api/front/models?primaryTag=\(tag)&limit=24"
+    static func directory(tag: String, offset: Int = 0) -> String {
+        let start = max(0, offset)
+        return "\(origin)/api/front/models?primaryTag=\(tag)&limit=\(pageSize)&offset=\(start)"
     }
 
     static func parse(_ data: Data) -> [Room] {

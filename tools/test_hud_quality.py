@@ -3072,6 +3072,7 @@ class HUDSeductionTests(unittest.TestCase):
             "HUDLayout.swift",
             "TvPlate.swift",
             "StillZoom.swift",
+            "LiveZoom.swift",
             "NaLive.swift",
             "AdultDesk.swift",
         ):
@@ -4981,6 +4982,7 @@ class FacetedMetalHUDTests(unittest.TestCase):
         "SpeakTurnCard.swift",
         "TvPlate.swift",
         "StillZoom.swift",
+        "LiveZoom.swift",
         "NaLive.swift",
         "AdultDesk.swift",
         "SOSHold.swift",

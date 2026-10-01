@@ -32,12 +32,17 @@ struct NaLiveWell: View {
     let row: NaLive.Row
     let pipe: Bool
     @Binding var playingID: String?
+    var onFull: (NaLive.Row) -> Void
     @State private var player: AVPlayer?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Button(row.name) { toggle() }
                 .buttonStyle(HUDActionStyle(filled: playing))
+            if playing {
+                Button("TAP FULL") { goFull() }
+                    .buttonStyle(HUDActionStyle(filled: true))
+            }
             HStack {
                 Text(row.range)
                     .font(.system(size: 13, weight: .heavy))
@@ -58,7 +63,7 @@ struct NaLiveWell: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(row.name)
         .accessibilityValue(playing ? "LIVE" : row.range)
-        .accessibilityHint(pipe ? "TAP PLAY" : "NO PIPE")
+        .accessibilityHint(pipe ? (playing ? "TAP FULL" : "TAP PLAY") : "NO PIPE")
     }
 
     private var playing: Bool { playingID == row.id && player != nil }
@@ -94,8 +99,21 @@ struct NaLiveWell: View {
                 .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
         )
         .contentShape(Rectangle())
-        .onTapGesture { toggle() }
-        .accessibilityLabel(pipe ? (playing ? "LIVE" : "TAP PLAY") : "NO PIPE")
+        .onTapGesture { tapWell() }
+        .accessibilityLabel(pipe ? (playing ? "TAP FULL" : "TAP PLAY") : "NO PIPE")
+    }
+
+    private func tapWell() {
+        if playing {
+            goFull()
+            return
+        }
+        toggle()
+    }
+
+    private func goFull() {
+        stop()
+        onFull(row)
     }
 
     private func toggle() {

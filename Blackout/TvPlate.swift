@@ -138,7 +138,8 @@ struct TvPlate: View {
                                 NaLiveWell(
                                     row: row,
                                     pipe: runtime.updateSocket.pipe,
-                                    playingID: $naPlayingID
+                                    playingID: $naPlayingID,
+                                    onFull: { runtime.openLive($0) }
                                 )
                             }
                             ForEach(naFeeds) { row in

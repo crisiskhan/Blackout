@@ -38,7 +38,14 @@ struct RootChrome: View {
                     .transition(.opacity)
             }
         }
+        .overlay {
+            if let row = runtime.zoomLive {
+                LiveZoom(row: row, pipe: runtime.updateSocket.pipe, onClose: runtime.closeLive)
+                    .transition(.opacity)
+            }
+        }
         .animation(Theme.Motion.heavy, value: runtime.zoomStillName)
+        .animation(Theme.Motion.heavy, value: runtime.zoomLive?.id)
         .tint(Theme.silver)
         .preferredColorScheme(runtime.lamp == .sun ? .light : .dark)
         .onAppear {
@@ -56,6 +63,7 @@ struct RootChrome: View {
                 runtime.hudKeys.close()
                 runtime.closeMark()
                 runtime.closeStill()
+                runtime.closeLive()
                 runtime.clearIncoming()
                 runtime.haltSOSFlash()
                 runtime.showInstruments = false

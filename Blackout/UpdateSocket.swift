@@ -132,16 +132,28 @@ final class UpdateSocket {
         guard pipe else { return }
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 8
-        config.timeoutIntervalForResource = 20
+        config.timeoutIntervalForResource = 40
         config.waitsForConnectivity = false
         config.allowsExpensiveNetworkAccess = true
         config.allowsConstrainedNetworkAccess = true
         config.tlsMinimumSupportedProtocolVersion = .TLSv12
         let session = URLSession(configuration: config)
         var batches: [[AdultDesk.Room]] = []
-        for tag in AdultDesk.tags {
-            if let data = await Self.fetchAdult(session, AdultDesk.directory(tag: tag)) {
-                batches.append(AdultDesk.parse(data))
+        await withTaskGroup(of: [AdultDesk.Room].self) { group in
+            for tag in AdultDesk.tags {
+                for page in 0..<AdultDesk.pages {
+                    group.addTask {
+                        let offset = page * AdultDesk.pageSize
+                        guard let data = await UpdateSocket.fetchAdult(
+                            session,
+                            AdultDesk.directory(tag: tag, offset: offset)
+                        ) else { return [] }
+                        return AdultDesk.parse(data)
+                    }
+                }
+            }
+            for await batch in group {
+                if !batch.isEmpty { batches.append(batch) }
             }
         }
         session.invalidateAndCancel()
