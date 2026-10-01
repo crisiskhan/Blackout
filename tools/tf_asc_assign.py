@@ -6,7 +6,9 @@ then POST betaGroups/.../relationships/builds 404 NOT_FOUND on that
 build id. Treat 409 as already assigned. Retry 404 with backoff.
 35742115500: GET /v1/builds urlopen timed out after WAIT no build 164.
 Map transport timeout to 598 and retry. Auth 401/403 fail closed.
-No App Review. No External. No network unless main() is invoked.
+36924273852: CPV 174 uploaded, WAIT no build for 25 min, TIMEOUT.
+Wait 45 min before giving up. No App Review. No External.
+No network unless main() is invoked.
 """
 from __future__ import annotations
 
@@ -25,6 +27,8 @@ except ImportError:  # unit tests never call _http
     jwt = None
 
 ASSIGN_BACKOFF = (15.0, 30.0, 60.0, 90.0, 120.0)
+# 36924273852: CPV 174 uploaded, then WAIT no build for 25 min. TIMEOUT.
+ASSIGN_WAIT_SEC = 45 * 60
 LIST_RETRYABLE = frozenset({500, 502, 503, 598})
 INTERNAL_GROUP = "28035586-fce6-474f-9bc2-ef0f1f65306e"
 ASC_APP = "6806388963"
@@ -176,7 +180,7 @@ def main() -> int:
         group=os.environ.get("ASC_INTERNAL_GROUP_ID") or INTERNAL_GROUP,
         want=want,
         sleep=time.sleep,
-        deadline=time.time() + 25 * 60,
+        deadline=time.time() + ASSIGN_WAIT_SEC,
     )
 
 
