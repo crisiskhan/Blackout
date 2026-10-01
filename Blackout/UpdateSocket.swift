@@ -16,6 +16,7 @@ final class UpdateSocket {
     var lastManifest: SnapManifest?
     var adultRooms: [AdultDesk.Room] = []
     private var adultBusy = false
+    private var adultPlay: [String: String] = [:]
 
     private let monitor = NWPathMonitor()
     private let monitorQueue = DispatchQueue(label: "blackout.update.path")
@@ -158,6 +159,39 @@ final class UpdateSocket {
         }
         session.invalidateAndCancel()
         adultRooms = AdultDesk.merge(batches)
+        adultPlay = adultPlay.filter { key, _ in adultRooms.contains { $0.id == key } }
+    }
+
+    func liveAdult(_ row: NaLive.Row) async -> String? {
+        if let cached = adultPlay[row.id], AdultDesk.playlist(cached) != nil {
+            return cached
+        }
+        if let ready = AdultDesk.playlist(row.url) {
+            adultPlay[row.id] = ready
+            return ready
+        }
+        guard pipe else { return nil }
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = 8
+        config.timeoutIntervalForResource = 12
+        config.waitsForConnectivity = false
+        config.allowsExpensiveNetworkAccess = true
+        config.allowsConstrainedNetworkAccess = true
+        config.tlsMinimumSupportedProtocolVersion = .TLSv12
+        let session = URLSession(configuration: config)
+        var url: String?
+        if let path = AdultDesk.context(row.handle),
+           let data = await Self.fetchAdult(session, path) {
+            url = AdultDesk.stream(data)
+        }
+        if url == nil, let edge = AdultDesk.edge(row.handle),
+           let data = await Self.fetchAdultPost(session, edge.path, body: edge.body) {
+            url = AdultDesk.stream(data)
+        }
+        session.invalidateAndCancel()
+        guard let url else { return nil }
+        adultPlay[row.id] = url
+        return url
     }
 
     func applyHopStills(_ hopStills: [(id: String, jpeg: Data)]) {
@@ -392,6 +426,27 @@ final class UpdateSocket {
     }
 
     nonisolated static func fetchAdult(_ session: URLSession, _ raw: String) async -> Data? {
+        await adultGet(session, raw)
+    }
+
+    nonisolated static func fetchAdultPost(_ session: URLSession, _ raw: String, body: String) async -> Data? {
+        await adultPost(session, raw, body: body)
+    }
+
+    nonisolated private static func adultGet(_ session: URLSession, _ raw: String) async -> Data? {
+        guard let request = adultRequest(raw) else { return nil }
+        return await adultData(session, request)
+    }
+
+    nonisolated private static func adultPost(_ session: URLSession, _ raw: String, body: String) async -> Data? {
+        guard var request = adultRequest(raw) else { return nil }
+        request.httpMethod = "POST"
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        request.httpBody = body.data(using: .utf8)
+        return await adultData(session, request)
+    }
+
+    nonisolated private static func adultRequest(_ raw: String) -> URLRequest? {
         guard let url = URL(string: raw), url.scheme?.lowercased() == "https" else { return nil }
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
@@ -399,6 +454,11 @@ final class UpdateSocket {
         request.setValue(AdultDesk.agent, forHTTPHeaderField: "User-Agent")
         request.setValue(AdultDesk.origin, forHTTPHeaderField: "Referer")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("XMLHttpRequest", forHTTPHeaderField: "X-Requested-With")
+        return request
+    }
+
+    nonisolated private static func adultData(_ session: URLSession, _ request: URLRequest) async -> Data? {
         do {
             let (data, response) = try await session.data(for: request)
             guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {

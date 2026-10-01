@@ -9,6 +9,7 @@ enum NaLive {
     struct Row: Identifiable, Equatable {
         var id: String
         var name: String
+        var handle: String
         var url: String
         var viewers: Int
         var range: String
@@ -16,10 +17,12 @@ enum NaLive {
 
     static func rows(_ rooms: [AdultDesk.Room]) -> [Row] {
         rooms.compactMap { room in
-            guard let parsed = URL(string: room.url), parsed.scheme == "https" else { return nil }
+            let handle = room.handle.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !handle.isEmpty else { return nil }
             return Row(
                 id: room.id,
                 name: room.name,
+                handle: handle,
                 url: room.url,
                 viewers: room.viewers,
                 range: "LIVE"
@@ -32,8 +35,10 @@ struct NaLiveWell: View {
     let row: NaLive.Row
     let pipe: Bool
     @Binding var playingID: String?
+    var onPlay: (NaLive.Row) async -> String?
     var onFull: (NaLive.Row) -> Void
     @State private var player: AVPlayer?
+    @State private var dead = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -80,7 +85,7 @@ struct NaLiveWell: View {
             } else if let player, playing {
                 NaLiveLayer(player: player)
                     .frame(maxWidth: .infinity, maxHeight: 180)
-            } else if URL(string: row.url) == nil {
+            } else if dead {
                 Text("NO STREAM")
                     .font(.system(size: 15, weight: .heavy))
                     .foregroundStyle(Theme.silver)
@@ -121,12 +126,24 @@ struct NaLiveWell: View {
             stop()
             return
         }
-        guard pipe, let url = URL(string: row.url), url.scheme == "https" else { return }
+        guard pipe else { return }
+        playingID = row.id
+        dead = false
+        Task { await start() }
+    }
+
+    private func start() async {
+        guard pipe, playingID == row.id else { return }
+        guard let raw = await onPlay(row), let url = URL(string: raw), url.scheme == "https" else {
+            if playingID == row.id { playingID = nil }
+            dead = true
+            return
+        }
+        guard playingID == row.id else { return }
         let next = AVPlayer(url: url)
         next.automaticallyWaitsToMinimizeStalling = true
         next.play()
         player = next
-        playingID = row.id
     }
 
     private func stop() {

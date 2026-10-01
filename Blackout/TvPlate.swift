@@ -139,6 +139,7 @@ struct TvPlate: View {
                                     row: row,
                                     pipe: runtime.updateSocket.pipe,
                                     playingID: $naPlayingID,
+                                    onPlay: { await runtime.updateSocket.liveAdult($0) },
                                     onFull: { runtime.openLive($0) }
                                 )
                             }
