@@ -121,24 +121,29 @@ enum AdultDesk {
         "THIEF",
         "FAVORS",
     ]
+    static let stephNeedles = [
+        "itsstephhoneyxo21",
+        "itsstephhoney xo21",
+        "itsstephhoneyxo",
+        "itsstephhoney xo",
+        "stephhoneyxo21",
+        "itsstephhoney21",
+        "itsstephhoney",
+        "stephhoney21",
+        "stephhoney",
+        "its steph honey",
+        "steph honey 21",
+        "stephaniehvip",
+        "itsstephhoney21free",
+    ]
     static let faces: [(String, [String])] = [
-        ("ITSSTEPHHONEY21", [
-            "itsstephhoney21",
-            "itsstephhoneyxo21",
-            "itsstephhoneyxo",
-            "itsstephhoney",
-            "stephhoney21",
-            "stephhoney",
-            "its steph honey",
-            "steph honey 21",
-            "itsstephhoney xo",
-            "stephaniehvip",
-            "itsstephhoney21free",
-        ]),
+        ("ITSSTEPHHONEY21", stephNeedles),
+        ("ITSSTEPHHONEYXO21", stephNeedles),
         ("MULAN VUITTON", ["mulanvuitton", "mulan_vuitton", "mulan vuitton", "mulanvuittontv"]),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
+        ("ITSSTEPHHONEYXO21", ["P283XrKRjsV"]),
         ("MULAN VUITTON", ["L3HLNRZy6sk", "pYaoSJlMR79"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
@@ -293,7 +298,7 @@ enum AdultDesk {
         var out: [String] = []
         var seen: Set<String> = []
         let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        for raw in [chip] + needles {
+        for raw in needles + [chip] {
             let query = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
             if query.count < 6 { continue }
             if seen.insert(query).inserted {

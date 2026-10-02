@@ -222,23 +222,24 @@ ADULT_PIN = (
     "THIEF",
     "FAVORS",
 )
+ADULT_STEPH = (
+    "itsstephhoneyxo21",
+    "itsstephhoney xo21",
+    "itsstephhoneyxo",
+    "itsstephhoney xo",
+    "stephhoneyxo21",
+    "itsstephhoney21",
+    "itsstephhoney",
+    "stephhoney21",
+    "stephhoney",
+    "its steph honey",
+    "steph honey 21",
+    "stephaniehvip",
+    "itsstephhoney21free",
+)
 ADULT_FACES = (
-    (
-        "ITSSTEPHHONEY21",
-        (
-            "itsstephhoney21",
-            "itsstephhoneyxo21",
-            "itsstephhoneyxo",
-            "itsstephhoney",
-            "stephhoney21",
-            "stephhoney",
-            "its steph honey",
-            "steph honey 21",
-            "itsstephhoney xo",
-            "stephaniehvip",
-            "itsstephhoney21free",
-        ),
-    ),
+    ("ITSSTEPHHONEY21", ADULT_STEPH),
+    ("ITSSTEPHHONEYXO21", ADULT_STEPH),
     ("MULAN VUITTON", ("mulanvuitton", "mulan_vuitton", "mulan vuitton", "mulanvuittontv")),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
@@ -771,7 +772,7 @@ def adult_face_queries(kind: str) -> list[str]:
     out: list[str] = []
     seen: set[str] = set()
     chip = str(kind or "").strip().lower()
-    for raw in [chip] + list(needles):
+    for raw in list(needles) + [chip]:
         query = str(raw or "").strip().lower()
         if len(query) < 6 or query in seen:
             continue
@@ -791,6 +792,7 @@ def adult_star_search(query: str, page: int = 1) -> str | None:
 
 ADULT_FACE_PINS = (
     ("ITSSTEPHHONEY21", ("P283XrKRjsV",)),
+    ("ITSSTEPHHONEYXO21", ("P283XrKRjsV",)),
     ("MULAN VUITTON", ("L3HLNRZy6sk", "pYaoSJlMR79")),
 )
 ADULT_FACE_KILL = (
@@ -1798,6 +1800,10 @@ class AdultDeskTests(unittest.TestCase):
             ["adult-itsstephhoney21"],
         )
         self.assertEqual(
+            [row["id"] for row in adult_pick(extra, kind="ITSSTEPHHONEYXO21")],
+            ["adult-itsstephhoney21"],
+        )
+        self.assertEqual(
             [row["id"] for row in adult_pick(extra, kind="MULAN VUITTON")],
             ["adult-mulanvuitton"],
         )
@@ -1808,6 +1814,7 @@ class AdultDeskTests(unittest.TestCase):
                 "ALL",
                 "LOVESCAPE",
                 "ITSSTEPHHONEY21",
+                "ITSSTEPHHONEYXO21",
                 "MULAN VUITTON",
                 "COUPLE",
                 "ORGY",
@@ -1835,8 +1842,8 @@ class AdultDeskTests(unittest.TestCase):
             }
         ]
         rail = adult_rail(fat)
-        self.assertEqual(rail[:14], adult_rail([]))
-        self.assertLessEqual(len(rail), 22)
+        self.assertEqual(rail[:15], adult_rail([]))
+        self.assertLessEqual(len(rail), 23)
         self.assertTrue(any(chip.startswith("KIND") for chip in rail))
         self.assertLess(len(rail), 14 + len(fat_kinds))
         love = adult_parse_love(
@@ -2108,7 +2115,11 @@ class AdultDeskTests(unittest.TestCase):
         self.assertEqual(adult_parse_face({"videos": []}, "ITSSTEPHHONEY21"), [])
         self.assertIn("its steph honey", adult_face_queries("ITSSTEPHHONEY21"))
         self.assertIn("itsstephhoneyxo21", adult_face_needles("ITSSTEPHHONEY21") or [])
+        self.assertIn("itsstephhoneyxo21", adult_face_needles("ITSSTEPHHONEYXO21") or [])
+        self.assertEqual(adult_face_queries("ITSSTEPHHONEY21")[0], "itsstephhoneyxo21")
+        self.assertEqual(adult_face_queries("ITSSTEPHHONEYXO21")[0], "itsstephhoneyxo21")
         self.assertIn("stephaniehvip", adult_face_queries("ITSSTEPHHONEY21"))
+        self.assertTrue(any("api.redgifs.com/v2/users/itsstephhoneyxo21/search" in path for path in adult_face_hunt("ITSSTEPHHONEYXO21")))
         self.assertTrue(any("bornstar.co/api/search" in path for path in adult_face_hunt("MULAN VUITTON")))
         self.assertTrue(any("eporner.com/api/v2/video/search" in path for path in adult_face_hunt("MULAN VUITTON")))
         self.assertTrue(any("eporner.com/api/v2/video/id/?id=L3HLNRZy6sk" in path for path in adult_face_hunt("MULAN VUITTON")))
@@ -2306,6 +2317,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("THIEF", desk)
         self.assertIn("FAVORS", desk)
         self.assertIn("ITSSTEPHHONEY21", desk)
+        self.assertIn("ITSSTEPHHONEYXO21", desk)
         self.assertIn("itsstephhoneyxo21", desk)
         self.assertIn("stephaniehvip", desk)
         self.assertIn("P283XrKRjsV", desk)
@@ -2648,6 +2660,7 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("SEARCH", tv)
         self.assertIn("BRAIDS", tv)
         self.assertIn("ITSSTEPHHONEY21", tv)
+        self.assertIn("ITSSTEPHHONEYXO21", tv)
         self.assertIn("MULAN VUITTON", tv)
         self.assertIn("LOVESCAPE", tv)
         self.assertIn("lovescape.cam", tv.lower())
