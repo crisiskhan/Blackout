@@ -465,7 +465,13 @@ struct MapTab: View {
             hasRoute: !runtime.routeCoords.isEmpty,
             hasYouFix: you != nil
         )
-        let point = destActive ? (dest ?? you) : nil
+        let navigating = MapFieldChrome.maneuverLive(
+            hasDestination: dest != nil,
+            hasRoute: !runtime.routeCoords.isEmpty
+        )
+        let point = destActive
+            ? MapFieldChrome.destField(dest: dest, you: you, navigating: navigating)
+            : nil
         let lines = MapFieldChrome.lines(
             lock: runtime.lockChrome,
             route: runtime.routeChrome,
@@ -495,11 +501,13 @@ struct MapTab: View {
                             MapFieldDestRail(
                                 dest: point,
                                 nextTurn: runtime.speakNextHUD,
-                                remaining: VoiceNav.remainingHUD(runtime.routeCoords),
-                                navigating: MapFieldChrome.maneuverLive(
-                                    hasDestination: dest != nil,
-                                    hasRoute: !runtime.routeCoords.isEmpty
+                                remaining: MapFieldChrome.liveRemainingHUD(
+                                    you: you,
+                                    dest: dest,
+                                    coords: runtime.routeCoords,
+                                    travelMode: runtime.travelMode
                                 ),
+                                navigating: navigating,
                                 onTurns: { runtime.toggleSpeakTurns() }
                             )
                         }

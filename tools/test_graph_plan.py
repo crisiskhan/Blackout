@@ -263,23 +263,80 @@ def plan(graph: Graph | None, frm, to, mode: str):
         if len(coords) < 2:
             return [], OFF_GRAPH
         return coords, ""
-    path = route(graph, leave(start, to, graph, mode), arrive(end, frm, graph, mode), mode)
-    if not path:
+    best = None
+    for start_id in legal_leave(start, graph, mode):
+        for end_id in legal_arrive(end, graph, mode):
+            path = route(graph, start_id, end_id, mode)
+            if not path:
+                continue
+            coords = [(graph.nodes[str(i)]["lat"], graph.nodes[str(i)]["lon"]) for i in path]
+            first = coords[0]
+            last = coords[-1]
+            if haversine(start["lat"], start["lon"], first[0], first[1]) >= STITCH_METERS:
+                coords.insert(0, (start["lat"], start["lon"]))
+            if start["metres"] >= STITCH_METERS:
+                coords.insert(0, (frm[0], frm[1]))
+            if haversine(end["lat"], end["lon"], last[0], last[1]) >= STITCH_METERS:
+                coords.append((end["lat"], end["lon"]))
+            if end["metres"] >= STITCH_METERS:
+                coords.append((to[0], to[1]))
+            if len(coords) < 2:
+                continue
+            cost = path_cost(graph, path, mode) + access_cost(start, start_id, graph, mode) + access_cost(
+                end, end_id, graph, mode
+            )
+            if best is None or cost < best[0]:
+                best = (cost, coords)
+    if best is None:
         return [], OFF_GRAPH
-    coords = [(graph.nodes[str(i)]["lat"], graph.nodes[str(i)]["lon"]) for i in path]
-    first = coords[0]
-    last = coords[-1]
-    if haversine(start["lat"], start["lon"], first[0], first[1]) >= STITCH_METERS:
-        coords.insert(0, (start["lat"], start["lon"]))
-    if start["metres"] >= STITCH_METERS:
-        coords.insert(0, (frm[0], frm[1]))
-    if haversine(end["lat"], end["lon"], last[0], last[1]) >= STITCH_METERS:
-        coords.append((end["lat"], end["lon"]))
-    if end["metres"] >= STITCH_METERS:
-        coords.append((to[0], to[1]))
-    if len(coords) < 2:
-        return [], OFF_GRAPH
-    return coords, ""
+    return best[1], ""
+
+
+def legal_leave(access: dict, graph: Graph, mode: str) -> list[int]:
+    can_ab = has_link(graph, access["a"], access["b"], mode)
+    can_ba = has_link(graph, access["b"], access["a"], mode)
+    if can_ab and can_ba:
+        return [access["a"]] if access["a"] == access["b"] else [access["a"], access["b"]]
+    if can_ab:
+        return [access["b"]]
+    if can_ba:
+        return [access["a"]]
+    return [access["id"]]
+
+
+def legal_arrive(access: dict, graph: Graph, mode: str) -> list[int]:
+    can_ab = has_link(graph, access["a"], access["b"], mode)
+    can_ba = has_link(graph, access["b"], access["a"], mode)
+    if can_ab and can_ba:
+        return [access["a"]] if access["a"] == access["b"] else [access["a"], access["b"]]
+    if can_ab:
+        return [access["a"]]
+    if can_ba:
+        return [access["b"]]
+    return [access["id"]]
+
+
+def path_cost(graph: Graph, path: list[int], mode: str) -> float:
+    total = 0.0
+    for src, dst in zip(path, path[1:]):
+        for e in graph.edges:
+            if e["a"] == src and e["b"] == dst:
+                ok = e["walk"] if mode == "walk" else e["drive"]
+                if ok:
+                    total += edge_cost(e["m"], mode, e.get("cls", 0))
+                    break
+    return total
+
+
+def access_cost(access: dict, node: int, graph: Graph, mode: str) -> float:
+    point = graph.nodes[str(node)]
+    metres = haversine(access["lat"], access["lon"], point["lat"], point["lon"])
+    cls = 0
+    for e in graph.edges:
+        if {e["a"], e["b"]} == {access["a"], access["b"]}:
+            cls = e.get("cls", 0)
+            break
+    return edge_cost(metres, mode, cls)
 
 
 def diamond() -> Graph:
@@ -300,6 +357,26 @@ def diamond() -> Graph:
             {"a": 3, "b": 1, "m": haversine(0.001, 0.010, 0.0, 0.0), "walk": True, "drive": True, "cls": 6},
             {"a": 3, "b": 4, "m": haversine(0.001, 0.010, 0.0, 0.020), "walk": True, "drive": True, "cls": 6},
             {"a": 4, "b": 3, "m": haversine(0.0, 0.020, 0.001, 0.010), "walk": True, "drive": True, "cls": 6},
+        ],
+    )
+
+
+def river_block() -> Graph:
+    """Dest sits next to A as the crow flies. The packed path is B then south."""
+    return Graph(
+        {
+            "1": {"id": 1, "lon": 0.0, "lat": 0.0},
+            "2": {"id": 2, "lon": 0.01, "lat": 0.0},
+            "3": {"id": 3, "lon": 0.01, "lat": -0.002},
+            "4": {"id": 4, "lon": 0.0, "lat": -0.002},
+        },
+        [
+            {"a": 1, "b": 2, "m": 1100, "walk": True, "drive": True, "cls": 6},
+            {"a": 2, "b": 1, "m": 1100, "walk": True, "drive": True, "cls": 6},
+            {"a": 2, "b": 3, "m": 220, "walk": True, "drive": True, "cls": 6},
+            {"a": 3, "b": 2, "m": 220, "walk": True, "drive": True, "cls": 6},
+            {"a": 3, "b": 4, "m": 1100, "walk": True, "drive": True, "cls": 6},
+            {"a": 4, "b": 3, "m": 1100, "walk": True, "drive": True, "cls": 6},
         ],
     )
 
@@ -405,6 +482,8 @@ class GraphPlanTests(unittest.TestCase):
         self.assertIn("func ahead", body)
         self.assertIn("func leave", body)
         self.assertIn("func arrive", body)
+        self.assertIn("func departures", body)
+        self.assertIn("func arrivals", body)
         router = ROUTER.read_text()
         self.assertIn("maxMetres", router)
         self.assertIn("best.metres + index.maxMetres", router)
@@ -507,6 +586,20 @@ class GraphPlanTests(unittest.TestCase):
         walk, walk_chrome = plan(g, you, dest, "walk")
         self.assertEqual(walk_chrome, "")
         self.assertFalse(any(abs(c[0] - 0.002) < 1e-4 for c in walk), walk)
+
+    def test_mid_block_does_not_backtrack_to_the_crow_fly_node(self):
+        g = river_block()
+        you = (0.0002, 0.009)
+        dest = (-0.0019, 0.0002)
+        coords, chrome = plan(g, you, dest, "walk")
+        self.assertEqual(chrome, "")
+        self.assertEqual(coords[0], you)
+        self.assertEqual(coords[-1], dest)
+        self.assertFalse(
+            any(abs(c[0]) < 1e-4 and abs(c[1]) < 1e-4 for c in coords),
+            "mid-block walk ran back to the crow-fly corner",
+        )
+        self.assertTrue(any(abs(c[1] - 0.01) < 1e-4 for c in coords), coords)
 
     def test_drive_against_a_one_way_with_no_way_around_is_off_graph(self):
         g = Graph(

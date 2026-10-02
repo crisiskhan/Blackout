@@ -791,6 +791,25 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(farWest, "-90.00000, -180.00000")
         XCTAssertLessThanOrEqual(farWest.count, 44)
         XCTAssertFalse(farWest.contains("DEST"))
+        XCTAssertEqual(MapFieldChrome.destField(dest: dest, you: you, navigating: false)?.lat, you.lat)
+        XCTAssertEqual(MapFieldChrome.destField(dest: dest, you: you, navigating: true)?.lat, dest.lat)
+        XCTAssertEqual(MapFieldChrome.destField(dest: dest, you: nil, navigating: false)?.lat, dest.lat)
+        let line = [
+            (lat: 0.0, lon: 0.0),
+            (lat: 0.0, lon: 0.0017966),
+            (lat: 0.0008993, lon: 0.0017966),
+        ]
+        let mid = (lat: 0.0, lon: 0.0008983)
+        let cue = LiveNav.progress(you: mid, dest: line.last, coords: line)
+        XCTAssertEqual(
+            MapFieldChrome.liveRemainingHUD(you: mid, dest: line.last, coords: line, travelMode: .walk),
+            VoiceNav.remainingHUD(cue.remainingCoords)
+        )
+        XCTAssertEqual(
+            MapFieldChrome.liveRemainingHUD(you: nil, dest: line.last, coords: line, travelMode: .walk),
+            VoiceNav.remainingHUD(line)
+        )
+        XCTAssertLessThan(cue.remainingMeters, VoiceNav.remainingMeters(line))
     }
 
     func testActiveBearingIsQuietWithoutSomewhereToWalk() {
