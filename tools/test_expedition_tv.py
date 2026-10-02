@@ -226,6 +226,9 @@ ADULT_FACES = (
     ("ITSSTEPHHONEY21", ("itsstephhoney21", "itsstephhoney", "stephhoney21", "stephhoney")),
     ("MULAN VUITTON", ("mulanvuitton", "mulan_vuitton", "mulan vuitton", "mulanvuittontv")),
 )
+ADULT_LOVE_CHIP = "LOVESCAPE"
+ADULT_LOVE_ORIGIN = "https://lovescape.cam"
+ADULT_LOVE_TAGS = ("girls", "couples")
 ADULT_TOPIC = {
     "BRAIDS": ("braids", "braid", "cornrows"),
     "SLEEP": ("sleeping", "sleep", "somno"),
@@ -261,7 +264,17 @@ ADULT_MALE = {
     "ts",
 }
 ADULT_COUPLE = {"c", "couple", "couples"}
-ADULT_WOMAN = {"f", "female", "w", "woman", "women"} | ADULT_COUPLE
+ADULT_WOMAN = {
+    "f",
+    "female",
+    "females",
+    "w",
+    "woman",
+    "women",
+    "malefemale",
+    "girl",
+    "girls",
+} | ADULT_COUPLE
 
 
 def adult_playlist(raw: str) -> str | None:
@@ -275,6 +288,81 @@ def adult_playlist(raw: str) -> str | None:
     if ".m3u8" not in low and ".mp4" not in low:
         return None
     return text
+
+
+def adult_file_play(raw: str) -> bool:
+    low = str(raw or "").strip().lower()
+    return ".mp4" in low and ".m3u8" not in low
+
+
+def adult_live_play(source: str, text: str) -> str | None:
+    """Guest live media playlist only. Refuse advert VOD and dummy media.mp4."""
+    play = adult_playlist(source)
+    if not play:
+        return None
+    low = str(text or "").lower()
+    if "mouflon-advert" in low or "/cpa/" in low:
+        return None
+    if "#ext-x-endlist" in low:
+        return None
+    if "#ext-x-stream-inf" in low:
+        return None
+    if "media.mp4" in low:
+        return None
+    if "#extinf" not in low:
+        return None
+    return play
+
+
+def adult_love_variant(source: str, text: str) -> str | None:
+    """Master variant with the psch/pkey the file already advertises."""
+    if adult_playlist(source) is None:
+        return None
+    blob = str(text or "")
+    low = blob.lower()
+    if "mouflon-advert" in low or "/cpa/" in low:
+        return None
+    if "#ext-x-stream-inf" not in low:
+        return None
+    psch = ""
+    pkey = ""
+    variants: list[str] = []
+    for line in blob.splitlines():
+        row = line.strip()
+        if row.startswith("#EXT-X-MOUFLON:PSCH:"):
+            parts = row.split(":")
+            if len(parts) >= 4:
+                psch = parts[2]
+                pkey = parts[3]
+        if row.lower().startswith("https://"):
+            play = adult_playlist(row)
+            if play:
+                variants.append(play)
+    pick = _adult_love_pick(variants)
+    if not pick:
+        return None
+    if not psch or not pkey:
+        return pick
+    sep = "&" if "?" in pick else "?"
+    return f"{pick}{sep}psch={psch}&pkey={pkey}"
+
+
+def _adult_love_pick(variants: list[str]) -> str | None:
+    ranked = [
+        row
+        for row in variants
+        if "blur" not in row.lower() and "160p" not in row.lower()
+    ]
+    for row in ranked:
+        if "_480p" in row.lower():
+            return row
+    for row in ranked:
+        low = row.lower()
+        if "_auto" in low or "_240p" not in low:
+            return row
+    if ranked:
+        return ranked[0]
+    return variants[0] if variants else None
 
 
 def adult_allows(name: str) -> bool:
@@ -398,8 +486,125 @@ def adult_face_needles(kind: str) -> list[str] | None:
     return None
 
 
+def adult_love_needles(kind: str) -> bool:
+    return str(kind or "").strip().upper() == ADULT_LOVE_CHIP
+
+
+def adult_love_directory(tag: str, offset: int = 0) -> str:
+    start = max(0, int(offset))
+    raw = str(tag or "").strip().lower()
+    token = raw if raw in ADULT_LOVE_TAGS else ADULT_LOVE_TAGS[0]
+    return (
+        f"{ADULT_LOVE_ORIGIN}/api/front/models"
+        f"?limit=100&offset={start}&primaryTag={token}"
+    )
+
+
+def adult_love_still(raw: str) -> str | None:
+    text = str(raw or "").strip()
+    if text.lower().endswith("-thumb-small"):
+        stem = text[: -len("-thumb-small")]
+        return adult_still(stem) or adult_still(stem + "-thumb-big") or adult_still(text)
+    return adult_still(text)
+
+
+def adult_parse_love(payload: object) -> list[dict]:
+    """Live public women and couple rooms from the love desk."""
+    models: list[object] = []
+    if isinstance(payload, list):
+        models = payload
+    elif isinstance(payload, dict):
+        raw = payload.get("models")
+        if raw is None:
+            raw = payload.get("results")
+        if isinstance(raw, list):
+            models = raw
+    rooms: list[dict] = []
+    seen: set[str] = set()
+    for model in models:
+        if not isinstance(model, dict):
+            continue
+        if not model.get("isLive"):
+            continue
+        if str(model.get("status") or "").strip().lower() != "public":
+            continue
+        group = str(model.get("genderGroup") or "").strip().lower()
+        if group in {"m", "male", "t", "trans"}:
+            continue
+        broadcast = str(model.get("broadcastGender") or "").strip().lower()
+        if broadcast in {"male", "men", "trans", "tranny"}:
+            continue
+        if not adult_woman(model):
+            continue
+        try:
+            years = model.get("age")
+            if years is not None and int(years) < 18:
+                continue
+        except (TypeError, ValueError):
+            continue
+        handle = str(model.get("username") or model.get("slug") or "").strip()
+        name = str(model.get("displayName") or handle).strip()
+        if not handle or not adult_allows(handle) or not adult_allows(name):
+            continue
+        topic = str(model.get("groupShowTopic") or "")
+        if not adult_clean(topic):
+            continue
+        rid = f"adult-love-{handle.lower()}"
+        if rid in seen:
+            continue
+        seen.add(rid)
+        play = adult_playlist(str(model.get("hlsPlaylist") or "")) or ""
+        if play:
+            play = play.replace("_240p.m3u8", "_auto.m3u8")
+        image = adult_love_still(str(model.get("previewUrlThumbSmall") or "")) or ""
+        if not image:
+            image = adult_still(str(model.get("avatarUrl") or "")) or ""
+        kinds = [ADULT_LOVE_CHIP]
+        gender = str(model.get("gender") or "").strip().lower()
+        if gender in {"c", "couple", "couples", "malefemale", "females"} or broadcast == "group":
+            kinds.append("COUPLE")
+        if model.get("isNew"):
+            kinds.append("NEW")
+        blob = f"{topic} {handle}".lower()
+        seen_kinds = set(kinds)
+        for needle, chip in ADULT_KIND_WORDS:
+            if needle == "new":
+                continue
+            if needle in blob and chip not in seen_kinds and adult_clean(chip):
+                seen_kinds.add(chip)
+                kinds.append(chip)
+        try:
+            viewers = int(model.get("viewersCount") or model.get("viewers") or 0)
+        except (TypeError, ValueError):
+            viewers = 0
+        rooms.append(
+            {
+                "id": rid,
+                "name": name.upper(),
+                "handle": handle,
+                "url": play,
+                "viewers": viewers,
+                "image": image,
+                "kinds": kinds,
+                "seek": " ".join(
+                    part
+                    for part in (
+                        handle,
+                        name,
+                        gender,
+                        topic,
+                        str(model.get("country") or ""),
+                    )
+                    if part
+                ).lower(),
+                "seconds": 0,
+            }
+        )
+    return rooms
+
+
 def adult_topics(kind: str) -> list[str]:
-    if adult_face_needles(kind) is not None:
+    if adult_face_needles(kind) is not None or adult_love_needles(kind):
         return []
     chip = str(kind or "").strip().upper()
     if chip in ("", "ALL"):
@@ -425,7 +630,12 @@ def adult_directory(tag: str, offset: int = 0, topic: str = "") -> str:
 def adult_rail(rooms: list[dict]) -> list[str]:
     out: list[str] = []
     seen: set[str] = set()
-    chips = ["ALL"] + [name for name, _ in ADULT_FACES] + list(ADULT_PIN) + adult_kinds(rooms)
+    chips = (
+        ["ALL", ADULT_LOVE_CHIP]
+        + [name for name, _ in ADULT_FACES]
+        + list(ADULT_PIN)
+        + adult_kinds(rooms)
+    )
     for chip in chips:
         if chip not in seen:
             seen.add(chip)
@@ -437,6 +647,7 @@ def adult_pick(rooms: list[dict], kind: str = "", query: str = "") -> list[dict]
     chip = str(kind or "").strip().upper()
     needle = str(query or "").strip().lower()
     faces = adult_face_needles(chip)
+    love = adult_love_needles(chip)
     out: list[dict] = []
     for room in rooms:
         kinds = [str(item).strip().upper() for item in (room.get("kinds") or [])]
@@ -450,6 +661,9 @@ def adult_pick(rooms: list[dict], kind: str = "", query: str = "") -> list[dict]
                 ]
             ).lower()
             if not any(token in blob for token in faces):
+                continue
+        elif love:
+            if ADULT_LOVE_CHIP not in kinds:
                 continue
         elif chip and chip != "ALL" and chip not in kinds:
             continue
@@ -1195,6 +1409,9 @@ class AdultDeskTests(unittest.TestCase):
         self.assertTrue(adult_woman({}))
         self.assertTrue(adult_woman({"gender": "c"}))
         self.assertTrue(adult_woman({"gender": "couple"}))
+        self.assertTrue(adult_woman({"gender": "female"}))
+        self.assertTrue(adult_woman({"gender": "females"}))
+        self.assertTrue(adult_woman({"gender": "maleFemale"}))
         self.assertTrue(adult_clean("orgy roleplay couple"))
         self.assertFalse(adult_woman({"gender": "m"}))
         self.assertFalse(adult_woman({"gender": "male"}))
@@ -1344,9 +1561,10 @@ class AdultDeskTests(unittest.TestCase):
         )
         self.assertEqual(adult_pick(extra, kind="ITSSTEPHHONEY21", query="mulan"), [])
         self.assertEqual(
-            adult_rail([])[:13],
+            adult_rail([])[:14],
             [
                 "ALL",
+                "LOVESCAPE",
                 "ITSSTEPHHONEY21",
                 "MULAN VUITTON",
                 "COUPLE",
@@ -1360,6 +1578,119 @@ class AdultDeskTests(unittest.TestCase):
                 "THIEF",
                 "FAVORS",
             ],
+        )
+        love = adult_parse_love(
+            {
+                "models": [
+                    {
+                        "username": "enya-",
+                        "gender": "female",
+                        "genderGroup": "F",
+                        "broadcastGender": "female",
+                        "status": "public",
+                        "isLive": True,
+                        "viewersCount": 970,
+                        "hlsPlaylist": "https://edge-hls.example/hls/1/master/1_240p.m3u8",
+                        "previewUrlThumbSmall": "https://img.example/previews/a-thumb-small",
+                        "groupShowTopic": "braids roleplay",
+                    },
+                    {
+                        "username": "pair-live",
+                        "gender": "maleFemale",
+                        "genderGroup": "F",
+                        "broadcastGender": "group",
+                        "status": "public",
+                        "isLive": True,
+                        "viewersCount": 2200,
+                        "hlsPlaylist": "https://edge-hls.example/hls/2/master/2_240p.m3u8",
+                        "previewUrlThumbSmall": "https://img.example/previews/b-thumb-small",
+                    },
+                    {
+                        "username": "man-lead",
+                        "gender": "male",
+                        "genderGroup": "M",
+                        "broadcastGender": "male",
+                        "status": "public",
+                        "isLive": True,
+                        "viewersCount": 9000,
+                        "hlsPlaylist": "https://edge-hls.example/hls/3/master/3_240p.m3u8",
+                    },
+                    {
+                        "username": "off-air",
+                        "gender": "female",
+                        "genderGroup": "F",
+                        "status": "public",
+                        "isLive": False,
+                        "viewersCount": 10,
+                    },
+                    {
+                        "username": "teenstar",
+                        "gender": "female",
+                        "genderGroup": "F",
+                        "status": "public",
+                        "isLive": True,
+                        "viewersCount": 50,
+                    },
+                ]
+            }
+        )
+        self.assertEqual([row["id"] for row in love], ["adult-love-enya-", "adult-love-pair-live"])
+        self.assertEqual(love[0]["handle"], "enya-")
+        self.assertTrue(love[0]["url"].endswith("_auto.m3u8"))
+        self.assertEqual(love[0]["image"], "https://img.example/previews/a")
+        self.assertEqual(love[0]["kinds"][0], "LOVESCAPE")
+        self.assertIn("BRAIDS", love[0]["kinds"])
+        self.assertIn("ROLEPLAY", love[0]["kinds"])
+        self.assertEqual(love[1]["kinds"][:2], ["LOVESCAPE", "COUPLE"])
+        self.assertEqual(
+            [row["id"] for row in adult_pick(love + extra, kind="LOVESCAPE")],
+            ["adult-love-enya-", "adult-love-pair-live"],
+        )
+        self.assertEqual(adult_topics("LOVESCAPE"), [])
+        self.assertTrue(adult_love_needles("LOVESCAPE"))
+        self.assertIn("primaryTag=girls", adult_love_directory("girls"))
+        self.assertIn("lovescape.cam", adult_love_directory("girls"))
+        self.assertTrue(adult_file_play("https://cdn.example/dload/abc/720/video.mp4"))
+        self.assertIsNone(
+            adult_live_play(
+                "https://edge.example/live.m3u8",
+                "#EXTM3U\n#EXT-X-MOUFLON-ADVERT\n#EXT-X-ENDLIST\n",
+            )
+        )
+        self.assertIsNone(
+            adult_live_play(
+                "https://media.example/b-hls-1/1/1.m3u8",
+                "#EXTM3U\n#EXTINF:2.000\nhttps://media.example/b-hls-1/media.mp4\n",
+            )
+        )
+        self.assertEqual(
+            adult_live_play(
+                "https://edge.example/live.m3u8",
+                "#EXTM3U\n#EXT-X-TARGETDURATION:2\n#EXTINF:2.000\nhttps://edge.example/seg0.ts\n",
+            ),
+            "https://edge.example/live.m3u8",
+        )
+        self.assertIsNone(
+            adult_live_play(
+                "https://edge.example/master.m3u8",
+                "#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1\nhttps://edge.example/480p.m3u8\n",
+            )
+        )
+        self.assertEqual(
+            adult_love_variant(
+                "https://edge.example/master.m3u8",
+                "\n".join(
+                    [
+                        "#EXTM3U",
+                        "#EXT-X-MOUFLON:PSCH:v2:Ook7quaiNgiyuhai",
+                        "#EXT-X-STREAM-INF:BANDWIDTH=1,NAME=\"480p\"",
+                        "https://media.example/1_480p.m3u8?playlistType=standard",
+                        "#EXT-X-STREAM-INF:BANDWIDTH=2,NAME=\"240p\"",
+                        "https://media.example/1_240p.m3u8?playlistType=standard",
+                    ]
+                ),
+            ),
+            "https://media.example/1_480p.m3u8?playlistType=standard&psch=v2&pkey=Ook7quaiNgiyuhai",
         )
         self.assertEqual(adult_topics("BRAIDS"), ["braids", "braid", "cornrows"])
         self.assertEqual(adult_topics("ITSSTEPHHONEY21"), [])
@@ -1523,9 +1854,21 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("FAVORS", desk)
         self.assertIn("ITSSTEPHHONEY21", desk)
         self.assertIn("MULAN VUITTON", desk)
+        self.assertIn("LOVESCAPE", desk)
+        self.assertIn("lovescape.cam", desk.lower())
+        self.assertIn("static let loveChip", desk)
+        self.assertIn("static let loveOrigin", desk)
         self.assertIn("static let faces", desk)
         self.assertIn("static func topics(", desk)
         self.assertIn("static func faceNeedles(", desk)
+        self.assertIn("static func loveNeedles(", desk)
+        self.assertIn("static func loveDirectory(", desk)
+        self.assertIn("static func parseLove(", desk)
+        self.assertIn("static func livePlay(", desk)
+        self.assertIn("static func loveVariant(", desk)
+        self.assertIn("static func filePlay(", desk)
+        self.assertIn("static func userAgent(", desk)
+        self.assertIn("static func referer(", desk)
         self.assertIn("static func faceRoom(", desk)
         self.assertIn("static func faceQueries(", desk)
         self.assertIn("static func faceSearch(", desk)
@@ -1556,21 +1899,32 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("hls_source", desk)
         self.assertIn("current_show", desk)
         self.assertIn("num_users", desk)
-        self.assertNotIn("lovescape", desk.lower())
+        self.assertIn("hlsPlaylist", desk)
         self.assertNotIn("onlyfans", desk.lower())
         self.assertNotIn("fansly", desk.lower())
         self.assertNotIn("fanbase", desk.lower())
-        self.assertNotIn("hlsPlaylist", desk)
         self.assertNotIn("iframe_embed", desk)
         self.assertIn("func pullAdult(", sock)
         self.assertIn("pullAdult(topic:", sock)
         self.assertIn("AdultDesk.topics", sock)
         self.assertIn("AdultDesk.faceNeedles", sock)
+        self.assertIn("AdultDesk.loveNeedles", sock)
+        self.assertIn("AdultDesk.loveDirectory", sock)
+        self.assertIn("AdultDesk.parseLove", sock)
+        self.assertIn("AdultDesk.livePlay", sock)
+        self.assertIn("AdultDesk.loveVariant", sock)
+        self.assertIn("AdultDesk.filePlay", sock)
+        self.assertIn("fetchLovePages", sock)
+        self.assertIn("resolveAdult", sock)
+        self.assertIn("AdultDesk.userAgent", sock)
+        self.assertIn("AdultDesk.referer", sock)
         self.assertIn("AdultDesk.faceRoom", sock)
         self.assertIn("fetchAdultFaces", sock)
         self.assertIn("fetchAdultFaceFiles", sock)
         self.assertIn("AdultDesk.parseFace", sock)
         self.assertIn("AdultDesk.faceSearch", sock)
+        self.assertIn("imageJPEG", sock)
+        self.assertIn("0x50", sock)
         self.assertIn("func pullAdultStills(", sock)
         self.assertIn("nonisolated static func stillPreview", sock)
         self.assertIn("kCGImageSourceThumbnailMaxPixelSize", sock)
@@ -1800,6 +2154,8 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("BRAIDS", tv)
         self.assertIn("ITSSTEPHHONEY21", tv)
         self.assertIn("MULAN VUITTON", tv)
+        self.assertIn("LOVESCAPE", tv)
+        self.assertIn("lovescape.cam", tv.lower())
         self.assertIn("FAVORS", tv)
         self.assertIn("still", tv.lower())
         self.assertNotIn("insecam", tv.lower())

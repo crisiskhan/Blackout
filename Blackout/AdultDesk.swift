@@ -125,6 +125,11 @@ enum AdultDesk {
         ("ITSSTEPHHONEY21", ["itsstephhoney21", "itsstephhoney", "stephhoney21", "stephhoney"]),
         ("MULAN VUITTON", ["mulanvuitton", "mulan_vuitton", "mulan vuitton", "mulanvuittontv"]),
     ]
+    static let loveChip = "LOVESCAPE"
+    static let loveOrigin = "https://lovescape.cam"
+    static let loveTags = ["girls", "couples"]
+    static let loveAgent =
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
     struct Room: Identifiable, Equatable, Sendable {
         var id: String
@@ -152,7 +157,7 @@ enum AdultDesk {
     }
 
     static func topics(_ kind: String) -> [String] {
-        if faceNeedles(kind) != nil { return [] }
+        if faceNeedles(kind) != nil || loveNeedles(kind) { return [] }
         switch kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() {
         case "", "ALL":
             return []
@@ -210,6 +215,36 @@ enum AdultDesk {
             return pair.1
         }
         return nil
+    }
+
+    static func loveNeedles(_ kind: String) -> Bool {
+        kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() == loveChip
+    }
+
+    static func loveDirectory(tag: String, offset: Int = 0) -> String {
+        let start = max(0, offset)
+        let raw = tag.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let token = loveTags.contains(raw) ? raw : loveTags[0]
+        return "\(loveOrigin)/api/front/models?limit=\(pageSize)&offset=\(start)&primaryTag=\(token)"
+    }
+
+    static func userAgent(_ raw: String) -> String {
+        loveHost(raw) ? loveAgent : agent
+    }
+
+    static func referer(_ raw: String) -> String {
+        if loveHost(raw) { return "\(loveOrigin)/" }
+        let host = URL(string: raw)?.host?.lowercased() ?? ""
+        if host.contains("eporner") { return "https://www.eporner.com/" }
+        return "\(origin)/"
+    }
+
+    static func loveHost(_ raw: String) -> Bool {
+        let host = URL(string: raw)?.host?.lowercased() ?? ""
+        if host == "lovescape.cam" || host.hasSuffix(".lovescape.cam") { return true }
+        if host.contains("doppiocdn") { return true }
+        if host.contains("strpst") { return true }
+        return false
     }
 
     static func faceQueries(_ kind: String) -> [String] {
@@ -406,6 +441,89 @@ enum AdultDesk {
         return text
     }
 
+    static func filePlay(_ raw: String) -> Bool {
+        let low = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return low.contains(".mp4") && !low.contains(".m3u8")
+    }
+
+    static func livePlay(_ source: String, _ data: Data) -> String? {
+        guard let play = playlist(source) else { return nil }
+        let text = String(data: data, encoding: .utf8) ?? ""
+        let low = text.lowercased()
+        if low.contains("mouflon-advert") || low.contains("/cpa/") { return nil }
+        if low.contains("#ext-x-endlist") { return nil }
+        if low.contains("#ext-x-stream-inf") { return nil }
+        if low.contains("media.mp4") { return nil }
+        if !low.contains("#extinf") { return nil }
+        return play
+    }
+
+    static func loveVariant(_ source: String, _ data: Data) -> String? {
+        guard playlist(source) != nil else { return nil }
+        let text = String(data: data, encoding: .utf8) ?? ""
+        let low = text.lowercased()
+        if low.contains("mouflon-advert") || low.contains("/cpa/") { return nil }
+        if !low.contains("#ext-x-stream-inf") { return nil }
+        var psch = ""
+        var pkey = ""
+        var variants: [String] = []
+        for line in text.split(whereSeparator: \.isNewline).map(String.init) {
+            let row = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            if row.hasPrefix("#EXT-X-MOUFLON:PSCH:") {
+                let parts = row.split(separator: ":").map(String.init)
+                if parts.count >= 4 {
+                    psch = parts[2]
+                    pkey = parts[3]
+                }
+            }
+            if row.lowercased().hasPrefix("https://"), let play = playlist(row) {
+                variants.append(play)
+            }
+        }
+        guard let pick = lovePick(variants) else { return nil }
+        if psch.isEmpty || pkey.isEmpty { return pick }
+        let sep = pick.contains("?") ? "&" : "?"
+        return "\(pick)\(sep)psch=\(psch)&pkey=\(pkey)"
+    }
+
+    static func parseLove(_ data: Data) -> [Room] {
+        guard let obj = try? JSONSerialization.jsonObject(with: data) else { return [] }
+        let models = models(from: obj)
+        var seen: Set<String> = []
+        var rows: [Room] = []
+        for model in models {
+            guard flag(model, "isLive") else { continue }
+            let status = string(model["status"]).lowercased()
+            guard status == "public" else { continue }
+            guard loveWoman(model) else { continue }
+            if let years = age(model), years < 18 { continue }
+            let handle = string(model["username"]).isEmpty
+                ? string(model["slug"])
+                : string(model["username"])
+            let named = string(model["displayName"]).isEmpty ? handle : string(model["displayName"])
+            guard !handle.isEmpty, allows(handle), allows(named) else { continue }
+            let topic = string(model["groupShowTopic"])
+            guard clean(topic) else { continue }
+            let rid = "adult-love-\(handle.lowercased())"
+            guard seen.insert(rid).inserted else { continue }
+            let play = loveMaster(string(model["hlsPlaylist"])) ?? ""
+            rows.append(
+                Room(
+                    id: rid,
+                    name: named.uppercased(),
+                    handle: handle,
+                    url: play,
+                    viewers: viewers(model),
+                    image: loveImage(model),
+                    kinds: loveKinds(model),
+                    seek: loveSeek(model),
+                    seconds: 0
+                )
+            )
+        }
+        return rows
+    }
+
     static func still(_ raw: String) -> String? {
         let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let url = URL(string: text), url.scheme?.lowercased() == "https" else { return nil }
@@ -418,12 +536,17 @@ enum AdultDesk {
         let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         let faces = faceNeedles(chip)
+        let love = loveNeedles(chip)
         let picked = rooms.filter { room in
             if let faces {
                 let blob = ([room.name, room.handle, room.seek] + room.kinds)
                     .joined(separator: " ")
                     .lowercased()
                 if !faces.contains(where: { blob.contains($0) }) {
+                    return false
+                }
+            } else if love {
+                if !room.kinds.contains(loveChip) {
                     return false
                 }
             } else if !chip.isEmpty && chip != "ALL" && !room.kinds.contains(chip) {
@@ -458,7 +581,7 @@ enum AdultDesk {
     static func rail(_ rooms: [Room]) -> [String] {
         var out: [String] = []
         var seen: Set<String> = []
-        for chip in ["ALL"] + faces.map(\.0) + pin + kinds(rooms) {
+        for chip in ["ALL", loveChip] + faces.map(\.0) + pin + kinds(rooms) {
             if seen.insert(chip).inserted {
                 out.append(chip)
             }
@@ -485,7 +608,107 @@ enum AdultDesk {
         ].contains(gender) {
             return false
         }
-        return ["f", "female", "w", "woman", "women", "c", "couple", "couples"].contains(gender)
+        return [
+            "f",
+            "female",
+            "females",
+            "w",
+            "woman",
+            "women",
+            "c",
+            "couple",
+            "couples",
+            "malefemale",
+            "girl",
+            "girls",
+        ].contains(gender)
+    }
+
+    private static func loveWoman(_ model: [String: Any]) -> Bool {
+        let group = string(model["genderGroup"]).lowercased()
+        if ["m", "male", "t", "trans"].contains(group) { return false }
+        let broadcast = string(model["broadcastGender"]).lowercased()
+        if ["male", "men", "trans", "tranny"].contains(broadcast) { return false }
+        return woman(model)
+    }
+
+    private static func loveMaster(_ raw: String) -> String? {
+        guard let play = playlist(raw) else { return nil }
+        return play.replacingOccurrences(of: "_240p.m3u8", with: "_auto.m3u8")
+    }
+
+    private static func lovePick(_ variants: [String]) -> String? {
+        let ranked = variants.filter { row in
+            let low = row.lowercased()
+            return !low.contains("blur") && !low.contains("160p")
+        }
+        if let hit = ranked.first(where: { $0.lowercased().contains("_480p") }) { return hit }
+        if let hit = ranked.first(where: { row in
+            let low = row.lowercased()
+            return low.contains("_auto") || !low.contains("_240p")
+        }) {
+            return hit
+        }
+        return ranked.first ?? variants.first
+    }
+
+    private static func loveImage(_ model: [String: Any]) -> String {
+        if let hit = loveStill(string(model["previewUrlThumbSmall"])) { return hit }
+        if let hit = still(string(model["avatarUrl"])) { return hit }
+        return ""
+    }
+
+    private static func loveStill(_ raw: String) -> String? {
+        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        let low = text.lowercased()
+        if low.hasSuffix("-thumb-small") {
+            let stem = String(text.dropLast("-thumb-small".count))
+            if let hit = still(stem) { return hit }
+            if let hit = still(stem + "-thumb-big") { return hit }
+        }
+        return still(text)
+    }
+
+    private static func loveKinds(_ model: [String: Any]) -> [String] {
+        var found = [loveChip]
+        var seen: Set<String> = [loveChip]
+        let gender = string(model["gender"]).lowercased()
+        let broadcast = string(model["broadcastGender"]).lowercased()
+        if [
+            "c",
+            "couple",
+            "couples",
+            "malefemale",
+            "females",
+        ].contains(gender) || broadcast == "group" {
+            if seen.insert("COUPLE").inserted {
+                found.append("COUPLE")
+            }
+        }
+        if flag(model, "isNew"), seen.insert("NEW").inserted {
+            found.append("NEW")
+        }
+        let blob = (string(model["groupShowTopic"]) + " " + string(model["username"])).lowercased()
+        for pair in kindWords {
+            if pair.0 == "new" { continue }
+            if blob.contains(pair.0), clean(pair.1), seen.insert(pair.1).inserted {
+                found.append(pair.1)
+            }
+        }
+        return found
+    }
+
+    private static func loveSeek(_ model: [String: Any]) -> String {
+        [
+            string(model["username"]),
+            string(model["displayName"]),
+            string(model["gender"]),
+            string(model["groupShowTopic"]),
+            string(model["country"]),
+        ]
+        .filter { !$0.isEmpty }
+        .joined(separator: " ")
+        .lowercased()
     }
 
     private static func token(_ handle: String) -> String? {
