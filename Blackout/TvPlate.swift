@@ -13,6 +13,8 @@ struct TvPlate: View {
     @State private var naChrome: String?
     @State private var naPlayingID: String?
     @State private var naOffset = 0
+    @State private var naKind = "ALL"
+    @State private var naQuery = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -59,12 +61,17 @@ struct TvPlate: View {
         }
         .onChange(of: naUnlocked) { _, ok in
             if ok {
-                naOffset = 0
+                resetNaPage()
                 runtime.updateSocket.pullAdult()
+                runtime.updateSocket.pullAdultStills(naPageRows)
             }
         }
         .onChange(of: runtime.updateSocket.adultRooms.count) { _, _ in
             clampNaOffset()
+            runtime.updateSocket.pullAdultStills(naPageRows)
+        }
+        .onChange(of: naPageKey) { _, _ in
+            runtime.updateSocket.pullAdultStills(naPageRows)
         }
         .task {
             runtime.pullMapSnap()
@@ -119,12 +126,37 @@ struct TvPlate: View {
         )
     }
 
+    private var naPicked: [AdultDesk.Room] {
+        AdultDesk.pick(runtime.updateSocket.adultRooms, kind: naKind, query: naQuery)
+    }
+
     private var naLiveRows: [NaLive.Row] {
-        NaLive.rows(runtime.updateSocket.adultRooms)
+        NaLive.rows(naPicked)
     }
 
     private var naPageRows: [NaLive.Row] {
-        NaLive.page(runtime.updateSocket.adultRooms, offset: naOffset)
+        NaLive.page(
+            runtime.updateSocket.adultRooms,
+            kind: naKind,
+            query: naQuery,
+            offset: naOffset
+        )
+    }
+
+    private var naPageKey: String {
+        naPageRows.map(\.id).joined(separator: ",")
+    }
+
+    private var naKindChips: [String] {
+        ["ALL"] + AdultDesk.kinds(runtime.updateSocket.adultRooms)
+    }
+
+    private var naEmptyChrome: String {
+        let query = naQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !query.isEmpty || (naKind != "ALL" && !naKind.isEmpty) {
+            return "NO MATCH"
+        }
+        return "NO CAMERAS"
     }
 
     private var naHasMore: Bool {
@@ -144,9 +176,10 @@ struct TvPlate: View {
                 VStack(alignment: .leading, spacing: 10) {
                     naHoldRow
                     if naUnlocked {
+                        naFindRail
                         if naPageRows.isEmpty && naFeeds.isEmpty {
                             if runtime.updateSocket.adultReady {
-                                Text("NO CAMERAS")
+                                Text(naEmptyChrome)
                                     .font(.system(size: 13, weight: .heavy))
                                     .foregroundStyle(Theme.silver)
                                     .textCase(.uppercase)
@@ -157,6 +190,7 @@ struct TvPlate: View {
                                 NaLiveWell(
                                     row: row,
                                     pipe: runtime.updateSocket.pipe,
+                                    still: still(id: row.id),
                                     playingID: $naPlayingID,
                                     onPlay: { await runtime.updateSocket.liveAdult($0) },
                                     onFull: { runtime.openLive($0) }
@@ -170,6 +204,35 @@ struct TvPlate: View {
                     }
                 }
             }
+        }
+        .onAppear {
+            if naUnlocked {
+                runtime.updateSocket.pullAdultStills(naPageRows)
+            }
+        }
+    }
+
+    private var naFindRail: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HUDField("SEARCH",
+                text: $naQuery,
+                id: "tv.na.search",
+                submit: "DONE",
+                pointSize: 16,
+                onSubmit: { resetNaPage() }
+            )
+            HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                ForEach(naKindChips, id: \.self) { kind in
+                    Button(kind) {
+                        naKind = kind
+                        resetNaPage()
+                    }
+                    .buttonStyle(HUDOverlayChipStyle(filled: naKind == kind))
+                }
+            }
+        }
+        .onChange(of: naQuery) { _, _ in
+            resetNaPage()
         }
     }
 
@@ -190,6 +253,11 @@ struct TvPlate: View {
                 .buttonStyle(HUDActionStyle(filled: false))
             }
         }
+    }
+
+    private func resetNaPage() {
+        naPlayingID = nil
+        naOffset = 0
     }
 
     private func clampNaOffset() {

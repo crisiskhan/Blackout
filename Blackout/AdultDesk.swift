@@ -1,12 +1,12 @@
 import Foundation
 
-/// Adult directory for N/A after the 10s hold. JSON only. No player.
+/// Adult directory for N/A after the 10s hold. Women only. JSON only. No player.
 enum AdultDesk {
     static let cap = 600
     static let pageSize = 100
     static let pages = 6
     static let origin = "https://chaturbate.com"
-    static let tags = ["f", "c", "m", "s"]
+    static let tags = ["f"]
     static let mark = "DkfRj"
     static let via = "8.8.8.8"
     static let agent =
@@ -26,12 +26,33 @@ enum AdultDesk {
         "younggirl",
     ]
 
+    static let kindWords: [(String, String)] = [
+        ("new", "NEW"),
+        ("dance", "DANCE"),
+        ("blonde", "BLONDE"),
+        ("brunette", "BRUNETTE"),
+        ("redhead", "REDHEAD"),
+        ("asian", "ASIAN"),
+        ("latina", "LATINA"),
+        ("ebony", "EBONY"),
+        ("milf", "MILF"),
+        ("petite", "PETITE"),
+        ("curvy", "CURVY"),
+        ("outdoor", "OUTDOOR"),
+        ("toys", "TOYS"),
+        ("squirt", "SQUIRT"),
+        ("anal", "ANAL"),
+        ("lesbian", "LESBIAN"),
+    ]
+
     struct Room: Identifiable, Equatable, Sendable {
         var id: String
         var name: String
         var handle: String
         var url: String
         var viewers: Int
+        var image: String
+        var kinds: [String]
     }
 
     static func directory(tag: String, offset: Int = 0) -> String {
@@ -88,6 +109,51 @@ enum AdultDesk {
         return text
     }
 
+    static func still(_ raw: String) -> String? {
+        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let url = URL(string: text), url.scheme?.lowercased() == "https" else { return nil }
+        let low = text.lowercased()
+        if low.contains("/cpa/") || low.contains(".m3u8") { return nil }
+        return text
+    }
+
+    static func pick(_ rooms: [Room], kind: String, query: String) -> [Room] {
+        let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return rooms.filter { room in
+            if !chip.isEmpty && chip != "ALL" && !room.kinds.contains(chip) {
+                return false
+            }
+            if !needle.isEmpty {
+                let blob = ([room.name, room.handle] + room.kinds).joined(separator: " ").lowercased()
+                if !blob.contains(needle) { return false }
+            }
+            return true
+        }
+    }
+
+    static func kinds(_ rooms: [Room]) -> [String] {
+        var seen: Set<String> = []
+        var out: [String] = []
+        for room in rooms {
+            for kind in room.kinds {
+                if seen.insert(kind).inserted {
+                    out.append(kind)
+                }
+            }
+        }
+        return out.sorted()
+    }
+
+    static func woman(_ model: [String: Any]) -> Bool {
+        let gender = string(model["gender"]).lowercased()
+        if gender.isEmpty { return true }
+        if ["m", "male", "c", "couple", "couples", "s", "trans"].contains(gender) {
+            return false
+        }
+        return ["f", "female", "w", "woman", "women"].contains(gender)
+    }
+
     private static func token(_ handle: String) -> String? {
         let token = handle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !token.isEmpty, token.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" }) else {
@@ -132,6 +198,7 @@ enum AdultDesk {
             let show = string(model["current_show"]).lowercased()
             let status = show.isEmpty ? string(model["status"]).lowercased() : show
             guard status == "public" else { continue }
+            guard woman(model) else { continue }
             guard let years = age(model), years >= 18 else { continue }
             let handle = string(model["username"]).isEmpty
                 ? string(model["slug"])
@@ -148,11 +215,43 @@ enum AdultDesk {
                     name: named.uppercased(),
                     handle: handle,
                     url: "",
-                    viewers: viewers(model)
+                    viewers: viewers(model),
+                    image: image(model),
+                    kinds: roomKinds(model)
                 )
             )
         }
         return rows
+    }
+
+    private static func image(_ model: [String: Any]) -> String {
+        if let hit = still(string(model["image_url_360p"])) { return hit }
+        if let hit = still(string(model["image_url"])) { return hit }
+        return ""
+    }
+
+    private static func roomKinds(_ model: [String: Any]) -> [String] {
+        let blob = (tags(model) + " " + string(model["room_subject"])).lowercased()
+        let tokens = Set(blob.split(whereSeparator: { $0.isWhitespace }).map(String.init))
+        var found: [String] = []
+        var seen: Set<String> = []
+        if flag(model, "is_new") || tokens.contains("new") {
+            seen.insert("NEW")
+            found.append("NEW")
+        }
+        for pair in kindWords {
+            if pair.0 == "new" { continue }
+            if blob.contains(pair.0), clean(pair.1), seen.insert(pair.1).inserted {
+                found.append(pair.1)
+            }
+        }
+        return found
+    }
+
+    private static func flag(_ model: [String: Any], _ key: String) -> Bool {
+        if let flag = model[key] as? Bool { return flag }
+        let text = string(model[key]).lowercased()
+        return text == "1" || text == "true" || text == "yes"
     }
 
     private static func age(_ model: [String: Any]) -> Int? {

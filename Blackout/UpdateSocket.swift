@@ -17,6 +17,8 @@ final class UpdateSocket {
     var adultRooms: [AdultDesk.Room] = []
     var adultReady = false
     private var adultBusy = false
+    private var adultStillBusy = false
+    private var adultStillQueued: [NaLive.Row] = []
     private var adultPlay: [String: String] = [:]
 
     private let monitor = NWPathMonitor()
@@ -127,6 +129,60 @@ final class UpdateSocket {
         if adultBusy { return }
         adultBusy = true
         Task { await loadAdult() }
+    }
+
+    func pullAdultStills(_ rows: [NaLive.Row]) {
+        guard pipe else { return }
+        if adultStillBusy {
+            adultStillQueued = rows
+            return
+        }
+        let jobs = rows.compactMap { row -> (String, String)? in
+            guard let image = AdultDesk.still(row.image) else { return nil }
+            return (row.id, image)
+        }
+        guard !jobs.isEmpty else { return }
+        adultStillBusy = true
+        Task { await loadAdultStills(jobs) }
+    }
+
+    private func loadAdultStills(_ jobs: [(String, String)]) async {
+        defer {
+            adultStillBusy = false
+            let queued = adultStillQueued
+            adultStillQueued = []
+            if !queued.isEmpty {
+                pullAdultStills(queued)
+            }
+        }
+        guard pipe else { return }
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = 8
+        config.timeoutIntervalForResource = 16
+        config.waitsForConnectivity = false
+        config.allowsExpensiveNetworkAccess = true
+        config.allowsConstrainedNetworkAccess = true
+        config.tlsMinimumSupportedProtocolVersion = .TLSv12
+        let session = URLSession(configuration: config)
+        var wrote = false
+        await withTaskGroup(of: (String, Data)?.self) { group in
+            for job in jobs {
+                group.addTask {
+                    guard let data = await UpdateSocket.fetchAdult(session, job.1) else { return nil }
+                    guard let jpeg = UpdateSocket.stillJPEG(data), jpeg.count > 32 else { return nil }
+                    return (job.0, jpeg)
+                }
+            }
+            for await hit in group {
+                guard let hit else { continue }
+                write("cam-\(hit.0).jpg", hit.1)
+                wrote = true
+            }
+        }
+        session.invalidateAndCancel()
+        if wrote {
+            updatedAt = Date()
+        }
     }
 
     private func loadAdult() async {
