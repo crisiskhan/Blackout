@@ -761,16 +761,19 @@ public enum PackCamera {
 
     /// Oblique satellite desk. Enter north-up; the lift is pitch, not a globe.
     public static let godsEyePitch: Double = 45
-    /// Walking MAP is the 3D neighborhood desk. Pitch reads house walls on the photo.
-    public static let walkPitch: Double = 55
+    /// Walking MAP is the 3D neighborhood desk. 55 put YOU on the horizon
+    /// and filled the upper glass with void (device 31.87053, -106.59753).
+    /// This pitch keeps YOU on the packed photo.
+    public static let walkPitch: Double = 36
     /// Viewing distance is this times the packed-extract radius so STATES
     /// lifts to both outlines, not a 160m neighborhood desk.
     public static let godsEyeRangeFactor: Double = 1.15
     public static let godsEyeHeading: Double = 0
     public static let godsEyeFlySeconds: Double = 2
     public static let godsEyeFlyPeakFactor: Double = 1.6
-    /// Oblique ceiling on the packed desk. Pinch can flatten; it cannot go past this.
-    public static let godsEyeMaxPitch: Double = 60
+    /// Oblique ceiling on the packed desk. Pinch can flatten. Past this the
+    /// upper glass is void sky, not hillshade.
+    public static let godsEyeMaxPitch: Double = 42
 
     public static func packCenter(
         south: Double,
