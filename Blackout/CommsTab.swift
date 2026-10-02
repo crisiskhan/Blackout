@@ -203,11 +203,13 @@ struct CommsTab: View {
             sectionLabel("NOTE")
             HUDGlassCard {
                 HStack(spacing: 8) {
-                    HUDField("NOTE", text: $note, id: "comms.note", submit: "SEND") {
+                    HUDField("NOTE", text: $note, id: "comms.note", submit: "SEND", onSubmit: {
                         if runtime.sendPartyNote(note) {
                             note = ""
+                            return true
                         }
-                    }
+                        return false
+                    })
                     Button("SEND") {
                         if runtime.sendPartyNote(note) {
                             note = ""
@@ -377,6 +379,7 @@ struct CommsTab: View {
         runtime.pendingNoteFocus = false
         runtime.hudKeys.open(
             id: "comms.note",
+            title: "NOTE",
             text: note,
             submit: "SEND",
             locked: false,
@@ -386,7 +389,9 @@ struct CommsTab: View {
             onSubmit: {
                 if runtime.sendPartyNote(note) {
                     note = ""
+                    return true
                 }
+                return false
             }
         )
     }

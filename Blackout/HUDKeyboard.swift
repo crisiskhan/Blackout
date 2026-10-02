@@ -6,9 +6,10 @@ import Tokens
 @Observable
 final class HUDKeyboardGate {
     var activeID: String?
+    var fieldTitle: String = ""
     var submitTitle: String = "DONE"
     var state = HUDKeyboardState()
-    var onSubmit: (() -> Void)?
+    var onSubmit: (() -> Bool)?
     var onOpen: (() -> Void)?
     private var write: ((String) -> Void)?
 
@@ -16,15 +17,17 @@ final class HUDKeyboardGate {
 
     func open(
         id: String,
+        title: String,
         text: String,
         submit: String,
         locked: Bool,
         digits: Bool,
         write: @escaping (String) -> Void,
         onOpen: (() -> Void)?,
-        onSubmit: (() -> Void)?
+        onSubmit: (() -> Bool)?
     ) {
         activeID = id
+        fieldTitle = title
         submitTitle = submit
         self.write = write
         self.onOpen = onOpen
@@ -40,8 +43,9 @@ final class HUDKeyboardGate {
 
     func tap(_ key: HUDKeyboardState.Key) {
         if case .done = key {
-            onSubmit?()
-            close()
+            if onSubmit?() ?? true {
+                close()
+            }
             return
         }
         state.tap(key)
@@ -50,6 +54,7 @@ final class HUDKeyboardGate {
 
     func close() {
         activeID = nil
+        fieldTitle = ""
         write = nil
         onOpen = nil
         onSubmit = nil
@@ -71,8 +76,8 @@ struct HUDField: View {
     var pointSize: CGFloat = 14
     var weight: Font.Weight = .semibold
     var ink: Color = Theme.silver
+    var onSubmit: (() -> Bool)? = nil
     var onOpen: (() -> Void)? = nil
-    var onSubmit: (() -> Void)? = nil
     var reserveTrailing: CGFloat = 0
     @Environment(HUDKeyboardGate.self) private var keys
 
@@ -86,8 +91,8 @@ struct HUDField: View {
         pointSize: CGFloat = 14,
         weight: Font.Weight = .semibold,
         ink: Color = Theme.silver,
+        onSubmit: (() -> Bool)? = nil,
         onOpen: (() -> Void)? = nil,
-        onSubmit: (() -> Void)? = nil,
         reserveTrailing: CGFloat = 0
     ) {
         self.title = title
@@ -99,8 +104,8 @@ struct HUDField: View {
         self.pointSize = pointSize
         self.weight = weight
         self.ink = ink
-        self.onOpen = onOpen
         self.onSubmit = onSubmit
+        self.onOpen = onOpen
         self.reserveTrailing = reserveTrailing
     }
 
@@ -110,6 +115,7 @@ struct HUDField: View {
             withAnimation(Theme.Motion.heavy) {
                 keys.open(
                     id: id,
+                    title: title,
                     text: text,
                     submit: submit,
                     locked: locked,
@@ -124,8 +130,9 @@ struct HUDField: View {
                 Text(text.isEmpty ? title : text)
                     .font(.system(size: pointSize, weight: weight))
                     .foregroundStyle(text.isEmpty ? Theme.silver.opacity(0.45) : ink)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .lineLimit(2)
+                    .minimumScaleFactor(1)
+                    .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if live {
                     TimelineView(.animation(minimumInterval: 0.5, paused: false)) { context in
@@ -241,6 +248,7 @@ private struct HUDSearchMicArt: View {
 
 struct HUDKeyboard: View {
     @Bindable var keys: HUDKeyboardGate
+    var liftHome: Bool = false
 
     var body: some View {
         VStack(spacing: 6) {
@@ -255,6 +263,7 @@ struct HUDKeyboard: View {
         .padding(.horizontal, 8)
         .padding(.top, 10)
         .padding(.bottom, 8)
+        .safeAreaPadding(liftHome ? Edge.Set.bottom : [])
         .background(Theme.glass(opacity: 0.94))
         .overlay(alignment: .top) {
             Rectangle()
@@ -265,11 +274,12 @@ struct HUDKeyboard: View {
 
     private var readout: some View {
         HStack(spacing: 6) {
-            Text(keys.state.text.isEmpty ? " " : keys.state.text)
+            Text(keys.state.text.isEmpty ? keys.fieldTitle : keys.state.text)
                 .font(.system(size: 18, weight: .heavy))
-                .foregroundStyle(Color.white)
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
+                .foregroundStyle(keys.state.text.isEmpty ? Theme.silver.opacity(0.45) : Color.white)
+                .lineLimit(2)
+                .minimumScaleFactor(1)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
             TimelineView(.animation(minimumInterval: 0.5, paused: false)) { context in
                 Rectangle()
@@ -294,16 +304,13 @@ struct HUDKeyboard: View {
                 HStack(spacing: 4) {
                     if index == 2, !keys.state.locked {
                         Button("SHIFT") { keys.tap(.shift) }
-                            .buttonStyle(HUDKeyCapStyle(lit: keys.state.shift))
-                            .frame(minWidth: 52)
+                            .buttonStyle(HUDKeyCapStyle(lit: keys.state.shift, expand: false))
                     }
                     ForEach(row, id: \.self) { glyph in
                         cap(shown(glyph)) { keys.tap(.glyph(glyph)) }
                     }
                     if index == 2 {
-                        Button("BACK") { keys.tap(.back) }
-                            .buttonStyle(HUDKeyCapStyle())
-                            .frame(minWidth: 52)
+                        HUDRepeatKey("BACK") { keys.tap(.back) }
                     }
                 }
             }
@@ -329,27 +336,30 @@ struct HUDKeyboard: View {
         HStack(spacing: 6) {
             if keys.state.face == .letters {
                 Button("123") { keys.tap(.digits) }
-                    .buttonStyle(HUDKeyCapStyle())
-                    .frame(minWidth: 52)
+                    .buttonStyle(HUDKeyCapStyle(expand: false))
+                Button(HUDKeyboardLayout.apostrophe) {
+                    keys.tap(.glyph(HUDKeyboardLayout.apostrophe))
+                }
+                .buttonStyle(HUDKeyCapStyle(expand: false, minWidth: CGFloat(HUDKeyboardLayout.keyHeight)))
+                Button(HUDKeyboardLayout.hyphen) {
+                    keys.tap(.glyph(HUDKeyboardLayout.hyphen))
+                }
+                .buttonStyle(HUDKeyCapStyle(expand: false, minWidth: CGFloat(HUDKeyboardLayout.keyHeight)))
             } else {
                 Button("ABC") { keys.tap(.letters) }
-                    .buttonStyle(HUDKeyCapStyle())
-                    .frame(minWidth: 52)
-                Button(",") { keys.tap(.glyph(HUDKeyboardLayout.comma)) }
-                    .buttonStyle(HUDKeyCapStyle())
-                    .frame(minWidth: 52)
+                    .buttonStyle(HUDKeyCapStyle(expand: false))
+                Button(HUDKeyboardLayout.comma) { keys.tap(.glyph(HUDKeyboardLayout.comma)) }
+                    .buttonStyle(HUDKeyCapStyle(expand: false))
             }
             Button("SPACE") { keys.tap(.space) }
                 .buttonStyle(HUDKeyCapStyle())
                 .frame(maxWidth: .infinity)
             if keys.state.face == .digits {
-                Button("BACK") { keys.tap(.back) }
-                    .buttonStyle(HUDKeyCapStyle())
-                    .frame(minWidth: 52)
+                HUDRepeatKey("BACK") { keys.tap(.back) }
             }
             Button(keys.submitTitle) { keys.tap(.done) }
-                .buttonStyle(HUDKeyCapStyle(fill: Theme.accent))
-                .frame(minWidth: 72)
+                .buttonStyle(HUDKeyCapStyle(fill: Theme.accent, expand: false))
+                .frame(minWidth: CGFloat(HUDKeyboardLayout.submitKeyMinWidth))
         }
     }
 
@@ -364,25 +374,129 @@ struct HUDKeyboard: View {
     private func cap(
         _ title: String,
         lit: Bool = false,
-        wide: Bool = false,
         action: @escaping () -> Void
     ) -> some View {
         Button(title, action: action)
             .buttonStyle(HUDKeyCapStyle(lit: lit))
-            .frame(minWidth: wide ? 52 : 0)
+    }
+}
+
+struct HUDRepeatKey: View {
+    let title: String
+    var lit: Bool = false
+    var fill: Color? = nil
+    var expand: Bool = false
+    var minWidth: CGFloat = CGFloat(HUDKeyboardLayout.wordKeyMinWidth)
+    let action: () -> Void
+    @State private var held = false
+    @State private var holdTask: Task<Void, Never>?
+
+    init(
+        _ title: String,
+        lit: Bool = false,
+        fill: Color? = nil,
+        expand: Bool = false,
+        minWidth: CGFloat = CGFloat(HUDKeyboardLayout.wordKeyMinWidth),
+        action: @escaping () -> Void
+    ) {
+        self.title = title
+        self.lit = lit
+        self.fill = fill
+        self.expand = expand
+        self.minWidth = minWidth
+        self.action = action
+    }
+
+    var body: some View {
+        let hit = CGFloat(HUDKeyboardLayout.keyHeight)
+        Text(title)
+            .font(.system(size: 15, weight: .heavy))
+            .foregroundStyle(fill == nil ? Theme.silver : Color.white)
+            .lineLimit(1)
+            .minimumScaleFactor(1)
+            .padding(.horizontal, expand ? 2 : 8)
+            .frame(
+                minWidth: expand ? 0 : minWidth,
+                maxWidth: expand ? .infinity : nil,
+                minHeight: hit
+            )
+            .background {
+                if let fill {
+                    fill.opacity(held ? 0.72 : 1)
+                } else {
+                    Theme.glass(opacity: held || lit ? 0.5 : 0.92)
+                }
+            }
+            .clipShape(Theme.plateRect())
+            .overlay {
+                if lit || fill != nil {
+                    Theme.plateRect()
+                        .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1))
+                } else {
+                    Theme.plateRect()
+                        .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
+                }
+            }
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        guard !held else { return }
+                        held = true
+                        action()
+                        startRepeat()
+                    }
+                    .onEnded { _ in
+                        held = false
+                        stopRepeat()
+                    }
+            )
+            .accessibilityAddTraits(.isButton)
+            .accessibilityLabel(title)
+            .accessibilityAction { action() }
+            .onDisappear {
+                held = false
+                stopRepeat()
+            }
+    }
+
+    private func startRepeat() {
+        stopRepeat()
+        holdTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(350))
+            while !Task.isCancelled {
+                action()
+                try? await Task.sleep(for: .milliseconds(70))
+            }
+        }
+    }
+
+    private func stopRepeat() {
+        holdTask?.cancel()
+        holdTask = nil
     }
 }
 
 struct HUDKeyCapStyle: ButtonStyle {
     var lit: Bool = false
     var fill: Color? = nil
+    var expand: Bool = true
+    var minWidth: CGFloat? = nil
 
     func makeBody(configuration: Configuration) -> some View {
         let hit = CGFloat(HUDKeyboardLayout.keyHeight)
+        let floor = expand ? 0 : (minWidth ?? CGFloat(HUDKeyboardLayout.wordKeyMinWidth))
         return configuration.label
             .font(.system(size: 15, weight: .heavy))
             .foregroundStyle(fill == nil ? Theme.silver : Color.white)
-            .frame(maxWidth: .infinity, minHeight: hit)
+            .lineLimit(1)
+            .minimumScaleFactor(1)
+            .padding(.horizontal, expand ? 2 : 8)
+            .frame(
+                minWidth: floor,
+                maxWidth: expand ? .infinity : nil,
+                minHeight: hit
+            )
             .background {
                 if let fill {
                     fill.opacity(configuration.isPressed ? 0.72 : 1)

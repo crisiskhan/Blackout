@@ -170,6 +170,10 @@ final class TokensTests: XCTestCase {
     func testHUDKeyboardTypesCoordinatesAndLock() {
         XCTAssertEqual(HUDKeyboardLayout.keyHeight, 44)
         XCTAssertEqual(HUDKeyboardLayout.comma, ",")
+        XCTAssertEqual(HUDKeyboardLayout.apostrophe, "'")
+        XCTAssertEqual(HUDKeyboardLayout.hyphen, "-")
+        XCTAssertEqual(HUDKeyboardLayout.wordKeyMinWidth, 72)
+        XCTAssertEqual(HUDKeyboardLayout.submitKeyMinWidth, 88)
         XCTAssertEqual(HUDKeyboardLayout.digitRows.last, ["-", "0", "."])
         var state = HUDKeyboardState()
         for ch in ["3", "1", ".", "7", ",", " "] {
@@ -198,5 +202,10 @@ final class TokensTests: XCTestCase {
         mixed.tap(.glyph("a"))
         XCTAssertEqual(mixed.text, "Mo A")
         XCTAssertFalse(mixed.shift)
+        var name = HUDKeyboardState(shift: true, locked: true)
+        for ch in ["O", "'", "B", "R", "I", "E", "N"] {
+            name.tap(.glyph(ch))
+        }
+        XCTAssertEqual(name.text, "O'BRIEN")
     }
 }

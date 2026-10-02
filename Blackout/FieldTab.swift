@@ -601,12 +601,13 @@ struct FieldTab: View {
     /// out — that is a menu, not an answer. Unknown words open a live ASK
     /// walk on the same stepper. SEARCH while ASK is building cancels that
     /// walk, then starts again.
-    private func openAnswer() {
+    @discardableResult
+    private func openAnswer() -> Bool {
         if runtime.field.askBusy {
             runtime.cancelFieldAsk()
-            if !FieldCorpus.asking(catalogQuery) { return }
+            if !FieldCorpus.asking(catalogQuery) { return false }
         }
-        guard FieldCorpus.asking(catalogQuery) else { return }
+        guard FieldCorpus.asking(catalogQuery) else { return false }
         if let first = listCards.first {
             runtime.field.sayFailed = false
             runtime.field.askFailed = false
@@ -614,7 +615,7 @@ struct FieldTab: View {
             let chapter = FieldCorpus.chapter(cards, pack: runtime.packs?.active?.id)
             let walk = FieldCorpus.askWalk(first: first, chapter: chapter)
             openRoute(walk, speakFirst: true)
-            return
+            return true
         }
         runtime.beginFieldAsk(
             query: catalogQuery,
@@ -623,6 +624,7 @@ struct FieldTab: View {
             packName: runtime.packs?.active?.name ?? "pack",
             packId: runtime.packs?.active?.id
         )
+        return true
     }
 
     /// The map's hold card named the cards that answer the ground it held,

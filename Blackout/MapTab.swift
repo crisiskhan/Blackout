@@ -304,11 +304,12 @@ struct MapTab: View {
                         id: "map.search",
                         submit: "DONE",
                         pointSize: 16,
-                        onOpen: { runtime.touch(.search) },
                         onSubmit: {
                             runtime.touch(.search)
                             search()
+                            return true
                         },
+                        onOpen: { runtime.touch(.search) },
                         reserveTrailing: BlackoutTokens.Chrome.mapChipHitPoints
                     )
                     HUDSearchMic(listening: saying, action: say)

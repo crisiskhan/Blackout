@@ -272,10 +272,10 @@ struct RootChrome: View {
                 .onTapGesture {
                     withAnimation(Theme.Motion.heavy) { runtime.hudKeys.close() }
                 }
-            HUDKeyboard(keys: runtime.hudKeys)
+            HUDKeyboard(keys: runtime.hudKeys, liftHome: runtime.leftHand)
                 .padding(
                     .bottom,
-                    runtime.leftHand ? 8 : CGFloat(BlackoutTokens.Chrome.hudTabReservePoints)
+                    runtime.leftHand ? 0 : CGFloat(BlackoutTokens.Chrome.hudTabReservePoints)
                 )
         }
         .transition(.opacity)
