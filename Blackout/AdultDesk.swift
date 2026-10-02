@@ -50,10 +50,31 @@ enum AdultDesk {
         ("couple", "COUPLE"),
         ("orgy", "ORGY"),
         ("gangbang", "ORGY"),
+        ("threesome", "ORGY"),
+        ("fff", "ORGY"),
+        ("ffm", "ORGY"),
+        ("group sex", "ORGY"),
         ("roleplay", "ROLEPLAY"),
         ("role-play", "ROLEPLAY"),
         ("role play", "ROLEPLAY"),
+        ("roleplaying", "ROLEPLAY"),
+        ("cosplay", "ROLEPLAY"),
+        ("bdsm", "BDSM"),
+        ("fetish", "FETISH"),
+        ("bondage", "BDSM"),
+        ("femdom", "BDSM"),
+        ("oral", "ORAL"),
+        ("blowjob", "ORAL"),
+        ("deepthroat", "ORAL"),
+        ("cuckold", "CUCKOLD"),
+        ("shower", "SHOWER"),
+        ("feet", "FEET"),
+        ("smoking", "SMOKE"),
+        ("lovense", "TOYS"),
+        ("dildo", "TOYS"),
+        ("masturbat", "SOLO"),
     ]
+    static let pin = ["COUPLE", "ORGY", "ROLEPLAY"]
 
     struct Room: Identifiable, Equatable, Sendable {
         var id: String
@@ -63,6 +84,7 @@ enum AdultDesk {
         var viewers: Int
         var image: String
         var kinds: [String]
+        var seek: String
     }
 
     static func directory(tag: String, offset: Int = 0) -> String {
@@ -135,7 +157,7 @@ enum AdultDesk {
                 return false
             }
             if !needle.isEmpty {
-                let blob = ([room.name, room.handle] + room.kinds).joined(separator: " ").lowercased()
+                let blob = ([room.name, room.handle, room.seek] + room.kinds).joined(separator: " ").lowercased()
                 if !blob.contains(needle) { return false }
             }
             return true
@@ -144,15 +166,14 @@ enum AdultDesk {
 
     static func kinds(_ rooms: [Room]) -> [String] {
         var seen: Set<String> = []
-        var out: [String] = []
         for room in rooms {
             for kind in room.kinds {
-                if seen.insert(kind).inserted {
-                    out.append(kind)
-                }
+                seen.insert(kind)
             }
         }
-        return out.sorted()
+        let pinned = pin.filter { seen.contains($0) }
+        let rest = seen.subtracting(pin).sorted()
+        return pinned + rest
     }
 
     static func woman(_ model: [String: Any]) -> Bool {
@@ -237,11 +258,18 @@ enum AdultDesk {
                     url: "",
                     viewers: viewers(model),
                     image: image(model),
-                    kinds: roomKinds(model)
+                    kinds: roomKinds(model),
+                    seek: seek(model)
                 )
             )
         }
         return rows
+    }
+
+    private static func seek(_ model: [String: Any]) -> String {
+        (tags(model) + " " + string(model["room_subject"]))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
     }
 
     private static func image(_ model: [String: Any]) -> String {

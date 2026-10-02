@@ -602,7 +602,7 @@ final class UpdateSocket {
     }
 
     /// Raw JPEG, or TxDOT JSON `{snippet: base64 jpeg}`. Nothing else.
-    static func stillJPEG(_ data: Data) -> Data? {
+    nonisolated static func stillJPEG(_ data: Data) -> Data? {
         if data.count >= 3, data[0] == 0xFF, data[1] == 0xD8 {
             return data
         }

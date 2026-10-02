@@ -150,10 +150,31 @@ ADULT_KIND_WORDS = (
     ("couple", "COUPLE"),
     ("orgy", "ORGY"),
     ("gangbang", "ORGY"),
+    ("threesome", "ORGY"),
+    ("fff", "ORGY"),
+    ("ffm", "ORGY"),
+    ("group sex", "ORGY"),
     ("roleplay", "ROLEPLAY"),
     ("role-play", "ROLEPLAY"),
     ("role play", "ROLEPLAY"),
+    ("roleplaying", "ROLEPLAY"),
+    ("cosplay", "ROLEPLAY"),
+    ("bdsm", "BDSM"),
+    ("fetish", "FETISH"),
+    ("bondage", "BDSM"),
+    ("femdom", "BDSM"),
+    ("oral", "ORAL"),
+    ("blowjob", "ORAL"),
+    ("deepthroat", "ORAL"),
+    ("cuckold", "CUCKOLD"),
+    ("shower", "SHOWER"),
+    ("feet", "FEET"),
+    ("smoking", "SMOKE"),
+    ("lovense", "TOYS"),
+    ("dildo", "TOYS"),
+    ("masturbat", "SOLO"),
 )
+ADULT_PIN = ("COUPLE", "ORGY", "ROLEPLAY")
 ADULT_MALE = {
     "m",
     "male",
@@ -270,6 +291,17 @@ def adult_room_kinds(model: object) -> list[str]:
     return found
 
 
+def adult_seek(model: object) -> str:
+    if not isinstance(model, dict):
+        return ""
+    tags = model.get("tags") or []
+    if isinstance(tags, list):
+        tag_blob = " ".join(str(tag) for tag in tags)
+    else:
+        tag_blob = str(tags)
+    return f"{tag_blob} {model.get('room_subject') or ''}".strip().lower()
+
+
 def adult_kinds(rooms: list[dict]) -> list[str]:
     seen: set[str] = set()
     for room in rooms:
@@ -277,7 +309,9 @@ def adult_kinds(rooms: list[dict]) -> list[str]:
             chip = str(kind).strip().upper()
             if chip:
                 seen.add(chip)
-    return sorted(seen)
+    pinned = [chip for chip in ADULT_PIN if chip in seen]
+    rest = sorted(seen.difference(ADULT_PIN))
+    return pinned + rest
 
 
 def adult_pick(rooms: list[dict], kind: str = "", query: str = "") -> list[dict]:
@@ -293,6 +327,7 @@ def adult_pick(rooms: list[dict], kind: str = "", query: str = "") -> list[dict]
                 [
                     str(room.get("name") or ""),
                     str(room.get("handle") or ""),
+                    str(room.get("seek") or ""),
                     " ".join(kinds),
                 ]
             ).lower()
@@ -367,6 +402,7 @@ def adult_rooms(payload: object) -> list[dict]:
                 "viewers": count,
                 "image": adult_image(model),
                 "kinds": adult_room_kinds(model),
+                "seek": adult_seek(model),
             }
         )
     rooms.sort(key=lambda row: (-int(row["viewers"]), str(row["name"])))
@@ -829,10 +865,23 @@ class AdultDeskTests(unittest.TestCase):
                     "tags": ["shemale"],
                     "room_subject": "live",
                 },
+                {
+                    "username": "rho",
+                    "display_name": "rho",
+                    "age": 26,
+                    "gender": "f",
+                    "current_show": "public",
+                    "num_users": 50,
+                    "tags": ["oil", "bdsm", "threesome", "cosplay"],
+                    "room_subject": "nurse fetish",
+                },
             ]
         }
         got = adult_rooms(payload)
-        self.assertEqual([row["id"] for row in got], ["adult-sigma", "adult-alpha", "adult-echo"])
+        self.assertEqual(
+            [row["id"] for row in got],
+            ["adult-sigma", "adult-alpha", "adult-echo", "adult-rho"],
+        )
         self.assertEqual(got[0]["name"], "SIGMA")
         self.assertEqual(got[0]["handle"], "sigma")
         self.assertEqual(got[0]["kinds"], ["COUPLE", "LESBIAN", "ORGY", "ROLEPLAY"])
@@ -844,6 +893,9 @@ class AdultDeskTests(unittest.TestCase):
         self.assertEqual(got[2]["handle"], "echo")
         self.assertEqual(got[2]["image"], "")
         self.assertEqual(got[2]["kinds"], [])
+        self.assertEqual(got[3]["handle"], "rho")
+        self.assertEqual(got[3]["seek"], "oil bdsm threesome cosplay nurse fetish")
+        self.assertEqual(got[3]["kinds"], ["ORGY", "ROLEPLAY", "BDSM", "FETISH"])
         self.assertTrue(adult_woman({"gender": "f"}))
         self.assertTrue(adult_woman({}))
         self.assertTrue(adult_woman({"gender": "c"}))
@@ -870,7 +922,16 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIsNone(adult_still("https://edge.example/live.m3u8"))
         self.assertEqual(
             adult_kinds(got),
-            ["BLONDE", "COUPLE", "DANCE", "LESBIAN", "ORGY", "ROLEPLAY"],
+            [
+                "COUPLE",
+                "ORGY",
+                "ROLEPLAY",
+                "BDSM",
+                "BLONDE",
+                "DANCE",
+                "FETISH",
+                "LESBIAN",
+            ],
         )
         self.assertEqual(
             [row["id"] for row in adult_pick(got, kind="DANCE")],
@@ -882,15 +943,27 @@ class AdultDeskTests(unittest.TestCase):
         )
         self.assertEqual(
             [row["id"] for row in adult_pick(got, kind="ORGY")],
-            ["adult-sigma"],
+            ["adult-sigma", "adult-rho"],
         )
         self.assertEqual(
             [row["id"] for row in adult_pick(got, query="echo")],
             ["adult-echo"],
         )
         self.assertEqual(
+            [row["id"] for row in adult_pick(got, query="oil")],
+            ["adult-rho"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(got, query="nurse")],
+            ["adult-rho"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(got, kind="BDSM")],
+            ["adult-rho"],
+        )
+        self.assertEqual(
             [row["id"] for row in adult_pick(got, kind="ALL")],
-            ["adult-sigma", "adult-alpha", "adult-echo"],
+            ["adult-sigma", "adult-alpha", "adult-echo", "adult-rho"],
         )
         self.assertTrue(adult_allows("alpha"))
         self.assertFalse(adult_allows("teenstar"))
@@ -943,10 +1016,17 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("COUPLE", desk)
         self.assertIn("ORGY", desk)
         self.assertIn("ROLEPLAY", desk)
+        self.assertIn("BDSM", desk)
+        self.assertIn("threesome", desk)
+        self.assertIn("cosplay", desk)
+        self.assertIn('static let pin = ["COUPLE", "ORGY", "ROLEPLAY"]', desk)
+        self.assertIn("var seek:", desk)
+        self.assertIn("room.seek", desk)
         self.assertIn("static func still(", desk)
         self.assertIn("static func pick(", desk)
         self.assertIn("static func kinds(", desk)
         self.assertIn("static func woman(", desk)
+        self.assertIn("nonisolated static func stillJPEG", sock)
         self.assertIn("image_url_360p", desk)
         self.assertIn("image_url", desk)
         self.assertIn("var image:", desk)
@@ -1177,6 +1257,7 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("couple", tv.lower())
         self.assertIn("orgies", tv.lower())
         self.assertIn("role play", tv.lower())
+        self.assertIn("everything else", tv.lower())
         self.assertIn("no trans", tv.lower())
         self.assertIn("eight at a time", tv)
         self.assertIn("SEARCH", tv)
