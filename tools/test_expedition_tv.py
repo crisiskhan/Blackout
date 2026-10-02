@@ -239,6 +239,9 @@ ADULT_FACES = (
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_LOVE_ORIGIN = "https://lovescape.cam"
 ADULT_LOVE_TAGS = ("girls", "couples")
+ADULT_RAIL_EXTRA = 8
+ADULT_HUNT_AT_ONCE = 4
+ADULT_COUNT_CAP = 1_000_000_000
 ADULT_TOPIC = {
     "BRAIDS": ("braids", "braid", "cornrows"),
     "SLEEP": ("sleeping", "sleep", "somno"),
@@ -635,19 +638,50 @@ def adult_directory(tag: str, offset: int = 0, topic: str = "") -> str:
     return url
 
 
+def adult_count(value: object) -> int:
+    if isinstance(value, bool):
+        return 0
+    if isinstance(value, int):
+        if value < 0 or value > ADULT_COUNT_CAP:
+            return 0
+        return value
+    if isinstance(value, float):
+        if not math.isfinite(value) or value < 0 or value > ADULT_COUNT_CAP:
+            return 0
+        return int(value)
+    text = str(value or "").strip()
+    if not text:
+        return 0
+    try:
+        return adult_count(int(text))
+    except ValueError:
+        try:
+            return adult_count(float(text))
+        except ValueError:
+            return 0
+
+
 def adult_rail(rooms: list[dict]) -> list[str]:
     out: list[str] = []
     seen: set[str] = set()
-    chips = (
+    always = (
         ["ALL", ADULT_LOVE_CHIP]
         + [name for name, _ in ADULT_FACES]
         + list(ADULT_PIN)
-        + adult_kinds(rooms)
     )
-    for chip in chips:
+    for chip in always:
         if chip not in seen:
             seen.add(chip)
             out.append(chip)
+    extra = 0
+    for chip in adult_kinds(rooms):
+        if chip in seen:
+            continue
+        seen.add(chip)
+        out.append(chip)
+        extra += 1
+        if extra >= ADULT_RAIL_EXTRA:
+            break
     return out
 
 
@@ -833,16 +867,10 @@ def _adult_face_clip(model: dict, needles: list[str]) -> dict | None:
     default = model.get("default_thumb")
     if isinstance(default, dict):
         thumb = adult_still(str(default.get("src") or "")) or ""
-    try:
-        seconds = int(model.get("length_sec") or 0)
-    except (TypeError, ValueError):
-        seconds = 0
+    seconds = adult_count(model.get("length_sec"))
     if seconds <= 0:
         return None
-    try:
-        views = int(model.get("views") or 0)
-    except (TypeError, ValueError):
-        views = 0
+    views = adult_count(model.get("views"))
     return {
         "id": f"adult-face-{token.lower()}",
         "name": title.upper(),
@@ -872,16 +900,10 @@ def _adult_star_clip(model: dict, needles: list[str]) -> dict | None:
         return None
     if not _adult_face_hit(f"{title} {creator} {slug}", needles):
         return None
-    try:
-        seconds = int(model.get("durationSeconds") or 0)
-    except (TypeError, ValueError):
-        seconds = 0
+    seconds = adult_count(model.get("durationSeconds"))
     if seconds <= 0:
         return None
-    try:
-        views = int(model.get("views") or 0)
-    except (TypeError, ValueError):
-        views = 0
+    views = adult_count(model.get("views"))
     return {
         "id": f"adult-face-star-{slug.lower()}",
         "name": title.upper(),
@@ -1644,7 +1666,7 @@ class AdultDeskTests(unittest.TestCase):
         )
         self.assertEqual(adult_pick(extra, kind="ITSSTEPHHONEY21", query="mulan"), [])
         self.assertEqual(
-            adult_rail([])[:14],
+            adult_rail([]),
             [
                 "ALL",
                 "LOVESCAPE",
@@ -1662,6 +1684,24 @@ class AdultDeskTests(unittest.TestCase):
                 "FAVORS",
             ],
         )
+        fat_kinds = [f"KIND{index:02d}" for index in range(40)]
+        fat = [
+            {
+                "id": "adult-fat",
+                "name": "FAT",
+                "handle": "fat",
+                "url": "",
+                "viewers": 1,
+                "kinds": fat_kinds,
+                "seek": "",
+                "seconds": 0,
+            }
+        ]
+        rail = adult_rail(fat)
+        self.assertEqual(rail[:14], adult_rail([]))
+        self.assertLessEqual(len(rail), 22)
+        self.assertTrue(any(chip.startswith("KIND") for chip in rail))
+        self.assertLess(len(rail), 14 + len(fat_kinds))
         love = adult_parse_love(
             {
                 "models": [
@@ -1774,6 +1814,24 @@ class AdultDeskTests(unittest.TestCase):
                 ),
             ),
             "https://media.example/1_480p.m3u8?playlistType=standard&psch=v2&pkey=Ook7quaiNgiyuhai",
+        )
+        self.assertEqual(adult_count(712.0), 712)
+        self.assertEqual(adult_count(1e20), 0)
+        self.assertEqual(adult_count(float("nan")), 0)
+        self.assertEqual(adult_count(float("inf")), 0)
+        self.assertEqual(adult_count(-4), 0)
+        self.assertIsNone(
+            _adult_star_clip(
+                {
+                    "slug": "overflow-clip",
+                    "title": "Mulan Vuitton overflow",
+                    "creator": "mulanvuitton",
+                    "durationSeconds": 1e20,
+                    "views": 12,
+                    "thumbnailUrl": "https://cdn.example/x.webp",
+                },
+                ["mulanvuitton"],
+            )
         )
         self.assertEqual(adult_topics("BRAIDS"), ["braids", "braid", "cornrows"])
         self.assertEqual(adult_topics("ITSSTEPHHONEY21"), [])
@@ -2015,6 +2073,13 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("eporner.com", desk.lower())
         self.assertIn(".mp4", desk)
         self.assertIn("static func rail(", desk)
+        self.assertIn("static let railExtra", desk)
+        self.assertIn("static let huntAtOnce", desk)
+        self.assertIn("n.isFinite", desk)
+        self.assertIn("fetchFacePages", sock)
+        self.assertIn("huntAtOnce", sock)
+        self.assertIn("inflight", sock)
+        self.assertNotIn("CGImageSourceCreateImageAtIndex", sock)
         self.assertIn("&tag=", desk)
         self.assertIn("var seek:", desk)
         self.assertIn("room.seek", desk)
@@ -2292,6 +2357,7 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("MULAN VUITTON", tv)
         self.assertIn("LOVESCAPE", tv)
         self.assertIn("lovescape.cam", tv.lower())
+        self.assertIn("cannot jet", tv)
         self.assertIn("FAVORS", tv)
         self.assertIn("still", tv.lower())
         self.assertNotIn("insecam", tv.lower())

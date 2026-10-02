@@ -135,6 +135,8 @@ enum AdultDesk {
     static let loveChip = "LOVESCAPE"
     static let loveOrigin = "https://lovescape.cam"
     static let loveTags = ["girls", "couples"]
+    static let railExtra = 8
+    static let huntAtOnce = 4
     static let loveAgent =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
@@ -433,9 +435,12 @@ enum AdultDesk {
     }
 
     private static func number(_ value: Any?) -> Int {
-        if let n = value as? Int { return n }
-        if let n = value as? Double { return Int(n) }
-        if let n = Int(string(value)) { return n }
+        if let n = value as? Int { return n < 0 ? 0 : n }
+        if let n = value as? Double {
+            guard n.isFinite, n >= 0, n <= 1_000_000_000 else { return 0 }
+            return Int(n)
+        }
+        if let n = Int(string(value)), n >= 0 { return n }
         return 0
     }
 
@@ -656,10 +661,17 @@ enum AdultDesk {
     static func rail(_ rooms: [Room]) -> [String] {
         var out: [String] = []
         var seen: Set<String> = []
-        for chip in ["ALL", loveChip] + faces.map(\.0) + pin + kinds(rooms) {
+        for chip in ["ALL", loveChip] + faces.map(\.0) + pin {
             if seen.insert(chip).inserted {
                 out.append(chip)
             }
+        }
+        var extra = 0
+        for chip in kinds(rooms) {
+            guard seen.insert(chip).inserted else { continue }
+            out.append(chip)
+            extra += 1
+            if extra >= railExtra { break }
         }
         return out
     }
@@ -904,25 +916,20 @@ enum AdultDesk {
     }
 
     private static func age(_ model: [String: Any]) -> Int? {
+        guard model["age"] != nil else { return nil }
         if let n = model["age"] as? Int { return n }
-        if let n = model["age"] as? Double { return Int(n) }
+        if let n = model["age"] as? Double {
+            guard n.isFinite, n >= 0, n <= 1_000_000_000 else { return nil }
+            return Int(n)
+        }
         if let n = Int(string(model["age"])) { return n }
         return nil
     }
 
     private static func viewers(_ model: [String: Any]) -> Int {
-        if let n = model["num_users"] as? Int { return n }
-        if let n = model["num_viewers"] as? Int { return n }
-        if let n = model["viewersCount"] as? Int { return n }
-        if let n = model["viewers"] as? Int { return n }
-        if let n = model["num_users"] as? Double { return Int(n) }
-        if let n = model["num_viewers"] as? Double { return Int(n) }
-        if let n = model["viewersCount"] as? Double { return Int(n) }
-        if let n = model["viewers"] as? Double { return Int(n) }
-        if let n = Int(string(model["num_users"])) { return n }
-        if let n = Int(string(model["num_viewers"])) { return n }
-        if let n = Int(string(model["viewersCount"])) { return n }
-        if let n = Int(string(model["viewers"])) { return n }
+        for key in ["num_users", "num_viewers", "viewersCount", "viewers"] {
+            if model[key] != nil { return number(model[key]) }
+        }
         return 0
     }
 
