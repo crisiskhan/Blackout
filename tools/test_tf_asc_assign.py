@@ -184,6 +184,12 @@ class TestAssignInternalRetries404(unittest.TestCase):
         self.assertEqual(rc, 1)
 
 
+class TestAssignWait(unittest.TestCase):
+    def test_waits_forty_five_minutes_for_list(self) -> None:
+        """36924273852: uploaded CPV 174 never listed in 25 min."""
+        self.assertEqual(assign.ASSIGN_WAIT_SEC, 45 * 60)
+
+
 def main() -> None:
     suite = unittest.defaultTestLoader.loadTestsFromModule(sys.modules[__name__])
     result = unittest.TextTestRunner(verbosity=2).run(suite)

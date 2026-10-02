@@ -1,5 +1,7 @@
+import CoreGraphics
 import CryptoKit
 import Foundation
+import ImageIO
 import MapLibreMap
 import Network
 import Observation
@@ -15,7 +17,11 @@ final class UpdateSocket {
     var offLabels: [String] = SnapKind.allCases.map(\.offTitle)
     var lastManifest: SnapManifest?
     var adultRooms: [AdultDesk.Room] = []
+    var adultReady = false
     private var adultBusy = false
+    private var adultStillBusy = false
+    private var adultStillQueued: [NaLive.Row] = []
+    private var adultPlay: [String: String] = [:]
 
     private let monitor = NWPathMonitor()
     private let monitorQueue = DispatchQueue(label: "blackout.update.path")
@@ -127,8 +133,68 @@ final class UpdateSocket {
         Task { await loadAdult() }
     }
 
+    func pullAdultStills(_ rows: [NaLive.Row]) {
+        guard pipe else { return }
+        if adultStillBusy {
+            adultStillQueued = rows
+            return
+        }
+        let folder = SnapManifest.folder()
+        let jobs = rows.compactMap { row -> (String, String)? in
+            let dest = folder.appendingPathComponent("cam-\(row.id).jpg")
+            if FileManager.default.fileExists(atPath: dest.path) { return nil }
+            guard let image = AdultDesk.still(row.image) else { return nil }
+            return (row.id, image)
+        }
+        guard !jobs.isEmpty else { return }
+        adultStillBusy = true
+        Task { await loadAdultStills(jobs) }
+    }
+
+    private func loadAdultStills(_ jobs: [(String, String)]) async {
+        defer {
+            adultStillBusy = false
+            let queued = adultStillQueued
+            adultStillQueued = []
+            if !queued.isEmpty {
+                pullAdultStills(queued)
+            }
+        }
+        guard pipe else { return }
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = 8
+        config.timeoutIntervalForResource = 16
+        config.waitsForConnectivity = false
+        config.allowsExpensiveNetworkAccess = true
+        config.allowsConstrainedNetworkAccess = true
+        config.tlsMinimumSupportedProtocolVersion = .TLSv12
+        let session = URLSession(configuration: config)
+        var wrote = false
+        await withTaskGroup(of: (String, Data)?.self) { group in
+            for job in jobs {
+                group.addTask {
+                    guard let data = await UpdateSocket.fetchAdult(session, job.1) else { return nil }
+                    guard let jpeg = UpdateSocket.stillPreview(data), jpeg.count > 32 else { return nil }
+                    return (job.0, jpeg)
+                }
+            }
+            for await hit in group {
+                guard let hit else { continue }
+                write("cam-\(hit.0).jpg", hit.1)
+                wrote = true
+            }
+        }
+        session.invalidateAndCancel()
+        if wrote {
+            updatedAt = Date()
+        }
+    }
+
     private func loadAdult() async {
-        defer { adultBusy = false }
+        defer {
+            adultBusy = false
+            adultReady = true
+        }
         guard pipe else { return }
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 8
@@ -138,17 +204,39 @@ final class UpdateSocket {
         config.allowsConstrainedNetworkAccess = true
         config.tlsMinimumSupportedProtocolVersion = .TLSv12
         let session = URLSession(configuration: config)
+        var batches = await fetchAdultPages(session, from: 0, count: 1)
+        adultRooms = AdultDesk.merge(batches)
+        if AdultDesk.pages > 1 {
+            let rest = await fetchAdultPages(session, from: 1, count: AdultDesk.pages - 1)
+            if !rest.isEmpty {
+                batches.append(contentsOf: rest)
+                adultRooms = AdultDesk.merge(batches)
+            }
+        }
+        session.invalidateAndCancel()
+        adultPlay = adultPlay.filter { key, _ in adultRooms.contains { $0.id == key } }
+    }
+
+    private func fetchAdultPages(
+        _ session: URLSession,
+        from start: Int,
+        count: Int
+    ) async -> [[AdultDesk.Room]] {
+        let first = max(0, start)
+        let last = first + max(0, count)
         var batches: [[AdultDesk.Room]] = []
         await withTaskGroup(of: [AdultDesk.Room].self) { group in
             for tag in AdultDesk.tags {
-                for page in 0..<AdultDesk.pages {
+                for page in first..<last {
                     group.addTask {
                         let offset = page * AdultDesk.pageSize
                         guard let data = await UpdateSocket.fetchAdult(
                             session,
                             AdultDesk.directory(tag: tag, offset: offset)
                         ) else { return [] }
-                        return AdultDesk.parse(data)
+                        return await Task.detached(priority: .utility) {
+                            AdultDesk.parse(data)
+                        }.value
                     }
                 }
             }
@@ -156,8 +244,39 @@ final class UpdateSocket {
                 if !batch.isEmpty { batches.append(batch) }
             }
         }
+        return batches
+    }
+
+    func liveAdult(_ row: NaLive.Row) async -> String? {
+        if let cached = adultPlay[row.id], AdultDesk.playlist(cached) != nil {
+            return cached
+        }
+        if let ready = AdultDesk.playlist(row.url) {
+            adultPlay[row.id] = ready
+            return ready
+        }
+        guard pipe else { return nil }
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = 8
+        config.timeoutIntervalForResource = 12
+        config.waitsForConnectivity = false
+        config.allowsExpensiveNetworkAccess = true
+        config.allowsConstrainedNetworkAccess = true
+        config.tlsMinimumSupportedProtocolVersion = .TLSv12
+        let session = URLSession(configuration: config)
+        var url: String?
+        if let path = AdultDesk.context(row.handle),
+           let data = await Self.fetchAdult(session, path) {
+            url = AdultDesk.stream(data)
+        }
+        if url == nil, let edge = AdultDesk.edge(row.handle),
+           let data = await Self.fetchAdultPost(session, edge.path, body: edge.body) {
+            url = AdultDesk.stream(data)
+        }
         session.invalidateAndCancel()
-        adultRooms = AdultDesk.merge(batches)
+        guard let url else { return nil }
+        adultPlay[row.id] = url
+        return url
     }
 
     func applyHopStills(_ hopStills: [(id: String, jpeg: Data)]) {
@@ -392,6 +511,27 @@ final class UpdateSocket {
     }
 
     nonisolated static func fetchAdult(_ session: URLSession, _ raw: String) async -> Data? {
+        await adultGet(session, raw)
+    }
+
+    nonisolated static func fetchAdultPost(_ session: URLSession, _ raw: String, body: String) async -> Data? {
+        await adultPost(session, raw, body: body)
+    }
+
+    nonisolated private static func adultGet(_ session: URLSession, _ raw: String) async -> Data? {
+        guard let request = adultRequest(raw) else { return nil }
+        return await adultData(session, request)
+    }
+
+    nonisolated private static func adultPost(_ session: URLSession, _ raw: String, body: String) async -> Data? {
+        guard var request = adultRequest(raw) else { return nil }
+        request.httpMethod = "POST"
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        request.httpBody = body.data(using: .utf8)
+        return await adultData(session, request)
+    }
+
+    nonisolated private static func adultRequest(_ raw: String) -> URLRequest? {
         guard let url = URL(string: raw), url.scheme?.lowercased() == "https" else { return nil }
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
@@ -399,6 +539,11 @@ final class UpdateSocket {
         request.setValue(AdultDesk.agent, forHTTPHeaderField: "User-Agent")
         request.setValue(AdultDesk.origin, forHTTPHeaderField: "Referer")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("XMLHttpRequest", forHTTPHeaderField: "X-Requested-With")
+        return request
+    }
+
+    nonisolated private static func adultData(_ session: URLSession, _ request: URLRequest) async -> Data? {
         do {
             let (data, response) = try await session.data(for: request)
             guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
@@ -461,8 +606,34 @@ final class UpdateSocket {
         return rows.filter { !$0.id.isEmpty && $0.url.hasPrefix("https://") }
     }
 
+    /// Adult well still. JPEG only, down to a 640px edge so TV does not jet.
+    nonisolated static func stillPreview(_ data: Data, maxEdge: Int = 640) -> Data? {
+        guard let jpeg = stillJPEG(data), jpeg.count > 32 else { return nil }
+        guard let src = CGImageSourceCreateWithData(jpeg as CFData, nil) else { return jpeg }
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: max(64, maxEdge),
+        ]
+        guard let cg = CGImageSourceCreateThumbnailAtIndex(src, 0, options as CFDictionary) else {
+            return jpeg
+        }
+        let out = NSMutableData()
+        guard let dest = CGImageDestinationCreateWithData(out, "public.jpeg" as CFString, 1, nil) else {
+            return jpeg
+        }
+        CGImageDestinationAddImage(
+            dest,
+            cg,
+            [kCGImageDestinationLossyCompressionQuality: 0.7] as CFDictionary
+        )
+        guard CGImageDestinationFinalize(dest) else { return jpeg }
+        let preview = out as Data
+        return preview.count > 32 ? preview : jpeg
+    }
+
     /// Raw JPEG, or TxDOT JSON `{snippet: base64 jpeg}`. Nothing else.
-    static func stillJPEG(_ data: Data) -> Data? {
+    nonisolated static func stillJPEG(_ data: Data) -> Data? {
         if data.count >= 3, data[0] == 0xFF, data[1] == 0xD8 {
             return data
         }

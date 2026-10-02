@@ -193,6 +193,8 @@ def test_altool_binds_primary_app() -> None:
         fail("33986112949: assign must retry betaGroups 404 after VALID")
     if "RETRY list" not in helper or "598" not in helper:
         fail("35742115500: assign must retry ASC builds list timeout")
+    if "ASSIGN_WAIT_SEC" not in helper or "45 * 60" not in helper:
+        fail("36924273852: assign must wait 45 min for ASC to list the upload")
     if "st == 409" not in helper:
         fail("assign must treat 409 as already assigned")
     test_tf_asc_assign.main()

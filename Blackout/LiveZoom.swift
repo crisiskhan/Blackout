@@ -52,7 +52,10 @@ struct LiveZoom: View {
 
     private func start() {
         guard pipe, let url = URL(string: row.url), url.scheme == "https" else { return }
-        let next = AVPlayer(url: url)
+        let item = AVPlayerItem(url: url)
+        item.preferredForwardBufferDuration = 6
+        item.preferredPeakBitRate = 0
+        let next = AVPlayer(playerItem: item)
         next.automaticallyWaitsToMinimizeStalling = true
         next.play()
         player = next

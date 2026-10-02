@@ -511,20 +511,33 @@ struct HUDWrapRail: Layout {
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize {
-        let rows = rowsFitting(maxWidth: proposal.width ?? .infinity, subviews: subviews)
-        let width = rows.map(\.width).max() ?? 0
+        let cap = Self.wrapWidth(proposal.width)
+        let rows = rowsFitting(maxWidth: cap, subviews: subviews)
+        let content = rows.map(\.width).max() ?? 0
+        let width: CGFloat
+        if let proposed = proposal.width, proposed.isFinite, proposed > 0 {
+            width = min(proposed, max(content, 0))
+        } else {
+            width = content
+        }
         let height = rows.reduce(0) { $0 + $1.height } + spacing * CGFloat(max(0, rows.count - 1))
-        return CGSize(width: proposal.width ?? width, height: height)
+        return CGSize(
+            width: width.isFinite ? width : 0,
+            height: height.isFinite ? height : 0
+        )
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) {
+        let cap = bounds.width.isFinite && bounds.width > 0 ? bounds.width : Self.wrapWidth(proposal.width)
         var y = bounds.minY
-        for row in rowsFitting(maxWidth: bounds.width, subviews: subviews) {
+        for row in rowsFitting(maxWidth: cap, subviews: subviews) {
             var x = bounds.minX
             for index in row.indices {
-                let size = subviews[index].sizeThatFits(.unspecified)
+                let size = Self.finiteSize(subviews[index].sizeThatFits(.unspecified))
+                let top = y + (row.height - size.height) / 2
+                guard x.isFinite, top.isFinite else { continue }
                 subviews[index].place(
-                    at: CGPoint(x: x, y: y + (row.height - size.height) / 2),
+                    at: CGPoint(x: x, y: top),
                     proposal: ProposedViewSize(size)
                 )
                 x += size.width + spacing
@@ -539,13 +552,26 @@ struct HUDWrapRail: Layout {
         var height: CGFloat = 0
     }
 
+    private static func wrapWidth(_ raw: CGFloat?) -> CGFloat {
+        if let raw, raw.isFinite, raw > 0 { return raw }
+        return 360
+    }
+
+    private static func finiteSize(_ raw: CGSize) -> CGSize {
+        let hit = CGFloat(BlackoutTokens.Chrome.mapChipHitPoints)
+        let width = raw.width.isFinite && raw.width > 0 ? raw.width : hit
+        let height = raw.height.isFinite && raw.height > 0 ? raw.height : hit
+        return CGSize(width: width, height: height)
+    }
+
     private func rowsFitting(maxWidth: CGFloat, subviews: Subviews) -> [Row] {
+        let cap = maxWidth.isFinite && maxWidth > 0 ? maxWidth : Self.wrapWidth(nil)
         var rows: [Row] = []
         var row = Row()
         for index in subviews.indices {
-            let size = subviews[index].sizeThatFits(.unspecified)
+            let size = Self.finiteSize(subviews[index].sizeThatFits(.unspecified))
             let width = row.indices.isEmpty ? size.width : row.width + spacing + size.width
-            if !row.indices.isEmpty, width > maxWidth {
+            if !row.indices.isEmpty, width > cap {
                 rows.append(row)
                 row = Row(indices: [index], width: size.width, height: size.height)
             } else {

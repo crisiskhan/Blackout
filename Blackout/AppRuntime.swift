@@ -742,9 +742,18 @@ final class AppRuntime {
     }
 
     func openLive(_ row: NaLive.Row) {
-        guard let url = URL(string: row.url), url.scheme == "https" else { return }
+        Task { await presentLive(row) }
+    }
+
+    private func presentLive(_ row: NaLive.Row) async {
+        var next = row
+        if let raw = await updateSocket.liveAdult(row) {
+            next.url = raw
+        } else {
+            next.url = ""
+        }
         zoomStillName = nil
-        zoomLive = row
+        zoomLive = next
     }
 
     func closeLive() {

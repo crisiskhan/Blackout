@@ -112,6 +112,7 @@ def na_unlocks(elapsed: float) -> bool:
 
 
 ADULT_CAP = 600
+ADULT_SCREEN = 8
 ADULT_BLOCKED = (
     "teen",
     "underage",
@@ -124,19 +125,82 @@ ADULT_BLOCKED = (
     "minor",
     "under18",
     "younggirl",
+    "trans",
+    "shemale",
+    "ladyboy",
+    "tgirl",
 )
+ADULT_KIND_WORDS = (
+    ("new", "NEW"),
+    ("dance", "DANCE"),
+    ("blonde", "BLONDE"),
+    ("brunette", "BRUNETTE"),
+    ("redhead", "REDHEAD"),
+    ("asian", "ASIAN"),
+    ("latina", "LATINA"),
+    ("ebony", "EBONY"),
+    ("milf", "MILF"),
+    ("petite", "PETITE"),
+    ("curvy", "CURVY"),
+    ("outdoor", "OUTDOOR"),
+    ("toys", "TOYS"),
+    ("squirt", "SQUIRT"),
+    ("anal", "ANAL"),
+    ("lesbian", "LESBIAN"),
+    ("couple", "COUPLE"),
+    ("orgy", "ORGY"),
+    ("gangbang", "ORGY"),
+    ("threesome", "ORGY"),
+    ("fff", "ORGY"),
+    ("ffm", "ORGY"),
+    ("group sex", "ORGY"),
+    ("roleplay", "ROLEPLAY"),
+    ("role-play", "ROLEPLAY"),
+    ("role play", "ROLEPLAY"),
+    ("roleplaying", "ROLEPLAY"),
+    ("cosplay", "ROLEPLAY"),
+    ("bdsm", "BDSM"),
+    ("fetish", "FETISH"),
+    ("bondage", "BDSM"),
+    ("femdom", "BDSM"),
+    ("oral", "ORAL"),
+    ("blowjob", "ORAL"),
+    ("deepthroat", "ORAL"),
+    ("cuckold", "CUCKOLD"),
+    ("shower", "SHOWER"),
+    ("feet", "FEET"),
+    ("smoking", "SMOKE"),
+    ("lovense", "TOYS"),
+    ("dildo", "TOYS"),
+    ("masturbat", "SOLO"),
+)
+ADULT_PIN = ("COUPLE", "ORGY", "ROLEPLAY")
+ADULT_MALE = {
+    "m",
+    "male",
+    "s",
+    "trans",
+    "shemale",
+    "tgirl",
+    "transgender",
+    "transsexual",
+    "ts",
+}
+ADULT_COUPLE = {"c", "couple", "couples"}
+ADULT_WOMAN = {"f", "female", "w", "woman", "women"} | ADULT_COUPLE
 
 
 def adult_playlist(raw: str) -> str | None:
-    """HTTPS only. Strip a quality suffix so the player can take the master."""
+    """HTTPS HLS only. Refuse guest advert / preview clips."""
     text = str(raw or "").strip()
     if not text.lower().startswith("https://"):
         return None
-    stripped = re.sub(r"_\d+p\.m3u8$", ".m3u8", text, flags=re.IGNORECASE)
-    stripped = re.sub(r"_high\.m3u8$", ".m3u8", stripped, flags=re.IGNORECASE)
-    if not stripped.lower().startswith("https://"):
+    low = text.lower()
+    if "/cpa/" in low or "mouflon-advert" in low:
         return None
-    return stripped
+    if ".m3u8" not in low:
+        return None
+    return text
 
 
 def adult_allows(name: str) -> bool:
@@ -146,17 +210,146 @@ def adult_allows(name: str) -> bool:
     return not any(token in blob for token in ADULT_BLOCKED)
 
 
+def adult_clean(blob: str) -> bool:
+    text = str(blob or "").lower()
+    if not text.strip():
+        return True
+    return not any(token in text for token in ADULT_BLOCKED)
+
+
+def adult_stream(payload: object) -> str | None:
+    """Public room HLS only. Private or empty is no stream."""
+    if not isinstance(payload, dict):
+        return None
+    status = str(payload.get("room_status") or "").strip().lower()
+    if status != "public":
+        return None
+    raw = payload.get("hls_source")
+    if raw is None or str(raw).strip() == "":
+        raw = payload.get("url")
+    return adult_playlist(str(raw or ""))
+
+
+def adult_woman(model: object) -> bool:
+    """Women and couples. Refuse male-lead and trans gender tags."""
+    if not isinstance(model, dict):
+        return False
+    gender = str(model.get("gender") or "").strip().lower()
+    if not gender:
+        return True
+    if gender in ADULT_MALE:
+        return False
+    return gender in ADULT_WOMAN
+
+
+def adult_still(raw: str) -> str | None:
+    """HTTPS JPEG still only. Never a playlist or advert clip."""
+    text = str(raw or "").strip()
+    if not text.lower().startswith("https://"):
+        return None
+    low = text.lower()
+    if "/cpa/" in low or ".m3u8" in low:
+        return None
+    return text
+
+
+def adult_image(model: object) -> str:
+    if not isinstance(model, dict):
+        return ""
+    for key in ("image_url_360p", "image_url"):
+        hit = adult_still(str(model.get(key) or ""))
+        if hit:
+            return hit
+    return ""
+
+
+def adult_room_kinds(model: object) -> list[str]:
+    if not isinstance(model, dict):
+        return []
+    tags = model.get("tags") or []
+    if isinstance(tags, list):
+        tag_blob = " ".join(str(tag) for tag in tags)
+    else:
+        tag_blob = str(tags)
+    blob = f"{tag_blob} {model.get('room_subject') or ''}".lower()
+    tokens = set(blob.split())
+    found: list[str] = []
+    seen: set[str] = set()
+    if model.get("is_new") or "new" in tokens:
+        seen.add("NEW")
+        found.append("NEW")
+    gender = str(model.get("gender") or "").strip().lower()
+    if gender in ADULT_COUPLE or "couple" in tokens or "couples" in tokens:
+        seen.add("COUPLE")
+        found.append("COUPLE")
+    for needle, chip in ADULT_KIND_WORDS:
+        if needle == "new":
+            continue
+        if needle in blob and chip not in seen and adult_clean(chip):
+            seen.add(chip)
+            found.append(chip)
+    return found
+
+
+def adult_seek(model: object) -> str:
+    if not isinstance(model, dict):
+        return ""
+    tags = model.get("tags") or []
+    if isinstance(tags, list):
+        tag_blob = " ".join(str(tag) for tag in tags)
+    else:
+        tag_blob = str(tags)
+    return f"{tag_blob} {model.get('room_subject') or ''}".strip().lower()
+
+
+def adult_kinds(rooms: list[dict]) -> list[str]:
+    seen: set[str] = set()
+    for room in rooms:
+        for kind in room.get("kinds") or []:
+            chip = str(kind).strip().upper()
+            if chip:
+                seen.add(chip)
+    pinned = [chip for chip in ADULT_PIN if chip in seen]
+    rest = sorted(seen.difference(ADULT_PIN))
+    return pinned + rest
+
+
+def adult_pick(rooms: list[dict], kind: str = "", query: str = "") -> list[dict]:
+    chip = str(kind or "").strip().upper()
+    needle = str(query or "").strip().lower()
+    out: list[dict] = []
+    for room in rooms:
+        kinds = [str(item).strip().upper() for item in (room.get("kinds") or [])]
+        if chip and chip != "ALL" and chip not in kinds:
+            continue
+        if needle:
+            blob = " ".join(
+                [
+                    str(room.get("name") or ""),
+                    str(room.get("handle") or ""),
+                    str(room.get("seek") or ""),
+                    " ".join(kinds),
+                ]
+            ).lower()
+            if needle not in blob:
+                continue
+        out.append(room)
+    return out
+
+
 def adult_rooms(payload: object) -> list[dict]:
-    """Live public HTTPS rooms, highest viewers first, cap ADULT_CAP."""
+    """Live public women rooms, highest viewers first, cap ADULT_CAP. HLS later."""
     models: list[object] = []
     if isinstance(payload, list):
         models = payload
     elif isinstance(payload, dict):
-        raw = payload.get("models")
+        raw = payload.get("results")
+        if raw is None:
+            raw = payload.get("models")
         if raw is None:
             raw = payload.get("items")
         if isinstance(raw, dict):
-            raw = raw.get("models") or raw.get("items") or []
+            raw = raw.get("results") or raw.get("models") or raw.get("items") or []
         if isinstance(raw, list):
             models = raw
     rooms: list[dict] = []
@@ -164,38 +357,35 @@ def adult_rooms(payload: object) -> list[dict]:
     for model in models:
         if not isinstance(model, dict):
             continue
-        live = model.get("isLive")
-        if live in (True, 1, "1", "true", "True"):
-            pass
+        show = str(model.get("current_show") or model.get("status") or "").strip().lower()
+        if show != "public":
+            continue
+        try:
+            years = int(model.get("age"))
+        except (TypeError, ValueError):
+            continue
+        if years < 18:
+            continue
+        if not adult_woman(model):
+            continue
+        handle = str(model.get("username") or model.get("slug") or "").strip()
+        name = str(model.get("display_name") or handle).strip()
+        if not handle or not adult_allows(handle) or not adult_allows(name):
+            continue
+        tags = model.get("tags") or []
+        if isinstance(tags, list):
+            tag_blob = " ".join(str(tag) for tag in tags)
         else:
+            tag_blob = str(tags)
+        subject = str(model.get("room_subject") or "")
+        if not adult_clean(tag_blob) or not adult_clean(subject):
             continue
-        status = str(model.get("status") or "").strip().lower()
-        if status != "public":
-            continue
-        name = str(model.get("username") or model.get("alias") or "").strip()
-        if not adult_allows(name):
-            continue
-        raw_id = model.get("id")
-        if raw_id is None:
-            token = name
-        else:
-            token = str(raw_id).strip()
-        if not token:
-            continue
-        rid = f"adult-{token}"
+        rid = f"adult-{handle.lower()}"
         if rid in seen:
             continue
-        playlist = adult_playlist(
-            str(
-                model.get("hlsPlaylist")
-                or model.get("hlsStreamUrl")
-                or model.get("streamUrl")
-                or ""
-            )
-        )
-        if not playlist:
-            continue
-        viewers = model.get("viewersCount")
+        viewers = model.get("num_users")
+        if viewers is None:
+            viewers = model.get("viewersCount")
         if viewers is None:
             viewers = model.get("viewers")
         try:
@@ -207,12 +397,31 @@ def adult_rooms(payload: object) -> list[dict]:
             {
                 "id": rid,
                 "name": name.upper(),
-                "url": playlist,
+                "handle": handle,
+                "url": "",
                 "viewers": count,
+                "image": adult_image(model),
+                "kinds": adult_room_kinds(model),
+                "seek": adult_seek(model),
             }
         )
     rooms.sort(key=lambda row: (-int(row["viewers"]), str(row["name"])))
     return rooms[:ADULT_CAP]
+
+
+def adult_page(
+    rooms: list[dict],
+    offset: int = 0,
+    limit: int = ADULT_SCREEN,
+    kind: str = "",
+    query: str = "",
+) -> list[dict]:
+    """One screen of picked live rooms. TV never mounts the whole directory."""
+    picked = adult_pick(rooms, kind=kind, query=query)
+    start = max(0, int(offset))
+    if limit <= 0:
+        return []
+    return picked[start : start + limit]
 
 
 YOU = (31.87050, -106.59732)
@@ -541,71 +750,252 @@ class OpenStillTests(unittest.TestCase):
 
 
 class AdultDeskTests(unittest.TestCase):
-    def test_directory_keeps_live_public_https_and_strips_quality(self):
+    def test_directory_keeps_live_public_rooms_and_resolves_hls(self):
         payload = {
-            "models": [
+            "results": [
                 {
-                    "id": 11,
                     "username": "alpha",
-                    "isLive": True,
-                    "status": "public",
-                    "viewersCount": 900,
-                    "hlsPlaylist": "https://edge-hls.example/hls/a/master/a_240p.m3u8",
+                    "display_name": "alpha",
+                    "age": 24,
+                    "gender": "f",
+                    "current_show": "public",
+                    "num_users": 900,
+                    "tags": ["dance", "blonde"],
+                    "room_subject": "live",
+                    "image_url": "https://img.example/alpha.jpg",
+                    "image_url_360p": "https://img.example/alpha-360.jpg",
                 },
                 {
-                    "id": 12,
                     "username": "teenstar",
-                    "isLive": True,
-                    "status": "public",
-                    "viewersCount": 5000,
-                    "hlsPlaylist": "https://edge-hls.example/hls/b/master/b.m3u8",
+                    "display_name": "teenstar",
+                    "age": 22,
+                    "gender": "f",
+                    "current_show": "public",
+                    "num_users": 5000,
+                    "tags": [],
+                    "room_subject": "",
                 },
                 {
-                    "id": 13,
                     "username": "beta",
-                    "isLive": True,
-                    "status": "private",
-                    "viewersCount": 800,
-                    "hlsPlaylist": "https://edge-hls.example/hls/c/master/c.m3u8",
+                    "display_name": "beta",
+                    "age": 28,
+                    "gender": "f",
+                    "current_show": "private",
+                    "num_users": 800,
+                    "tags": [],
+                    "room_subject": "",
                 },
                 {
-                    "id": 14,
                     "username": "gamma",
-                    "isLive": False,
-                    "status": "public",
-                    "viewersCount": 10,
-                    "hlsPlaylist": "https://edge-hls.example/hls/d/master/d.m3u8",
+                    "display_name": "gamma",
+                    "age": 17,
+                    "gender": "f",
+                    "current_show": "public",
+                    "num_users": 10,
+                    "tags": [],
+                    "room_subject": "",
                 },
                 {
-                    "id": 15,
                     "username": "delta",
-                    "isLive": True,
-                    "status": "public",
-                    "viewersCount": 100,
-                    "hlsPlaylist": "http://insecure.example/x.m3u8",
+                    "display_name": "delta",
+                    "age": 30,
+                    "gender": "f",
+                    "current_show": "public",
+                    "num_users": 100,
+                    "tags": ["teen"],
+                    "room_subject": "",
                 },
                 {
-                    "id": 16,
                     "username": "echo",
-                    "isLive": True,
-                    "status": "public",
-                    "viewersCount": 400,
-                    "hlsPlaylist": "https://edge-hls.example/hls/e/master/e_720p.m3u8",
+                    "display_name": "echo",
+                    "age": 26,
+                    "current_show": "public",
+                    "num_users": 400,
+                    "tags": [],
+                    "room_subject": "live",
+                },
+                {
+                    "username": "omega",
+                    "display_name": "omega",
+                    "age": 29,
+                    "gender": "m",
+                    "current_show": "public",
+                    "num_users": 8000,
+                    "tags": ["dance"],
+                    "room_subject": "live",
+                    "image_url": "https://img.example/omega.jpg",
+                },
+                {
+                    "username": "sigma",
+                    "display_name": "sigma",
+                    "age": 31,
+                    "gender": "c",
+                    "current_show": "public",
+                    "num_users": 7000,
+                    "tags": ["lesbian", "orgy", "roleplay"],
+                    "room_subject": "live",
+                },
+                {
+                    "username": "tau",
+                    "display_name": "tau",
+                    "age": 27,
+                    "gender": "s",
+                    "current_show": "public",
+                    "num_users": 6500,
+                    "tags": ["dance"],
+                    "room_subject": "live",
+                },
+                {
+                    "username": "upsilon",
+                    "display_name": "upsilon",
+                    "age": 25,
+                    "gender": "f",
+                    "current_show": "public",
+                    "num_users": 6000,
+                    "tags": ["trans"],
+                    "room_subject": "live",
+                },
+                {
+                    "username": "phi",
+                    "display_name": "phi",
+                    "age": 28,
+                    "gender": "f",
+                    "current_show": "public",
+                    "num_users": 5500,
+                    "tags": ["shemale"],
+                    "room_subject": "live",
+                },
+                {
+                    "username": "rho",
+                    "display_name": "rho",
+                    "age": 26,
+                    "gender": "f",
+                    "current_show": "public",
+                    "num_users": 50,
+                    "tags": ["oil", "bdsm", "threesome", "cosplay"],
+                    "room_subject": "nurse fetish",
                 },
             ]
         }
         got = adult_rooms(payload)
-        self.assertEqual([row["id"] for row in got], ["adult-11", "adult-16"])
-        self.assertEqual(got[0]["name"], "ALPHA")
-        self.assertEqual(got[0]["url"], "https://edge-hls.example/hls/a/master/a.m3u8")
-        self.assertEqual(got[1]["url"], "https://edge-hls.example/hls/e/master/e.m3u8")
+        self.assertEqual(
+            [row["id"] for row in got],
+            ["adult-sigma", "adult-alpha", "adult-echo", "adult-rho"],
+        )
+        self.assertEqual(got[0]["name"], "SIGMA")
+        self.assertEqual(got[0]["handle"], "sigma")
+        self.assertEqual(got[0]["kinds"], ["COUPLE", "LESBIAN", "ORGY", "ROLEPLAY"])
+        self.assertEqual(got[1]["name"], "ALPHA")
+        self.assertEqual(got[1]["handle"], "alpha")
+        self.assertEqual(got[1]["url"], "")
+        self.assertEqual(got[1]["image"], "https://img.example/alpha-360.jpg")
+        self.assertEqual(got[1]["kinds"], ["DANCE", "BLONDE"])
+        self.assertEqual(got[2]["handle"], "echo")
+        self.assertEqual(got[2]["image"], "")
+        self.assertEqual(got[2]["kinds"], [])
+        self.assertEqual(got[3]["handle"], "rho")
+        self.assertEqual(got[3]["seek"], "oil bdsm threesome cosplay nurse fetish")
+        self.assertEqual(got[3]["kinds"], ["ORGY", "ROLEPLAY", "BDSM", "FETISH"])
+        self.assertTrue(adult_woman({"gender": "f"}))
+        self.assertTrue(adult_woman({}))
+        self.assertTrue(adult_woman({"gender": "c"}))
+        self.assertTrue(adult_woman({"gender": "couple"}))
+        self.assertTrue(adult_clean("orgy roleplay couple"))
+        self.assertFalse(adult_woman({"gender": "m"}))
+        self.assertFalse(adult_woman({"gender": "male"}))
+        self.assertFalse(adult_woman({"gender": "s"}))
+        self.assertFalse(adult_woman({"gender": "trans"}))
+        self.assertFalse(adult_woman({"gender": "shemale"}))
+        self.assertFalse(adult_woman({"gender": "tgirl"}))
+        self.assertFalse(adult_allows("transgirl"))
+        self.assertFalse(adult_clean("shemale"))
+        self.assertFalse(adult_clean("ladyboy live"))
+        self.assertEqual(
+            adult_image({"image_url": "https://img.example/a.jpg"}),
+            "https://img.example/a.jpg",
+        )
+        self.assertEqual(
+            adult_still("https://img.example/a.jpg"),
+            "https://img.example/a.jpg",
+        )
+        self.assertIsNone(adult_still("http://img.example/a.jpg"))
+        self.assertIsNone(adult_still("https://edge.example/live.m3u8"))
+        self.assertEqual(
+            adult_kinds(got),
+            [
+                "COUPLE",
+                "ORGY",
+                "ROLEPLAY",
+                "BDSM",
+                "BLONDE",
+                "DANCE",
+                "FETISH",
+                "LESBIAN",
+            ],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(got, kind="DANCE")],
+            ["adult-alpha"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(got, kind="COUPLE")],
+            ["adult-sigma"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(got, kind="ORGY")],
+            ["adult-sigma", "adult-rho"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(got, query="echo")],
+            ["adult-echo"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(got, query="oil")],
+            ["adult-rho"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(got, query="nurse")],
+            ["adult-rho"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(got, kind="BDSM")],
+            ["adult-rho"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(got, kind="ALL")],
+            ["adult-sigma", "adult-alpha", "adult-echo", "adult-rho"],
+        )
         self.assertTrue(adult_allows("alpha"))
         self.assertFalse(adult_allows("teenstar"))
         self.assertIsNone(adult_playlist("http://insecure.example/x.m3u8"))
+        self.assertIsNone(
+            adult_playlist("https://media-hls.example/b-hls-1/cpa/v2/stream.m3u8")
+        )
+        self.assertEqual(
+            adult_stream(
+                {
+                    "room_status": "public",
+                    "hls_source": "https://edge.example/live-hls/amlst:alpha/playlist.m3u8",
+                }
+            ),
+            "https://edge.example/live-hls/amlst:alpha/playlist.m3u8",
+        )
+        self.assertIsNone(
+            adult_stream(
+                {
+                    "room_status": "public",
+                    "hls_source": "https://media-hls.example/b-hls-1/cpa/v2/stream.m3u8",
+                }
+            )
+        )
+        self.assertIsNone(
+            adult_stream({"room_status": "private", "hls_source": "https://edge.example/x.m3u8"})
+        )
         desk = read("Blackout", "AdultDesk.swift")
         sock = read("Blackout", "UpdateSocket.swift")
         live = read("Blackout", "NaLive.swift")
         tv = read("Blackout", "TvPlate.swift")
+        app = read("Blackout", "AppRuntime.swift")
         self.assertIn("enum AdultDesk", desk)
         self.assertIn("static let cap", desk)
         self.assertIn("= 600", desk)
@@ -614,17 +1004,63 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("static func parse(", desk)
         self.assertIn("static func playlist(", desk)
         self.assertIn("static func directory(", desk)
+        self.assertIn("static func context(", desk)
+        self.assertIn("static func edge(", desk)
+        self.assertIn("static func stream(", desk)
+        self.assertIn("get_edge_hls_url_ajax", desk)
         self.assertIn("offset", desk)
-        self.assertIn("lovescape.cam", desk.lower())
-        self.assertIn("primaryTag", desk)
-        self.assertIn("girls", desk)
+        self.assertIn("chaturbate.com", desk.lower())
+        self.assertIn("affiliates/onlinerooms", desk)
+        self.assertIn('static let tags = ["f", "c"]', desk)
+        self.assertNotIn('["f", "c", "m", "s"]', desk)
+        self.assertIn("COUPLE", desk)
+        self.assertIn("ORGY", desk)
+        self.assertIn("ROLEPLAY", desk)
+        self.assertIn("BDSM", desk)
+        self.assertIn("threesome", desk)
+        self.assertIn("cosplay", desk)
+        self.assertIn('static let pin = ["COUPLE", "ORGY", "ROLEPLAY"]', desk)
+        self.assertIn("var seek:", desk)
+        self.assertIn("room.seek", desk)
+        self.assertIn("static func still(", desk)
+        self.assertIn("static func pick(", desk)
+        self.assertIn("static func kinds(", desk)
+        self.assertIn("static func woman(", desk)
+        self.assertIn("nonisolated static func stillJPEG", sock)
+        self.assertIn("image_url_360p", desk)
+        self.assertIn("image_url", desk)
+        self.assertIn("var image:", desk)
+        self.assertIn("var kinds:", desk)
+        self.assertIn("gender", desk)
+        self.assertIn("\"trans\"", desk)
+        self.assertIn("\"shemale\"", desk)
+        self.assertIn("\"ladyboy\"", desk)
+        self.assertIn("\"tgirl\"", desk)
+        self.assertIn("hls_source", desk)
+        self.assertIn("current_show", desk)
+        self.assertIn("num_users", desk)
+        self.assertNotIn("lovescape", desk.lower())
+        self.assertNotIn("onlyfans", desk.lower())
+        self.assertNotIn("fansly", desk.lower())
+        self.assertNotIn("fanbase", desk.lower())
+        self.assertNotIn("hlsPlaylist", desk)
+        self.assertNotIn("iframe_embed", desk)
         self.assertIn("func pullAdult(", sock)
+        self.assertIn("func pullAdultStills(", sock)
+        self.assertIn("nonisolated static func stillPreview", sock)
+        self.assertIn("kCGImageSourceThumbnailMaxPixelSize", sock)
+        self.assertIn("func liveAdult(", sock)
         self.assertIn("fetchAdult", sock)
         self.assertIn("adultRooms", sock)
         self.assertIn("AdultDesk.parse", sock)
+        self.assertIn("AdultDesk.stream", sock)
+        self.assertIn("AdultDesk.context", sock)
+        self.assertIn("AdultDesk.edge", sock)
+        self.assertIn("fetchAdultPost", sock)
         self.assertIn("AdultDesk.pages", sock)
         self.assertIn("offset:", sock)
         self.assertIn("User-Agent", sock)
+        self.assertIn("X-Requested-With", sock)
         self.assertNotIn("lovescape", sock.lower())
         self.assertNotIn("WKWebView", desk)
         self.assertNotIn("WKWebView", sock)
@@ -634,15 +1070,67 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("NaLive.rows", tv)
         self.assertIn("adultRooms", tv)
         self.assertIn("pullAdult", tv)
+        self.assertIn("pullAdultStills", tv)
+        self.assertIn('HUDField("SEARCH"', tv)
+        self.assertIn("HUDWrapRail", tv)
+        self.assertIn("prefix(12)", tv)
+        self.assertIn("naStillCache", tv)
+        self.assertIn("naKind", tv)
+        self.assertIn("naQuery", tv)
+        self.assertIn("AdultDesk.pick", tv)
+        self.assertIn("AdultDesk.kinds", tv)
+        self.assertIn("NO MATCH", tv)
+        self.assertIn("onPlay", tv)
+        self.assertIn("liveAdult", tv)
+        self.assertIn("liveAdult", app)
         gate = na_gate_body(tv)
         self.assertIn("NaLiveWell", gate)
         self.assertIn("naLiveRows", gate)
+        self.assertNotIn("pullAdultStills", gate)
         self.assertNotIn("NaLiveWell", open_body(tv))
         self.assertIn("LIVE", live)
         self.assertIn("AdultDesk.Room", live)
+        self.assertIn("onPlay", live)
+        self.assertIn("handle", live)
+        self.assertIn("var image:", live)
+        self.assertIn("var kinds:", live)
+        self.assertIn("let still: UIImage?", live)
+        self.assertIn("static let screen", live)
+        self.assertIn("static func page(", live)
+        self.assertIn("static let screen = 8", live)
+        self.assertIn("preferredForwardBufferDuration", live)
         self.assertNotIn("zoocams.elpasozoo.org", live.lower())
-        for word in ("truelook", "earthcam", "insecam", "chaturbate", "stripchat"):
+        self.assertIn("ForEach(naPageRows)", tv)
+        self.assertNotIn("ForEach(naLiveRows)", tv)
+        self.assertIn("MORE", gate)
+        self.assertIn("BACK", gate)
+        self.assertIn("adultReady", tv)
+        self.assertIn("if naUnlocked { naGate }", tv)
+        self.assertLess(tv.find("if naUnlocked { naGate }"), tv.find("ForEach(openBlocks)"))
+        self.assertIn("adultReady", sock)
+        self.assertIn("fetchAdultPages", sock)
+        self.assertIn("Task.detached", sock)
+        watch = tv.split(".task")[1].split("private var you")[0]
+        self.assertNotIn("pullAdult", watch)
+        count = tv.split("onChange(of: runtime.updateSocket.adultRooms.count)")[1].split("onChange(of: naPageKey)")[0]
+        self.assertNotIn("pullAdultStills", count)
+        page = tv.split("onChange(of: naPageKey)")[1].split(".task")[0]
+        self.assertIn("pullAdultStills", page)
+        self.assertIn("Task {", page)
+        rooms = [
+            {"id": f"adult-{index}", "name": f"R{index}", "handle": f"r{index}", "url": "", "viewers": 100 - index}
+            for index in range(30)
+        ]
+        self.assertEqual([row["id"] for row in adult_page(rooms)], [f"adult-{index}" for index in range(8)])
+        self.assertEqual(len(adult_page(rooms, offset=8)), 8)
+        self.assertEqual([row["id"] for row in adult_page(rooms, offset=24)], ["adult-24", "adult-25", "adult-26", "adult-27", "adult-28", "adult-29"])
+        self.assertEqual(adult_page(rooms, offset=30), [])
+        self.assertEqual(adult_page(rooms, offset=-4)[0]["id"], "adult-0")
+        for word in ("truelook", "earthcam", "insecam", "stripchat"):
             self.assertNotIn(word, desk.lower())
+            self.assertNotIn(word, live.lower())
+            self.assertNotIn(word, sock.lower())
+        for word in ("chaturbate",):
             self.assertNotIn(word, live.lower())
             self.assertNotIn(word, sock.lower())
 
@@ -661,6 +1149,10 @@ class NaLiveTests(unittest.TestCase):
         self.assertIn("HOLD 10", tv)
         gate = na_gate_body(tv)
         self.assertIn("naLiveRows", gate)
+        self.assertIn('HUDField("SEARCH"', gate)
+        self.assertIn("HUDWrapRail", gate)
+        self.assertIn("still:", gate)
+        self.assertNotIn("pullAdultStills", gate)
         self.assertNotIn("DeskLive", gate)
 
 
@@ -734,6 +1226,8 @@ class ClosedSourcesTests(unittest.TestCase):
             "stripchat",
             "cam4",
             "onlyfans",
+            "fansly",
+            "fanbase",
             ".m3u8",
             "rtmp://",
         )
@@ -768,6 +1262,16 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("TAP FULL", tv)
         self.assertIn("zoom", tv.lower())
         self.assertIn("section", tv.lower())
+        self.assertIn("not a preview clip", tv.lower())
+        self.assertIn("women", tv.lower())
+        self.assertIn("couple", tv.lower())
+        self.assertIn("orgies", tv.lower())
+        self.assertIn("role play", tv.lower())
+        self.assertIn("everything else", tv.lower())
+        self.assertIn("no trans", tv.lower())
+        self.assertIn("eight at a time", tv)
+        self.assertIn("SEARCH", tv)
+        self.assertIn("still", tv.lower())
         self.assertNotIn("insecam", tv.lower())
         self.assertNotIn("best in class", tv.lower())
         self.assertIn("test_expedition_tv.py", agents)

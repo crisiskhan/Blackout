@@ -462,6 +462,10 @@ class WholeWordHUDTests(unittest.TestCase):
         self.assertNotIn('Button("FIT PACK")', tab)
         self.assertIn("HUDWrapRail", tab)
         self.assertIn("struct HUDWrapRail", theme)
+        wrap = theme.split("struct HUDWrapRail")[1]
+        self.assertIn("isFinite", wrap)
+        self.assertIn("wrapWidth", wrap)
+        self.assertNotIn("?? .infinity", wrap)
         self.assertIn('instrumentsTitle = "INSTRUMENTS"', tokens)
         self.assertIn('lockOnTitle = "LOCK-ON"', tokens)
         self.assertNotIn("godsEyeTitle", tokens)
