@@ -5213,6 +5213,12 @@ class HUDKeyboardTests(unittest.TestCase):
             self.assertNotIn(".spring(", body, name)
         map_tab = read("Blackout", "MapTab.swift")
         self.assertIn('HUDField("SEARCH"', map_tab)
+        search = map_tab.split('HUDField("SEARCH"')[1]
+        self.assertLess(
+            search.find("onSubmit:"),
+            search.find("onOpen:"),
+            "Xcode 16: argument onSubmit must precede onOpen",
+        )
         field = read("Blackout", "FieldTab.swift")
         self.assertIn('L10n.t("field.search"', field)
         self.assertIn("HUDField(", field)
