@@ -283,6 +283,24 @@ final class RouterTests: XCTestCase {
         )
     }
 
+    func testMidBlockDoesNotBacktrackToTheCrowFlyNode() {
+        let g = riverBlock()
+        let you = (lat: 0.0002, lon: 0.009)
+        let dest = (lat: -0.0019, lon: 0.0002)
+        let plan = GraphPlan.line(graph: g, from: you, to: dest, mode: .walk)
+        XCTAssertEqual(plan.chrome, "")
+        XCTAssertEqual(plan.coords.first?.lat, you.lat)
+        XCTAssertEqual(plan.coords.last?.lat, dest.lat)
+        XCTAssertFalse(
+            plan.coords.contains { abs($0.lat) < 0.0001 && abs($0.lon) < 0.0001 },
+            "mid-block walk ran back to the crow-fly corner"
+        )
+        XCTAssertTrue(
+            plan.coords.contains { abs($0.lon - 0.01) < 0.0002 },
+            "packed path has to leave via B"
+        )
+    }
+
     func testDriveAgainstAOneWayWithNoWayAroundIsOffGraph() {
         let g = RouteGraph(
             nodes: [
@@ -817,6 +835,25 @@ final class RouterTests: XCTestCase {
             [(1, 2, 0), (2, 4, 0), (1, 3, 0), (3, 4, 0)]
         )
         XCTAssertEqual(GraphRouter.route(graph: unknown, from: 1, to: 4, mode: .drive)?.nodeIds, [1, 3, 4])
+    }
+
+    private func riverBlock() -> RouteGraph {
+        RouteGraph(
+            nodes: [
+                .init(id: 1, lon: 0, lat: 0),
+                .init(id: 2, lon: 0.01, lat: 0),
+                .init(id: 3, lon: 0.01, lat: -0.002),
+                .init(id: 4, lon: 0, lat: -0.002),
+            ],
+            edges: [
+                .init(a: 1, b: 2, m: 1100, walk: true, drive: true, roadClass: 6),
+                .init(a: 2, b: 1, m: 1100, walk: true, drive: true, roadClass: 6),
+                .init(a: 2, b: 3, m: 220, walk: true, drive: true, roadClass: 6),
+                .init(a: 3, b: 2, m: 220, walk: true, drive: true, roadClass: 6),
+                .init(a: 3, b: 4, m: 1100, walk: true, drive: true, roadClass: 6),
+                .init(a: 4, b: 3, m: 1100, walk: true, drive: true, roadClass: 6),
+            ]
+        )
     }
 
     private func oneWayBlock() -> RouteGraph {

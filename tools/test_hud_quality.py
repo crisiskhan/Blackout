@@ -247,6 +247,8 @@ class QuietBearingTests(unittest.TestCase):
         self.assertIn("func destRailVisible(", route)
         self.assertIn("destRailVisible(", chrome)
         self.assertIn("func destValue(", route)
+        self.assertIn("func destField(", route)
+        self.assertIn("func liveRemainingHUD(", route)
         self.assertIn("enum MapFieldDestMode", route)
         self.assertIn("case turns", route)
         self.assertIn("%.5f, %.5f", route)
@@ -260,6 +262,9 @@ class QuietBearingTests(unittest.TestCase):
         self.assertIn("Theme.Motion.beat", chrome)
         self.assertIn("@State private var beat", chrome)
         self.assertIn("MapFieldChrome.destValue", chrome)
+        self.assertIn("MapFieldChrome.destField", chrome)
+        self.assertIn("MapFieldChrome.liveRemainingHUD", chrome)
+        self.assertNotIn("VoiceNav.remainingHUD(runtime.routeCoords)", chrome)
         self.assertIn("Text(field)", chrome)
         rail = chrome.split("struct MapFieldDestRail")[1]
         self.assertNotIn("chip(MapFieldDestMode.coordinates)", rail)
@@ -4301,7 +4306,7 @@ class LiveStreetGuideTests(unittest.TestCase):
         self.assertIn("SpeakStatus.offRouteLine", guide)
         self.assertIn("SpeakStatus.chrome(", guide)
         self.assertIn("remainingCoords", guide)
-        self.assertIn("navigate(mode: travelMode)", guide)
+        self.assertIn("navigate(mode: travelMode, speak: false)", guide)
         self.assertIn("liveSpokenTurn", app)
         nav = app.split("func navigate(mode:")[1].split("func tapRuler")[0]
         self.assertIn("speakMap()", nav)

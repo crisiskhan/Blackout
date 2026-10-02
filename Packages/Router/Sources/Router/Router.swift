@@ -636,33 +636,40 @@ public enum GraphPlan {
                 GraphIndex.seconds(metres: street, cost: cost, mode: mode) + extraSeconds(start, end, mode: mode)
             )
         }
-        let startId = leave(start, toward: to, graph: graph, mode: mode)
-        let endId = arrive(end, toward: from, graph: graph, mode: mode)
-        guard let r = GraphRouter.route(graph: graph, from: startId, to: endId, mode: mode),
-              r.fallback == .onGraph
-        else {
+        var best: (coords: [(lat: Double, lon: Double)], seconds: Double)?
+        for startId in departures(start, graph: graph, mode: mode) {
+            for endId in arrivals(end, graph: graph, mode: mode) {
+                guard let r = GraphRouter.route(graph: graph, from: startId, to: endId, mode: mode),
+                      r.fallback == .onGraph
+                else { continue }
+                var coords = GraphRouter.coordinates(graph: graph, nodeIds: r.nodeIds)
+                guard let first = coords.first, let last = coords.last else { continue }
+                if GraphRouter.haversine(start.lat, start.lon, first.lat, first.lon) >= stitchMeters {
+                    coords.insert((start.lat, start.lon), at: 0)
+                }
+                if start.metres >= stitchMeters {
+                    coords.insert(from, at: 0)
+                }
+                if GraphRouter.haversine(end.lat, end.lon, last.lat, last.lon) >= stitchMeters {
+                    coords.append((end.lat, end.lon))
+                }
+                if end.metres >= stitchMeters {
+                    coords.append(to)
+                }
+                guard coords.count >= 2 else { continue }
+                let seconds = r.seconds
+                    + extraSeconds(start, end, mode: mode)
+                    + accessSeconds(start, node: startId, graph: graph, mode: mode)
+                    + accessSeconds(end, node: endId, graph: graph, mode: mode)
+                if best == nil || seconds < best!.seconds {
+                    best = (coords, seconds)
+                }
+            }
+        }
+        guard let best else {
             return ([], offGraph, 0)
         }
-        var coords = GraphRouter.coordinates(graph: graph, nodeIds: r.nodeIds)
-        guard let first = coords.first, let last = coords.last else {
-            return ([], offGraph, 0)
-        }
-        if GraphRouter.haversine(start.lat, start.lon, first.lat, first.lon) >= stitchMeters {
-            coords.insert((start.lat, start.lon), at: 0)
-        }
-        if start.metres >= stitchMeters {
-            coords.insert(from, at: 0)
-        }
-        if GraphRouter.haversine(end.lat, end.lon, last.lat, last.lon) >= stitchMeters {
-            coords.append((end.lat, end.lon))
-        }
-        if end.metres >= stitchMeters {
-            coords.append(to)
-        }
-        guard coords.count >= 2 else {
-            return ([], offGraph, 0)
-        }
-        return (coords, "", r.seconds + extraSeconds(start, end, mode: mode))
+        return (best.coords, "", best.seconds)
     }
 
     private static func extraSeconds(_ start: StreetAccess, _ end: StreetAccess, mode: TravelMode) -> Double {
@@ -694,6 +701,57 @@ public enum GraphPlan {
         if canAB { return startAlong <= endAlong + 1 }
         if canBA { return startAlong >= endAlong - 1 }
         return false
+    }
+
+    /// Two-way mid-block must try both ends. Crow-flies closer can be the
+    /// long maze; the other corner is the packed street path.
+    private static func departures(
+        _ access: StreetAccess,
+        graph: RouteGraph,
+        mode: TravelMode
+    ) -> [Int] {
+        let canAB = graph.index.linkBits(from: access.a, to: access.b, mode: mode) != nil
+        let canBA = graph.index.linkBits(from: access.b, to: access.a, mode: mode) != nil
+        if canAB && canBA {
+            return uniqueNodes(access.a, access.b)
+        }
+        if canAB { return [access.b] }
+        if canBA { return [access.a] }
+        return [access.id]
+    }
+
+    private static func arrivals(
+        _ access: StreetAccess,
+        graph: RouteGraph,
+        mode: TravelMode
+    ) -> [Int] {
+        let canAB = graph.index.linkBits(from: access.a, to: access.b, mode: mode) != nil
+        let canBA = graph.index.linkBits(from: access.b, to: access.a, mode: mode) != nil
+        if canAB && canBA {
+            return uniqueNodes(access.a, access.b)
+        }
+        if canAB { return [access.a] }
+        if canBA { return [access.b] }
+        return [access.id]
+    }
+
+    private static func uniqueNodes(_ a: Int, _ b: Int) -> [Int] {
+        a == b ? [a] : [a, b]
+    }
+
+    private static func accessSeconds(
+        _ access: StreetAccess,
+        node: Int,
+        graph: RouteGraph,
+        mode: TravelMode
+    ) -> Double {
+        guard let point = graph.point(node) else { return 0 }
+        let metres = GraphRouter.haversine(access.lat, access.lon, point.lat, point.lon)
+        let bits = graph.index.linkBits(from: access.a, to: access.b, mode: mode)
+            ?? graph.index.linkBits(from: access.b, to: access.a, mode: mode)
+            ?? 0
+        let cost = GraphIndex.stepCost(metres: metres, mode: mode, bits: bits)
+        return GraphIndex.seconds(metres: metres, cost: cost, mode: mode)
     }
 
     /// Mid-block two-way, leave toward the other pin. One-way, leave

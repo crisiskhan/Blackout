@@ -47,6 +47,17 @@ def remaining_hud(coords: list[tuple[float, float]]) -> str:
     return f"{round(round(meters) * FEET_PER_METER):.0f} FT"
 
 
+def dest_field(
+    dest: tuple[float, float] | None,
+    you: tuple[float, float] | None,
+    navigating: bool,
+) -> tuple[float, float] | None:
+    """Mirror of MapFieldChrome.destField. YOU when idle, dest while navigating."""
+    if navigating:
+        return dest
+    return you if you is not None else dest
+
+
 def maneuver_live(has_destination: bool, has_route: bool) -> bool:
     """Mirror of MapFieldChrome.maneuverLive."""
     return has_destination and has_route
@@ -64,6 +75,14 @@ def chrome_sleep_blocked(
 
 
 class ManeuverHUDTests(unittest.TestCase):
+    def test_dest_field_is_you_when_idle_and_dest_while_navigating(self):
+        dest = (31.75800, -106.48700)
+        you = (31.76190, -106.49000)
+        self.assertEqual(dest_field(dest, you, False), you)
+        self.assertEqual(dest_field(dest, you, True), dest)
+        self.assertEqual(dest_field(dest, None, False), dest)
+        self.assertIsNone(dest_field(None, None, False))
+
     def test_remaining_shrinks_along_the_line(self):
         start = (31.76190, -106.49000)
         mid = (31.76300, -106.49000)
@@ -102,8 +121,13 @@ class ManeuverHUDTests(unittest.TestCase):
         rail = chrome.split("struct MapFieldDestRail")[1]
         self.assertIn("remaining", rail)
         self.assertIn("navigating", rail)
-        self.assertIn("VoiceNav.remainingHUD", chrome)
+        self.assertIn("MapFieldChrome.liveRemainingHUD", chrome)
+        self.assertIn("MapFieldChrome.destField", chrome)
+        self.assertIn("func destField(", route)
+        self.assertIn("func liveRemainingHUD(", route)
+        self.assertNotIn("VoiceNav.remainingHUD(runtime.routeCoords)", chrome)
         self.assertIn("MapFieldChrome.maneuverLive", chrome)
+        self.assertNotIn("dest ?? you", chrome)
         self.assertIn("Theme.fix", rail)
         self.assertIn("chip(MapFieldDestMode.turns)", rail)
         self.assertNotIn("chip(MapFieldDestMode.coordinates)", rail)

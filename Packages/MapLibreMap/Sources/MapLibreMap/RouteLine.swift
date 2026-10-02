@@ -422,8 +422,8 @@ public enum MapFieldChrome: Sendable {
         return hasDestination || hasYouFix
     }
 
-    /// Dest pin while navigating. Live YOU when idle. Never a DEST pair.
-    /// No dest and no YOU stays quiet — the rail does not print NO FIX as a fake dest.
+    /// Slot text so the dest rail mounts. The numbers the rail prints are
+    /// `destField` — live YOU when idle, dest pin while navigating.
     public static func destLine(
         dest: (lat: Double, lon: Double)? = nil,
         you: (lat: Double, lon: Double)? = nil
@@ -431,6 +431,36 @@ public enum MapFieldChrome: Sendable {
         if dest != nil { return destValue(point: dest) }
         if you != nil { return destValue(point: you) }
         return ""
+    }
+
+    /// Live YOU when idle. Dest pin while a WALK or DRIVE line is up.
+    /// Dest without YOU still prints the pin so a last-known dest is not NO FIX.
+    public static func destField(
+        dest: (lat: Double, lon: Double)?,
+        you: (lat: Double, lon: Double)?,
+        navigating: Bool
+    ) -> (lat: Double, lon: Double)? {
+        if navigating { return dest }
+        return you ?? dest
+    }
+
+    /// Remaining on the live line from YOU, not the first plot. No YOU keeps
+    /// the drawn length so a last-known path is not a blank rail.
+    public static func liveRemainingHUD(
+        you: (lat: Double, lon: Double)?,
+        dest: (lat: Double, lon: Double)?,
+        coords: [(lat: Double, lon: Double)],
+        travelMode: TravelMode
+    ) -> String {
+        guard coords.count >= 2 else { return "" }
+        guard let you else { return VoiceNav.remainingHUD(coords) }
+        let remaining = LiveNav.progress(
+            you: you,
+            dest: dest,
+            coords: coords,
+            travelMode: travelMode
+        ).remainingCoords
+        return VoiceNav.remainingHUD(remaining)
     }
 
     /// Coordinate pair formatter. MAP COORDINATES rail passes dest or YOU.

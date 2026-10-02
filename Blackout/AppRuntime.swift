@@ -1243,11 +1243,13 @@ final class AppRuntime {
 
     func navigate(mode: TravelMode, speak: Bool = true) {
         touch(.dock)
-        speechChrome = ""
+        if speak {
+            speechChrome = ""
+            liveSpokenTurn = ""
+            liveArrived = false
+            clearSpeakTurns()
+        }
         travelMode = mode
-        liveSpokenTurn = ""
-        liveArrived = false
-        clearSpeakTurns()
         navSeq += 1
         let seq = navSeq
         let pack = packs?.active
@@ -1277,7 +1279,6 @@ final class AppRuntime {
             return
         }
         routeTarget = dest
-        routeCoords = []
         navChrome = ""
         routeChrome = WalkDriveChip.working(mode: mode)
         let id = pack?.id
@@ -1308,7 +1309,11 @@ final class AppRuntime {
                 if RouteLine.shouldDraw(plan.coords) {
                     DeskNav.save(mode)
                 }
-                if speak { self.speakMap() }
+                if speak {
+                    self.speakMap()
+                } else {
+                    self.applyLiveGuide()
+                }
             }
         }
     }
@@ -2705,7 +2710,7 @@ final class AppRuntime {
             let now = Date().timeIntervalSince1970
             if now - lastLiveRerouteAt >= LiveNav.replanSeconds {
                 lastLiveRerouteAt = now
-                navigate(mode: travelMode)
+                navigate(mode: travelMode, speak: false)
             }
             return
         }

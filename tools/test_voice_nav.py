@@ -589,7 +589,14 @@ class VoiceNavSourceContracts(unittest.TestCase):
         self.assertIn("LiveNav.progress", guide)
         self.assertIn("VoiceNav.arrive", guide)
         self.assertIn("SpeakStatus.offRouteLine", guide)
-        self.assertIn("navigate(mode: travelMode)", guide)
+        self.assertIn("navigate(mode: travelMode, speak: false)", guide)
+        nav_head = nav.split("Task {", 1)[0]
+        from_guard = nav_head.split("guard let from = fieldYou", 1)[1]
+        self.assertNotIn(
+            "routeCoords = []",
+            from_guard,
+            "WALK/DRIVE must keep the last silver line up while GraphPlan runs",
+        )
         self.assertIn("remainingCoords", guide)
         self.assertIn("liveSpokenTurn", guide)
         self.assertIn("cue.speakTurn", guide)
@@ -635,6 +642,7 @@ class VoiceNavSourceContracts(unittest.TestCase):
         self.assertIn("testVoiceNavOffGraphIsFullHonestSentence", tests)
         self.assertIn("testVoiceNavDestWithoutYouNamesNoFix", tests)
         self.assertIn("testGraphPlanRefusesAFarSnapAndStitchesANearYou", tests)
+        self.assertIn("testMidBlockDoesNotBacktrackToTheCrowFlyNode", tests)
         self.assertIn("testVoiceNavDriveTurnByTurnUsesDriveNotWalk", tests)
         self.assertIn("testDriveTakesTheFasterRoadNotTheShortestResidential", tests)
         self.assertIn("testVoiceNavNamesTheStreetsItTurnsOnto", tests)

@@ -402,6 +402,8 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertIn("case turns", self.route_line)
         self.assertIn('return "TURNS"', self.route_line)
         self.assertIn("func destValue(", self.route_line)
+        self.assertIn("func destField(", self.route_line)
+        self.assertIn("func liveRemainingHUD(", self.route_line)
         self.assertIn("func destRailVisible(", self.route_line)
         self.assertIn("hasYouFix", self.route_line)
         self.assertNotIn("destActive", self.route_line)
@@ -416,6 +418,9 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertIn("Theme.Motion.beat", chrome)
         self.assertIn("@State private var beat", chrome)
         self.assertIn("MapFieldChrome.destValue", chrome)
+        self.assertIn("MapFieldChrome.destField", chrome)
+        self.assertIn("MapFieldChrome.liveRemainingHUD", chrome)
+        self.assertNotIn("VoiceNav.remainingHUD(runtime.routeCoords)", chrome)
         self.assertIn("Text(field)", chrome)
         rail = chrome.split("struct MapFieldDestRail")[1]
         self.assertNotIn("chip(MapFieldDestMode.coordinates)", rail)
