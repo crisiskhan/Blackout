@@ -1047,6 +1047,8 @@ class AdultDeskTests(unittest.TestCase):
         self.assertNotIn("iframe_embed", desk)
         self.assertIn("func pullAdult(", sock)
         self.assertIn("func pullAdultStills(", sock)
+        self.assertIn("nonisolated static func stillPreview", sock)
+        self.assertIn("kCGImageSourceThumbnailMaxPixelSize", sock)
         self.assertIn("func liveAdult(", sock)
         self.assertIn("fetchAdult", sock)
         self.assertIn("adultRooms", sock)
@@ -1071,6 +1073,8 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("pullAdultStills", tv)
         self.assertIn('HUDField("SEARCH"', tv)
         self.assertIn("HUDWrapRail", tv)
+        self.assertIn("prefix(12)", tv)
+        self.assertIn("naStillCache", tv)
         self.assertIn("naKind", tv)
         self.assertIn("naQuery", tv)
         self.assertIn("AdultDesk.pick", tv)
@@ -1082,6 +1086,7 @@ class AdultDeskTests(unittest.TestCase):
         gate = na_gate_body(tv)
         self.assertIn("NaLiveWell", gate)
         self.assertIn("naLiveRows", gate)
+        self.assertNotIn("pullAdultStills", gate)
         self.assertNotIn("NaLiveWell", open_body(tv))
         self.assertIn("LIVE", live)
         self.assertIn("AdultDesk.Room", live)
@@ -1107,6 +1112,11 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("Task.detached", sock)
         watch = tv.split(".task")[1].split("private var you")[0]
         self.assertNotIn("pullAdult", watch)
+        count = tv.split("onChange(of: runtime.updateSocket.adultRooms.count)")[1].split("onChange(of: naPageKey)")[0]
+        self.assertNotIn("pullAdultStills", count)
+        page = tv.split("onChange(of: naPageKey)")[1].split(".task")[0]
+        self.assertIn("pullAdultStills", page)
+        self.assertIn("Task {", page)
         rooms = [
             {"id": f"adult-{index}", "name": f"R{index}", "handle": f"r{index}", "url": "", "viewers": 100 - index}
             for index in range(30)
@@ -1142,7 +1152,7 @@ class NaLiveTests(unittest.TestCase):
         self.assertIn('HUDField("SEARCH"', gate)
         self.assertIn("HUDWrapRail", gate)
         self.assertIn("still:", gate)
-        self.assertIn("pullAdultStills", gate)
+        self.assertNotIn("pullAdultStills", gate)
         self.assertNotIn("DeskLive", gate)
 
 

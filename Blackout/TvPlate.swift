@@ -15,6 +15,7 @@ struct TvPlate: View {
     @State private var naOffset = 0
     @State private var naKind = "ALL"
     @State private var naQuery = ""
+    @State private var naStillCache: [String: UIImage] = [:]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -63,15 +64,18 @@ struct TvPlate: View {
             if ok {
                 resetNaPage()
                 runtime.updateSocket.pullAdult()
-                runtime.updateSocket.pullAdultStills(naPageRows)
             }
         }
         .onChange(of: runtime.updateSocket.adultRooms.count) { _, _ in
             clampNaOffset()
-            runtime.updateSocket.pullAdultStills(naPageRows)
         }
         .onChange(of: naPageKey) { _, _ in
-            runtime.updateSocket.pullAdultStills(naPageRows)
+            refreshNaStills()
+            let rows = naPageRows
+            Task { runtime.updateSocket.pullAdultStills(rows) }
+        }
+        .onChange(of: runtime.updateSocket.updatedAt) { _, _ in
+            refreshNaStills()
         }
         .task {
             runtime.pullMapSnap()
@@ -148,7 +152,7 @@ struct TvPlate: View {
     }
 
     private var naKindChips: [String] {
-        ["ALL"] + AdultDesk.kinds(runtime.updateSocket.adultRooms)
+        ["ALL"] + Array(AdultDesk.kinds(runtime.updateSocket.adultRooms).prefix(12))
     }
 
     private var naEmptyChrome: String {
@@ -205,11 +209,6 @@ struct TvPlate: View {
                 }
             }
         }
-        .onAppear {
-            if naUnlocked {
-                runtime.updateSocket.pullAdultStills(naPageRows)
-            }
-        }
     }
 
     private var naFindRail: some View {
@@ -232,7 +231,9 @@ struct TvPlate: View {
             }
         }
         .onChange(of: naQuery) { _, _ in
-            resetNaPage()
+            if naOffset != 0 || naPlayingID != nil {
+                resetNaPage()
+            }
         }
     }
 
@@ -389,7 +390,24 @@ struct TvPlate: View {
         .accessibilityHint("TAP")
     }
 
+    private func refreshNaStills() {
+        var next: [String: UIImage] = [:]
+        let folder = SnapManifest.folder()
+        for row in naPageRows {
+            if let hit = naStillCache[row.id] {
+                next[row.id] = hit
+                continue
+            }
+            let url = folder.appendingPathComponent("cam-\(row.id).jpg")
+            if let image = UIImage(contentsOfFile: url.path) {
+                next[row.id] = image
+            }
+        }
+        naStillCache = next
+    }
+
     private func still(id: String) -> UIImage? {
+        if let hit = naStillCache[id] { return hit }
         _ = runtime.updateSocket.updatedAt
         _ = runtime.updateSocket.busy
         let url = SnapManifest.folder().appendingPathComponent("cam-\(id).jpg")

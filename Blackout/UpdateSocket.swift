@@ -1,5 +1,7 @@
+import CoreGraphics
 import CryptoKit
 import Foundation
+import ImageIO
 import MapLibreMap
 import Network
 import Observation
@@ -137,7 +139,10 @@ final class UpdateSocket {
             adultStillQueued = rows
             return
         }
+        let folder = SnapManifest.folder()
         let jobs = rows.compactMap { row -> (String, String)? in
+            let dest = folder.appendingPathComponent("cam-\(row.id).jpg")
+            if FileManager.default.fileExists(atPath: dest.path) { return nil }
             guard let image = AdultDesk.still(row.image) else { return nil }
             return (row.id, image)
         }
@@ -169,7 +174,7 @@ final class UpdateSocket {
             for job in jobs {
                 group.addTask {
                     guard let data = await UpdateSocket.fetchAdult(session, job.1) else { return nil }
-                    guard let jpeg = UpdateSocket.stillJPEG(data), jpeg.count > 32 else { return nil }
+                    guard let jpeg = UpdateSocket.stillPreview(data), jpeg.count > 32 else { return nil }
                     return (job.0, jpeg)
                 }
             }
@@ -599,6 +604,32 @@ final class UpdateSocket {
             let rows = try? JSONDecoder().decode([PackCam].self, from: data)
         else { return [] }
         return rows.filter { !$0.id.isEmpty && $0.url.hasPrefix("https://") }
+    }
+
+    /// Adult well still. JPEG only, down to a 640px edge so TV does not jet.
+    nonisolated static func stillPreview(_ data: Data, maxEdge: Int = 640) -> Data? {
+        guard let jpeg = stillJPEG(data), jpeg.count > 32 else { return nil }
+        guard let src = CGImageSourceCreateWithData(jpeg as CFData, nil) else { return jpeg }
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: max(64, maxEdge),
+        ]
+        guard let cg = CGImageSourceCreateThumbnailAtIndex(src, 0, options as CFDictionary) else {
+            return jpeg
+        }
+        let out = NSMutableData()
+        guard let dest = CGImageDestinationCreateWithData(out, "public.jpeg" as CFString, 1, nil) else {
+            return jpeg
+        }
+        CGImageDestinationAddImage(
+            dest,
+            cg,
+            [kCGImageDestinationLossyCompressionQuality: 0.7] as CFDictionary
+        )
+        guard CGImageDestinationFinalize(dest) else { return jpeg }
+        let preview = out as Data
+        return preview.count > 32 ? preview : jpeg
     }
 
     /// Raw JPEG, or TxDOT JSON `{snippet: base64 jpeg}`. Nothing else.
