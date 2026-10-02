@@ -14,6 +14,7 @@ import math
 import re
 import sys
 import unittest
+import urllib.parse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -271,7 +272,7 @@ def adult_playlist(raw: str) -> str | None:
     low = text.lower()
     if "/cpa/" in low or "mouflon-advert" in low:
         return None
-    if ".m3u8" not in low:
+    if ".m3u8" not in low and ".mp4" not in low:
         return None
     return text
 
@@ -464,6 +465,14 @@ def adult_pick(rooms: list[dict], kind: str = "", query: str = "") -> list[dict]
             if needle not in blob:
                 continue
         out.append(room)
+    if faces:
+        out.sort(
+            key=lambda room: (
+                -int(room.get("seconds") or 0),
+                -int(room.get("viewers") or 0),
+                str(room.get("name") or ""),
+            )
+        )
     return out
 
 
@@ -492,7 +501,134 @@ def adult_face_room(handle: str, payload: object) -> dict | None:
         "image": adult_image(payload),
         "kinds": adult_room_kinds(payload),
         "seek": f"{handle} {title}".strip().lower(),
+        "seconds": 0,
     }
+
+
+def adult_face_queries(kind: str) -> list[str]:
+    needles = adult_face_needles(kind) or []
+    out: list[str] = []
+    seen: set[str] = set()
+    chip = str(kind or "").strip().lower()
+    for raw in [chip] + list(needles):
+        query = str(raw or "").strip().lower()
+        if len(query) < 6 or query in seen:
+            continue
+        seen.add(query)
+        out.append(query)
+    return out
+
+
+def adult_face_search(query: str, page: int = 1) -> str | None:
+    q = str(query or "").strip()
+    if not q:
+        return None
+    start = max(1, int(page))
+    encoded = urllib.parse.quote(q, safe="-")
+    return (
+        "https://www.eporner.com/api/v2/video/search/"
+        f"?query={encoded}&per_page=30&page={start}&order=longest&format=json&gay=0"
+    )
+
+
+def adult_face_file(token: str) -> str | None:
+    ident = str(token or "").strip()
+    if not ident or not all(ch.isalnum() for ch in ident):
+        return None
+    return f"https://www.eporner.com/dload/{ident}/720/video.mp4"
+
+
+def adult_clock(seconds: int) -> str:
+    total = max(0, int(seconds))
+    hours, rem = divmod(total, 3600)
+    minutes, rest = divmod(rem, 60)
+    if hours:
+        return f"{hours}:{minutes:02d}:{rest:02d}"
+    return f"{minutes}:{rest:02d}"
+
+
+def _adult_face_spam(blob: str) -> bool:
+    text = str(blob or "").lower()
+    if "library" in text:
+        return True
+    if "exclusive video" in text:
+        return True
+    if "see everything" in text:
+        return True
+    if "private content" in text:
+        return True
+    if ".club" in text:
+        return True
+    return False
+
+
+def adult_parse_face(payload: object, kind: str) -> list[dict]:
+    needles = adult_face_needles(kind) or []
+    if not needles or not isinstance(payload, dict):
+        return []
+    rows: list[dict] = []
+    seen: set[str] = set()
+    for model in payload.get("videos") or []:
+        if not isinstance(model, dict):
+            continue
+        token = str(model.get("id") or "").strip()
+        raw_title = str(model.get("title") or "")
+        if "\u200b" in raw_title:
+            continue
+        play = adult_playlist(adult_face_file(token) or "")
+        title = raw_title.strip()
+        keys = str(model.get("keywords") or "")
+        if not play or not title or not adult_allows(title) or not adult_clean(title) or not adult_clean(keys):
+            continue
+        if _adult_face_spam(title) or _adult_face_spam(keys):
+            continue
+        blob = f"{title} {keys}".lower()
+        compact = blob.replace(" ", "")
+        hit = False
+        for needle in needles:
+            text = needle.lower()
+            if " " in text:
+                if text in blob:
+                    hit = True
+                    break
+            elif text in blob or text in compact:
+                hit = True
+                break
+        if not hit:
+            continue
+        rid = f"adult-face-{token.lower()}"
+        if rid in seen:
+            continue
+        seen.add(rid)
+        thumb = ""
+        default = model.get("default_thumb")
+        if isinstance(default, dict):
+            thumb = adult_still(str(default.get("src") or "")) or ""
+        try:
+            seconds = int(model.get("length_sec") or 0)
+        except (TypeError, ValueError):
+            seconds = 0
+        if seconds <= 0:
+            continue
+        try:
+            views = int(model.get("views") or 0)
+        except (TypeError, ValueError):
+            views = 0
+        rows.append(
+            {
+                "id": rid,
+                "name": title.upper(),
+                "handle": token,
+                "url": play,
+                "viewers": views,
+                "image": thumb,
+                "kinds": [],
+                "seek": f"{title} {' '.join(needles)}".strip().lower(),
+                "seconds": seconds,
+            }
+        )
+    rows.sort(key=lambda row: (-int(row["seconds"]), str(row["name"])))
+    return rows
 
 
 def adult_rooms(payload: object) -> list[dict]:
@@ -561,6 +697,7 @@ def adult_rooms(payload: object) -> list[dict]:
                 "image": adult_image(model),
                 "kinds": adult_room_kinds(model),
                 "seek": adult_seek(model),
+                "seconds": 0,
             }
         )
     rooms.sort(key=lambda row: (-int(row["viewers"]), str(row["name"])))
@@ -1255,8 +1392,75 @@ class AdultDeskTests(unittest.TestCase):
                 },
             )
         )
+        self.assertIn("mulan vuitton", adult_face_queries("MULAN VUITTON"))
+        self.assertIn("itsstephhoney21", adult_face_queries("ITSSTEPHHONEY21"))
+        self.assertIn("query=mulan%20vuitton", adult_face_search("mulan vuitton") or "")
+        self.assertEqual(
+            adult_face_file("L3HLNRZy6sk"),
+            "https://www.eporner.com/dload/L3HLNRZy6sk/720/video.mp4",
+        )
+        self.assertIsNone(adult_face_file("mulan vuitton"))
+        self.assertEqual(adult_clock(184), "3:04")
+        self.assertEqual(adult_clock(3661), "1:01:01")
+        clips = adult_parse_face(
+            {
+                "videos": [
+                    {
+                        "id": "JpvjXbC6Ehu",
+                        "title": "Mulan \u200bvuitton \u200bComplete \u200bLibrary \u200bAt \u200b",
+                        "length_sec": 488,
+                        "views": 10,
+                        "keywords": "amateur",
+                        "default_thumb": {"src": "https://img.example/leak.jpg"},
+                    },
+                    {
+                        "id": "L3HLNRZy6sk",
+                        "title": "Mulan Vuitton",
+                        "length_sec": 184,
+                        "views": 17514,
+                        "keywords": "big ass, ebony, Mulan Vuitton",
+                        "default_thumb": {"src": "https://img.example/mulan.jpg"},
+                    },
+                    {
+                        "id": "shortclip1",
+                        "title": "Mulan Vuitton night",
+                        "length_sec": 90,
+                        "views": 9,
+                        "keywords": "Mulan Vuitton",
+                        "default_thumb": {"src": "https://img.example/night.jpg"},
+                    },
+                    {
+                        "id": "erika1",
+                        "title": "Erika Vuitton Couch",
+                        "length_sec": 2109,
+                        "views": 99,
+                        "keywords": "erika vuitton",
+                    },
+                    {
+                        "id": "teen1",
+                        "title": "Mulan Vuitton teen",
+                        "length_sec": 600,
+                        "views": 5,
+                        "keywords": "Mulan Vuitton",
+                    },
+                ]
+            },
+            "MULAN VUITTON",
+        )
+        self.assertEqual([row["id"] for row in clips], ["adult-face-l3hlnrzy6sk", "adult-face-shortclip1"])
+        self.assertEqual(clips[0]["seconds"], 184)
+        self.assertEqual(clips[0]["url"], "https://www.eporner.com/dload/L3HLNRZy6sk/720/video.mp4")
+        self.assertEqual(
+            [row["id"] for row in adult_pick(clips, kind="MULAN VUITTON")],
+            ["adult-face-l3hlnrzy6sk", "adult-face-shortclip1"],
+        )
+        self.assertEqual(adult_parse_face({"videos": []}, "ITSSTEPHHONEY21"), [])
         self.assertTrue(adult_allows("alpha"))
         self.assertFalse(adult_allows("teenstar"))
+        self.assertEqual(
+            adult_playlist("https://www.eporner.com/dload/L3HLNRZy6sk/720/video.mp4"),
+            "https://www.eporner.com/dload/L3HLNRZy6sk/720/video.mp4",
+        )
         self.assertIsNone(adult_playlist("http://insecure.example/x.m3u8"))
         self.assertIsNone(
             adult_playlist("https://media-hls.example/b-hls-1/cpa/v2/stream.m3u8")
@@ -1323,6 +1527,14 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("static func topics(", desk)
         self.assertIn("static func faceNeedles(", desk)
         self.assertIn("static func faceRoom(", desk)
+        self.assertIn("static func faceQueries(", desk)
+        self.assertIn("static func faceSearch(", desk)
+        self.assertIn("static func faceFile(", desk)
+        self.assertIn("static func parseFace(", desk)
+        self.assertIn("static func clock(", desk)
+        self.assertIn("var seconds:", desk)
+        self.assertIn("eporner.com", desk.lower())
+        self.assertIn(".mp4", desk)
         self.assertIn("static func rail(", desk)
         self.assertIn("&tag=", desk)
         self.assertIn("var seek:", desk)
@@ -1356,6 +1568,9 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("AdultDesk.faceNeedles", sock)
         self.assertIn("AdultDesk.faceRoom", sock)
         self.assertIn("fetchAdultFaces", sock)
+        self.assertIn("fetchAdultFaceFiles", sock)
+        self.assertIn("AdultDesk.parseFace", sock)
+        self.assertIn("AdultDesk.faceSearch", sock)
         self.assertIn("func pullAdultStills(", sock)
         self.assertIn("nonisolated static func stillPreview", sock)
         self.assertIn("kCGImageSourceThumbnailMaxPixelSize", sock)
@@ -1399,6 +1614,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertNotIn("pullAdultStills", gate)
         self.assertNotIn("NaLiveWell", open_body(tv))
         self.assertIn("LIVE", live)
+        self.assertIn("AdultDesk.clock", live)
         self.assertIn("AdultDesk.Room", live)
         self.assertIn("onPlay", live)
         self.assertIn("handle", live)

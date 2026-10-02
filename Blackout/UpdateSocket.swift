@@ -226,6 +226,11 @@ final class UpdateSocket {
                 batches.append(found)
                 adultRooms = AdultDesk.merge(batches)
             }
+            let files = await fetchAdultFaceFiles(session, topic)
+            if !files.isEmpty {
+                batches.append(files)
+                adultRooms = AdultDesk.merge(batches)
+            }
         }
         session.invalidateAndCancel()
         adultPlay = adultPlay.filter { key, _ in adultRooms.contains { $0.id == key } }
@@ -274,6 +279,27 @@ final class UpdateSocket {
             }
             for await hit in group {
                 if let hit { rooms.append(hit) }
+            }
+        }
+        return rooms
+    }
+
+    private func fetchAdultFaceFiles(_ session: URLSession, _ kind: String) async -> [AdultDesk.Room] {
+        var rooms: [AdultDesk.Room] = []
+        await withTaskGroup(of: [AdultDesk.Room].self) { group in
+            for query in AdultDesk.faceQueries(kind) {
+                for page in 1...2 {
+                    guard let path = AdultDesk.faceSearch(query, page: page) else { continue }
+                    group.addTask {
+                        guard let data = await UpdateSocket.fetchAdult(session, path) else { return [] }
+                        return await Task.detached(priority: .utility) {
+                            AdultDesk.parseFace(data, kind: kind)
+                        }.value
+                    }
+                }
+            }
+            for await batch in group {
+                if !batch.isEmpty { rooms.append(contentsOf: batch) }
             }
         }
         return rooms

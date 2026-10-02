@@ -31,7 +31,7 @@ enum NaLive {
                 viewers: room.viewers,
                 image: room.image,
                 kinds: room.kinds,
-                range: "LIVE"
+                range: room.seconds > 0 ? AdultDesk.clock(room.seconds) : "LIVE"
             )
         }
     }
