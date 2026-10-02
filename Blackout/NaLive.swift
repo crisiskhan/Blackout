@@ -187,7 +187,12 @@ struct NaLiveWell: View {
             return
         }
         guard playingID == row.id else { return }
-        let item = AVPlayerItem(url: url)
+        let item = AVPlayerItem(
+            asset: AVURLAsset(
+                url: url,
+                options: ["AVURLAssetHTTPHeaderFieldsKey": AdultDesk.playHeaders(raw)]
+            )
+        )
         item.preferredForwardBufferDuration = 6
         item.preferredPeakBitRate = 0
         let next = AVPlayer(playerItem: item)

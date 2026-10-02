@@ -263,6 +263,7 @@ final class UpdateSocket {
     private func fetchFacePages(_ session: URLSession, _ kind: String) async -> [[AdultDesk.Room]] {
         var batches: [[AdultDesk.Room]] = []
         let paths = AdultDesk.faceHunt(kind)
+        let gift = await fetchGiftAuth(session)
         await withTaskGroup(of: [AdultDesk.Room].self) { group in
             var next = 0
             var inflight = 0
@@ -272,7 +273,11 @@ final class UpdateSocket {
                     next += 1
                     inflight += 1
                     group.addTask {
-                        guard let data = await UpdateSocket.fetchAdult(session, path) else { return [] }
+                        guard let data = await UpdateSocket.fetchAdult(
+                            session,
+                            path,
+                            headers: AdultDesk.giftHeaders(path, token: gift.token, session: gift.session)
+                        ) else { return [] }
                         return await Task.detached(priority: .utility) {
                             AdultDesk.parseFace(data, kind: kind)
                         }.value
@@ -327,15 +332,28 @@ final class UpdateSocket {
     }
 
     private func fetchAdultFaceFiles(_ session: URLSession, _ kind: String) async -> [AdultDesk.Room] {
-        let batches = await fetchAdultBatches(session, paths: AdultDesk.faceHunt(kind)) {
+        let gift = await fetchGiftAuth(session)
+        let batches = await fetchAdultBatches(
+            session,
+            paths: AdultDesk.faceHunt(kind),
+            headersFor: { AdultDesk.giftHeaders($0, token: gift.token, session: gift.session) }
+        ) {
             AdultDesk.parseFace($0, kind: kind)
         }
         return batches.flatMap { $0 }
     }
 
+    private func fetchGiftAuth(_ session: URLSession) async -> (token: String, session: String) {
+        guard let data = await UpdateSocket.fetchAdult(session, AdultDesk.giftAuth) else {
+            return ("", "")
+        }
+        return (AdultDesk.giftToken(data) ?? "", AdultDesk.giftSession(data) ?? "")
+    }
+
     private func fetchAdultBatches(
         _ session: URLSession,
         paths: [String],
+        headersFor: (@Sendable (String) -> [String: String])? = nil,
         parse: @escaping @Sendable (Data) -> [AdultDesk.Room]
     ) async -> [[AdultDesk.Room]] {
         var batches: [[AdultDesk.Room]] = []
@@ -348,7 +366,9 @@ final class UpdateSocket {
                     next += 1
                     inflight += 1
                     group.addTask {
-                        guard let data = await UpdateSocket.fetchAdult(session, path) else { return [] }
+                        let headers = headersFor?(path) ?? [:]
+                        guard let data = await UpdateSocket.fetchAdult(session, path, headers: headers)
+                        else { return [] }
                         return await Task.detached(priority: .utility) {
                             parse(data)
                         }.value
@@ -644,16 +664,24 @@ final class UpdateSocket {
         }
     }
 
-    nonisolated static func fetchAdult(_ session: URLSession, _ raw: String) async -> Data? {
-        await adultGet(session, raw)
+    nonisolated static func fetchAdult(
+        _ session: URLSession,
+        _ raw: String,
+        headers: [String: String] = [:]
+    ) async -> Data? {
+        await adultGet(session, raw, headers: headers)
     }
 
     nonisolated static func fetchAdultPost(_ session: URLSession, _ raw: String, body: String) async -> Data? {
         await adultPost(session, raw, body: body)
     }
 
-    nonisolated private static func adultGet(_ session: URLSession, _ raw: String) async -> Data? {
-        guard let request = adultRequest(raw) else { return nil }
+    nonisolated private static func adultGet(
+        _ session: URLSession,
+        _ raw: String,
+        headers: [String: String] = [:]
+    ) async -> Data? {
+        guard let request = adultRequest(raw, headers: headers) else { return nil }
         return await adultData(session, request)
     }
 
@@ -665,7 +693,10 @@ final class UpdateSocket {
         return await adultData(session, request)
     }
 
-    nonisolated private static func adultRequest(_ raw: String) -> URLRequest? {
+    nonisolated private static func adultRequest(
+        _ raw: String,
+        headers: [String: String] = [:]
+    ) -> URLRequest? {
         guard let url = URL(string: raw), url.scheme?.lowercased() == "https" else { return nil }
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
@@ -674,6 +705,9 @@ final class UpdateSocket {
         request.setValue(AdultDesk.referer(raw), forHTTPHeaderField: "Referer")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("XMLHttpRequest", forHTTPHeaderField: "X-Requested-With")
+        for (key, value) in headers where !key.isEmpty && !value.isEmpty {
+            request.setValue(value, forHTTPHeaderField: key)
+        }
         return request
     }
 

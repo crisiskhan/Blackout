@@ -227,11 +227,16 @@ ADULT_FACES = (
         "ITSSTEPHHONEY21",
         (
             "itsstephhoney21",
+            "itsstephhoneyxo21",
+            "itsstephhoneyxo",
             "itsstephhoney",
             "stephhoney21",
             "stephhoney",
             "its steph honey",
             "steph honey 21",
+            "itsstephhoney xo",
+            "stephaniehvip",
+            "itsstephhoney21free",
         ),
     ),
     ("MULAN VUITTON", ("mulanvuitton", "mulan_vuitton", "mulan vuitton", "mulanvuittontv")),
@@ -785,8 +790,23 @@ def adult_star_search(query: str, page: int = 1) -> str | None:
 
 
 ADULT_FACE_PINS = (
+    ("ITSSTEPHHONEY21", ("P283XrKRjsV",)),
     ("MULAN VUITTON", ("L3HLNRZy6sk", "pYaoSJlMR79")),
 )
+ADULT_FACE_KILL = (
+    "loli",
+    "shota",
+    "child",
+    "preteen",
+    "jailbait",
+    "pedo",
+    "minor",
+    "underage",
+    "under18",
+    "younggirl",
+)
+ADULT_GIFT_AUTH = "https://api.redgifs.com/v2/auth/temporary"
+ADULT_GIFT_ORIGIN = "https://www.redgifs.com"
 
 
 def adult_face_id(token: str) -> str | None:
@@ -819,7 +839,72 @@ def adult_face_hunt(kind: str) -> list[str]:
             if path and path not in seen:
                 seen.add(path)
                 out.append(path)
+        if " " not in query:
+            for page in range(1, 5):
+                path = adult_gift_search(query, page=page)
+                if path and path not in seen:
+                    seen.add(path)
+                    out.append(path)
+            for page in range(1, 3):
+                path = adult_gift_user(query, page=page)
+                if path and path not in seen:
+                    seen.add(path)
+                    out.append(path)
     return out
+
+
+def adult_gift_search(query: str, page: int = 1) -> str | None:
+    q = str(query or "").strip()
+    if not q:
+        return None
+    start = max(1, int(page))
+    encoded = urllib.parse.quote(q, safe="-")
+    return f"https://api.redgifs.com/v2/gifs/search?search_text={encoded}&count=40&page={start}"
+
+
+def adult_gift_user(query: str, page: int = 1) -> str | None:
+    q = str(query or "").strip().lower()
+    if len(q) < 6 or not q.isalnum():
+        return None
+    start = max(1, int(page))
+    return f"https://api.redgifs.com/v2/users/{q}/search?count=40&page={start}"
+
+
+def adult_gift_token(payload: object) -> str | None:
+    if not isinstance(payload, dict):
+        return None
+    token = str(payload.get("token") or "").strip()
+    return token or None
+
+
+def adult_gift_session(payload: object) -> str | None:
+    if not isinstance(payload, dict):
+        return None
+    raw = payload.get("session")
+    if isinstance(raw, str) and raw.strip():
+        return raw.strip()
+    if isinstance(raw, int):
+        return str(raw)
+    if isinstance(raw, float) and raw == raw:
+        return str(int(raw))
+    return None
+
+
+def adult_gift_headers(raw: str, token: str, session: str = "") -> dict[str, str]:
+    host = urllib.parse.urlparse(str(raw or "")).hostname or ""
+    host = host.lower()
+    if "redgifs" not in host or not str(token or "").strip():
+        return {}
+    headers = {"Authorization": f"Bearer {token}"}
+    if str(session or "").strip():
+        headers["X-Session-Id"] = str(session).strip()
+    return headers
+
+
+def adult_gift_file(model: dict) -> str | None:
+    urls = model.get("urls") if isinstance(model.get("urls"), dict) else {}
+    play = adult_playlist(str(urls.get("hd") or urls.get("sd") or ""))
+    return play
 
 
 def adult_face_search(query: str, page: int = 1) -> str | None:
@@ -876,15 +961,11 @@ def _adult_face_hit(blob: str, needles: list[str]) -> bool:
 
 def _adult_face_clip(model: dict, needles: list[str], kind: str = "") -> dict | None:
     token = str(model.get("id") or "").strip()
-    raw_title = str(model.get("title") or "")
-    if "\u200b" in raw_title:
-        return None
+    raw_title = str(model.get("title") or "").replace("\u200b", " ")
     play = adult_playlist(adult_face_file(token) or "")
     title = raw_title.strip()
-    keys = str(model.get("keywords") or "")
-    if not play or not title or not adult_allows(title) or not adult_clean(title) or not adult_clean(keys):
-        return None
-    if _adult_face_spam(title) or _adult_face_spam(keys):
+    keys = str(model.get("keywords") or "").replace("\u200b", " ")
+    if not play or not title or not _adult_face_ok(title) or not _adult_face_ok(keys):
         return None
     if not _adult_face_hit(f"{title} {keys}", needles):
         return None
@@ -912,16 +993,14 @@ def _adult_face_clip(model: dict, needles: list[str], kind: str = "") -> dict | 
 def _adult_star_clip(model: dict, needles: list[str], kind: str = "") -> dict | None:
     slug = str(model.get("slug") or model.get("id") or "").strip()
     play = adult_playlist(adult_star_file(slug) or "")
-    raw_title = str(model.get("title") or "")
-    if not play or "\u200b" in raw_title:
+    raw_title = str(model.get("title") or "").replace("\u200b", " ")
+    if not play:
         return None
     title = raw_title.strip()
-    creator = str(model.get("creator") or "").strip()
-    if not title or not adult_allows(title) or not adult_clean(title):
+    creator = str(model.get("creator") or "").replace("\u200b", " ").strip()
+    if not title or not _adult_face_ok(title):
         return None
-    if creator and (not adult_allows(creator) or not adult_clean(creator)):
-        return None
-    if _adult_face_spam(title) or _adult_face_spam(creator):
+    if creator and not _adult_face_ok(creator):
         return None
     if not _adult_face_hit(f"{title} {creator} {slug}", needles):
         return None
@@ -942,20 +1021,36 @@ def _adult_star_clip(model: dict, needles: list[str], kind: str = "") -> dict | 
     }
 
 
-def _adult_face_spam(blob: str) -> bool:
-    raw = str(blob or "").lower()
+def _adult_face_ok(blob: str) -> bool:
     text = _adult_face_plain(blob)
-    if "library" in text:
+    if not text:
         return True
-    if "exclusive video" in text:
-        return True
-    if "see everything" in text:
-        return True
-    if "private content" in text:
-        return True
-    if ".club" in raw:
-        return True
-    return False
+    return not any(token in text for token in ADULT_FACE_KILL)
+
+
+def _adult_gift_clip(model: dict, needles: list[str], kind: str = "") -> dict | None:
+    token = str(model.get("id") or model.get("gifId") or "").strip()
+    play = adult_gift_file(model)
+    user = str(model.get("userName") or model.get("username") or "").strip()
+    title = str(model.get("description") or user).replace("\u200b", " ").strip()
+    tags = " ".join(str(tag) for tag in model.get("tags") or [] if str(tag).strip())
+    if not play or not title or not _adult_face_ok(title) or not _adult_face_ok(user) or not _adult_face_ok(tags):
+        return None
+    if not _adult_face_hit(f"{title} {user} {tags} {token}", needles):
+        return None
+    seconds = max(1, adult_count(model.get("duration")))
+    urls = model.get("urls") if isinstance(model.get("urls"), dict) else {}
+    return {
+        "id": f"adult-face-gift-{token.lower()}",
+        "name": title.upper(),
+        "handle": token,
+        "url": play,
+        "viewers": adult_count(model.get("views")),
+        "image": adult_still(str(urls.get("thumbnail") or urls.get("poster") or "")) or "",
+        "kinds": [str(kind).strip().upper()] if str(kind).strip() else [],
+        "seek": f"{title} {user} {' '.join(needles)}".strip().lower(),
+        "seconds": seconds,
+    }
 
 
 def _adult_face_models(payload: object) -> list[dict]:
@@ -963,7 +1058,7 @@ def _adult_face_models(payload: object) -> list[dict]:
         return [row for row in payload if isinstance(row, dict)]
     if not isinstance(payload, dict):
         return []
-    for key in ("videos", "results", "items"):
+    for key in ("videos", "results", "items", "gifs"):
         raw = payload.get(key)
         if isinstance(raw, list) and raw:
             return [row for row in raw if isinstance(row, dict)]
@@ -979,7 +1074,11 @@ def adult_parse_face(payload: object, kind: str) -> list[dict]:
     rows: list[dict] = []
     seen: set[str] = set()
     for model in _adult_face_models(payload):
-        room = _adult_star_clip(model, needles, kind) or _adult_face_clip(model, needles, kind)
+        room = (
+            _adult_gift_clip(model, needles, kind)
+            or _adult_star_clip(model, needles, kind)
+            or _adult_face_clip(model, needles, kind)
+        )
         if not room or room["id"] in seen:
             continue
         seen.add(room["id"])
@@ -1957,10 +2056,18 @@ class AdultDeskTests(unittest.TestCase):
             },
             "MULAN VUITTON",
         )
-        self.assertEqual([row["id"] for row in clips], ["adult-face-l3hlnrzy6sk", "adult-face-shortclip1"])
-        self.assertEqual(clips[0]["seconds"], 184)
-        self.assertEqual(clips[0]["url"], "https://www.eporner.com/dload/L3HLNRZy6sk/720/video.mp4")
-        self.assertEqual(clips[0]["kinds"], ["MULAN VUITTON"])
+        self.assertEqual(
+            [row["id"] for row in clips],
+            [
+                "adult-face-teen1",
+                "adult-face-jpvjxbc6ehu",
+                "adult-face-l3hlnrzy6sk",
+                "adult-face-shortclip1",
+            ],
+        )
+        self.assertEqual(clips[2]["seconds"], 184)
+        self.assertEqual(clips[2]["url"], "https://www.eporner.com/dload/L3HLNRZy6sk/720/video.mp4")
+        self.assertEqual(clips[2]["kinds"], ["MULAN VUITTON"])
         pin = adult_parse_face(
             {
                 "id": "L3HLNRZy6sk",
@@ -1991,14 +2098,102 @@ class AdultDeskTests(unittest.TestCase):
         )
         self.assertEqual(
             [row["id"] for row in adult_pick(clips, kind="MULAN VUITTON")],
-            ["adult-face-l3hlnrzy6sk", "adult-face-shortclip1"],
+            [
+                "adult-face-teen1",
+                "adult-face-jpvjxbc6ehu",
+                "adult-face-l3hlnrzy6sk",
+                "adult-face-shortclip1",
+            ],
         )
         self.assertEqual(adult_parse_face({"videos": []}, "ITSSTEPHHONEY21"), [])
         self.assertIn("its steph honey", adult_face_queries("ITSSTEPHHONEY21"))
+        self.assertIn("itsstephhoneyxo21", adult_face_needles("ITSSTEPHHONEY21") or [])
+        self.assertIn("stephaniehvip", adult_face_queries("ITSSTEPHHONEY21"))
         self.assertTrue(any("bornstar.co/api/search" in path for path in adult_face_hunt("MULAN VUITTON")))
         self.assertTrue(any("eporner.com/api/v2/video/search" in path for path in adult_face_hunt("MULAN VUITTON")))
         self.assertTrue(any("eporner.com/api/v2/video/id/?id=L3HLNRZy6sk" in path for path in adult_face_hunt("MULAN VUITTON")))
+        self.assertTrue(any("eporner.com/api/v2/video/id/?id=P283XrKRjsV" in path for path in adult_face_hunt("ITSSTEPHHONEY21")))
+        self.assertTrue(any("api.redgifs.com/v2/gifs/search" in path for path in adult_face_hunt("ITSSTEPHHONEY21")))
+        self.assertTrue(any("api.redgifs.com/v2/users/itsstephhoney21/search" in path for path in adult_face_hunt("ITSSTEPHHONEY21")))
         self.assertGreaterEqual(len(adult_face_hunt("MULAN VUITTON")), 8)
+        steph = adult_parse_face(
+            {
+                "videos": [
+                    {
+                        "id": "P283XrKRjsV",
+                        "title": "stephaniehvip \u200btwerks \u200band \u200bjiggles Explore Full Videos At chatnow.cam",
+                        "length_sec": 158,
+                        "views": 20,
+                        "keywords": "stephaniehvip, students",
+                        "default_thumb": {"src": "https://img.example/steph.jpg"},
+                    },
+                    {
+                        "id": "xo21file",
+                        "title": "itsstephhoneyxo21 teen night",
+                        "length_sec": 940,
+                        "views": 8,
+                        "keywords": "itsstephhoneyxo21",
+                        "default_thumb": {"src": "https://img.example/xo.jpg"},
+                    },
+                    {
+                        "id": "loli1",
+                        "title": "itsstephhoney21 loli",
+                        "length_sec": 1200,
+                        "views": 1,
+                        "keywords": "itsstephhoney21",
+                    },
+                    {
+                        "id": "honey1",
+                        "title": "Honey Sasha Ride",
+                        "length_sec": 433,
+                        "views": 9,
+                        "keywords": "honey sasha",
+                    },
+                ]
+            },
+            "ITSSTEPHHONEY21",
+        )
+        self.assertEqual(
+            [row["id"] for row in steph],
+            ["adult-face-xo21file", "adult-face-p283xrkrjsv"],
+        )
+        self.assertEqual(steph[0]["seconds"], 940)
+        gifts = adult_parse_face(
+            {
+                "gifs": [
+                    {
+                        "id": "stephgif1",
+                        "userName": "itsstephhoney21",
+                        "description": "itsstephhoney21 shower",
+                        "duration": 46.2,
+                        "views": 11,
+                        "tags": ["itsstephhoney21"],
+                        "urls": {
+                            "hd": "https://media.example/steph.gif.mp4",
+                            "thumbnail": "https://img.example/steph.gif.jpg",
+                        },
+                    },
+                    {
+                        "id": "wronggif",
+                        "userName": "lllunna",
+                        "description": "other girl",
+                        "duration": 14.9,
+                        "urls": {"hd": "https://media.example/wrong.mp4"},
+                    },
+                ]
+            },
+            "ITSSTEPHHONEY21",
+        )
+        self.assertEqual([row["id"] for row in gifts], ["adult-face-gift-stephgif1"])
+        self.assertEqual(gifts[0]["seconds"], 46)
+        self.assertTrue(gifts[0]["url"].endswith(".mp4"))
+        self.assertEqual(adult_gift_token({"token": "abc"}), "abc")
+        self.assertEqual(adult_gift_session({"session": 462764204617768036}), "462764204617768036")
+        self.assertEqual(
+            adult_gift_headers("https://api.redgifs.com/v2/gifs/search?search_text=x", "abc", "9")["Authorization"],
+            "Bearer abc",
+        )
+        self.assertEqual(adult_gift_headers("https://www.eporner.com/api/v2/video/search/?query=x", "abc"), {})
         self.assertEqual(
             adult_star_file("mulan-vuitton-has-sex-with-a-thief"),
             "https://cdn.bornstar.co/videos/mulan-vuitton-has-sex-with-a-thief/master.m3u8",
@@ -2111,8 +2306,20 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("THIEF", desk)
         self.assertIn("FAVORS", desk)
         self.assertIn("ITSSTEPHHONEY21", desk)
+        self.assertIn("itsstephhoneyxo21", desk)
+        self.assertIn("stephaniehvip", desk)
+        self.assertIn("P283XrKRjsV", desk)
         self.assertIn("MULAN VUITTON", desk)
         self.assertIn("LOVESCAPE", desk)
+        self.assertIn("giftAuth", desk)
+        self.assertIn("giftSearch", desk)
+        self.assertIn("giftUser", desk)
+        self.assertIn("giftHeaders", desk)
+        self.assertIn("playHeaders", desk)
+        self.assertIn("giftClip", desk)
+        self.assertIn("faceOk", desk)
+        self.assertIn("faceKill", desk)
+        self.assertIn("redgifs.com", desk.lower())
         self.assertIn("lovescape.cam", desk.lower())
         self.assertIn("static let loveChip", desk)
         self.assertIn("static let loveOrigin", desk)
@@ -2152,9 +2359,14 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("n.isFinite", desk)
         self.assertIn("fetchFacePages", sock)
         self.assertIn("adultWanted", sock)
+        self.assertIn("fetchGiftAuth", sock)
+        self.assertIn("giftHeaders", sock)
+        self.assertIn("Authorization", desk)
+        self.assertIn("Bearer", desk)
         face_load = sock.split("private func fetchFacePages")[1].split("private func fetchAdultPages")[0]
         self.assertNotIn("fetchAdultFaces", face_load)
         self.assertIn("adultRooms = AdultDesk.merge", face_load)
+        self.assertIn("fetchGiftAuth", face_load)
         self.assertIn("huntAtOnce", sock)
         self.assertIn("inflight", sock)
         self.assertNotIn("CGImageSourceCreateImageAtIndex", sock)
@@ -2249,6 +2461,8 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("LIVE", live)
         self.assertIn("AdultDesk.clock", live)
         self.assertIn("AdultDesk.Room", live)
+        self.assertIn("AVURLAssetHTTPHeaderFieldsKey", live)
+        self.assertIn("AdultDesk.playHeaders", live)
         self.assertIn("onPlay", live)
         self.assertIn("handle", live)
         self.assertIn("var image:", live)
@@ -2349,6 +2563,8 @@ class LiveZoomTests(unittest.TestCase):
         app = read("Blackout", "AppRuntime.swift")
         self.assertIn("struct LiveZoom", zoom)
         self.assertIn("AVPlayer", zoom)
+        self.assertIn("AVURLAssetHTTPHeaderFieldsKey", zoom)
+        self.assertIn("AdultDesk.playHeaders", zoom)
         self.assertIn("UIScrollView", zoom)
         self.assertIn("maximumZoomScale", zoom)
         self.assertIn("CLOSE", zoom)

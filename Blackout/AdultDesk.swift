@@ -124,16 +124,36 @@ enum AdultDesk {
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", [
             "itsstephhoney21",
+            "itsstephhoneyxo21",
+            "itsstephhoneyxo",
             "itsstephhoney",
             "stephhoney21",
             "stephhoney",
             "its steph honey",
             "steph honey 21",
+            "itsstephhoney xo",
+            "stephaniehvip",
+            "itsstephhoney21free",
         ]),
         ("MULAN VUITTON", ["mulanvuitton", "mulan_vuitton", "mulan vuitton", "mulanvuittontv"]),
     ]
     static let facePins: [(String, [String])] = [
+        ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
         ("MULAN VUITTON", ["L3HLNRZy6sk", "pYaoSJlMR79"]),
+    ]
+    static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
+    static let giftOrigin = "https://www.redgifs.com"
+    static let faceKill = [
+        "loli",
+        "shota",
+        "child",
+        "preteen",
+        "jailbait",
+        "pedo",
+        "minor",
+        "underage",
+        "under18",
+        "younggirl",
     ]
     static let loveChip = "LOVESCAPE"
     static let loveOrigin = "https://lovescape.cam"
@@ -242,16 +262,22 @@ enum AdultDesk {
 
     static func userAgent(_ raw: String) -> String {
         let host = URL(string: raw)?.host?.lowercased() ?? ""
-        if loveHost(raw) || host.contains("bornstar") { return loveAgent }
+        if loveHost(raw) || giftHost(raw) || host.contains("bornstar") { return loveAgent }
         return agent
     }
 
     static func referer(_ raw: String) -> String {
         if loveHost(raw) { return "\(loveOrigin)/" }
+        if giftHost(raw) { return "\(giftOrigin)/" }
         let host = URL(string: raw)?.host?.lowercased() ?? ""
         if host.contains("eporner") { return "https://www.eporner.com/" }
         if host.contains("bornstar") { return "https://bornstar.co/" }
         return "\(origin)/"
+    }
+
+    static func giftHost(_ raw: String) -> Bool {
+        let host = URL(string: raw)?.host?.lowercased() ?? ""
+        return host == "api.redgifs.com" || host.hasSuffix(".redgifs.com") || host.contains("redgifs")
     }
 
     static func loveHost(_ raw: String) -> Bool {
@@ -295,6 +321,57 @@ enum AdultDesk {
         return "https://bornstar.co/api/search?q=\(encoded)&page=\(start)"
     }
 
+    static func giftSearch(_ query: String, page: Int = 1) -> String? {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !q.isEmpty,
+              let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return nil }
+        let start = max(1, page)
+        return "https://api.redgifs.com/v2/gifs/search?search_text=\(encoded)&count=40&page=\(start)"
+    }
+
+    static func giftUser(_ query: String, page: Int = 1) -> String? {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard q.count >= 6, q.allSatisfy({ $0.isLetter || $0.isNumber }) else { return nil }
+        let start = max(1, page)
+        return "https://api.redgifs.com/v2/users/\(q)/search?count=40&page=\(start)"
+    }
+
+    static func giftToken(_ data: Data) -> String? {
+        guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        let token = string(obj["token"])
+        return token.isEmpty ? nil : token
+    }
+
+    static func giftSession(_ data: Data) -> String? {
+        guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        if let token = obj["session"] as? String, !token.isEmpty { return token }
+        if let token = obj["session"] as? NSNumber {
+            return token.stringValue
+        }
+        return nil
+    }
+
+    static func giftHeaders(_ raw: String, token: String, session: String = "") -> [String: String] {
+        guard giftHost(raw), !token.isEmpty else { return [:] }
+        var headers = ["Authorization": "Bearer \(token)"]
+        if !session.isEmpty {
+            headers["X-Session-Id"] = session
+        }
+        return headers
+    }
+
+    static func playHeaders(_ raw: String) -> [String: String] {
+        [
+            "User-Agent": userAgent(raw),
+            "Referer": referer(raw),
+        ]
+    }
+
     static func faceId(_ token: String) -> String? {
         let id = token.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !id.isEmpty, id.allSatisfy({ $0.isLetter || $0.isNumber }) else { return nil }
@@ -321,6 +398,18 @@ enum AdultDesk {
             for page in 1...4 {
                 if let path = starSearch(query, page: page), seen.insert(path).inserted {
                     out.append(path)
+                }
+            }
+            if !query.contains(" ") {
+                for page in 1...4 {
+                    if let path = giftSearch(query, page: page), seen.insert(path).inserted {
+                        out.append(path)
+                    }
+                }
+                for page in 1...2 {
+                    if let path = giftUser(query, page: page), seen.insert(path).inserted {
+                        out.append(path)
+                    }
                 }
             }
         }
@@ -358,7 +447,8 @@ enum AdultDesk {
         var seen: Set<String> = []
         var rows: [Room] = []
         for model in faceModels(obj) {
-            guard let room = starClip(model, needles: needles, kind: kind)
+            guard let room = giftClip(model, needles: needles, kind: kind)
+                ?? starClip(model, needles: needles, kind: kind)
                 ?? faceClip(model, needles: needles, kind: kind)
             else { continue }
             guard seen.insert(room.id).inserted else { continue }
@@ -373,7 +463,7 @@ enum AdultDesk {
     private static func faceModels(_ obj: Any) -> [[String: Any]] {
         if let list = obj as? [[String: Any]] { return list }
         guard let dict = obj as? [String: Any] else { return [] }
-        for key in ["videos", "results", "items"] {
+        for key in ["videos", "results", "items", "gifs"] {
             if let list = dict[key] as? [[String: Any]], !list.isEmpty { return list }
         }
         if !string(dict["title"]).isEmpty, !string(dict["id"]).isEmpty || !string(dict["slug"]).isEmpty {
@@ -384,13 +474,11 @@ enum AdultDesk {
 
     private static func faceClip(_ model: [String: Any], needles: [String], kind: String) -> Room? {
         let token = string(model["id"])
-        let rawTitle = string(model["title"])
-        if rawTitle.contains("\u{200B}") { return nil }
+        let rawTitle = string(model["title"]).replacingOccurrences(of: "\u{200B}", with: " ")
         guard let play = playlist(faceFile(token) ?? "") else { return nil }
         let title = rawTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-        let keys = string(model["keywords"])
-        guard !title.isEmpty, allows(title), clean(title), clean(keys) else { return nil }
-        guard !faceSpam(title), !faceSpam(keys) else { return nil }
+        let keys = string(model["keywords"]).replacingOccurrences(of: "\u{200B}", with: " ")
+        guard !title.isEmpty, faceOk(title), faceOk(keys) else { return nil }
         guard faceHit(title + " " + keys, needles: needles) else { return nil }
         var thumb = ""
         if let dict = model["default_thumb"] as? [String: Any] {
@@ -418,13 +506,10 @@ enum AdultDesk {
     private static func starClip(_ model: [String: Any], needles: [String], kind: String) -> Room? {
         let slug = string(model["slug"]).isEmpty ? string(model["id"]) : string(model["slug"])
         guard let play = playlist(starFile(slug) ?? "") else { return nil }
-        let rawTitle = string(model["title"])
-        if rawTitle.contains("\u{200B}") { return nil }
+        let rawTitle = string(model["title"]).replacingOccurrences(of: "\u{200B}", with: " ")
         let title = rawTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-        let creator = string(model["creator"])
-        guard !title.isEmpty, allows(title), clean(title), allows(creator) || creator.isEmpty, clean(creator)
-        else { return nil }
-        guard !faceSpam(title), !faceSpam(creator) else { return nil }
+        let creator = string(model["creator"]).replacingOccurrences(of: "\u{200B}", with: " ")
+        guard !title.isEmpty, faceOk(title), creator.isEmpty || faceOk(creator) else { return nil }
         let blob = title + " " + creator + " " + slug
         guard faceHit(blob, needles: needles) else { return nil }
         let seconds = max(0, number(model["durationSeconds"]))
@@ -439,6 +524,42 @@ enum AdultDesk {
             image: still(string(model["thumbnailUrl"])) ?? "",
             kinds: chip.isEmpty ? [] : [chip],
             seek: (title + " " + creator + " " + needles.joined(separator: " ")).lowercased(),
+            seconds: seconds
+        )
+    }
+
+    private static func giftClip(_ model: [String: Any], needles: [String], kind: String) -> Room? {
+        let token = string(model["id"]).isEmpty ? string(model["gifId"]) : string(model["id"])
+        var urls = model["urls"] as? [String: Any] ?? [:]
+        if urls.isEmpty, let nested = model["gif"] as? [String: Any] {
+            urls = nested["urls"] as? [String: Any] ?? [:]
+        }
+        let hd = string(urls["hd"])
+        let sd = string(urls["sd"])
+        guard let play = playlist(hd.isEmpty ? sd : hd) else { return nil }
+        let user = string(model["userName"]).isEmpty ? string(model["username"]) : string(model["userName"])
+        let title = string(model["description"]).isEmpty ? user : string(model["description"])
+        let named = title.replacingOccurrences(of: "\u{200B}", with: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        var tags = ""
+        if let list = model["tags"] as? [String] {
+            tags = list.joined(separator: " ")
+        }
+        guard !named.isEmpty, faceOk(named), faceOk(user), faceOk(tags) else { return nil }
+        let blob = named + " " + user + " " + tags + " " + token
+        guard faceHit(blob, needles: needles) else { return nil }
+        let seconds = max(1, number(model["duration"]))
+        let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        let thumb = still(string(urls["thumbnail"])) ?? still(string(urls["poster"])) ?? ""
+        return Room(
+            id: "adult-face-gift-\(token.lowercased())",
+            name: named.uppercased(),
+            handle: token,
+            url: play,
+            viewers: number(model["views"]),
+            image: thumb,
+            kinds: chip.isEmpty ? [] : [chip],
+            seek: (named + " " + user + " " + needles.joined(separator: " ")).lowercased(),
             seconds: seconds
         )
     }
@@ -460,15 +581,10 @@ enum AdultDesk {
         }
     }
 
-    private static func faceSpam(_ blob: String) -> Bool {
-        let raw = blob.lowercased()
+    private static func faceOk(_ blob: String) -> Bool {
         let text = facePlain(blob)
-        if text.contains("library") { return true }
-        if text.contains("exclusive video") { return true }
-        if text.contains("see everything") { return true }
-        if text.contains("private content") { return true }
-        if raw.contains(".club") { return true }
-        return false
+        if text.isEmpty { return true }
+        return !faceKill.contains { text.contains($0) }
     }
 
     private static func number(_ value: Any?) -> Int {
