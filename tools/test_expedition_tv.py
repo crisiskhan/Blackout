@@ -111,7 +111,7 @@ def na_unlocks(elapsed: float) -> bool:
     return elapsed >= NA_HOLD_SECONDS
 
 
-ADULT_CAP = 600
+ADULT_CAP = 800
 ADULT_SCREEN = 8
 ADULT_BLOCKED = (
     "teen",
@@ -173,8 +173,81 @@ ADULT_KIND_WORDS = (
     ("lovense", "TOYS"),
     ("dildo", "TOYS"),
     ("masturbat", "SOLO"),
+    ("braid", "BRAIDS"),
+    ("cornrow", "BRAIDS"),
+    ("sleep", "SLEEP"),
+    ("asleep", "SLEEP"),
+    ("somno", "SLEEP"),
+    ("robbery", "ROBBERY"),
+    ("robber", "ROBBERY"),
+    ("burglar", "ROBBERY"),
+    ("forced", "FORCED"),
+    ("cnc", "FORCED"),
+    ("noncon", "FORCED"),
+    ("non-con", "FORCED"),
+    ("pawn", "PAWN"),
+    ("thief", "THIEF"),
+    ("caught", "THIEF"),
+    ("freeuse", "FREEUSE"),
+    ("kidnap", "KIDNAP"),
+    ("cop", "COP"),
+    ("police", "COP"),
+    ("maid", "MAID"),
+    ("nurse", "NURSE"),
+    ("hypno", "HYPNO"),
+    ("cheating", "CHEAT"),
+    ("hotwife", "CHEAT"),
+    ("teacher", "TEACHER"),
+    ("favor", "FAVORS"),
+    ("favour", "FAVORS"),
+    ("hostage", "HOSTAGE"),
+    ("blackmail", "BLACKMAIL"),
+    ("burglary", "ROBBERY"),
+    ("invasion", "INVASION"),
+    ("fulani", "BRAIDS"),
+    ("knotless", "BRAIDS"),
+    ("free use", "FREEUSE"),
+    ("somnophilia", "SLEEP"),
 )
-ADULT_PIN = ("COUPLE", "ORGY", "ROLEPLAY")
+ADULT_PIN = (
+    "COUPLE",
+    "ORGY",
+    "ROLEPLAY",
+    "BRAIDS",
+    "SLEEP",
+    "ROBBERY",
+    "FORCED",
+    "PAWN",
+    "THIEF",
+    "FAVORS",
+)
+ADULT_FACES = (
+    ("ITSSTEPHHONEY21", ("itsstephhoney21", "itsstephhoney", "stephhoney21", "stephhoney")),
+    ("MULAN VUITTON", ("mulanvuitton", "mulan_vuitton", "mulan vuitton", "mulanvuittontv")),
+)
+ADULT_TOPIC = {
+    "BRAIDS": ("braids", "braid", "cornrows"),
+    "SLEEP": ("sleeping", "sleep", "somno"),
+    "ROBBERY": ("robbery", "robber"),
+    "FORCED": ("cnc", "forced", "noncon"),
+    "PAWN": ("pawn", "pawnshop"),
+    "THIEF": ("thief", "caught"),
+    "FAVORS": ("favors", "favour"),
+    "FREEUSE": ("freeuse",),
+    "KIDNAP": ("kidnap",),
+    "COP": ("cop", "police"),
+    "MAID": ("maid",),
+    "NURSE": ("nurse",),
+    "HYPNO": ("hypno",),
+    "CHEAT": ("cheating", "hotwife"),
+    "TEACHER": ("teacher",),
+    "HOSTAGE": ("hostage",),
+    "BLACKMAIL": ("blackmail",),
+    "INVASION": ("invasion",),
+    "ROLEPLAY": ("roleplay", "cosplay"),
+    "ORGY": ("orgy", "gangbang", "threesome"),
+    "COUPLE": ("couple",),
+}
 ADULT_MALE = {
     "m",
     "male",
@@ -235,6 +308,8 @@ def adult_woman(model: object) -> bool:
     if not isinstance(model, dict):
         return False
     gender = str(model.get("gender") or "").strip().lower()
+    if not gender:
+        gender = str(model.get("broadcaster_gender") or "").strip().lower()
     if not gender:
         return True
     if gender in ADULT_MALE:
@@ -314,13 +389,68 @@ def adult_kinds(rooms: list[dict]) -> list[str]:
     return pinned + rest
 
 
+def adult_face_needles(kind: str) -> list[str] | None:
+    chip = str(kind or "").strip().upper()
+    for name, needles in ADULT_FACES:
+        if name == chip:
+            return list(needles)
+    return None
+
+
+def adult_topics(kind: str) -> list[str]:
+    if adult_face_needles(kind) is not None:
+        return []
+    chip = str(kind or "").strip().upper()
+    if chip in ("", "ALL"):
+        return []
+    if chip in ADULT_TOPIC:
+        return list(ADULT_TOPIC[chip])
+    tag = str(kind or "").strip().lower()
+    return [tag] if tag else []
+
+
+def adult_directory(tag: str, offset: int = 0, topic: str = "") -> str:
+    start = max(0, int(offset))
+    url = (
+        "https://chaturbate.com/api/public/affiliates/onlinerooms/"
+        f"?format=json&limit=100&offset={start}&client_ip=8.8.8.8&wm=DkfRj&gender={tag}"
+    )
+    hashtag = str(topic or "").strip().lower()
+    if hashtag:
+        url += f"&tag={hashtag}"
+    return url
+
+
+def adult_rail(rooms: list[dict]) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+    chips = ["ALL"] + [name for name, _ in ADULT_FACES] + list(ADULT_PIN) + adult_kinds(rooms)
+    for chip in chips:
+        if chip not in seen:
+            seen.add(chip)
+            out.append(chip)
+    return out
+
+
 def adult_pick(rooms: list[dict], kind: str = "", query: str = "") -> list[dict]:
     chip = str(kind or "").strip().upper()
     needle = str(query or "").strip().lower()
+    faces = adult_face_needles(chip)
     out: list[dict] = []
     for room in rooms:
         kinds = [str(item).strip().upper() for item in (room.get("kinds") or [])]
-        if chip and chip != "ALL" and chip not in kinds:
+        if faces:
+            blob = " ".join(
+                [
+                    str(room.get("name") or ""),
+                    str(room.get("handle") or ""),
+                    str(room.get("seek") or ""),
+                    " ".join(kinds),
+                ]
+            ).lower()
+            if not any(token in blob for token in faces):
+                continue
+        elif chip and chip != "ALL" and chip not in kinds:
             continue
         if needle:
             blob = " ".join(
@@ -335,6 +465,34 @@ def adult_pick(rooms: list[dict], kind: str = "", query: str = "") -> list[dict]
                 continue
         out.append(room)
     return out
+
+
+def adult_face_room(handle: str, payload: object) -> dict | None:
+    play = adult_stream(payload)
+    if not play or not isinstance(payload, dict):
+        return None
+    if not adult_woman(payload):
+        return None
+    try:
+        years = payload.get("age")
+        if years is not None and int(years) < 18:
+            return None
+    except (TypeError, ValueError):
+        return None
+    named = str(payload.get("broadcaster_username") or handle).strip() or handle
+    title = str(payload.get("room_title") or payload.get("room_subject") or "").strip()
+    if not adult_allows(handle) or not adult_allows(named) or not adult_clean(title):
+        return None
+    return {
+        "id": f"adult-{handle.lower()}",
+        "name": named.upper(),
+        "handle": handle,
+        "url": play,
+        "viewers": int(payload.get("num_users") or payload.get("num_viewers") or payload.get("viewers") or 0),
+        "image": adult_image(payload),
+        "kinds": adult_room_kinds(payload),
+        "seek": f"{handle} {title}".strip().lower(),
+    }
 
 
 def adult_rooms(payload: object) -> list[dict]:
@@ -895,7 +1053,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertEqual(got[2]["kinds"], [])
         self.assertEqual(got[3]["handle"], "rho")
         self.assertEqual(got[3]["seek"], "oil bdsm threesome cosplay nurse fetish")
-        self.assertEqual(got[3]["kinds"], ["ORGY", "ROLEPLAY", "BDSM", "FETISH"])
+        self.assertEqual(got[3]["kinds"], ["ORGY", "ROLEPLAY", "BDSM", "FETISH", "NURSE"])
         self.assertTrue(adult_woman({"gender": "f"}))
         self.assertTrue(adult_woman({}))
         self.assertTrue(adult_woman({"gender": "c"}))
@@ -931,6 +1089,7 @@ class AdultDeskTests(unittest.TestCase):
                 "DANCE",
                 "FETISH",
                 "LESBIAN",
+                "NURSE",
             ],
         )
         self.assertEqual(
@@ -965,6 +1124,137 @@ class AdultDeskTests(unittest.TestCase):
             [row["id"] for row in adult_pick(got, kind="ALL")],
             ["adult-sigma", "adult-alpha", "adult-echo", "adult-rho"],
         )
+        extra = adult_rooms(
+            {
+                "results": [
+                    {
+                        "username": "itsstephhoney21",
+                        "display_name": "itsstephhoney21",
+                        "age": 24,
+                        "gender": "f",
+                        "current_show": "public",
+                        "num_users": 180,
+                        "tags": ["braids", "roleplay"],
+                        "room_subject": "sleeping robbery",
+                    },
+                    {
+                        "username": "mulanvuitton",
+                        "display_name": "Mulan Vuitton",
+                        "age": 26,
+                        "gender": "f",
+                        "current_show": "public",
+                        "num_users": 90,
+                        "tags": ["pawn", "thief"],
+                        "room_subject": "caught favors cnc",
+                    },
+                    {
+                        "username": "zeta",
+                        "display_name": "zeta",
+                        "age": 29,
+                        "gender": "f",
+                        "current_show": "public",
+                        "num_users": 40,
+                        "tags": ["hostage"],
+                        "room_subject": "thief caught sexual favors",
+                    },
+                ]
+            }
+        )
+        self.assertEqual(
+            extra[0]["kinds"],
+            ["ROLEPLAY", "BRAIDS", "SLEEP", "ROBBERY"],
+        )
+        self.assertEqual(
+            extra[1]["kinds"],
+            ["FORCED", "PAWN", "THIEF", "FAVORS"],
+        )
+        self.assertEqual(extra[2]["kinds"], ["THIEF", "FAVORS", "HOSTAGE"])
+        self.assertEqual(
+            [row["id"] for row in adult_pick(extra, kind="BRAIDS")],
+            ["adult-itsstephhoney21"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(extra, kind="SLEEP")],
+            ["adult-itsstephhoney21"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(extra, kind="ROBBERY")],
+            ["adult-itsstephhoney21"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(extra, kind="FORCED")],
+            ["adult-mulanvuitton"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(extra, kind="PAWN")],
+            ["adult-mulanvuitton"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(extra, kind="THIEF")],
+            ["adult-mulanvuitton", "adult-zeta"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(extra, kind="FAVORS")],
+            ["adult-mulanvuitton", "adult-zeta"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(extra, kind="ITSSTEPHHONEY21")],
+            ["adult-itsstephhoney21"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(extra, kind="MULAN VUITTON")],
+            ["adult-mulanvuitton"],
+        )
+        self.assertEqual(adult_pick(extra, kind="ITSSTEPHHONEY21", query="mulan"), [])
+        self.assertEqual(
+            adult_rail([])[:13],
+            [
+                "ALL",
+                "ITSSTEPHHONEY21",
+                "MULAN VUITTON",
+                "COUPLE",
+                "ORGY",
+                "ROLEPLAY",
+                "BRAIDS",
+                "SLEEP",
+                "ROBBERY",
+                "FORCED",
+                "PAWN",
+                "THIEF",
+                "FAVORS",
+            ],
+        )
+        self.assertEqual(adult_topics("BRAIDS"), ["braids", "braid", "cornrows"])
+        self.assertEqual(adult_topics("ITSSTEPHHONEY21"), [])
+        self.assertEqual(adult_topics("ALL"), [])
+        self.assertIn("itsstephhoney21", adult_face_needles("ITSSTEPHHONEY21") or [])
+        self.assertIn("&tag=braids", adult_directory("f", topic="braids"))
+        self.assertEqual(
+            adult_face_room(
+                "itsstephhoney21",
+                {
+                    "room_status": "public",
+                    "hls_source": "https://edge.example/live-hls/amlst:steph/playlist.m3u8",
+                    "broadcaster_username": "itsstephhoney21",
+                    "gender": "f",
+                    "age": 24,
+                    "num_viewers": 12,
+                    "room_title": "live",
+                },
+            )["id"],
+            "adult-itsstephhoney21",
+        )
+        self.assertIsNone(
+            adult_face_room(
+                "itsstephhoney21",
+                {
+                    "room_status": "private",
+                    "hls_source": "https://edge.example/x.m3u8",
+                    "gender": "f",
+                    "age": 24,
+                },
+            )
+        )
         self.assertTrue(adult_allows("alpha"))
         self.assertFalse(adult_allows("teenstar"))
         self.assertIsNone(adult_playlist("http://insecure.example/x.m3u8"))
@@ -998,7 +1288,7 @@ class AdultDeskTests(unittest.TestCase):
         app = read("Blackout", "AppRuntime.swift")
         self.assertIn("enum AdultDesk", desk)
         self.assertIn("static let cap", desk)
-        self.assertIn("= 600", desk)
+        self.assertIn("= 800", desk)
         self.assertIn("static let pageSize", desk)
         self.assertIn("static let pages", desk)
         self.assertIn("static func parse(", desk)
@@ -1019,7 +1309,22 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("BDSM", desk)
         self.assertIn("threesome", desk)
         self.assertIn("cosplay", desk)
-        self.assertIn('static let pin = ["COUPLE", "ORGY", "ROLEPLAY"]', desk)
+        self.assertIn("static let pin", desk)
+        self.assertIn("BRAIDS", desk)
+        self.assertIn("SLEEP", desk)
+        self.assertIn("ROBBERY", desk)
+        self.assertIn("FORCED", desk)
+        self.assertIn("PAWN", desk)
+        self.assertIn("THIEF", desk)
+        self.assertIn("FAVORS", desk)
+        self.assertIn("ITSSTEPHHONEY21", desk)
+        self.assertIn("MULAN VUITTON", desk)
+        self.assertIn("static let faces", desk)
+        self.assertIn("static func topics(", desk)
+        self.assertIn("static func faceNeedles(", desk)
+        self.assertIn("static func faceRoom(", desk)
+        self.assertIn("static func rail(", desk)
+        self.assertIn("&tag=", desk)
         self.assertIn("var seek:", desk)
         self.assertIn("room.seek", desk)
         self.assertIn("static func still(", desk)
@@ -1046,6 +1351,11 @@ class AdultDeskTests(unittest.TestCase):
         self.assertNotIn("hlsPlaylist", desk)
         self.assertNotIn("iframe_embed", desk)
         self.assertIn("func pullAdult(", sock)
+        self.assertIn("pullAdult(topic:", sock)
+        self.assertIn("AdultDesk.topics", sock)
+        self.assertIn("AdultDesk.faceNeedles", sock)
+        self.assertIn("AdultDesk.faceRoom", sock)
+        self.assertIn("fetchAdultFaces", sock)
         self.assertIn("func pullAdultStills(", sock)
         self.assertIn("nonisolated static func stillPreview", sock)
         self.assertIn("kCGImageSourceThumbnailMaxPixelSize", sock)
@@ -1073,12 +1383,12 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("pullAdultStills", tv)
         self.assertIn('HUDField("SEARCH"', tv)
         self.assertIn("HUDWrapRail", tv)
-        self.assertIn("prefix(12)", tv)
+        self.assertIn("AdultDesk.rail", tv)
         self.assertIn("naStillCache", tv)
         self.assertIn("naKind", tv)
         self.assertIn("naQuery", tv)
         self.assertIn("AdultDesk.pick", tv)
-        self.assertIn("AdultDesk.kinds", tv)
+        self.assertIn("pullAdult(topic:", tv)
         self.assertIn("NO MATCH", tv)
         self.assertIn("onPlay", tv)
         self.assertIn("liveAdult", tv)
@@ -1271,6 +1581,10 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("no trans", tv.lower())
         self.assertIn("eight at a time", tv)
         self.assertIn("SEARCH", tv)
+        self.assertIn("BRAIDS", tv)
+        self.assertIn("ITSSTEPHHONEY21", tv)
+        self.assertIn("MULAN VUITTON", tv)
+        self.assertIn("FAVORS", tv)
         self.assertIn("still", tv.lower())
         self.assertNotIn("insecam", tv.lower())
         self.assertNotIn("best in class", tv.lower())

@@ -152,7 +152,7 @@ struct TvPlate: View {
     }
 
     private var naKindChips: [String] {
-        ["ALL"] + Array(AdultDesk.kinds(runtime.updateSocket.adultRooms).prefix(12))
+        AdultDesk.rail(runtime.updateSocket.adultRooms)
     }
 
     private var naEmptyChrome: String {
@@ -228,6 +228,7 @@ struct TvPlate: View {
                     Button(kind) {
                         naKind = kind
                         resetNaPage()
+                        runtime.updateSocket.pullAdult(topic: kind)
                     }
                     .buttonStyle(HUDOverlayChipStyle(filled: naKind == kind))
                 }

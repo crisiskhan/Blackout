@@ -2,9 +2,9 @@ import Foundation
 
 /// Adult directory for N/A after the 10s hold. Women and couples. JSON only. No player.
 enum AdultDesk {
-    static let cap = 600
+    static let cap = 800
     static let pageSize = 100
-    static let pages = 6
+    static let pages = 8
     static let origin = "https://chaturbate.com"
     static let tags = ["f", "c"]
     static let mark = "DkfRj"
@@ -73,8 +73,58 @@ enum AdultDesk {
         ("lovense", "TOYS"),
         ("dildo", "TOYS"),
         ("masturbat", "SOLO"),
+        ("braid", "BRAIDS"),
+        ("cornrow", "BRAIDS"),
+        ("sleep", "SLEEP"),
+        ("asleep", "SLEEP"),
+        ("somno", "SLEEP"),
+        ("robbery", "ROBBERY"),
+        ("robber", "ROBBERY"),
+        ("burglar", "ROBBERY"),
+        ("forced", "FORCED"),
+        ("cnc", "FORCED"),
+        ("noncon", "FORCED"),
+        ("non-con", "FORCED"),
+        ("pawn", "PAWN"),
+        ("thief", "THIEF"),
+        ("caught", "THIEF"),
+        ("freeuse", "FREEUSE"),
+        ("kidnap", "KIDNAP"),
+        ("cop", "COP"),
+        ("police", "COP"),
+        ("maid", "MAID"),
+        ("nurse", "NURSE"),
+        ("hypno", "HYPNO"),
+        ("cheating", "CHEAT"),
+        ("hotwife", "CHEAT"),
+        ("teacher", "TEACHER"),
+        ("favor", "FAVORS"),
+        ("favour", "FAVORS"),
+        ("hostage", "HOSTAGE"),
+        ("blackmail", "BLACKMAIL"),
+        ("burglary", "ROBBERY"),
+        ("invasion", "INVASION"),
+        ("fulani", "BRAIDS"),
+        ("knotless", "BRAIDS"),
+        ("free use", "FREEUSE"),
+        ("somnophilia", "SLEEP"),
     ]
-    static let pin = ["COUPLE", "ORGY", "ROLEPLAY"]
+    static let pin = [
+        "COUPLE",
+        "ORGY",
+        "ROLEPLAY",
+        "BRAIDS",
+        "SLEEP",
+        "ROBBERY",
+        "FORCED",
+        "PAWN",
+        "THIEF",
+        "FAVORS",
+    ]
+    static let faces: [(String, [String])] = [
+        ("ITSSTEPHHONEY21", ["itsstephhoney21", "itsstephhoney", "stephhoney21", "stephhoney"]),
+        ("MULAN VUITTON", ["mulanvuitton", "mulan_vuitton", "mulan vuitton", "mulanvuittontv"]),
+    ]
 
     struct Room: Identifiable, Equatable, Sendable {
         var id: String
@@ -87,9 +137,106 @@ enum AdultDesk {
         var seek: String
     }
 
-    static func directory(tag: String, offset: Int = 0) -> String {
+    static func directory(tag: String, offset: Int = 0, topic: String = "") -> String {
         let start = max(0, offset)
-        return "\(origin)/api/public/affiliates/onlinerooms/?format=json&limit=\(pageSize)&offset=\(start)&client_ip=\(via)&wm=\(mark)&gender=\(tag)"
+        var url =
+            "\(origin)/api/public/affiliates/onlinerooms/?format=json&limit=\(pageSize)&offset=\(start)&client_ip=\(via)&wm=\(mark)&gender=\(tag)"
+        let hashtag = topic.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if !hashtag.isEmpty,
+           let encoded = hashtag.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        {
+            url += "&tag=\(encoded)"
+        }
+        return url
+    }
+
+    static func topics(_ kind: String) -> [String] {
+        if faceNeedles(kind) != nil { return [] }
+        switch kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() {
+        case "", "ALL":
+            return []
+        case "BRAIDS":
+            return ["braids", "braid", "cornrows"]
+        case "SLEEP":
+            return ["sleeping", "sleep", "somno"]
+        case "ROBBERY":
+            return ["robbery", "robber"]
+        case "FORCED":
+            return ["cnc", "forced", "noncon"]
+        case "PAWN":
+            return ["pawn", "pawnshop"]
+        case "THIEF":
+            return ["thief", "caught"]
+        case "FAVORS":
+            return ["favors", "favour"]
+        case "FREEUSE":
+            return ["freeuse"]
+        case "KIDNAP":
+            return ["kidnap"]
+        case "COP":
+            return ["cop", "police"]
+        case "MAID":
+            return ["maid"]
+        case "NURSE":
+            return ["nurse"]
+        case "HYPNO":
+            return ["hypno"]
+        case "CHEAT":
+            return ["cheating", "hotwife"]
+        case "TEACHER":
+            return ["teacher"]
+        case "HOSTAGE":
+            return ["hostage"]
+        case "BLACKMAIL":
+            return ["blackmail"]
+        case "INVASION":
+            return ["invasion"]
+        case "ROLEPLAY":
+            return ["roleplay", "cosplay"]
+        case "ORGY":
+            return ["orgy", "gangbang", "threesome"]
+        case "COUPLE":
+            return ["couple"]
+        default:
+            let tag = kind.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            return tag.isEmpty ? [] : [tag]
+        }
+    }
+
+    static func faceNeedles(_ kind: String) -> [String]? {
+        let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        for pair in faces where pair.0 == chip {
+            return pair.1
+        }
+        return nil
+    }
+
+    static func faceRoom(handle: String, data: Data) -> Room? {
+        guard let play = stream(data) else { return nil }
+        guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        guard woman(obj) else { return nil }
+        if let years = age(obj), years < 18 { return nil }
+        let named = string(obj["broadcaster_username"]).isEmpty
+            ? handle
+            : string(obj["broadcaster_username"])
+        let title = string(obj["room_title"]).isEmpty
+            ? string(obj["room_subject"])
+            : string(obj["room_title"])
+        guard allows(handle), allows(named), clean(title) else { return nil }
+        return Room(
+            id: "adult-\(handle.lowercased())",
+            name: named.uppercased(),
+            handle: handle,
+            url: play,
+            viewers: viewers(obj),
+            image: image(obj),
+            kinds: roomKinds(obj),
+            seek: (handle + " " + title)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .lowercased()
+        )
     }
 
     static func context(_ handle: String) -> String? {
@@ -152,8 +299,16 @@ enum AdultDesk {
     static func pick(_ rooms: [Room], kind: String, query: String) -> [Room] {
         let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let faces = faceNeedles(chip)
         return rooms.filter { room in
-            if !chip.isEmpty && chip != "ALL" && !room.kinds.contains(chip) {
+            if let faces {
+                let blob = ([room.name, room.handle, room.seek] + room.kinds)
+                    .joined(separator: " ")
+                    .lowercased()
+                if !faces.contains(where: { blob.contains($0) }) {
+                    return false
+                }
+            } else if !chip.isEmpty && chip != "ALL" && !room.kinds.contains(chip) {
                 return false
             }
             if !needle.isEmpty {
@@ -176,8 +331,22 @@ enum AdultDesk {
         return pinned + rest
     }
 
+    static func rail(_ rooms: [Room]) -> [String] {
+        var out: [String] = []
+        var seen: Set<String> = []
+        for chip in ["ALL"] + faces.map(\.0) + pin + kinds(rooms) {
+            if seen.insert(chip).inserted {
+                out.append(chip)
+            }
+        }
+        return out
+    }
+
     static func woman(_ model: [String: Any]) -> Bool {
-        let gender = string(model["gender"]).lowercased()
+        var gender = string(model["gender"]).lowercased()
+        if gender.isEmpty {
+            gender = string(model["broadcaster_gender"]).lowercased()
+        }
         if gender.isEmpty { return true }
         if [
             "m",
@@ -320,12 +489,15 @@ enum AdultDesk {
 
     private static func viewers(_ model: [String: Any]) -> Int {
         if let n = model["num_users"] as? Int { return n }
+        if let n = model["num_viewers"] as? Int { return n }
         if let n = model["viewersCount"] as? Int { return n }
         if let n = model["viewers"] as? Int { return n }
         if let n = model["num_users"] as? Double { return Int(n) }
+        if let n = model["num_viewers"] as? Double { return Int(n) }
         if let n = model["viewersCount"] as? Double { return Int(n) }
         if let n = model["viewers"] as? Double { return Int(n) }
         if let n = Int(string(model["num_users"])) { return n }
+        if let n = Int(string(model["num_viewers"])) { return n }
         if let n = Int(string(model["viewersCount"])) { return n }
         if let n = Int(string(model["viewers"])) { return n }
         return 0

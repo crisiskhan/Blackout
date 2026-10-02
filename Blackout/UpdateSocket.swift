@@ -126,11 +126,11 @@ final class UpdateSocket {
         var onSnapStill: ((String, Data) -> Void)?
     }
 
-    func pullAdult() {
+    func pullAdult(topic: String = "") {
         guard pipe else { return }
         if adultBusy { return }
         adultBusy = true
-        Task { await loadAdult() }
+        Task { await loadAdult(topic: topic) }
     }
 
     func pullAdultStills(_ rows: [NaLive.Row]) {
@@ -190,7 +190,7 @@ final class UpdateSocket {
         }
     }
 
-    private func loadAdult() async {
+    private func loadAdult(topic: String = "") async {
         defer {
             adultBusy = false
             adultReady = true
@@ -213,6 +213,20 @@ final class UpdateSocket {
                 adultRooms = AdultDesk.merge(batches)
             }
         }
+        for hashtag in AdultDesk.topics(topic) {
+            let extra = await fetchAdultPages(session, from: 0, count: 2, topic: hashtag)
+            if !extra.isEmpty {
+                batches.append(contentsOf: extra)
+                adultRooms = AdultDesk.merge(batches)
+            }
+        }
+        if let needles = AdultDesk.faceNeedles(topic) {
+            let found = await fetchAdultFaces(session, needles)
+            if !found.isEmpty {
+                batches.append(found)
+                adultRooms = AdultDesk.merge(batches)
+            }
+        }
         session.invalidateAndCancel()
         adultPlay = adultPlay.filter { key, _ in adultRooms.contains { $0.id == key } }
     }
@@ -220,7 +234,8 @@ final class UpdateSocket {
     private func fetchAdultPages(
         _ session: URLSession,
         from start: Int,
-        count: Int
+        count: Int,
+        topic: String = ""
     ) async -> [[AdultDesk.Room]] {
         let first = max(0, start)
         let last = first + max(0, count)
@@ -232,7 +247,7 @@ final class UpdateSocket {
                         let offset = page * AdultDesk.pageSize
                         guard let data = await UpdateSocket.fetchAdult(
                             session,
-                            AdultDesk.directory(tag: tag, offset: offset)
+                            AdultDesk.directory(tag: tag, offset: offset, topic: topic)
                         ) else { return [] }
                         return await Task.detached(priority: .utility) {
                             AdultDesk.parse(data)
@@ -245,6 +260,23 @@ final class UpdateSocket {
             }
         }
         return batches
+    }
+
+    private func fetchAdultFaces(_ session: URLSession, _ needles: [String]) async -> [AdultDesk.Room] {
+        var rooms: [AdultDesk.Room] = []
+        await withTaskGroup(of: AdultDesk.Room?.self) { group in
+            for needle in needles {
+                guard let path = AdultDesk.context(needle) else { continue }
+                group.addTask {
+                    guard let data = await UpdateSocket.fetchAdult(session, path) else { return nil }
+                    return AdultDesk.faceRoom(handle: needle, data: data)
+                }
+            }
+            for await hit in group {
+                if let hit { rooms.append(hit) }
+            }
+        }
+        return rooms
     }
 
     func liveAdult(_ row: NaLive.Row) async -> String? {
