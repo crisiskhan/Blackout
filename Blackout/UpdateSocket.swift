@@ -19,6 +19,7 @@ final class UpdateSocket {
     var adultRooms: [AdultDesk.Room] = []
     var adultReady = false
     private var adultBusy = false
+    private var adultWanted = ""
     private var adultStillBusy = false
     private var adultStillQueued: [NaLive.Row] = []
     private var adultPlay: [String: String] = [:]
@@ -128,6 +129,7 @@ final class UpdateSocket {
 
     func pullAdult(topic: String = "") {
         guard pipe else { return }
+        adultWanted = topic
         if adultBusy { return }
         adultBusy = true
         Task { await loadAdult(topic: topic) }
@@ -203,13 +205,17 @@ final class UpdateSocket {
 
     private func loadAdult(topic: String = "") async {
         defer {
+            let again = adultWanted
             adultBusy = false
             adultReady = true
+            if again != topic {
+                pullAdult(topic: again)
+            }
         }
         guard pipe else { return }
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 8
-        config.timeoutIntervalForResource = 40
+        config.timeoutIntervalForResource = AdultDesk.faceNeedles(topic) != nil ? 90 : 40
         config.waitsForConnectivity = false
         config.allowsExpensiveNetworkAccess = true
         config.allowsConstrainedNetworkAccess = true
@@ -256,12 +262,33 @@ final class UpdateSocket {
 
     private func fetchFacePages(_ session: URLSession, _ kind: String) async -> [[AdultDesk.Room]] {
         var batches: [[AdultDesk.Room]] = []
-        if let needles = AdultDesk.faceNeedles(kind) {
-            let found = await fetchAdultFaces(session, needles)
-            if !found.isEmpty { batches.append(found) }
+        let paths = AdultDesk.faceHunt(kind)
+        await withTaskGroup(of: [AdultDesk.Room].self) { group in
+            var next = 0
+            var inflight = 0
+            func enqueue() {
+                while inflight < AdultDesk.huntAtOnce, next < paths.count {
+                    let path = paths[next]
+                    next += 1
+                    inflight += 1
+                    group.addTask {
+                        guard let data = await UpdateSocket.fetchAdult(session, path) else { return [] }
+                        return await Task.detached(priority: .utility) {
+                            AdultDesk.parseFace(data, kind: kind)
+                        }.value
+                    }
+                }
+            }
+            enqueue()
+            for await batch in group {
+                if !batch.isEmpty {
+                    batches.append(batch)
+                    adultRooms = AdultDesk.merge(batches)
+                }
+                inflight -= 1
+                enqueue()
+            }
         }
-        let files = await fetchAdultFaceFiles(session, kind)
-        if !files.isEmpty { batches.append(files) }
         return batches
     }
 
