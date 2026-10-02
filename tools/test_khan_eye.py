@@ -8,8 +8,12 @@ Grey house masses stay off the glass — the photo is the building.
 from __future__ import annotations
 
 import gzip
+import hashlib
 import json
+import shutil
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -166,7 +170,7 @@ class StyleAndResolverTests(unittest.TestCase):
     def test_resolver_and_eye_layers_lock(self):
         swift = SWIFT.read_text()
         offline = OFFLINE.read_text()
-        self.assertIn("resolverVersion = 16", swift)
+        self.assertIn("resolverVersion = 17", swift)
         self.assertIn("func attachKhanLayers", swift)
         self.assertIn("func attachAerialLayers", swift)
         self.assertIn("khan.pmtiles", swift)
@@ -634,7 +638,7 @@ class FullExtractPhotoTests(unittest.TestCase):
         self.assertIn("contentsOfDirectory", attach)
         self.assertIn('hasPrefix("aerial")', attach)
         self.assertIn("hasSuffix(\".pmtiles\")", attach)
-        self.assertIn("resolverVersion = 16", SWIFT.read_text())
+        self.assertIn("resolverVersion = 17", SWIFT.read_text())
         copy = (ROOT / "tools" / "copy_resources.sh").read_text()
         self.assertIn("Packs/*/.naip-cache", copy)
         ignore = (ROOT / ".gitignore").read_text()
@@ -746,11 +750,107 @@ class PhotoSeamTests(unittest.TestCase):
             "Packed OSM houses"
         )[0]
         self.assertIn('"raster-resampling": "linear"', attach)
-        self.assertIn("resolverVersion = 16", SWIFT.read_text())
+        self.assertIn('if stem == "aerial-seam"', attach)
+        self.assertIn("resolverVersion = 17", SWIFT.read_text())
         qa = (ROOT / "docs" / "SOLO_QA.md").read_text()
         self.assertIn("photo is not a quilt", qa.lower())
+        self.assertIn("cyan slab", qa.lower())
         self.assertIn("def feather_tiles", (ROOT / "tools" / "v3" / "aerial.py").read_text())
+        self.assertIn("def heal_dead_photo", (ROOT / "tools" / "v3" / "aerial.py").read_text())
         self.assertIn("SEAM_BOXES", (ROOT / "tools" / "v3" / "aerial.py").read_text())
+
+    def test_cyan_nodata_jpeg_is_dead_and_mosaic_rebuilds_it(self):
+        if not _have_pil():
+            self.skipTest("Pillow not on this python (macOS CI guards)")
+        cyan = _solid_jpeg((8, 168, 158))
+        tan = _solid_jpeg((176, 158, 142))
+        self.assertTrue(aerial.is_dead_photo(cyan))
+        self.assertFalse(aerial.is_dead_photo(tan))
+        kids = {
+            (16, 20, 20): tan,
+            (16, 21, 20): tan,
+            (16, 20, 21): tan,
+            (16, 21, 21): tan,
+        }
+        mosaic = aerial.mosaic_from_children(kids, 15, 10, 10)
+        self.assertIsNotNone(mosaic)
+        assert mosaic is not None
+        self.assertFalse(aerial.is_dead_photo(mosaic))
+        self.assertIsNone(aerial.mosaic_from_children({(16, 20, 20): tan}, 15, 10, 10))
+        last = {(15, 10, 10): cyan, **kids}
+        replaced, dropped = aerial.heal_last_wins(last)
+        self.assertEqual(replaced, 1)
+        self.assertEqual(dropped, 0)
+        self.assertFalse(aerial.is_dead_photo(last[(15, 10, 10)]))
+        orphan = {(14, 3, 3): cyan}
+        replaced, dropped = aerial.heal_last_wins(orphan)
+        self.assertEqual(replaced, 0)
+        self.assertEqual(dropped, 1)
+        self.assertNotIn((14, 3, 3), orphan)
+
+    def test_hunter_foster_walk_desk_is_not_a_cyan_slab(self):
+        # Crisis still: DEST on the pad at Northwestern / Hunter Foster.
+        # Packed z15 6683/13314 was USGS NAIP no-data cyan. z16 children are photo.
+        lon, lat, z = -106.5758, 31.9248, 15
+        dest = PACK_ROOT / "tx-west"
+        blob = _packed_jpeg(dest, lon, lat, z)
+        self.assertIsNotNone(blob, "Hunter Foster walk desk has no packed z15 photo")
+        assert blob is not None
+        self.assertTrue(blob.startswith(b"\xff\xd8"))
+        digest = hashlib.sha256(blob).hexdigest()
+        self.assertNotIn(
+            digest,
+            {
+                "35d007c8d8a19e583ea485421a4c3f319245499318cc4fa54e3472fb389baa0f",
+                "0d88ea0a838f38d46e800d76d2084c83695e34bc0c4e0f3f17fd400584b39bb3",
+            },
+            "Hunter Foster still ships the dead NAIP cyan JPEG",
+        )
+        frac = _jpeg_nodata_fraction(blob)
+        if frac is None:
+            return
+        self.assertLess(frac, 0.08, f"Hunter Foster z15 nodata {frac:.1%}")
+        you = _packed_jpeg(dest, -106.60995, 31.89505, 17)
+        if you:
+            you_frac = _jpeg_nodata_fraction(you)
+            if you_frac is not None:
+                self.assertLess(you_frac, 0.08, f"Oleaster yard z17 nodata {you_frac:.1%}")
+
+
+def _jpeg_nodata_fraction(blob: bytes) -> float | None:
+    if _have_pil():
+        return aerial.nodata_fraction(blob)
+    if shutil.which("ffmpeg") is None:
+        return None
+    with tempfile.NamedTemporaryFile(suffix=".jpg") as fh:
+        fh.write(blob)
+        fh.flush()
+        proc = subprocess.run(
+            [
+                "ffmpeg",
+                "-v",
+                "error",
+                "-i",
+                fh.name,
+                "-f",
+                "rawvideo",
+                "-pix_fmt",
+                "rgb24",
+                "pipe:1",
+            ],
+            capture_output=True,
+            check=False,
+        )
+    raw = proc.stdout
+    if proc.returncode != 0 or len(raw) < 3:
+        return None
+    hit = 0
+    n = len(raw) // 3
+    for i in range(0, n * 3, 3):
+        r, g, b = raw[i], raw[i + 1], raw[i + 2]
+        if r < 90 and g > 115 and b > 100 and (g - r) > 45 and abs(g - b) < 50:
+            hit += 1
+    return hit / n
 
 
 def _have_pil() -> bool:

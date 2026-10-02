@@ -112,9 +112,13 @@ class OneAerialOnPhoneTests(unittest.TestCase):
         )[0]
         self.assertIn("aerialFileName", attach)
         self.assertIn('hasPrefix("aerial")', attach)
-        self.assertIn("resolverVersion = 16", swift)
+        self.assertIn('if stem == "aerial-seam"', attach)
+        self.assertIn('hasPrefix("aerial-seam-")', attach)
+        self.assertIn("resolverVersion = 17", swift)
         self.assertIn('if rest.startswith("seam")', aerial)
         self.assertIn("aerial-seam.pmtiles", aerial)
+        self.assertIn("def heal_dead_photo", aerial)
+        self.assertIn("def mosaic_from_children", aerial)
 
     def test_phone_style_drops_aerial_when_the_archive_is_off_the_phone(self):
         from pack_phone import pack_phone

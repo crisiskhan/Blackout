@@ -1012,9 +1012,9 @@ public enum PackStyle {
         public static let sunInkHex = "#141414"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
-    /// not keep replaying it. v15 strips grey house masses so a cached v14 style
-    /// cannot keep covering the photo.
-    public static let resolverVersion = 16
+    /// not keep replaying it. v17 paints aerial-seam last and the pack heals USGS
+    /// NAIP cyan no-data plates so a cached v16 style cannot keep the Hunter Foster slab.
+    public static let resolverVersion = 17
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -1267,10 +1267,15 @@ public enum PackStyle {
         let names = ((try? FileManager.default.contentsOfDirectory(atPath: packRoot.path)) ?? [])
             .filter { $0.hasPrefix("aerial") && $0.hasSuffix(".pmtiles") }
             .sorted { lhs, rhs in
-                func rank(_ name: String) -> Int {
-                    if name == aerialFileName { return 0 }
-                    let trimmed = name.dropFirst("aerial-".count).dropLast(".pmtiles".count)
-                    return (Int(trimmed) ?? 0) + 1
+                func rank(_ name: String) -> (Int, Int) {
+                    if name == aerialFileName { return (0, 0) }
+                    let stem = String(name.dropLast(".pmtiles".count))
+                    if stem == "aerial-seam" { return (2, 0) }
+                    if stem.hasPrefix("aerial-seam-") {
+                        return (2, Int(stem.dropFirst("aerial-seam-".count)) ?? 0)
+                    }
+                    let trimmed = String(stem.dropFirst("aerial-".count))
+                    return (1, Int(trimmed) ?? 0)
                 }
                 return rank(lhs) < rank(rhs)
             }

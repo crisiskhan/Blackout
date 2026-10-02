@@ -48,6 +48,10 @@ WRITE_DIR = ".aerial-write"
 SHARD_PAYLOAD_BYTES = SHARD_MAX_BYTES - (2 * 1024 * 1024)
 # Blend this many pixels across a shared tile edge so NAIP is one photo.
 FEATHER_PX = 8
+# USGS NAIP export paints missing imagery as a flat cyan plate. A tenth of a
+# tile is already a slab on the walking desk (Crisis still, Hunter Foster).
+NODATA_MIN_FRACTION = 0.10
+NODATA_SAMPLE_PX = 64
 # Walking desk Crisis scored: Vinton–Anthony plus Doniphan retail east of Oleaster.
 SEAM_BOXES = {
     "tx-west": {
@@ -515,6 +519,8 @@ def build_aerial(dest: Path, pack: dict) -> dict[str, Any]:
         present = sum(1 for zxy in jobs if cache_get(dest, *zxy))
         return {"present": False, "reason": f"NAIP returned {present} tiles", "tiles": 0}
     names.extend(write_feather_overlay(dest, pack_id))
+    heal_dead_photo(dest)
+    names = shard_names(dest)
     tiles = sum(1 for zxy in jobs if cache_get(dest, *zxy))
     bytes_out = sum((dest / name).stat().st_size for name in names)
     return {
@@ -553,6 +559,140 @@ def _jpeg_encode(im) -> bytes:
     buf = BytesIO()
     im.save(buf, format="JPEG", quality=90, optimize=True, subsampling=0)
     return buf.getvalue()
+
+
+def _is_nodata_pixel(r: int, g: int, b: int) -> bool:
+    return r < 90 and g > 115 and b > 100 and (g - r) > 45 and abs(g - b) < 50
+
+
+def nodata_fraction(blob: bytes) -> float | None:
+    """Share of a packed JPEG that is USGS NAIP cyan no-data."""
+    if not blob or not blob.startswith(JPEG_MAGIC):
+        return None
+    try:
+        im = _jpeg_decode(blob)
+    except Exception:
+        return None
+    sample = im.resize((NODATA_SAMPLE_PX, NODATA_SAMPLE_PX))
+    raw = sample.tobytes()
+    hit = 0
+    n = NODATA_SAMPLE_PX * NODATA_SAMPLE_PX
+    for i in range(0, len(raw), 3):
+        if _is_nodata_pixel(raw[i], raw[i + 1], raw[i + 2]):
+            hit += 1
+    return hit / n
+
+
+def is_dead_photo(blob: bytes) -> bool:
+    frac = nodata_fraction(blob)
+    return frac is not None and frac >= NODATA_MIN_FRACTION
+
+
+def mosaic_from_children(
+    tiles: dict[tuple[int, int, int], bytes],
+    z: int,
+    x: int,
+    y: int,
+) -> bytes | None:
+    """Rebuild a dead z tile from four live children. Yard photo beats a cyan plate."""
+    keys = (
+        (z + 1, 2 * x, 2 * y),
+        (z + 1, 2 * x + 1, 2 * y),
+        (z + 1, 2 * x, 2 * y + 1),
+        (z + 1, 2 * x + 1, 2 * y + 1),
+    )
+    kids = [tiles.get(key) for key in keys]
+    if any(blob is None or is_dead_photo(blob) for blob in kids):
+        return None
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+    half = TILE_PX // 2
+    out = Image.new("RGB", (TILE_PX, TILE_PX))
+    corners = ((0, 0), (half, 0), (0, half), (half, half))
+    for blob, corner in zip(kids, corners):
+        assert blob is not None
+        out.paste(_jpeg_decode(blob).resize((half, half)), corner)
+    mosaic = _jpeg_encode(out)
+    if not mosaic.startswith(JPEG_MAGIC) or len(mosaic) <= 800 or is_dead_photo(mosaic):
+        return None
+    return mosaic
+
+
+def _archive_bbox(path: Path) -> dict:
+    with open(path, "rb") as fh:
+        header = Reader(MmapSource(fh)).header()
+    return {
+        "west": header["min_lon_e7"] / 1e7,
+        "south": header["min_lat_e7"] / 1e7,
+        "east": header["max_lon_e7"] / 1e7,
+        "north": header["max_lat_e7"] / 1e7,
+    }
+
+
+def heal_last_wins(
+    last: dict[tuple[int, int, int], bytes],
+) -> tuple[int, int]:
+    """Mosaic dead last-wins tiles from children; drop the rest so a parent overzooms."""
+    replaced = 0
+    dropped = 0
+    for z in sorted({zxy[0] for zxy in last}, reverse=True):
+        for zxy in [key for key in list(last) if key[0] == z]:
+            if not is_dead_photo(last[zxy]):
+                continue
+            mosaic = mosaic_from_children(last, *zxy)
+            if mosaic:
+                last[zxy] = mosaic
+                replaced += 1
+            else:
+                del last[zxy]
+                dropped += 1
+    return replaced, dropped
+
+
+def heal_dead_photo(dest: Path) -> dict[str, Any]:
+    """Cut USGS cyan no-data plates out of packed shards. Phone merge last-wins this."""
+    names = shard_names(dest)
+    if not names:
+        return {"replaced": 0, "dropped": 0, "rewritten": []}
+    try:
+        from PIL import Image  # noqa: F401
+    except ImportError:
+        return {"replaced": 0, "dropped": 0, "rewritten": [], "reason": "no Pillow"}
+    archives = {name: read_archive(dest / name) for name in names}
+    last: dict[tuple[int, int, int], bytes] = {}
+    for name in names:
+        last.update({zxy: blob for zxy, blob in archives[name].items() if blob})
+    replaced, dropped = heal_last_wins(last)
+    rewritten: list[str] = []
+    pack = {"id": dest.name, "name": dest.name}
+    for name in names:
+        tiles = archives[name]
+        changed = False
+        kept: dict[tuple[int, int, int], bytes] = {}
+        for zxy, blob in tiles.items():
+            if not is_dead_photo(blob):
+                kept[zxy] = blob
+                continue
+            replacement = last.get(zxy)
+            if replacement and not is_dead_photo(replacement):
+                kept[zxy] = replacement
+                changed = True
+                continue
+            changed = True
+        if not changed:
+            continue
+        path = dest / name
+        ordered = sorted(kept.items(), key=lambda item: zxy_to_tileid(*item[0]))
+        tmp = path.with_suffix(".heal.tmp")
+        _write_one_shard(tmp, ordered, _archive_bbox(path), pack)
+        if tmp.stat().st_size > SHARD_MAX_BYTES:
+            tmp.unlink(missing_ok=True)
+            raise SystemExit(f"{name} heal exceeded shard cap")
+        tmp.replace(path)
+        rewritten.append(name)
+    return {"replaced": replaced, "dropped": dropped, "rewritten": rewritten}
 
 
 def feather_tiles(
