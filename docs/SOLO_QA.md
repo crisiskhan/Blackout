@@ -12,7 +12,7 @@ Score every row `[ ] PASS` / FAIL / N/A. Write the exact chrome string or behavi
 
 ## HUD KEYBOARD
 
-- [ ] PASS / FAIL / N/A — Tap SEARCH, NOTE, NAME, TIME, ITEM, TODAY, or PARTY CODE. The HUD keyboard rises on glass, 44pt keys. SPACE, BACK, SHIFT, 123 / ABC. Digit pad is 3-wide (`-` `0` `.` and comma) so `31.76190, -106.49000` is one line. Red submit plate (`DONE` / `SEARCH` / `SEND` / `LOG`). NAME / ITEM / PARTY CODE stay caps. SEARCH / NOTE / TODAY mix case. TIME opens the digit pad. MAP SEARCH ends with the mic, not a SAY chip. FIELD SAY is still a chip. Tap the dim field, submit, change tab, or DISARM to close. No iPhone keyboard.
+- [ ] PASS / FAIL / N/A — Tap SEARCH, NOTE, NAME, TIME, ITEM, TODAY, or PARTY CODE. The HUD keyboard rises on glass, 44pt keys. SPACE, BACK, SHIFT, 123 / ABC are whole words (they never clip). Apostrophe and hyphen sit on the letter face so `O'BRIEN` is one line. Digit pad is 3-wide (`-` `0` `.` and comma) so `31.76190, -106.49000` is one line. Red submit plate (`DONE` / `SEARCH` / `SEND` / `LOG` / `SET` / `ADD`). Empty SEND / LOG / ADD / SET chromes why not and keeps the board. NAME / ITEM / PARTY CODE stay caps. SEARCH / NOTE / TODAY mix case. TIME opens the digit pad. Readout prints the field title when empty. Hold BACK repeats. Left-hand sits above the home indicator. MAP SEARCH ends with the mic, not a SAY chip. FIELD SAY is still a chip. Tap the dim field, successful submit, change tab, or DISARM to close. No iPhone keyboard.
 
 ## MAP STILL — tip 60 score bar (five only)
 

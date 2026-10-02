@@ -308,6 +308,7 @@ struct MapTab: View {
                         onSubmit: {
                             runtime.touch(.search)
                             search()
+                            return true
                         },
                         reserveTrailing: BlackoutTokens.Chrome.mapChipHitPoints
                     )

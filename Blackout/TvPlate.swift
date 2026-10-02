@@ -218,7 +218,10 @@ struct TvPlate: View {
                 id: "tv.na.search",
                 submit: "DONE",
                 pointSize: 16,
-                onSubmit: { resetNaPage() }
+                onSubmit: {
+                    resetNaPage()
+                    return true
+                }
             )
             HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
                 ForEach(naKindChips, id: \.self) { kind in

@@ -585,37 +585,44 @@ struct ExpeditionTab: View {
         }
     }
 
-    private func setPartyTimer() {
+    @discardableResult
+    private func setPartyTimer() -> Bool {
         guard let duration = TimerDuration.parse(timerTime) else {
             timerChrome = "SET TIME"
-            return
+            return false
         }
         timerChrome = nil
         runtime.addPartyTimer(task: timerName, duration: duration)
         timerName = ""
         timerTime = ""
         runtime.hudKeys.close()
+        return true
     }
 
-    private func addKitItem() {
+    @discardableResult
+    private func addKitItem() -> Bool {
         let name = itemDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         if name.isEmpty {
             kitChrome = "NAME ITEM"
-            return
+            return false
         }
         kitChrome = nil
         runtime.addKitItem(name)
         itemDraft = ""
+        runtime.hudKeys.close()
+        return true
     }
 
-    private func logToday() {
+    @discardableResult
+    private func logToday() -> Bool {
         if runtime.logDiary(diaryDraft) {
             diaryChrome = runtime.mesh.chromeNet == "NO PEERS · LOGGED" ? "NO PEERS · LOGGED" : nil
             diaryDraft = ""
             runtime.hudKeys.close()
-        } else {
-            diaryChrome = "WRITE TODAY"
+            return true
         }
+        diaryChrome = "WRITE TODAY"
+        return false
     }
 
     private func sectionLabel(_ title: String) -> some View {

@@ -5132,6 +5132,7 @@ class HUDKeyboardTests(unittest.TestCase):
         "CommsTab.swift",
         "PartyHoldCard.swift",
         "PlaceMarkCard.swift",
+        "TvPlate.swift",
     )
 
     def test_every_field_is_hud_glass_not_uitextfield(self):
@@ -5171,7 +5172,8 @@ class HUDKeyboardTests(unittest.TestCase):
         self.assertIn("struct HUDKeyboard", board)
         self.assertIn("final class HUDKeyboardGate", board)
         self.assertIn("Button(\"SPACE\")", board)
-        self.assertIn("Button(\"BACK\")", board)
+        self.assertIn("HUDRepeatKey", board)
+        self.assertIn("\"BACK\"", board)
         self.assertIn("Button(\"123\")", board)
         self.assertIn("Button(\"ABC\")", board)
         self.assertIn("Button(\"SHIFT\")", board)
@@ -5226,6 +5228,8 @@ class HUDKeyboardTests(unittest.TestCase):
         self.assertIn('HUDField("PARTY CODE"', comms)
         party = read("Blackout", "PartyHoldCard.swift")
         self.assertIn('HUDField("NAME"', party)
+        tv = read("Blackout", "TvPlate.swift")
+        self.assertIn('HUDField("SEARCH"', tv)
         self.assertIn("locked: true", exped)
         self.assertIn("locked: true", party)
         self.assertIn("locked: true", comms)
@@ -5235,6 +5239,12 @@ class HUDKeyboardTests(unittest.TestCase):
         self.assertIn("BACK", qa)
         self.assertIn("Tap SEARCH, NOTE, NAME, TIME", qa)
         self.assertIn("no iphone keyboard", qa.lower())
+        self.assertIn("apostrophe", qa.lower())
+        self.assertIn("o'brien", qa.lower())
+        self.assertIn("keeps the board", qa.lower())
+        self.assertIn("home indicator", qa.lower())
+        self.assertIn("field title", qa.lower())
+        self.assertIn("hold back", qa.lower())
         self.assertNotIn("best in class", qa.lower())
 
     def test_engine_types_coordinates_and_respects_lock(self):
@@ -5264,6 +5274,79 @@ class HUDKeyboardTests(unittest.TestCase):
         hud_tap(mixed, ("glyph", "a"))
         self.assertEqual(mixed["text"], "Mo A")
         self.assertFalse(mixed["shift"])
+        name = {"text": "", "shift": True, "locked": True, "face": "letters"}
+        for ch in "O'BRIEN":
+            hud_tap(name, ("glyph", ch))
+        self.assertEqual(name["text"], "O'BRIEN")
+
+    def test_word_keys_title_and_empty_submit_stay_open(self):
+        """SHIFT stays a whole word. Empty SEND keeps the board. Left-hand clears home."""
+        board = read("Blackout", "HUDKeyboard.swift")
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "HUDKeyboard.swift")
+        root = read("Blackout", "RootChrome.swift")
+        comms = read("Blackout", "CommsTab.swift")
+        exped = read("Blackout", "ExpeditionTab.swift")
+        field = read("Blackout", "FieldTab.swift")
+        gate = board.split("final class HUDKeyboardGate")[1].split("struct HUDField")[0]
+        field_init = board.split("struct HUDField")[1].split("var body")[0]
+        style = board.split("struct HUDKeyCapStyle")[1]
+        typewriter = root.split("private var hudTypewriter")[1].split("private var sosFlashVeil")[0]
+        note = comms.split('HUDField("NOTE"')[1].split("Button(\"SEND\")")[0]
+        self.assertIn("apostrophe", tokens)
+        self.assertIn("wordKeyMinWidth", tokens)
+        self.assertIn("submitKeyMinWidth", tokens)
+        self.assertIn('public static let apostrophe = "\'"', tokens)
+        self.assertIn("wordKeyMinWidth: Double = 72", tokens)
+        self.assertIn("submitKeyMinWidth: Double = 88", tokens)
+        self.assertIn("var expand: Bool", style)
+        self.assertIn("minimumScaleFactor(1)", style)
+        self.assertIn("lineLimit(1)", style)
+        self.assertIn("HUDKeyboardLayout.wordKeyMinWidth", board)
+        self.assertIn("HUDKeyboardLayout.submitKeyMinWidth", board)
+        self.assertIn("HUDKeyboardLayout.apostrophe", board)
+        self.assertIn("HUDRepeatKey", board)
+        self.assertGreaterEqual(board.count("HUDRepeatKey("), 2)
+        repeat_key = board.split("struct HUDRepeatKey")[1].split("struct HUDKeyCapStyle")[0]
+        self.assertIn("DragGesture(minimumDistance: 0)", repeat_key)
+        self.assertNotIn("onLongPressGesture", repeat_key)
+        self.assertIn("var fieldTitle", gate)
+        self.assertIn("(() -> Bool)?", gate)
+        self.assertIn("onSubmit?() ?? true", gate)
+        self.assertIn("title: title", board.split("keys.open")[1].split("func close")[0])
+        self.assertLess(
+            field_init.find("onSubmit"),
+            field_init.find("onOpen"),
+            "trailing closure on HUDField is submit, not open",
+        )
+        self.assertIn("minimumScaleFactor(1)", board.split("struct HUDField")[1].split("struct HUDSearchMic")[0])
+        readout = board.split("private var readout")[1].split("private var letterPad")[0]
+        self.assertIn("fieldTitle", readout)
+        self.assertNotIn('" "', readout)
+        self.assertIn("lineLimit(2)", readout)
+        self.assertIn("minimumScaleFactor(1)", readout)
+        letter_actions = board.split("private var actionRow")[1].split("private func shown")[0]
+        self.assertIn("HUDKeyboardLayout.apostrophe", letter_actions)
+        self.assertIn('tap(.glyph(HUDKeyboardLayout.hyphen))', letter_actions)
+        self.assertIn("expand: false", board)
+        self.assertIn("liftHome", board)
+        self.assertIn("safeAreaPadding", board)
+        self.assertNotIn("leftHand ? 8", typewriter)
+        self.assertIn("safeAreaPadding", typewriter + board)
+        self.assertIn("hudTabReservePoints", typewriter)
+        self.assertIn("onSubmit:", note)
+        self.assertIn("sendPartyNote(note)", note)
+        self.assertIn("return true", note)
+        self.assertIn("return false", note)
+        self.assertIn("-> Bool", exped.split("private func setPartyTimer")[1].split("private func addKitItem")[0])
+        self.assertIn("-> Bool", exped.split("private func addKitItem")[1].split("private func logToday")[0])
+        self.assertIn("-> Bool", exped.split("private func logToday")[1].split("private func sectionLabel")[0])
+        self.assertIn("return false", exped.split("private func setPartyTimer")[1].split("private func addKitItem")[0])
+        self.assertIn("NAME ITEM", exped.split("private func addKitItem")[1].split("private func logToday")[0])
+        self.assertIn("WRITE TODAY", exped.split("private func logToday")[1].split("private func sectionLabel")[0])
+        self.assertIn("-> Bool", field.split("private func openAnswer")[1].split("private func jump")[0])
+        pending = comms.split("private func openPendingNote")[1].split("private func sectionLabel")[0]
+        self.assertIn("return true", pending)
+        self.assertIn("return false", pending)
 
     def test_no_color_vs_gradient_stroke_ternary_in_blackout(self):
         """HUDKeyboard-only regex missed INSTRUMENTS PACKS (PR 72 device compile)."""

@@ -14,6 +14,10 @@ public enum HUDKeyboardLayout: Sendable {
         ["-", "0", "."],
     ]
     public static let comma = ","
+    public static let apostrophe = "'"
+    public static let hyphen = "-"
+    public static let wordKeyMinWidth: Double = 72
+    public static let submitKeyMinWidth: Double = 88
 }
 
 public struct HUDKeyboardState: Equatable, Sendable {
