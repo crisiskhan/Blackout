@@ -1,12 +1,12 @@
 import Foundation
 
-/// Adult directory for N/A after the 10s hold. Women only. JSON only. No player.
+/// Adult directory for N/A after the 10s hold. Women and couples. JSON only. No player.
 enum AdultDesk {
     static let cap = 600
     static let pageSize = 100
     static let pages = 6
     static let origin = "https://chaturbate.com"
-    static let tags = ["f"]
+    static let tags = ["f", "c"]
     static let mark = "DkfRj"
     static let via = "8.8.8.8"
     static let agent =
@@ -47,6 +47,12 @@ enum AdultDesk {
         ("squirt", "SQUIRT"),
         ("anal", "ANAL"),
         ("lesbian", "LESBIAN"),
+        ("couple", "COUPLE"),
+        ("orgy", "ORGY"),
+        ("gangbang", "ORGY"),
+        ("roleplay", "ROLEPLAY"),
+        ("role-play", "ROLEPLAY"),
+        ("role play", "ROLEPLAY"),
     ]
 
     struct Room: Identifiable, Equatable, Sendable {
@@ -155,9 +161,6 @@ enum AdultDesk {
         if [
             "m",
             "male",
-            "c",
-            "couple",
-            "couples",
             "s",
             "trans",
             "shemale",
@@ -168,7 +171,7 @@ enum AdultDesk {
         ].contains(gender) {
             return false
         }
-        return ["f", "female", "w", "woman", "women"].contains(gender)
+        return ["f", "female", "w", "woman", "women", "c", "couple", "couples"].contains(gender)
     }
 
     private static func token(_ handle: String) -> String? {
@@ -255,6 +258,15 @@ enum AdultDesk {
         if flag(model, "is_new") || tokens.contains("new") {
             seen.insert("NEW")
             found.append("NEW")
+        }
+        let gender = string(model["gender"]).lowercased()
+        if ["c", "couple", "couples"].contains(gender)
+            || tokens.contains("couple")
+            || tokens.contains("couples")
+        {
+            if seen.insert("COUPLE").inserted {
+                found.append("COUPLE")
+            }
         }
         for pair in kindWords {
             if pair.0 == "new" { continue }

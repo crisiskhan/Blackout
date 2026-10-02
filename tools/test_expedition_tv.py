@@ -147,13 +147,16 @@ ADULT_KIND_WORDS = (
     ("squirt", "SQUIRT"),
     ("anal", "ANAL"),
     ("lesbian", "LESBIAN"),
+    ("couple", "COUPLE"),
+    ("orgy", "ORGY"),
+    ("gangbang", "ORGY"),
+    ("roleplay", "ROLEPLAY"),
+    ("role-play", "ROLEPLAY"),
+    ("role play", "ROLEPLAY"),
 )
 ADULT_MALE = {
     "m",
     "male",
-    "c",
-    "couple",
-    "couples",
     "s",
     "trans",
     "shemale",
@@ -162,7 +165,8 @@ ADULT_MALE = {
     "transsexual",
     "ts",
 }
-ADULT_WOMAN = {"f", "female", "w", "woman", "women"}
+ADULT_COUPLE = {"c", "couple", "couples"}
+ADULT_WOMAN = {"f", "female", "w", "woman", "women"} | ADULT_COUPLE
 
 
 def adult_playlist(raw: str) -> str | None:
@@ -206,7 +210,7 @@ def adult_stream(payload: object) -> str | None:
 
 
 def adult_woman(model: object) -> bool:
-    """Directory is women. Refuse male, couple, and trans gender tags."""
+    """Women and couples. Refuse male-lead and trans gender tags."""
     if not isinstance(model, dict):
         return False
     gender = str(model.get("gender") or "").strip().lower()
@@ -253,6 +257,10 @@ def adult_room_kinds(model: object) -> list[str]:
     if model.get("is_new") or "new" in tokens:
         seen.add("NEW")
         found.append("NEW")
+    gender = str(model.get("gender") or "").strip().lower()
+    if gender in ADULT_COUPLE or "couple" in tokens or "couples" in tokens:
+        seen.add("COUPLE")
+        found.append("COUPLE")
     for needle, chip in ADULT_KIND_WORDS:
         if needle == "new":
             continue
@@ -788,7 +796,7 @@ class AdultDeskTests(unittest.TestCase):
                     "gender": "c",
                     "current_show": "public",
                     "num_users": 7000,
-                    "tags": ["lesbian"],
+                    "tags": ["lesbian", "orgy", "roleplay"],
                     "room_subject": "live",
                 },
                 {
@@ -824,20 +832,25 @@ class AdultDeskTests(unittest.TestCase):
             ]
         }
         got = adult_rooms(payload)
-        self.assertEqual([row["id"] for row in got], ["adult-alpha", "adult-echo"])
-        self.assertEqual(got[0]["name"], "ALPHA")
-        self.assertEqual(got[0]["handle"], "alpha")
-        self.assertEqual(got[0]["url"], "")
-        self.assertEqual(got[0]["image"], "https://img.example/alpha-360.jpg")
-        self.assertEqual(got[0]["kinds"], ["DANCE", "BLONDE"])
-        self.assertEqual(got[1]["handle"], "echo")
-        self.assertEqual(got[1]["image"], "")
-        self.assertEqual(got[1]["kinds"], [])
+        self.assertEqual([row["id"] for row in got], ["adult-sigma", "adult-alpha", "adult-echo"])
+        self.assertEqual(got[0]["name"], "SIGMA")
+        self.assertEqual(got[0]["handle"], "sigma")
+        self.assertEqual(got[0]["kinds"], ["COUPLE", "LESBIAN", "ORGY", "ROLEPLAY"])
+        self.assertEqual(got[1]["name"], "ALPHA")
+        self.assertEqual(got[1]["handle"], "alpha")
+        self.assertEqual(got[1]["url"], "")
+        self.assertEqual(got[1]["image"], "https://img.example/alpha-360.jpg")
+        self.assertEqual(got[1]["kinds"], ["DANCE", "BLONDE"])
+        self.assertEqual(got[2]["handle"], "echo")
+        self.assertEqual(got[2]["image"], "")
+        self.assertEqual(got[2]["kinds"], [])
         self.assertTrue(adult_woman({"gender": "f"}))
         self.assertTrue(adult_woman({}))
+        self.assertTrue(adult_woman({"gender": "c"}))
+        self.assertTrue(adult_woman({"gender": "couple"}))
+        self.assertTrue(adult_clean("orgy roleplay couple"))
         self.assertFalse(adult_woman({"gender": "m"}))
         self.assertFalse(adult_woman({"gender": "male"}))
-        self.assertFalse(adult_woman({"gender": "c"}))
         self.assertFalse(adult_woman({"gender": "s"}))
         self.assertFalse(adult_woman({"gender": "trans"}))
         self.assertFalse(adult_woman({"gender": "shemale"}))
@@ -855,10 +868,21 @@ class AdultDeskTests(unittest.TestCase):
         )
         self.assertIsNone(adult_still("http://img.example/a.jpg"))
         self.assertIsNone(adult_still("https://edge.example/live.m3u8"))
-        self.assertEqual(adult_kinds(got), ["BLONDE", "DANCE"])
+        self.assertEqual(
+            adult_kinds(got),
+            ["BLONDE", "COUPLE", "DANCE", "LESBIAN", "ORGY", "ROLEPLAY"],
+        )
         self.assertEqual(
             [row["id"] for row in adult_pick(got, kind="DANCE")],
             ["adult-alpha"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(got, kind="COUPLE")],
+            ["adult-sigma"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(got, kind="ORGY")],
+            ["adult-sigma"],
         )
         self.assertEqual(
             [row["id"] for row in adult_pick(got, query="echo")],
@@ -866,7 +890,7 @@ class AdultDeskTests(unittest.TestCase):
         )
         self.assertEqual(
             [row["id"] for row in adult_pick(got, kind="ALL")],
-            ["adult-alpha", "adult-echo"],
+            ["adult-sigma", "adult-alpha", "adult-echo"],
         )
         self.assertTrue(adult_allows("alpha"))
         self.assertFalse(adult_allows("teenstar"))
@@ -914,8 +938,11 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("offset", desk)
         self.assertIn("chaturbate.com", desk.lower())
         self.assertIn("affiliates/onlinerooms", desk)
-        self.assertIn('static let tags = ["f"]', desk)
+        self.assertIn('static let tags = ["f", "c"]', desk)
         self.assertNotIn('["f", "c", "m", "s"]', desk)
+        self.assertIn("COUPLE", desk)
+        self.assertIn("ORGY", desk)
+        self.assertIn("ROLEPLAY", desk)
         self.assertIn("static func still(", desk)
         self.assertIn("static func pick(", desk)
         self.assertIn("static func kinds(", desk)
@@ -1147,6 +1174,9 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("section", tv.lower())
         self.assertIn("not a preview clip", tv.lower())
         self.assertIn("women", tv.lower())
+        self.assertIn("couple", tv.lower())
+        self.assertIn("orgies", tv.lower())
+        self.assertIn("role play", tv.lower())
         self.assertIn("no trans", tv.lower())
         self.assertIn("eight at a time", tv)
         self.assertIn("SEARCH", tv)
