@@ -210,7 +210,7 @@ class NativeMapTests(unittest.TestCase):
         self.assertGreaterEqual(walk["north"], lat)
         self.assertIn("OfflineMapView(", tab)
         self.assertNotIn("GlobeView(", tab)
-        self.assertIn("walkPitch: Double = 55", swift)
+        self.assertIn("walkPitch: Double = 36", swift)
         self.assertIn("static func followHeading(", swift)
         self.assertIn("holdPitch(godsEye: false)", offline)
         self.assertIn("PackCamera.followHeading", offline)

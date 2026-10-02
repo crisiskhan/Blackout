@@ -300,11 +300,11 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(PackCamera.allowsOrbit(godsEye: false))
         XCTAssertTrue(PackCamera.allowsTilt(godsEye: true))
         XCTAssertTrue(PackCamera.allowsTilt(godsEye: false))
-        XCTAssertEqual(PackCamera.godsEyeMaxPitch, 60)
+        XCTAssertEqual(PackCamera.godsEyeMaxPitch, 42)
         XCTAssertEqual(PackCamera.holdMinPitch(godsEye: true), 0)
-        XCTAssertEqual(PackCamera.holdMaxPitch(godsEye: true), 60)
+        XCTAssertEqual(PackCamera.holdMaxPitch(godsEye: true), 42)
         XCTAssertEqual(PackCamera.holdMinPitch(godsEye: false), 0)
-        XCTAssertEqual(PackCamera.holdMaxPitch(godsEye: false), 60)
+        XCTAssertEqual(PackCamera.holdMaxPitch(godsEye: false), 42)
         XCTAssertTrue(
             PackCamera.cameraStaysOnPack(
                 lat: 31.5,
@@ -1338,12 +1338,14 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(PackCamera.godsEyeRangeFactor, 1.15)
         XCTAssertEqual(PackCamera.godsEyeHeading, 0)
         XCTAssertEqual(PackCamera.godsEyeFlySeconds, 2)
-        XCTAssertEqual(PackCamera.holdPitch(godsEye: true), 55)
-        XCTAssertEqual(PackCamera.holdPitch(godsEye: false), 55)
+        XCTAssertEqual(PackCamera.holdPitch(godsEye: true), 36)
+        XCTAssertEqual(PackCamera.holdPitch(godsEye: false), 36)
         XCTAssertEqual(PackCamera.holdPitch(godsEye: true, overview: true), 0)
         XCTAssertEqual(PackCamera.overviewPitch, 0)
         XCTAssertFalse(PackCamera.allowsTilt(godsEye: true, overview: true))
-        XCTAssertEqual(PackCamera.walkPitch, 55)
+        XCTAssertEqual(PackCamera.walkPitch, 36)
+        XCTAssertLessThan(PackCamera.walkPitch, 45)
+        XCTAssertLessThanOrEqual(PackCamera.godsEyeMaxPitch, 42)
         XCTAssertEqual(
             PackCamera.followHeading(lockOn: true, godsEye: false, youHeading: 312),
             312

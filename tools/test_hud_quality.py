@@ -4565,7 +4565,25 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("return maxZoom", hold_max)
         self.assertNotIn("godsEye ? godsEyeMaxZoom : maxZoom", cam)
         qa = read("docs", "SOLO_QA.md")
+        device = read("docs", "DEVICE.md")
         self.assertIn("Pinch stays on packed tiles", qa)
+        self.assertIn("YOU sits on the photo", qa)
+        self.assertIn("never a void sky", qa.lower())
+        self.assertIn("YOU sits on the photo", device)
+        self.assertIn("never a void sky", device.lower())
+        self.assertNotIn("static let walkPitch: Double = 55", cam)
+        self.assertNotIn("static let godsEyeMaxPitch: Double = 60", cam)
+        # iPhone 12 Pro Max still at 31.87053, -106.59753: 55° put YOU on
+        # the horizon and filled the upper glass with void. Tall-phone
+        # vertical FOV is ~72°, so pitch + 36° must stay under 90°.
+        walk = float(re.search(r"static let walkPitch: Double = ([0-9.]+)", cam).group(1))
+        tilt = float(
+            re.search(r"static let godsEyeMaxPitch: Double = ([0-9.]+)", cam).group(1)
+        )
+        tall_half_vfov = 36.0
+        self.assertLess(walk + tall_half_vfov, 90)
+        self.assertLess(tilt + tall_half_vfov, 90)
+        self.assertGreaterEqual(55 + tall_half_vfov, 90)
         self.assertNotIn("best in class", qa.lower())
 
     def test_off_glass_dest_is_framed_without_stealing_lock_on(self):
@@ -4670,7 +4688,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("static let packPaddingPoints", cam)
         self.assertIn("static let packSidePaddingPoints", cam)
         self.assertIn("static let godsEyePitch: Double = 45", cam)
-        self.assertIn("static let walkPitch: Double = 55", cam)
+        self.assertIn("static let walkPitch: Double = 36", cam)
         self.assertIn("static let maxZoom: Double = 17.5", cam)
         self.assertIn("static func followHeading(", cam)
         self.assertIn("static let godsEyeRangeFactor: Double = 1.15", cam)
@@ -4700,7 +4718,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         )[0]
         self.assertNotIn("godsEye", stay)
         self.assertIn("overview: Bool", stay)
-        self.assertIn("static let godsEyeMaxPitch: Double = 60", cam)
+        self.assertIn("static let godsEyeMaxPitch: Double = 42", cam)
         self.assertIn("static func holdMinPitch(", cam)
         self.assertIn("static func holdMaxPitch(", cam)
         self.assertIn("godsEye _: Bool", cam.split("static func shouldFrameDest(")[1].split("static func destIsOnGlass(")[0])
