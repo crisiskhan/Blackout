@@ -122,7 +122,14 @@ enum AdultDesk {
         "FAVORS",
     ]
     static let faces: [(String, [String])] = [
-        ("ITSSTEPHHONEY21", ["itsstephhoney21", "itsstephhoney", "stephhoney21", "stephhoney"]),
+        ("ITSSTEPHHONEY21", [
+            "itsstephhoney21",
+            "itsstephhoney",
+            "stephhoney21",
+            "stephhoney",
+            "its steph honey",
+            "steph honey 21",
+        ]),
         ("MULAN VUITTON", ["mulanvuitton", "mulan_vuitton", "mulan vuitton", "mulanvuittontv"]),
     ]
     static let loveChip = "LOVESCAPE"
@@ -229,13 +236,16 @@ enum AdultDesk {
     }
 
     static func userAgent(_ raw: String) -> String {
-        loveHost(raw) ? loveAgent : agent
+        let host = URL(string: raw)?.host?.lowercased() ?? ""
+        if loveHost(raw) || host.contains("bornstar") { return loveAgent }
+        return agent
     }
 
     static func referer(_ raw: String) -> String {
         if loveHost(raw) { return "\(loveOrigin)/" }
         let host = URL(string: raw)?.host?.lowercased() ?? ""
         if host.contains("eporner") { return "https://www.eporner.com/" }
+        if host.contains("bornstar") { return "https://bornstar.co/" }
         return "\(origin)/"
     }
 
@@ -271,10 +281,45 @@ enum AdultDesk {
         return "https://www.eporner.com/api/v2/video/search/?query=\(encoded)&per_page=30&page=\(start)&order=longest&format=json&gay=0"
     }
 
+    static func starSearch(_ query: String, page: Int = 1) -> String? {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !q.isEmpty,
+              let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return nil }
+        let start = max(1, page)
+        return "https://bornstar.co/api/search?q=\(encoded)&page=\(start)"
+    }
+
+    static func faceHunt(_ kind: String) -> [String] {
+        var out: [String] = []
+        var seen: Set<String> = []
+        for query in faceQueries(kind) {
+            for page in 1...4 {
+                if let path = faceSearch(query, page: page), seen.insert(path).inserted {
+                    out.append(path)
+                }
+            }
+            for page in 1...2 {
+                if let path = starSearch(query, page: page), seen.insert(path).inserted {
+                    out.append(path)
+                }
+            }
+        }
+        return out
+    }
+
     static func faceFile(_ token: String) -> String? {
         let id = token.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !id.isEmpty, id.allSatisfy({ $0.isLetter || $0.isNumber }) else { return nil }
         return "https://www.eporner.com/dload/\(id)/720/video.mp4"
+    }
+
+    static func starFile(_ slug: String) -> String? {
+        let id = slug.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !id.isEmpty, id.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "-" }) else {
+            return nil
+        }
+        return "https://cdn.bornstar.co/videos/\(id)/master.m3u8"
     }
 
     static func clock(_ seconds: Int) -> String {
@@ -297,7 +342,8 @@ enum AdultDesk {
         var seen: Set<String> = []
         var rows: [Room] = []
         for model in list {
-            guard let room = faceClip(model, needles: needles) else { continue }
+            guard let room = starClip(model, needles: needles) ?? faceClip(model, needles: needles)
+            else { continue }
             guard seen.insert(room.id).inserted else { continue }
             rows.append(room)
         }
@@ -316,14 +362,7 @@ enum AdultDesk {
         let keys = string(model["keywords"])
         guard !title.isEmpty, allows(title), clean(title), clean(keys) else { return nil }
         guard !faceSpam(title), !faceSpam(keys) else { return nil }
-        let blob = (title + " " + keys).lowercased()
-        let compact = blob.replacingOccurrences(of: " ", with: "")
-        let hit = needles.contains { needle in
-            let text = needle.lowercased()
-            if text.contains(" ") { return blob.contains(text) }
-            return blob.contains(text) || compact.contains(text)
-        }
-        guard hit else { return nil }
+        guard faceHit(title + " " + keys, needles: needles) else { return nil }
         var thumb = ""
         if let dict = model["default_thumb"] as? [String: Any] {
             thumb = still(string(dict["src"])) ?? ""
@@ -344,6 +383,43 @@ enum AdultDesk {
             seek: (title + " " + needles.joined(separator: " ")).lowercased(),
             seconds: seconds
         )
+    }
+
+    private static func starClip(_ model: [String: Any], needles: [String]) -> Room? {
+        let slug = string(model["slug"]).isEmpty ? string(model["id"]) : string(model["slug"])
+        guard let play = playlist(starFile(slug) ?? "") else { return nil }
+        let rawTitle = string(model["title"])
+        if rawTitle.contains("\u{200B}") { return nil }
+        let title = rawTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        let creator = string(model["creator"])
+        guard !title.isEmpty, allows(title), clean(title), allows(creator) || creator.isEmpty, clean(creator)
+        else { return nil }
+        guard !faceSpam(title), !faceSpam(creator) else { return nil }
+        let blob = title + " " + creator + " " + slug
+        guard faceHit(blob, needles: needles) else { return nil }
+        let seconds = max(0, number(model["durationSeconds"]))
+        guard seconds > 0 else { return nil }
+        return Room(
+            id: "adult-face-star-\(slug.lowercased())",
+            name: title.uppercased(),
+            handle: slug,
+            url: play,
+            viewers: number(model["views"]),
+            image: still(string(model["thumbnailUrl"])) ?? "",
+            kinds: [],
+            seek: (title + " " + creator + " " + needles.joined(separator: " ")).lowercased(),
+            seconds: seconds
+        )
+    }
+
+    private static func faceHit(_ blob: String, needles: [String]) -> Bool {
+        let text = blob.lowercased()
+        let compact = text.replacingOccurrences(of: " ", with: "")
+        return needles.contains { needle in
+            let token = needle.lowercased()
+            if token.contains(" ") { return text.contains(token) }
+            return text.contains(token) || compact.contains(token)
+        }
     }
 
     private static func faceSpam(_ blob: String) -> Bool {
@@ -451,7 +527,6 @@ enum AdultDesk {
         let text = String(data: data, encoding: .utf8) ?? ""
         let low = text.lowercased()
         if low.contains("mouflon-advert") || low.contains("/cpa/") { return nil }
-        if low.contains("#ext-x-endlist") { return nil }
         if low.contains("#ext-x-stream-inf") { return nil }
         if low.contains("media.mp4") { return nil }
         if !low.contains("#extinf") { return nil }

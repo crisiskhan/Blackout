@@ -223,7 +223,17 @@ ADULT_PIN = (
     "FAVORS",
 )
 ADULT_FACES = (
-    ("ITSSTEPHHONEY21", ("itsstephhoney21", "itsstephhoney", "stephhoney21", "stephhoney")),
+    (
+        "ITSSTEPHHONEY21",
+        (
+            "itsstephhoney21",
+            "itsstephhoney",
+            "stephhoney21",
+            "stephhoney",
+            "its steph honey",
+            "steph honey 21",
+        ),
+    ),
     ("MULAN VUITTON", ("mulanvuitton", "mulan_vuitton", "mulan vuitton", "mulanvuittontv")),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
@@ -302,8 +312,6 @@ def adult_live_play(source: str, text: str) -> str | None:
         return None
     low = str(text or "").lower()
     if "mouflon-advert" in low or "/cpa/" in low:
-        return None
-    if "#ext-x-endlist" in low:
         return None
     if "#ext-x-stream-inf" in low:
         return None
@@ -733,6 +741,32 @@ def adult_face_queries(kind: str) -> list[str]:
     return out
 
 
+def adult_star_search(query: str, page: int = 1) -> str | None:
+    q = str(query or "").strip()
+    if not q:
+        return None
+    start = max(1, int(page))
+    encoded = urllib.parse.quote(q, safe="-")
+    return f"https://bornstar.co/api/search?q={encoded}&page={start}"
+
+
+def adult_face_hunt(kind: str) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+    for query in adult_face_queries(kind):
+        for page in range(1, 5):
+            path = adult_face_search(query, page=page)
+            if path and path not in seen:
+                seen.add(path)
+                out.append(path)
+        for page in range(1, 3):
+            path = adult_star_search(query, page=page)
+            if path and path not in seen:
+                seen.add(path)
+                out.append(path)
+    return out
+
+
 def adult_face_search(query: str, page: int = 1) -> str | None:
     q = str(query or "").strip()
     if not q:
@@ -752,6 +786,13 @@ def adult_face_file(token: str) -> str | None:
     return f"https://www.eporner.com/dload/{ident}/720/video.mp4"
 
 
+def adult_star_file(slug: str) -> str | None:
+    ident = str(slug or "").strip().lower()
+    if not ident or not all(ch.isalnum() or ch == "-" for ch in ident):
+        return None
+    return f"https://cdn.bornstar.co/videos/{ident}/master.m3u8"
+
+
 def adult_clock(seconds: int) -> str:
     total = max(0, int(seconds))
     hours, rem = divmod(total, 3600)
@@ -759,6 +800,99 @@ def adult_clock(seconds: int) -> str:
     if hours:
         return f"{hours}:{minutes:02d}:{rest:02d}"
     return f"{minutes}:{rest:02d}"
+
+
+def _adult_face_hit(blob: str, needles: list[str]) -> bool:
+    text = str(blob or "").lower()
+    compact = text.replace(" ", "")
+    for needle in needles:
+        token = needle.lower()
+        if " " in token:
+            if token in text:
+                return True
+        elif token in text or token in compact:
+            return True
+    return False
+
+
+def _adult_face_clip(model: dict, needles: list[str]) -> dict | None:
+    token = str(model.get("id") or "").strip()
+    raw_title = str(model.get("title") or "")
+    if "\u200b" in raw_title:
+        return None
+    play = adult_playlist(adult_face_file(token) or "")
+    title = raw_title.strip()
+    keys = str(model.get("keywords") or "")
+    if not play or not title or not adult_allows(title) or not adult_clean(title) or not adult_clean(keys):
+        return None
+    if _adult_face_spam(title) or _adult_face_spam(keys):
+        return None
+    if not _adult_face_hit(f"{title} {keys}", needles):
+        return None
+    thumb = ""
+    default = model.get("default_thumb")
+    if isinstance(default, dict):
+        thumb = adult_still(str(default.get("src") or "")) or ""
+    try:
+        seconds = int(model.get("length_sec") or 0)
+    except (TypeError, ValueError):
+        seconds = 0
+    if seconds <= 0:
+        return None
+    try:
+        views = int(model.get("views") or 0)
+    except (TypeError, ValueError):
+        views = 0
+    return {
+        "id": f"adult-face-{token.lower()}",
+        "name": title.upper(),
+        "handle": token,
+        "url": play,
+        "viewers": views,
+        "image": thumb,
+        "kinds": [],
+        "seek": f"{title} {' '.join(needles)}".strip().lower(),
+        "seconds": seconds,
+    }
+
+
+def _adult_star_clip(model: dict, needles: list[str]) -> dict | None:
+    slug = str(model.get("slug") or model.get("id") or "").strip()
+    play = adult_playlist(adult_star_file(slug) or "")
+    raw_title = str(model.get("title") or "")
+    if not play or "\u200b" in raw_title:
+        return None
+    title = raw_title.strip()
+    creator = str(model.get("creator") or "").strip()
+    if not title or not adult_allows(title) or not adult_clean(title):
+        return None
+    if creator and (not adult_allows(creator) or not adult_clean(creator)):
+        return None
+    if _adult_face_spam(title) or _adult_face_spam(creator):
+        return None
+    if not _adult_face_hit(f"{title} {creator} {slug}", needles):
+        return None
+    try:
+        seconds = int(model.get("durationSeconds") or 0)
+    except (TypeError, ValueError):
+        seconds = 0
+    if seconds <= 0:
+        return None
+    try:
+        views = int(model.get("views") or 0)
+    except (TypeError, ValueError):
+        views = 0
+    return {
+        "id": f"adult-face-star-{slug.lower()}",
+        "name": title.upper(),
+        "handle": slug,
+        "url": play,
+        "viewers": views,
+        "image": adult_still(str(model.get("thumbnailUrl") or "")) or "",
+        "kinds": [],
+        "seek": f"{title} {creator} {' '.join(needles)}".strip().lower(),
+        "seconds": seconds,
+    }
 
 
 def _adult_face_spam(blob: str) -> bool:
@@ -785,62 +919,11 @@ def adult_parse_face(payload: object, kind: str) -> list[dict]:
     for model in payload.get("videos") or []:
         if not isinstance(model, dict):
             continue
-        token = str(model.get("id") or "").strip()
-        raw_title = str(model.get("title") or "")
-        if "\u200b" in raw_title:
+        room = _adult_star_clip(model, needles) or _adult_face_clip(model, needles)
+        if not room or room["id"] in seen:
             continue
-        play = adult_playlist(adult_face_file(token) or "")
-        title = raw_title.strip()
-        keys = str(model.get("keywords") or "")
-        if not play or not title or not adult_allows(title) or not adult_clean(title) or not adult_clean(keys):
-            continue
-        if _adult_face_spam(title) or _adult_face_spam(keys):
-            continue
-        blob = f"{title} {keys}".lower()
-        compact = blob.replace(" ", "")
-        hit = False
-        for needle in needles:
-            text = needle.lower()
-            if " " in text:
-                if text in blob:
-                    hit = True
-                    break
-            elif text in blob or text in compact:
-                hit = True
-                break
-        if not hit:
-            continue
-        rid = f"adult-face-{token.lower()}"
-        if rid in seen:
-            continue
-        seen.add(rid)
-        thumb = ""
-        default = model.get("default_thumb")
-        if isinstance(default, dict):
-            thumb = adult_still(str(default.get("src") or "")) or ""
-        try:
-            seconds = int(model.get("length_sec") or 0)
-        except (TypeError, ValueError):
-            seconds = 0
-        if seconds <= 0:
-            continue
-        try:
-            views = int(model.get("views") or 0)
-        except (TypeError, ValueError):
-            views = 0
-        rows.append(
-            {
-                "id": rid,
-                "name": title.upper(),
-                "handle": token,
-                "url": play,
-                "viewers": views,
-                "image": thumb,
-                "kinds": [],
-                "seek": f"{title} {' '.join(needles)}".strip().lower(),
-                "seconds": seconds,
-            }
-        )
+        seen.add(room["id"])
+        rows.append(room)
     rows.sort(key=lambda row: (-int(row["seconds"]), str(row["name"])))
     return rows
 
@@ -1786,6 +1869,54 @@ class AdultDeskTests(unittest.TestCase):
             ["adult-face-l3hlnrzy6sk", "adult-face-shortclip1"],
         )
         self.assertEqual(adult_parse_face({"videos": []}, "ITSSTEPHHONEY21"), [])
+        self.assertIn("its steph honey", adult_face_queries("ITSSTEPHHONEY21"))
+        self.assertTrue(any("bornstar.co/api/search" in path for path in adult_face_hunt("MULAN VUITTON")))
+        self.assertTrue(any("eporner.com/api/v2/video/search" in path for path in adult_face_hunt("MULAN VUITTON")))
+        self.assertGreaterEqual(len(adult_face_hunt("MULAN VUITTON")), 8)
+        self.assertEqual(
+            adult_star_file("mulan-vuitton-has-sex-with-a-thief"),
+            "https://cdn.bornstar.co/videos/mulan-vuitton-has-sex-with-a-thief/master.m3u8",
+        )
+        self.assertIsNone(adult_star_file("mulan vuitton"))
+        stars = adult_parse_face(
+            {
+                "videos": [
+                    {
+                        "id": "mulan-vuitton-has-sex-with-a-thief",
+                        "slug": "mulan-vuitton-has-sex-with-a-thief",
+                        "title": "Mulan Vuitton Has Sex With A Thief",
+                        "creator": "Mulan Vuitton",
+                        "durationSeconds": 712,
+                        "thumbnailUrl": "https://cdn.example/mulan.webp",
+                    },
+                    {
+                        "id": "honey-sasha-wrong-person",
+                        "slug": "honey-sasha-wrong-person",
+                        "title": "Honey Sasha Ride",
+                        "creator": "Honey Sasha",
+                        "durationSeconds": 433,
+                    },
+                    {
+                        "id": "erika-vuitton-couch",
+                        "slug": "erika-vuitton-couch",
+                        "title": "Erika Vuitton Couch",
+                        "creator": "Erika Vuitton",
+                        "durationSeconds": 2109,
+                    },
+                ]
+            },
+            "MULAN VUITTON",
+        )
+        self.assertEqual([row["id"] for row in stars], ["adult-face-star-mulan-vuitton-has-sex-with-a-thief"])
+        self.assertEqual(stars[0]["seconds"], 712)
+        self.assertTrue(stars[0]["url"].endswith("/master.m3u8"))
+        self.assertEqual(
+            adult_live_play(
+                "https://cdn.example/videos/x/master.m3u8",
+                "#EXTM3U\n#EXT-X-PLAYLIST-TYPE:VOD\n#EXTINF:10.000\nseg_000.ts\n#EXT-X-ENDLIST\n",
+            ),
+            "https://cdn.example/videos/x/master.m3u8",
+        )
         self.assertTrue(adult_allows("alpha"))
         self.assertFalse(adult_allows("teenstar"))
         self.assertEqual(
@@ -1872,8 +2003,13 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("static func faceRoom(", desk)
         self.assertIn("static func faceQueries(", desk)
         self.assertIn("static func faceSearch(", desk)
+        self.assertIn("static func starSearch(", desk)
+        self.assertIn("static func faceHunt(", desk)
         self.assertIn("static func faceFile(", desk)
+        self.assertIn("static func starFile(", desk)
         self.assertIn("static func parseFace(", desk)
+        self.assertIn("bornstar.co", desk.lower())
+        self.assertIn("its steph honey", desk.lower())
         self.assertIn("static func clock(", desk)
         self.assertIn("var seconds:", desk)
         self.assertIn("eporner.com", desk.lower())
@@ -1922,7 +2058,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("fetchAdultFaces", sock)
         self.assertIn("fetchAdultFaceFiles", sock)
         self.assertIn("AdultDesk.parseFace", sock)
-        self.assertIn("AdultDesk.faceSearch", sock)
+        self.assertIn("AdultDesk.faceHunt", sock)
         self.assertIn("imageJPEG", sock)
         self.assertIn("0x50", sock)
         self.assertIn("func pullAdultStills(", sock)

@@ -317,15 +317,12 @@ final class UpdateSocket {
     private func fetchAdultFaceFiles(_ session: URLSession, _ kind: String) async -> [AdultDesk.Room] {
         var rooms: [AdultDesk.Room] = []
         await withTaskGroup(of: [AdultDesk.Room].self) { group in
-            for query in AdultDesk.faceQueries(kind) {
-                for page in 1...2 {
-                    guard let path = AdultDesk.faceSearch(query, page: page) else { continue }
-                    group.addTask {
-                        guard let data = await UpdateSocket.fetchAdult(session, path) else { return [] }
-                        return await Task.detached(priority: .utility) {
-                            AdultDesk.parseFace(data, kind: kind)
-                        }.value
-                    }
+            for path in AdultDesk.faceHunt(kind) {
+                group.addTask {
+                    guard let data = await UpdateSocket.fetchAdult(session, path) else { return [] }
+                    return await Task.detached(priority: .utility) {
+                        AdultDesk.parseFace(data, kind: kind)
+                    }.value
                 }
             }
             for await batch in group {
