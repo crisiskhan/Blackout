@@ -24,6 +24,10 @@ enum AdultDesk {
         "minor",
         "under18",
         "younggirl",
+        "trans",
+        "shemale",
+        "ladyboy",
+        "tgirl",
     ]
 
     static let kindWords: [(String, String)] = [
@@ -148,7 +152,20 @@ enum AdultDesk {
     static func woman(_ model: [String: Any]) -> Bool {
         let gender = string(model["gender"]).lowercased()
         if gender.isEmpty { return true }
-        if ["m", "male", "c", "couple", "couples", "s", "trans"].contains(gender) {
+        if [
+            "m",
+            "male",
+            "c",
+            "couple",
+            "couples",
+            "s",
+            "trans",
+            "shemale",
+            "tgirl",
+            "transgender",
+            "transsexual",
+            "ts",
+        ].contains(gender) {
             return false
         }
         return ["f", "female", "w", "woman", "women"].contains(gender)

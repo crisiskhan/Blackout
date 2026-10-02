@@ -125,6 +125,10 @@ ADULT_BLOCKED = (
     "minor",
     "under18",
     "younggirl",
+    "trans",
+    "shemale",
+    "ladyboy",
+    "tgirl",
 )
 ADULT_KIND_WORDS = (
     ("new", "NEW"),
@@ -144,7 +148,20 @@ ADULT_KIND_WORDS = (
     ("anal", "ANAL"),
     ("lesbian", "LESBIAN"),
 )
-ADULT_MALE = {"m", "male", "c", "couple", "couples", "s", "trans"}
+ADULT_MALE = {
+    "m",
+    "male",
+    "c",
+    "couple",
+    "couples",
+    "s",
+    "trans",
+    "shemale",
+    "tgirl",
+    "transgender",
+    "transsexual",
+    "ts",
+}
 ADULT_WOMAN = {"f", "female", "w", "woman", "women"}
 
 
@@ -774,6 +791,36 @@ class AdultDeskTests(unittest.TestCase):
                     "tags": ["lesbian"],
                     "room_subject": "live",
                 },
+                {
+                    "username": "tau",
+                    "display_name": "tau",
+                    "age": 27,
+                    "gender": "s",
+                    "current_show": "public",
+                    "num_users": 6500,
+                    "tags": ["dance"],
+                    "room_subject": "live",
+                },
+                {
+                    "username": "upsilon",
+                    "display_name": "upsilon",
+                    "age": 25,
+                    "gender": "f",
+                    "current_show": "public",
+                    "num_users": 6000,
+                    "tags": ["trans"],
+                    "room_subject": "live",
+                },
+                {
+                    "username": "phi",
+                    "display_name": "phi",
+                    "age": 28,
+                    "gender": "f",
+                    "current_show": "public",
+                    "num_users": 5500,
+                    "tags": ["shemale"],
+                    "room_subject": "live",
+                },
             ]
         }
         got = adult_rooms(payload)
@@ -792,6 +839,12 @@ class AdultDeskTests(unittest.TestCase):
         self.assertFalse(adult_woman({"gender": "male"}))
         self.assertFalse(adult_woman({"gender": "c"}))
         self.assertFalse(adult_woman({"gender": "s"}))
+        self.assertFalse(adult_woman({"gender": "trans"}))
+        self.assertFalse(adult_woman({"gender": "shemale"}))
+        self.assertFalse(adult_woman({"gender": "tgirl"}))
+        self.assertFalse(adult_allows("transgirl"))
+        self.assertFalse(adult_clean("shemale"))
+        self.assertFalse(adult_clean("ladyboy live"))
         self.assertEqual(
             adult_image({"image_url": "https://img.example/a.jpg"}),
             "https://img.example/a.jpg",
@@ -872,6 +925,10 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("var image:", desk)
         self.assertIn("var kinds:", desk)
         self.assertIn("gender", desk)
+        self.assertIn("\"trans\"", desk)
+        self.assertIn("\"shemale\"", desk)
+        self.assertIn("\"ladyboy\"", desk)
+        self.assertIn("\"tgirl\"", desk)
         self.assertIn("hls_source", desk)
         self.assertIn("current_show", desk)
         self.assertIn("num_users", desk)
@@ -1090,6 +1147,7 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("section", tv.lower())
         self.assertIn("not a preview clip", tv.lower())
         self.assertIn("women", tv.lower())
+        self.assertIn("no trans", tv.lower())
         self.assertIn("eight at a time", tv)
         self.assertIn("SEARCH", tv)
         self.assertIn("still", tv.lower())
