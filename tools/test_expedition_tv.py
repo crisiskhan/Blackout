@@ -497,7 +497,7 @@ ADULT_LOVE_TAGS = ("girls", "couples")
 ADULT_RAIL_EXTRA = 8
 ADULT_HUNT_AT_ONCE = 4
 ADULT_HUNT_PAGES = 2
-ADULT_HUNT_CAP = 96
+ADULT_HUNT_CAP = 160
 ADULT_COUNT_CAP = 1_000_000_000
 ADULT_TOPIC = {
     "BRAIDS": ("braids", "braid", "cornrows"),
@@ -769,8 +769,116 @@ def adult_ask_kind(raw: str) -> str | None:
     return None
 
 
-def adult_ask_needles(raw: str) -> list[str] | None:
+def adult_page_like(raw: str) -> bool:
+    text = str(raw or "").strip().lower()
+    if not text:
+        return False
+    if "://" in text or text.startswith("www."):
+        return True
+    if "/" not in text:
+        return False
+    host = text.split("/", 1)[0]
+    return "." in host and " " not in host
+
+
+def adult_page_token(raw: str) -> str | None:
+    name = str(raw or "").strip().lstrip("@")
+    name = urllib.parse.unquote(name)
+    name = " ".join(name.split())
+    compact = "".join(ch for ch in name.lower() if ch.isalnum())
+    if len(compact) < 3 or len(name) > 48:
+        return None
+    if not all(ch.isalnum() or ch in "._- " for ch in name):
+        return None
+    if name.isdigit():
+        return None
+    return name
+
+
+ADULT_PAGE_SKIP = {
+    "",
+    "search",
+    "profile",
+    "user",
+    "users",
+    "u",
+    "a",
+    "status",
+    "statuses",
+    "videos",
+    "video",
+    "watch",
+    "model",
+    "models",
+    "explore",
+    "home",
+    "login",
+    "signup",
+    "www",
+    "people",
+    "channel",
+    "channels",
+    "p",
+    "reel",
+    "reels",
+    "stories",
+    "tv",
+    "live",
+    "directory",
+    "tag",
+    "tags",
+    "category",
+    "categories",
+    "view",
+    "views",
+    "content",
+    "album",
+    "albums",
+    "gallery",
+    "post",
+    "posts",
+    "tweet",
+    "tweets",
+    "html",
+    "mobile",
+    "m",
+}
+
+
+def adult_page_name(raw: str) -> str | None:
     text = str(raw or "").strip()
+    if not adult_page_like(text):
+        return None
+    if "://" not in text:
+        text = "https://" + text
+    if "#" in text:
+        text = text.split("#", 1)[0]
+    parsed = urllib.parse.urlparse(text)
+    keys = {key.lower(): value for key, value in urllib.parse.parse_qsl(parsed.query)}
+    for key in ("q", "query", "search", "username", "user", "u", "k", "p", "text"):
+        if key in keys:
+            token = adult_page_token(keys[key])
+            if token:
+                return token
+    parts = [part for part in parsed.path.split("/") if part]
+    for part in reversed(parts):
+        piece = urllib.parse.unquote(part)
+        if piece.lower() in ADULT_PAGE_SKIP:
+            continue
+        if piece.isdigit() and len(piece) >= 8:
+            continue
+        token = adult_page_token(piece)
+        if token:
+            return token
+    return None
+
+
+def adult_ask_needles(raw: str) -> list[str] | None:
+    incoming = str(raw or "").strip()
+    if adult_page_like(incoming):
+        name = adult_page_name(incoming)
+        return adult_ask_needles(name) if name else None
+    text = incoming
     if not text:
         return None
     chip = text.upper()
@@ -1063,7 +1171,8 @@ def adult_face_queries(kind: str) -> list[str]:
     needles = adult_hunt_needles(kind) or []
     out: list[str] = []
     seen: set[str] = set()
-    chip = str(kind or "").strip().lower()
+    seed = adult_page_name(kind) or kind
+    chip = str(seed or "").strip().lower()
     for raw in list(needles) + [chip]:
         query = str(raw or "").strip().lower()
         if len(query) < 3 or query in seen:
@@ -1231,6 +1340,33 @@ ADULT_POST_STATUS = "https://api.fxtwitter.com"
 ADULT_POST_FOLLOW = 16
 ADULT_WEB_ORIGIN = "https://html.duckduckgo.com"
 ADULT_WEB_VIDEO = "https://www.bing.com"
+ADULT_WEB_LANDS = (
+    "us-en",
+    "uk-en",
+    "es-es",
+    "pt-br",
+    "de-de",
+    "fr-fr",
+    "ja-jp",
+    "ru-ru",
+    "es-mx",
+)
+ADULT_WEB_VIDEO_LANDS = (
+    "en-US",
+    "en-GB",
+    "es-ES",
+    "pt-BR",
+    "de-DE",
+    "fr-FR",
+    "ja-JP",
+    "ru-RU",
+    "es-MX",
+)
+ADULT_LAND_ORIGIN = "https://yandex.com"
+ADULT_LAND_ALT = "https://www.qwant.com"
+ADULT_TUBE_XV = "https://www.xvideos.com"
+ADULT_TUBE_XN = "https://www.xnxx.com"
+ADULT_TUBE_XH = "https://xhamster.com"
 ADULT_FACE_POSTS = (
     ("ITSSTEPHHONEY21", ("itsstephhoneyxo21", "itsstephhoney21")),
     ("ITSSTEPHHONEYXO21", ("itsstephhoneyxo21", "itsstephhoney21")),
@@ -1417,6 +1553,15 @@ def adult_face_hunt(kind: str) -> list[str]:
         add(adult_web_search(query))
     for query in adult_face_queries(kind):
         add(adult_web_video(query))
+    for query in adult_face_queries(kind)[:2]:
+        for land in ADULT_WEB_LANDS:
+            add(adult_web_search(query, land=land))
+        for land in ADULT_WEB_VIDEO_LANDS:
+            add(adult_web_video(query, land=land))
+        add(adult_land_search(query))
+        add(adult_land_alt(query))
+        for path in adult_tube_search(query):
+            add(path)
     gifts: list[str] = []
     gift_seen: set[str] = set()
     for raw in adult_face_gift_tokens(kind) + adult_face_queries(kind):
@@ -1515,12 +1660,20 @@ def adult_desk_look(raw: str) -> bool:
     return "/a/" not in str(raw or "").lower()
 
 
-def adult_web_search(query: str) -> str | None:
+def adult_web_search(query: str, land: str = "") -> str | None:
     q = str(query or "").strip()
     if not q:
         return None
     encoded = urllib.parse.quote(q, safe="-")
+    if land:
+        kl = urllib.parse.quote(str(land).strip(), safe="-")
+        return f"{ADULT_WEB_ORIGIN}/html/?q={encoded}&kl={kl}"
     return f"{ADULT_WEB_ORIGIN}/html/?q={encoded}"
+
+
+def adult_tube_host(raw: str) -> bool:
+    host = (urllib.parse.urlparse(str(raw or "")).hostname or "").lower()
+    return "xvideos.com" in host or "xnxx.com" in host or "xhamster.com" in host
 
 
 def adult_web_look(raw: str) -> bool:
@@ -1528,15 +1681,54 @@ def adult_web_look(raw: str) -> bool:
     path = str(raw or "").lower()
     if "duckduckgo.com" in host and "/html/" in path:
         return True
-    return "bing.com" in host and "/videos/search" in path
+    if "bing.com" in host and "/videos/search" in path:
+        return True
+    if "yandex." in host and "/search" in path:
+        return True
+    if "qwant.com" in host:
+        return True
+    if adult_tube_host(raw) and ("?k=" in path or "/search" in path):
+        return True
+    return False
 
 
-def adult_web_video(query: str) -> str | None:
+def adult_web_video(query: str, land: str = "") -> str | None:
     q = str(query or "").strip()
     if not q:
         return None
     encoded = urllib.parse.quote(q, safe="-")
+    if land:
+        market = urllib.parse.quote(str(land).strip(), safe="-")
+        return f"{ADULT_WEB_VIDEO}/videos/search?q={encoded}&setmkt={market}"
     return f"{ADULT_WEB_VIDEO}/videos/search?q={encoded}"
+
+
+def adult_land_search(query: str) -> str | None:
+    q = str(query or "").strip()
+    if not q:
+        return None
+    encoded = urllib.parse.quote(q, safe="-")
+    return f"{ADULT_LAND_ORIGIN}/search/?text={encoded}"
+
+
+def adult_land_alt(query: str) -> str | None:
+    q = str(query or "").strip()
+    if not q:
+        return None
+    encoded = urllib.parse.quote(q, safe="-")
+    return f"{ADULT_LAND_ALT}/?q={encoded}"
+
+
+def adult_tube_search(query: str) -> list[str]:
+    q = str(query or "").strip()
+    if not q:
+        return []
+    encoded = urllib.parse.quote(q, safe="-")
+    return [
+        f"{ADULT_TUBE_XV}/?k={encoded}",
+        f"{ADULT_TUBE_XN}/search/{encoded}",
+        f"{ADULT_TUBE_XH}/search/{encoded}",
+    ]
 
 
 def adult_web_albums(payload: object, kind: str) -> list[str]:
@@ -1573,6 +1765,64 @@ def adult_web_posts(payload: object, kind: str) -> list[str]:
         if _adult_face_hit(handle, needles):
             seen.add(ident)
             out.append(ident)
+    return out
+
+
+def adult_web_tubes(payload: object, kind: str, from_raw: str = "") -> list[str]:
+    needles = adult_hunt_needles(kind) or []
+    text = payload.decode("utf-8", "replace") if isinstance(payload, bytes) else str(payload or "")
+    out: list[str] = []
+    seen: set[str] = set()
+    host = (urllib.parse.urlparse(str(from_raw or "")).hostname or "").lower()
+
+    def take(url: str, blob: str) -> None:
+        play = url.strip().rstrip("\\")
+        if play.startswith("//"):
+            play = "https:" + play
+        if play.startswith("/"):
+            if "xvideos.com" in host:
+                play = f"{ADULT_TUBE_XV}{play}"
+            elif "xnxx.com" in host:
+                play = f"{ADULT_TUBE_XN}{play}"
+            elif "xhamster.com" in host:
+                play = f"{ADULT_TUBE_XH}{play}"
+            else:
+                return
+        parsed = urllib.parse.urlparse(play)
+        if parsed.scheme != "https":
+            return
+        page = parsed.hostname or ""
+        if not (
+            "xvideos.com" in page.lower()
+            or "xnxx.com" in page.lower()
+            or "xhamster.com" in page.lower()
+        ):
+            return
+        key = play.split("#", 1)[0]
+        if key in seen:
+            return
+        if not _adult_face_hit(blob, needles):
+            return
+        seen.add(key)
+        out.append(key)
+
+    for match in re.finditer(
+        r"https?://(?:www\.)?(?:xvideos\.com/video[^\s\"'<>]+|xnxx\.com/video[^\s\"'<>]+|xhamster\.com/videos/[^\s\"'<>]+)",
+        text,
+        re.I,
+    ):
+        start = max(0, match.start() - 48)
+        end = min(len(text), match.end() + 48)
+        take(match.group(0), text[start:end])
+    if host:
+        for match in re.finditer(
+            r"(?:/video(?:\.[A-Za-z0-9]+)?[^\s\"'<>]*|/videos/[^\s\"'<>]+)",
+            text,
+            re.I,
+        ):
+            start = max(0, match.start() - 48)
+            end = min(len(text), match.end() + 48)
+            take(match.group(0), text[start:end])
     return out
 
 
@@ -1957,7 +2207,7 @@ def adult_parse_face(payload: object, kind: str) -> list[dict]:
     if not needles:
         return []
     if isinstance(payload, (bytes, str)):
-        return adult_parse_desk(payload, kind)
+        return adult_parse_desk(payload, kind) or adult_parse_tube(payload, kind)
     if isinstance(payload, dict) and isinstance(payload.get("tweet"), dict):
         room = _adult_post_clip(payload["tweet"], needles, kind)
         return [room] if room else []
@@ -1976,7 +2226,8 @@ def adult_parse_face(payload: object, kind: str) -> list[dict]:
     if rows:
         rows.sort(key=lambda row: (-int(row["seconds"]), str(row["name"])))
         return rows
-    return adult_parse_desk(payload, kind)
+    desk = adult_parse_desk(payload, kind)
+    return desk or adult_parse_tube(payload, kind)
 
 
 def _adult_post_clip(model: dict, needles: list[str], kind: str) -> dict | None:
@@ -2161,6 +2412,93 @@ def adult_parse_desk(payload: object, kind: str) -> list[dict]:
         )
     rows.sort(key=lambda row: (-int(row["seconds"]), str(row["name"])))
     return rows
+
+
+def adult_parse_tube(payload: object, kind: str) -> list[dict]:
+    needles = adult_hunt_needles(kind) or []
+    if not needles:
+        return []
+    text = payload.decode("utf-8", "replace") if isinstance(payload, bytes) else str(payload or "")
+    title = _adult_tube_title(text)
+    if not title or not _adult_face_ok(title) or not _adult_face_hit(title, needles):
+        return []
+    play = _adult_tube_play(text)
+    if not play:
+        return []
+    seconds = _adult_tube_seconds(text)
+    if seconds <= 0:
+        seconds = 1
+    key = adult_post_key(play) or "".join(ch for ch in play.lower() if ch.isalnum())[-12:]
+    if not key:
+        return []
+    chip = str(kind or "").strip().upper()
+    return [
+        {
+            "id": f"adult-face-tube-{key}",
+            "name": title.upper(),
+            "handle": key,
+            "url": play,
+            "viewers": 0,
+            "image": "",
+            "kinds": [] if not chip else [chip],
+            "seek": f"{title} {' '.join(needles)}".strip().lower(),
+            "seconds": seconds,
+        }
+    ]
+
+
+def _adult_tube_title(text: str) -> str:
+    og = re.search(
+        r'property=["\']og:title["\'][^>]*content=["\']([^"\']+)',
+        text,
+        re.I,
+    )
+    if og:
+        return og.group(1).replace("\u200b", " ").strip()
+    og = re.search(
+        r'content=["\']([^"\']+)["\'][^>]*property=["\']og:title["\']',
+        text,
+        re.I,
+    )
+    if og:
+        return og.group(1).replace("\u200b", " ").strip()
+    title = re.search(r"<title[^>]*>([^<]+)</title>", text, re.I)
+    if title:
+        return title.group(1).replace("\u200b", " ").strip()
+    return ""
+
+
+def _adult_tube_play(text: str) -> str | None:
+    for pattern in (
+        r"setVideoUrlHigh\(['\"](https://[^'\"]+)['\"]",
+        r"setVideoUrlLow\(['\"](https://[^'\"]+)['\"]",
+        r"setVideoHLS\(['\"](https://[^'\"]+)['\"]",
+        r'"contentUrl"\s*:\s*"(https://[^"]+)"',
+        r'property=["\']og:video["\'][^>]*content=["\'](https://[^"\']+)',
+    ):
+        match = re.search(pattern, text, re.I)
+        if match:
+            play = adult_playlist(match.group(1).replace("\\/", "/"))
+            if play:
+                return play
+    return None
+
+
+def _adult_tube_seconds(text: str) -> int:
+    match = re.search(r'"duration"\s*:\s*(\d+(?:\.\d+)?)', text, re.I)
+    if match:
+        try:
+            return max(0, int(round(float(match.group(1)))))
+        except ValueError:
+            pass
+    match = re.search(r'"duration"\s*:\s*"(\d+:\d+(?::\d+)?)"', text, re.I)
+    if match:
+        parts = [int(part) for part in match.group(1).split(":")]
+        if len(parts) == 3:
+            return parts[0] * 3600 + parts[1] * 60 + parts[2]
+        if len(parts) == 2:
+            return parts[0] * 60 + parts[1]
+    return 0
 
 
 def adult_rooms(payload: object) -> list[dict]:
@@ -4349,7 +4687,7 @@ class AdultDeskTests(unittest.TestCase):
             ["1878566900231553384", "2090576669124002084"],
         )
         self.assertIn("static let facePosts", desk)
-        self.assertIn("huntCap = 96", desk)
+        self.assertIn("huntCap = 160", desk)
         self.assertIn("postFollow = 16", desk)
         self.assertIn("deskFollow = 12", desk)
         self.assertIn("syndication.twitter.com", desk)
@@ -4397,7 +4735,7 @@ class AdultDeskTests(unittest.TestCase):
         desk = read("Blackout", "AdultDesk.swift")
         sock = read("Blackout", "UpdateSocket.swift")
         tv = read("docs", "SOLO_QA.md")
-        self.assertIn("huntCap = 96", desk)
+        self.assertIn("huntCap = 160", desk)
         self.assertIn("postFollow = 16", desk)
         self.assertIn("deskFollow = 12", desk)
         self.assertIn("html.duckduckgo.com", desk)
@@ -4538,6 +4876,111 @@ class AdultDeskTests(unittest.TestCase):
         )
         self.assertIn("Genre chips stay off", tv)
         self.assertIn("longest first", tv.lower())
+        self.assertIn("static func pageName(", desk)
+        self.assertIn("static func pageLike(", desk)
+        self.assertIn("static let webLands", desk)
+        self.assertIn("yandex.com", desk)
+        self.assertIn("qwant.com", desk)
+        self.assertIn("xvideos.com", desk)
+        self.assertIn("xnxx.com", desk)
+        self.assertIn("xhamster.com", desk)
+        self.assertIn("webTubes", desk)
+        self.assertIn("webTubes", sock)
+        self.assertIn("func parseTube(", desk)
+        self.assertIn("creator page", tv)
+        self.assertIn("other countries", tv)
+        self.assertEqual(adult_page_name("https://x.com/elvanavitaa"), "elvanavitaa")
+        self.assertEqual(
+            adult_page_name("https://www.erome.com/search?q=annabellrio&o=new"),
+            "annabellrio",
+        )
+        self.assertEqual(adult_page_name("x.com/slaviccaramel"), "slaviccaramel")
+        self.assertEqual(
+            adult_page_name("https://x.com/graciebon1/status/2094082537190567998"),
+            "graciebon1",
+        )
+        self.assertEqual(adult_page_name("https://www.erome.com/lilbussygirl/"), "lilbussygirl")
+        self.assertIsNone(adult_page_name("roleplay"))
+        self.assertIsNone(adult_page_name("elvanavitaa"))
+        self.assertEqual(adult_hunt_needles("https://x.com/elvanavitaa"), list(ADULT_ELVANA))
+        self.assertEqual(
+            adult_hunt_needles("https://www.erome.com/lilbussygirl"),
+            list(ADULT_LILBUSSY),
+        )
+        self.assertEqual(
+            adult_hunt_needles("https://www.erome.com/search?q=slaviccaramel"),
+            list(ADULT_SLAVIC),
+        )
+        self.assertTrue(
+            any("yandex.com" in path and "elvanavitaa" in path for path in adult_face_hunt("elvanavitaa"))
+        )
+        self.assertTrue(
+            any("qwant.com" in path and "slaviccaramel" in path for path in adult_face_hunt("slaviccaramel"))
+        )
+        self.assertTrue(
+            any(
+                "xvideos.com" in path and "elvanavitaa" in path
+                for path in adult_face_hunt("https://x.com/elvanavitaa")
+            )
+        )
+        self.assertTrue(any("xnxx.com" in path for path in adult_face_hunt("roleplay")))
+        self.assertTrue(any("xhamster.com" in path for path in adult_face_hunt("braids")))
+        self.assertTrue(
+            any("kl=es-es" in path or "kl=pt-br" in path for path in adult_face_hunt("elvanavitaa"))
+        )
+        self.assertTrue(adult_web_look("https://yandex.com/search/?text=elvanavitaa"))
+        self.assertTrue(adult_web_look("https://www.qwant.com/?q=elvanavitaa"))
+        self.assertTrue(adult_web_look("https://www.xvideos.com/?k=elvanavitaa"))
+        self.assertTrue(adult_web_look("https://www.xnxx.com/search/roleplay"))
+        self.assertFalse(adult_web_look("https://www.xvideos.com/video123/elvanavitaa-cut"))
+        self.assertEqual(
+            adult_web_tubes(
+                'href="https://www.xvideos.com/video123/elvanavitaa-cut" elvanavitaa guest',
+                "ELVANA VITAA",
+            ),
+            ["https://www.xvideos.com/video123/elvanavitaa-cut"],
+        )
+        self.assertEqual(
+            adult_web_tubes(
+                'href="https://www.xvideos.com/video123/vita-celestine" vita celestine',
+                "ELVANA VITAA",
+            ),
+            [],
+        )
+        tube_html = (
+            "<title>Elvanavitaa guest cut</title>"
+            "html5player.setVideoUrlHigh('https://cdn.example.com/elvana.mp4')"
+            '"duration":184'
+        )
+        tube_rows = adult_parse_face(tube_html, "ELVANA VITAA")
+        self.assertEqual([row["id"] for row in tube_rows], ["adult-face-tube-elvana"])
+        self.assertEqual(tube_rows[0]["seconds"], 184)
+        self.assertIn("cdn.example.com/elvana.mp4", tube_rows[0]["url"])
+        steph = {
+            "id": "adult-steph",
+            "name": "STEPH",
+            "handle": "itsstephhoney21",
+            "url": "",
+            "viewers": 1,
+            "kinds": ["ITSSTEPHHONEY21"],
+            "seek": "itsstephhoney21",
+            "seconds": 10,
+        }
+        elvana = {
+            "id": "adult-elvana",
+            "name": "ELVANA",
+            "handle": "elvanavitaa",
+            "url": "",
+            "viewers": 1,
+            "kinds": ["ELVANA VITAA"],
+            "seek": "elvanavitaa",
+            "seconds": 40,
+        }
+        self.assertEqual(
+            [row["id"] for row in adult_pick([steph, elvana], "ITSSTEPHHONEY21", "https://x.com/elvanavitaa")],
+            ["adult-elvana"],
+        )
+        self.assertFalse(any("onlyfans" in path.lower() for path in adult_face_hunt("https://x.com/elvanavitaa")))
 
 
 class NaLiveTests(unittest.TestCase):
@@ -4706,6 +5149,8 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("LIL BUSSY GIRL", tv)
         self.assertIn("public video search", tv.lower())
         self.assertIn("longest first", tv.lower())
+        self.assertIn("creator page", tv)
+        self.assertIn("other countries", tv)
         self.assertIn("LOVESCAPE", tv)
         self.assertIn("lovescape.cam", tv.lower())
         self.assertIn("cannot jet", tv)

@@ -557,7 +557,34 @@ enum AdultDesk {
     static let railExtra = 8
     static let huntAtOnce = 4
     static let huntPages = 2
-    static let huntCap = 96
+    static let huntCap = 160
+    static let webLands = [
+        "us-en",
+        "uk-en",
+        "es-es",
+        "pt-br",
+        "de-de",
+        "fr-fr",
+        "ja-jp",
+        "ru-ru",
+        "es-mx",
+    ]
+    static let webVideoLands = [
+        "en-US",
+        "en-GB",
+        "es-ES",
+        "pt-BR",
+        "de-DE",
+        "fr-FR",
+        "ja-JP",
+        "ru-RU",
+        "es-MX",
+    ]
+    static let landOrigin = "https://yandex.com"
+    static let landAltOrigin = "https://www.qwant.com"
+    static let tubeXV = "https://www.xvideos.com"
+    static let tubeXN = "https://www.xnxx.com"
+    static let tubeXH = "https://xhamster.com"
     static let deskFollow = 12
     static let deskOrigin = "https://www.erome.com"
     static let postFollow = 16
@@ -862,8 +889,113 @@ enum AdultDesk {
         return nil
     }
 
+    static func pageLike(_ raw: String) -> Bool {
+        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if text.isEmpty { return false }
+        if text.contains("://") || text.hasPrefix("www.") { return true }
+        guard let slash = text.firstIndex(of: "/") else { return false }
+        let host = String(text[..<slash])
+        return host.contains(".") && !host.contains(" ")
+    }
+
+    static func pageToken(_ raw: String) -> String? {
+        var name = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if name.hasPrefix("@") { name.removeFirst() }
+        name = name.removingPercentEncoding ?? name
+        let parts = name.split { $0.isWhitespace }
+        name = parts.joined(separator: " ")
+        let compact = name.lowercased().filter { $0.isLetter || $0.isNumber }
+        guard compact.count >= 3, name.count <= 48 else { return nil }
+        guard name.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" || $0 == "." || $0 == "-" || $0.isWhitespace })
+        else { return nil }
+        if name.allSatisfy(\.isNumber) { return nil }
+        return name
+    }
+
+    static func pageName(_ raw: String) -> String? {
+        var text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard pageLike(text) else { return nil }
+        if !text.contains("://") {
+            text = "https://" + text
+        }
+        if let hash = text.firstIndex(of: "#") {
+            text = String(text[..<hash])
+        }
+        guard let url = URL(string: text) else { return nil }
+        if let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
+            for key in ["q", "query", "search", "username", "user", "u", "k", "p", "text"] {
+                if let value = items.first(where: { $0.name.lowercased() == key })?.value,
+                   let name = pageToken(value)
+                {
+                    return name
+                }
+            }
+        }
+        let skip: Set<String> = [
+            "",
+            "search",
+            "profile",
+            "user",
+            "users",
+            "u",
+            "a",
+            "status",
+            "statuses",
+            "videos",
+            "video",
+            "watch",
+            "model",
+            "models",
+            "explore",
+            "home",
+            "login",
+            "signup",
+            "www",
+            "people",
+            "channel",
+            "channels",
+            "p",
+            "reel",
+            "reels",
+            "stories",
+            "tv",
+            "live",
+            "directory",
+            "tag",
+            "tags",
+            "category",
+            "categories",
+            "view",
+            "views",
+            "content",
+            "album",
+            "albums",
+            "gallery",
+            "post",
+            "posts",
+            "tweet",
+            "tweets",
+            "html",
+            "mobile",
+            "m",
+        ]
+        let parts = url.path.split(separator: "/").map(String.init)
+        for part in parts.reversed() {
+            let piece = part.removingPercentEncoding ?? part
+            if skip.contains(piece.lowercased()) { continue }
+            if piece.allSatisfy(\.isNumber), piece.count >= 8 { continue }
+            if let name = pageToken(piece) { return name }
+        }
+        return nil
+    }
+
     static func askNeedles(_ raw: String) -> [String]? {
-        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        let incoming = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if pageLike(incoming) {
+            guard let name = pageName(incoming) else { return nil }
+            return askNeedles(name)
+        }
+        let text = incoming
         if text.isEmpty { return nil }
         let chip = text.uppercased()
         if chip == "ALL" || loveNeedles(chip) { return nil }
@@ -918,7 +1050,7 @@ enum AdultDesk {
     static func userAgent(_ raw: String) -> String {
         let host = URL(string: raw)?.host?.lowercased() ?? ""
         if loveHost(raw) || giftHost(raw) || deskHost(raw) || postHost(raw) || webHost(raw)
-            || host.contains("bornstar")
+            || tubeHost(raw) || host.contains("bornstar")
         {
             return loveAgent
         }
@@ -933,7 +1065,15 @@ enum AdultDesk {
         if webHost(raw) {
             let host = URL(string: raw)?.host?.lowercased() ?? ""
             if host.contains("bing.com") { return "https://www.bing.com/" }
+            if host.contains("yandex.") { return "\(landOrigin)/" }
+            if host.contains("qwant.com") { return "\(landAltOrigin)/" }
             return "https://duckduckgo.com/"
+        }
+        if tubeHost(raw) {
+            let host = URL(string: raw)?.host?.lowercased() ?? ""
+            if host.contains("xnxx.com") { return "\(tubeXN)/" }
+            if host.contains("xhamster.com") { return "\(tubeXH)/" }
+            return "\(tubeXV)/"
         }
         let host = URL(string: raw)?.host?.lowercased() ?? ""
         if host.contains("eporner") { return "https://www.eporner.com/" }
@@ -1051,29 +1191,83 @@ enum AdultDesk {
         if host == "html.duckduckgo.com" || host.hasSuffix(".duckduckgo.com") || host.contains("duckduckgo.com") {
             return true
         }
-        return host == "www.bing.com" || host.hasSuffix(".bing.com") || host.contains("bing.com")
+        if host == "www.bing.com" || host.hasSuffix(".bing.com") || host.contains("bing.com") {
+            return true
+        }
+        if host.contains("yandex.") { return true }
+        if host.contains("qwant.com") { return true }
+        return false
+    }
+
+    static func tubeHost(_ raw: String) -> Bool {
+        let host = URL(string: raw)?.host?.lowercased() ?? ""
+        return host.contains("xvideos.com") || host.contains("xnxx.com") || host.contains("xhamster.com")
     }
 
     static func webLook(_ raw: String) -> Bool {
         let path = raw.lowercased()
         if webHost(raw) && path.contains("/html/") { return true }
-        return webHost(raw) && path.contains("/videos/search")
+        if webHost(raw) && path.contains("/videos/search") { return true }
+        if webHost(raw) && path.contains("yandex.") && path.contains("/search") { return true }
+        if webHost(raw) && path.contains("qwant.com") { return true }
+        if tubeHost(raw) && (path.contains("?k=") || path.contains("/search")) { return true }
+        return false
     }
 
-    static func webSearch(_ query: String) -> String? {
+    static func webSearch(_ query: String, land: String = "") -> String? {
         let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !q.isEmpty,
               let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
         else { return nil }
-        return "\(webOrigin)/html/?q=\(encoded)"
+        let region = land.trimmingCharacters(in: .whitespacesAndNewlines)
+        if region.isEmpty {
+            return "\(webOrigin)/html/?q=\(encoded)"
+        }
+        guard let kl = region.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return nil }
+        return "\(webOrigin)/html/?q=\(encoded)&kl=\(kl)"
     }
 
-    static func webVideo(_ query: String) -> String? {
+    static func webVideo(_ query: String, land: String = "") -> String? {
         let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !q.isEmpty,
               let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
         else { return nil }
-        return "\(webVideoOrigin)/videos/search?q=\(encoded)"
+        let region = land.trimmingCharacters(in: .whitespacesAndNewlines)
+        if region.isEmpty {
+            return "\(webVideoOrigin)/videos/search?q=\(encoded)"
+        }
+        guard let market = region.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return nil }
+        return "\(webVideoOrigin)/videos/search?q=\(encoded)&setmkt=\(market)"
+    }
+
+    static func landSearch(_ query: String) -> String? {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !q.isEmpty,
+              let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return nil }
+        return "\(landOrigin)/search/?text=\(encoded)"
+    }
+
+    static func landAlt(_ query: String) -> String? {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !q.isEmpty,
+              let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return nil }
+        return "\(landAltOrigin)/?q=\(encoded)"
+    }
+
+    static func tubeSearch(_ query: String) -> [String] {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !q.isEmpty,
+              let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return [] }
+        return [
+            "\(tubeXV)/?k=\(encoded)",
+            "\(tubeXN)/search/\(encoded)",
+            "\(tubeXH)/search/\(encoded)",
+        ]
     }
 
     static func webAlbums(_ data: Data, kind: String) -> [String] {
@@ -1123,6 +1317,62 @@ enum AdultDesk {
         return out
     }
 
+    static func webTubes(_ data: Data, kind: String, from raw: String = "") -> [String] {
+        guard let needles = huntNeedles(kind),
+              let text = String(data: data, encoding: .utf8)
+        else { return [] }
+        let host = URL(string: raw)?.host?.lowercased() ?? ""
+        var out: [String] = []
+        var seen: Set<String> = []
+        func take(_ href: String, blob: String) {
+            var play = href.trimmingCharacters(in: .whitespacesAndNewlines)
+            if play.hasPrefix("//") { play = "https:" + play }
+            if play.hasPrefix("/") {
+                if host.contains("xvideos.com") {
+                    play = tubeXV + play
+                } else if host.contains("xnxx.com") {
+                    play = tubeXN + play
+                } else if host.contains("xhamster.com") {
+                    play = tubeXH + play
+                } else {
+                    return
+                }
+            }
+            guard let url = URL(string: play), url.scheme?.lowercased() == "https" else { return }
+            let page = url.host?.lowercased() ?? ""
+            guard page.contains("xvideos.com") || page.contains("xnxx.com") || page.contains("xhamster.com")
+            else { return }
+            var key = play
+            if let hash = key.firstIndex(of: "#") {
+                key = String(key[..<hash])
+            }
+            guard seen.insert(key).inserted else { return }
+            guard faceHit(blob, needles: needles) else { return }
+            out.append(key)
+        }
+        func scan(_ mark: String) {
+            var rest = text
+            while let hit = rest.range(of: mark, options: .caseInsensitive) {
+                let before = String(rest[..<hit.lowerBound].suffix(48))
+                rest = String(rest[hit.lowerBound...])
+                let rawHref = String(rest.prefix { ch in
+                    !ch.isWhitespace && ch != "\"" && ch != "'" && ch != "<" && ch != ">"
+                })
+                let after = String(rest.prefix(48 + rawHref.count))
+                rest = String(rest[hit.upperBound...])
+                take(rawHref.hasPrefix("http") || rawHref.hasPrefix("/") ? rawHref : "https://" + rawHref, blob: before + after)
+            }
+        }
+        scan("xvideos.com/video")
+        scan("xnxx.com/video")
+        scan("xhamster.com/videos/")
+        if !host.isEmpty {
+            scan("/video")
+            scan("/videos/")
+        }
+        return out
+    }
+
     static func deskSearch(_ query: String) -> String? {
         let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !q.isEmpty,
@@ -1149,7 +1399,8 @@ enum AdultDesk {
         guard let needles = huntNeedles(kind) else { return [] }
         var out: [String] = []
         var seen: Set<String> = []
-        let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let seed = pageName(kind) ?? kind
+        let chip = seed.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         for raw in needles + [chip] {
             let query = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
             if query.count < 3 { continue }
@@ -1306,6 +1557,19 @@ enum AdultDesk {
         }
         for query in faceQueries(kind) {
             add(webVideo(query))
+        }
+        for query in faceQueries(kind).prefix(2) {
+            for land in webLands {
+                add(webSearch(query, land: land))
+            }
+            for land in webVideoLands {
+                add(webVideo(query, land: land))
+            }
+            add(landSearch(query))
+            add(landAlt(query))
+            for path in tubeSearch(query) {
+                add(path)
+            }
         }
         var gifts: [String] = []
         var giftSeen: Set<String> = []
@@ -1472,7 +1736,8 @@ enum AdultDesk {
                 }
             }
         }
-        return parseDesk(data, kind: kind)
+        let desk = parseDesk(data, kind: kind)
+        return desk.isEmpty ? parseTube(data, kind: kind) : desk
     }
 
     static func deskAlbums(_ data: Data, kind: String) -> [String] {
@@ -1581,6 +1846,104 @@ enum AdultDesk {
             if lhs.seconds != rhs.seconds { return lhs.seconds > rhs.seconds }
             return lhs.name < rhs.name
         }
+    }
+
+    private static func parseTube(_ data: Data, kind: String) -> [Room] {
+        guard let needles = huntNeedles(kind) else { return [] }
+        guard let text = String(data: data, encoding: .utf8) else { return [] }
+        let title = tubeTitle(text)
+        guard !title.isEmpty, faceOk(title), faceHit(title, needles: needles) else { return [] }
+        guard let play = tubePlay(text) else { return [] }
+        var seconds = tubeSeconds(text)
+        if seconds <= 0 { seconds = 1 }
+        let key = postKey(play) ?? String(play.lowercased().filter { $0.isLetter || $0.isNumber }.suffix(12))
+        guard !key.isEmpty else { return [] }
+        let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        return [
+            Room(
+                id: "adult-face-tube-\(key)",
+                name: title.uppercased(),
+                handle: key,
+                url: play,
+                viewers: 0,
+                image: "",
+                kinds: chip.isEmpty ? [] : [chip],
+                seek: (title + " " + needles.joined(separator: " ")).lowercased(),
+                seconds: seconds
+            )
+        ]
+    }
+
+    private static func tubeTitle(_ text: String) -> String {
+        func attr(_ key: String) -> String? {
+            let marks = [
+                "property=\"\(key)\"",
+                "property='\(key)'",
+            ]
+            for mark in marks {
+                guard let hit = text.range(of: mark, options: .caseInsensitive) else { continue }
+                let rest = text[hit.upperBound...]
+                guard let open = rest.range(of: "content=\"") ?? rest.range(of: "content='") else { continue }
+                let tail = rest[open.upperBound...]
+                let quote: Character = rest[open.lowerBound...].hasPrefix("content=\"") ? "\"" : "'"
+                let value = String(tail.prefix { $0 != quote })
+                let clean = value.replacingOccurrences(of: "\u{200B}", with: " ")
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                if !clean.isEmpty { return clean }
+            }
+            return nil
+        }
+        if let title = attr("og:title") { return title }
+        guard let start = text.range(of: "<title", options: .caseInsensitive),
+              let open = text[start.lowerBound...].range(of: ">"),
+              let close = text[open.upperBound...].range(of: "</title>", options: .caseInsensitive)
+        else { return "" }
+        return String(text[open.upperBound..<close.lowerBound])
+            .replacingOccurrences(of: "\u{200B}", with: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static func tubePlay(_ text: String) -> String? {
+        let marks = ["setVideoUrlHigh", "setVideoUrlLow", "setVideoHLS", "\"contentUrl\"", "og:video"]
+        for mark in marks {
+            var rest = text
+            while let hit = rest.range(of: mark, options: .caseInsensitive) {
+                rest = String(rest[hit.upperBound...])
+                if let start = rest.range(of: "https://") {
+                    let tail = rest[start.lowerBound...]
+                    let raw = String(tail.prefix { ch in
+                        !ch.isWhitespace && ch != "\"" && ch != "'" && ch != "<" && ch != ">"
+                    })
+                    let cleaned = raw.replacingOccurrences(of: "\\/", with: "/")
+                    if let play = playlist(cleaned) { return play }
+                    rest = String(tail.dropFirst(8))
+                }
+            }
+        }
+        return nil
+    }
+
+    private static func tubeSeconds(_ text: String) -> Int {
+        var rest = text
+        while let mark = rest.range(of: "\"duration\"", options: .caseInsensitive) {
+            rest = String(rest[mark.upperBound...])
+            let body = rest.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard let colon = body.firstIndex(of: ":") else { continue }
+            var value = String(body[body.index(after: colon)...]).trimmingCharacters(in: .whitespacesAndNewlines)
+            if value.hasPrefix("\"") {
+                value.removeFirst()
+                let clock = String(value.prefix { $0 != "\"" })
+                let parts = clock.split(separator: ":").compactMap { Int($0) }
+                if parts.count == 3 { return parts[0] * 3600 + parts[1] * 60 + parts[2] }
+                if parts.count == 2 { return parts[0] * 60 + parts[1] }
+                continue
+            }
+            let number = String(value.prefix { $0.isNumber || $0 == "." })
+            if let n = Double(number), n.isFinite, n >= 0 {
+                return Int(n.rounded())
+            }
+        }
+        return 0
     }
 
     private static func deskTitle(_ text: String) -> String {

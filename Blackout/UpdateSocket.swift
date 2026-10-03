@@ -295,7 +295,7 @@ final class UpdateSocket {
                             return await UpdateSocket.fetchPostStatuses(session, data, kind: kind)
                         }
                         if AdultDesk.webLook(path) {
-                            return await UpdateSocket.fetchWebHits(session, data, kind: kind)
+                            return await UpdateSocket.fetchWebHits(session, data, kind: kind, from: path)
                         }
                         return await Task.detached(priority: .utility) {
                             AdultDesk.parseFace(data, kind: kind)
@@ -435,7 +435,8 @@ final class UpdateSocket {
     nonisolated private static func fetchWebHits(
         _ session: URLSession,
         _ data: Data,
-        kind: String
+        kind: String,
+        from raw: String = ""
     ) async -> [AdultDesk.Room] {
         var rows: [AdultDesk.Room] = []
         var seen: Set<String> = []
@@ -448,6 +449,11 @@ final class UpdateSocket {
             guard let path = AdultDesk.postStatus(token), seen.insert(path).inserted else { continue }
             guard let body = await UpdateSocket.fetchAdult(session, path) else { continue }
             rows.append(contentsOf: AdultDesk.parseFace(body, kind: kind))
+        }
+        for token in AdultDesk.webTubes(data, kind: kind, from: raw).prefix(AdultDesk.deskFollow) {
+            guard seen.insert(token).inserted else { continue }
+            guard let page = await UpdateSocket.fetchAdult(session, token) else { continue }
+            rows.append(contentsOf: AdultDesk.parseFace(page, kind: kind))
         }
         return rows
     }
@@ -785,7 +791,9 @@ final class UpdateSocket {
         request.timeoutInterval = 8
         request.setValue(AdultDesk.userAgent(raw), forHTTPHeaderField: "User-Agent")
         request.setValue(AdultDesk.referer(raw), forHTTPHeaderField: "Referer")
-        if AdultDesk.deskHost(raw) || AdultDesk.postLook(raw) || AdultDesk.webLook(raw) {
+        if AdultDesk.deskHost(raw) || AdultDesk.postLook(raw) || AdultDesk.webLook(raw)
+            || AdultDesk.tubeHost(raw)
+        {
             request.setValue(
                 "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
                 forHTTPHeaderField: "Accept"
