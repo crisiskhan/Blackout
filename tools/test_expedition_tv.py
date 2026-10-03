@@ -1044,6 +1044,23 @@ ADULT_FACE_HOLDS = (
         ("pin", "iXWnuAL4FnV", 140, "Doubledose Twins Blowjob"),
     )),
 )
+ADULT_FACE_STILLS = (
+    ("P283XrKRjsV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"),
+    ("pYaoSJlMR79", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/175/17518776/4_360.jpg"),
+    ("L3HLNRZy6sk", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/179/17953657/5_360.jpg"),
+    ("33TgD6OeUfp", "https://static-ca-cdn.eporner.com/thumbs/static4/1/18/182/18280571/8_360.jpg"),
+    ("XYqGeufLjxo", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/173/17342912/9_360.jpg"),
+    ("iaBJWcUXDqR", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/176/17654141/2_360.jpg"),
+    ("3Okd36yQXGq", "https://static-ca-cdn.eporner.com/thumbs/static4/1/16/168/16806371/9_360.jpg"),
+    ("I9eggkAajv5", "https://static-ca-cdn.eporner.com/thumbs/static4/1/18/183/18307343/8_360.jpg"),
+    ("ZxMHa5OsXqH", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/171/17112398/14_360.jpg"),
+    ("hdIUeKyK0Ux", "https://static-ca-cdn.eporner.com/thumbs/static4/1/16/166/16629256/12_360.jpg"),
+    ("GvbBRAGihAQ", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/170/17011500/4_360.jpg"),
+    ("mXbvfQ0ly1D", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/173/17378695/4_360.jpg"),
+    ("7bg2FgwidLS", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/171/17109075/14_360.jpg"),
+    ("NtQUcCtcTj0", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/173/17399374/14_360.jpg"),
+    ("iXWnuAL4FnV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/15/157/15712160/13_360.jpg"),
+)
 ADULT_FACE_GIFTS = (
     ("ITSSTEPHHONEY21", ("itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip")),
     ("ITSSTEPHHONEYXO21", ("itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip")),
@@ -1162,42 +1179,93 @@ def adult_face_hunt(kind: str) -> list[str]:
     return out[:ADULT_HUNT_CAP]
 
 
+def adult_face_keep(ident: str) -> bool:
+    return str(ident or "").startswith("adult-face-")
+
+
+def adult_face_still(desk: str, token: str) -> str | None:
+    if desk == "star":
+        slug = str(token or "").strip().lower()
+        if slug and all(ch.isalnum() or ch == "-" for ch in slug):
+            return adult_still(f"https://cdn.bornstar.co/preview-batch/{slug}/thumb.webp")
+        return None
+    ident = str(token or "").strip()
+    for name, src in ADULT_FACE_STILLS:
+        if name.lower() == ident.lower():
+            return adult_still(src)
+    return None
+
+
 def adult_face_hold_rooms(kind: str) -> list[dict]:
-    needles = adult_face_needles(kind) or []
-    if not needles:
-        return []
     chip = str(kind or "").strip().upper()
+    if chip in ("", "ALL"):
+        chips = [name for name, _needles in ADULT_FACES]
+    elif adult_face_needles(chip):
+        chips = [chip]
+    else:
+        return []
     rows: list[dict] = []
     seen: set[str] = set()
-    for name, holds in ADULT_FACE_HOLDS:
-        if name != chip:
-            continue
-        for desk, token, seconds, title in holds:
-            if seconds <= 0 or not str(title).strip() or not _adult_face_ok(title):
+    for name in chips:
+        needles = adult_face_needles(name) or []
+        for hold_name, holds in ADULT_FACE_HOLDS:
+            if hold_name != name:
                 continue
-            if desk == "star":
-                play = adult_playlist(adult_star_file(token) or "")
-                rid = f"adult-face-star-{token.lower()}"
-            else:
-                play = adult_playlist(adult_face_file(token) or "")
-                rid = f"adult-face-{token.lower()}"
-            if not play or rid in seen:
-                continue
-            seen.add(rid)
-            rows.append(
-                {
-                    "id": rid,
-                    "name": title.upper(),
-                    "handle": token,
-                    "url": play,
-                    "viewers": 0,
-                    "kinds": [chip],
-                    "seek": f"{title} {' '.join(needles)}".strip().lower(),
-                    "seconds": int(seconds),
-                }
-            )
+            for desk, token, seconds, title in holds:
+                if seconds <= 0 or not str(title).strip() or not _adult_face_ok(title):
+                    continue
+                if desk == "star":
+                    play = adult_playlist(adult_star_file(token) or "")
+                    rid = f"adult-face-star-{token.lower()}"
+                else:
+                    play = adult_playlist(adult_face_file(token) or "")
+                    rid = f"adult-face-{token.lower()}"
+                if not play or rid in seen:
+                    continue
+                seen.add(rid)
+                rows.append(
+                    {
+                        "id": rid,
+                        "name": title.upper(),
+                        "handle": token,
+                        "url": play,
+                        "viewers": 0,
+                        "image": adult_face_still(desk, token) or "",
+                        "kinds": [name],
+                        "seek": f"{title} {' '.join(needles)}".strip().lower(),
+                        "seconds": int(seconds),
+                    }
+                )
     rows.sort(key=lambda row: (-int(row["seconds"]), str(row["name"])))
     return rows
+
+
+def adult_merge(batches: list[list[dict]]) -> list[dict]:
+    by_id: dict[str, dict] = {}
+    for room in (row for batch in batches for row in batch):
+        rid = str(room.get("id") or "")
+        if not rid:
+            continue
+        old = by_id.get(rid)
+        if old is None:
+            by_id[rid] = dict(room)
+            continue
+        if int(room.get("viewers") or 0) > int(old.get("viewers") or 0):
+            next_room = dict(room)
+            if not str(next_room.get("image") or "").strip():
+                next_room["image"] = old.get("image") or ""
+            by_id[rid] = next_room
+        elif not str(old.get("image") or "").strip() and str(room.get("image") or "").strip():
+            old = dict(old)
+            old["image"] = room["image"]
+            by_id[rid] = old
+    all_rows = list(by_id.values())
+    files = [row for row in all_rows if adult_face_keep(str(row.get("id") or ""))]
+    rest = [row for row in all_rows if not adult_face_keep(str(row.get("id") or ""))]
+    files.sort(key=lambda row: (-int(row.get("seconds") or 0), str(row.get("name") or "")))
+    rest.sort(key=lambda row: (-int(row.get("viewers") or 0), str(row.get("name") or "")))
+    keep = max(0, ADULT_CAP - len(files))
+    return rest[:keep] + files
 
 
 def adult_gift_search(query: str, page: int = 1) -> str | None:
@@ -2764,6 +2832,48 @@ class AdultDeskTests(unittest.TestCase):
             ["adult-face-star-kirawrrra2-0-fills-her-ass-for-the-first-time"],
         )
         self.assertEqual(adult_face_hold_rooms("IMHIZBAEEXX"), [])
+        self.assertGreaterEqual(len(adult_face_hold_rooms("ALL")), 10)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("")), 10)
+        self.assertEqual(
+            adult_face_hold_rooms("KIRAWWRRRA")[0]["image"],
+            "https://cdn.bornstar.co/preview-batch/kirawrrra2-0-fills-her-ass-for-the-first-time/thumb.webp",
+        )
+        self.assertTrue(
+            all(str(row.get("image") or "").startswith("https://") for row in adult_face_hold_rooms("ALL"))
+        )
+        self.assertTrue(
+            all(str(row.get("image") or "").startswith("https://") for row in adult_face_hold_rooms("DOUBLE DOSE TWINS"))
+        )
+        held = adult_face_hold_rooms("KIRAWWRRRA")
+        lives = [
+            {
+                "id": f"adult-{index}",
+                "name": f"L{index}",
+                "handle": f"l{index}",
+                "url": "https://example.com/live.m3u8",
+                "viewers": 1000 - index,
+                "image": "",
+                "kinds": [],
+                "seek": "",
+                "seconds": 0,
+            }
+            for index in range(ADULT_CAP)
+        ]
+        merged = adult_merge([held, lives])
+        ids = [row["id"] for row in merged]
+        self.assertEqual(len(merged), ADULT_CAP)
+        self.assertIn(held[0]["id"], ids)
+        self.assertEqual(ids[0], "adult-0")
+        self.assertNotIn(f"adult-{ADULT_CAP - 1}", ids)
+        self.assertEqual(
+            adult_merge(
+                [
+                    [{"id": "adult-face-pin", "name": "A", "viewers": 0, "image": "https://img.example/a.jpg", "seconds": 10}],
+                    [{"id": "adult-face-pin", "name": "A", "viewers": 9, "image": "", "seconds": 10}],
+                ]
+            )[0]["image"],
+            "https://img.example/a.jpg",
+        )
         self.assertLessEqual(len(adult_face_hunt("MULAN VUITTON")), ADULT_HUNT_CAP)
         self.assertLessEqual(len(adult_face_hunt("KIRAWWRRRA")), ADULT_HUNT_CAP)
         self.assertTrue(any("thumbsize=big" in path for path in adult_face_hunt("MULAN VUITTON")))
@@ -3176,6 +3286,11 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("7bg2FgwidLS", desk)
         self.assertIn("kirawrrra2-0", desk)
         self.assertIn("static let faceHolds", desk)
+        self.assertIn("static let faceStills", desk)
+        self.assertIn("static func faceStill(", desk)
+        self.assertIn("static func faceKeep(", desk)
+        self.assertIn("preview-batch", desk)
+        self.assertIn("static-ca-cdn.eporner.com", desk)
         self.assertIn("static let huntCap", desk)
         self.assertIn("static let huntPages", desk)
         self.assertIn("static func faceHoldRooms(", desk)
@@ -3259,12 +3374,16 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("Bearer", desk)
         face_load = sock.split("private func fetchFacePages")[1].split("private func fetchAdultPages")[0]
         self.assertIn("faceHoldRooms", face_load)
+        self.assertIn('faceHoldRooms("ALL")', face_load)
         self.assertIn("parseFace", face_load)
         self.assertIn("fetchAdultFaces", face_load)
         self.assertIn("adultRooms = AdultDesk.merge", face_load)
         self.assertIn("fetchGiftAuth", face_load)
         self.assertIn("huntAtOnce", sock)
         self.assertIn("adultReady = false", sock)
+        load = sock.split("private func loadAdult(topic")[1].split("private func fetchLovePages")[0]
+        self.assertIn('faceHoldRooms("ALL")', load)
+        self.assertNotIn("adultRooms = []", load)
         self.assertIn("timeoutIntervalForResource = AdultDesk.faceNeedles(topic) != nil ? 180 : 40", sock)
         self.assertIn("inflight", sock)
         self.assertNotIn("CGImageSourceCreateImageAtIndex", sock)
@@ -3347,6 +3466,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("naQuery", tv)
         self.assertIn("AdultDesk.pick", tv)
         self.assertIn("pullAdult(topic:", tv)
+        self.assertIn("pullAdult(topic: naKind)", tv)
         self.assertIn("NO MATCH", tv)
         self.assertIn("onPlay", tv)
         self.assertIn("liveAdult", tv)
@@ -3569,6 +3689,9 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("LOVESCAPE", tv)
         self.assertIn("lovescape.cam", tv.lower())
         self.assertIn("cannot jet", tv)
+        self.assertIn("cannot flash an empty plate", tv)
+        self.assertIn("guest stills", tv)
+        self.assertIn("VENUE` stays reserved", tv)
         self.assertIn("FAVORS", tv)
         self.assertIn("still", tv.lower())
         self.assertNotIn("insecam", tv.lower())

@@ -205,7 +205,10 @@ final class UpdateSocket {
 
     private func loadAdult(topic: String = "") async {
         adultReady = false
-        adultRooms = []
+        let held = AdultDesk.faceHoldRooms("ALL")
+        if !held.isEmpty {
+            adultRooms = AdultDesk.merge([held, adultRooms])
+        }
         defer {
             let again = adultWanted
             adultBusy = false
@@ -229,22 +232,22 @@ final class UpdateSocket {
             adultRooms = AdultDesk.merge(batches)
         } else if AdultDesk.faceNeedles(topic) != nil {
             batches = await fetchFacePages(session, topic)
-            adultRooms = AdultDesk.merge(batches)
+            adultRooms = AdultDesk.merge([held] + batches)
         } else {
             batches = await fetchAdultPages(session, from: 0, count: 1)
-            adultRooms = AdultDesk.merge(batches)
+            adultRooms = AdultDesk.merge([held] + batches)
             if AdultDesk.pages > 1 {
                 let rest = await fetchAdultPages(session, from: 1, count: AdultDesk.pages - 1)
                 if !rest.isEmpty {
                     batches.append(contentsOf: rest)
-                    adultRooms = AdultDesk.merge(batches)
+                    adultRooms = AdultDesk.merge([held] + batches)
                 }
             }
             for hashtag in AdultDesk.topics(topic) {
                 let extra = await fetchAdultPages(session, from: 0, count: 2, topic: hashtag)
                 if !extra.isEmpty {
                     batches.append(contentsOf: extra)
-                    adultRooms = AdultDesk.merge(batches)
+                    adultRooms = AdultDesk.merge([held] + batches)
                 }
             }
         }
@@ -264,7 +267,7 @@ final class UpdateSocket {
 
     private func fetchFacePages(_ session: URLSession, _ kind: String) async -> [[AdultDesk.Room]] {
         var batches: [[AdultDesk.Room]] = []
-        let held = AdultDesk.faceHoldRooms(kind)
+        let held = AdultDesk.faceHoldRooms("ALL")
         if !held.isEmpty {
             batches.append(held)
             adultRooms = AdultDesk.merge(batches)

@@ -494,6 +494,24 @@ enum AdultDesk {
             ("pin", "iXWnuAL4FnV", 140, "Doubledose Twins Blowjob"),
         ]),
     ]
+    /// Guest stills for baked pin tokens. Star stills are `preview-batch/{slug}/thumb.webp`.
+    static let faceStills: [(String, String)] = [
+        ("P283XrKRjsV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"),
+        ("pYaoSJlMR79", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/175/17518776/4_360.jpg"),
+        ("L3HLNRZy6sk", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/179/17953657/5_360.jpg"),
+        ("33TgD6OeUfp", "https://static-ca-cdn.eporner.com/thumbs/static4/1/18/182/18280571/8_360.jpg"),
+        ("XYqGeufLjxo", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/173/17342912/9_360.jpg"),
+        ("iaBJWcUXDqR", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/176/17654141/2_360.jpg"),
+        ("3Okd36yQXGq", "https://static-ca-cdn.eporner.com/thumbs/static4/1/16/168/16806371/9_360.jpg"),
+        ("I9eggkAajv5", "https://static-ca-cdn.eporner.com/thumbs/static4/1/18/183/18307343/8_360.jpg"),
+        ("ZxMHa5OsXqH", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/171/17112398/14_360.jpg"),
+        ("hdIUeKyK0Ux", "https://static-ca-cdn.eporner.com/thumbs/static4/1/16/166/16629256/12_360.jpg"),
+        ("GvbBRAGihAQ", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/170/17011500/4_360.jpg"),
+        ("mXbvfQ0ly1D", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/173/17378695/4_360.jpg"),
+        ("7bg2FgwidLS", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/171/17109075/14_360.jpg"),
+        ("NtQUcCtcTj0", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/173/17399374/14_360.jpg"),
+        ("iXWnuAL4FnV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/15/157/15712160/13_360.jpg"),
+    ]
     static let loveAgent =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
@@ -783,46 +801,75 @@ enum AdultDesk {
     }
 
     static func faceHoldRooms(_ kind: String) -> [Room] {
-        guard let needles = faceNeedles(kind) else { return [] }
         let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        let chips: [String]
+        if chip.isEmpty || chip == "ALL" {
+            chips = faces.map(\.0)
+        } else if faceNeedles(chip) != nil {
+            chips = [chip]
+        } else {
+            return []
+        }
         var rows: [Room] = []
         var seen: Set<String> = []
-        for pair in faceHolds where pair.0 == chip {
-            for hold in pair.1 {
-                let desk = hold.0
-                let token = hold.1
-                let seconds = hold.2
-                let title = hold.3
-                guard seconds > 0, !title.isEmpty, faceOk(title) else { continue }
-                let play: String?
-                let rid: String
-                if desk == "star" {
-                    play = playlist(starFile(token) ?? "")
-                    rid = "adult-face-star-\(token.lowercased())"
-                } else {
-                    play = playlist(faceFile(token) ?? "")
-                    rid = "adult-face-\(token.lowercased())"
-                }
-                guard let play, seen.insert(rid).inserted else { continue }
-                rows.append(
-                    Room(
-                        id: rid,
-                        name: title.uppercased(),
-                        handle: token,
-                        url: play,
-                        viewers: 0,
-                        image: "",
-                        kinds: [chip],
-                        seek: (title + " " + needles.joined(separator: " ")).lowercased(),
-                        seconds: seconds
+        for name in chips {
+            guard let needles = faceNeedles(name) else { continue }
+            for pair in faceHolds where pair.0 == name {
+                for hold in pair.1 {
+                    let desk = hold.0
+                    let token = hold.1
+                    let seconds = hold.2
+                    let title = hold.3
+                    guard seconds > 0, !title.isEmpty, faceOk(title) else { continue }
+                    let play: String?
+                    let rid: String
+                    if desk == "star" {
+                        play = playlist(starFile(token) ?? "")
+                        rid = "adult-face-star-\(token.lowercased())"
+                    } else {
+                        play = playlist(faceFile(token) ?? "")
+                        rid = "adult-face-\(token.lowercased())"
+                    }
+                    guard let play, seen.insert(rid).inserted else { continue }
+                    rows.append(
+                        Room(
+                            id: rid,
+                            name: title.uppercased(),
+                            handle: token,
+                            url: play,
+                            viewers: 0,
+                            image: still(faceStill(desk, token) ?? "") ?? "",
+                            kinds: [name],
+                            seek: (title + " " + needles.joined(separator: " ")).lowercased(),
+                            seconds: seconds
+                        )
                     )
-                )
+                }
             }
         }
         return rows.sorted { lhs, rhs in
             if lhs.seconds != rhs.seconds { return lhs.seconds > rhs.seconds }
             return lhs.name < rhs.name
         }
+    }
+
+    static func faceKeep(_ id: String) -> Bool {
+        id.hasPrefix("adult-face-")
+    }
+
+    static func faceStill(_ desk: String, _ token: String) -> String? {
+        if desk == "star" {
+            let id = token.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            guard !id.isEmpty, id.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "-" }) else {
+                return nil
+            }
+            return still("https://cdn.bornstar.co/preview-batch/\(id)/thumb.webp")
+        }
+        let id = token.trimmingCharacters(in: .whitespacesAndNewlines)
+        for pair in faceStills where pair.0.caseInsensitiveCompare(id) == .orderedSame {
+            return still(pair.1)
+        }
+        return nil
     }
 
     static func faceFile(_ token: String) -> String? {
@@ -1076,16 +1123,30 @@ enum AdultDesk {
     static func merge(_ batches: [[Room]]) -> [Room] {
         var byID: [String: Room] = [:]
         for room in batches.joined() {
-            if let old = byID[room.id], old.viewers >= room.viewers { continue }
+            if var old = byID[room.id] {
+                if room.viewers > old.viewers {
+                    var next = room
+                    if next.image.isEmpty { next.image = old.image }
+                    byID[room.id] = next
+                } else if old.image.isEmpty, !room.image.isEmpty {
+                    old.image = room.image
+                    byID[room.id] = old
+                }
+                continue
+            }
             byID[room.id] = room
         }
-        return Array(byID.values)
-            .sorted { lhs, rhs in
-                if lhs.viewers != rhs.viewers { return lhs.viewers > rhs.viewers }
-                return lhs.name < rhs.name
-            }
-            .prefix(cap)
-            .map { $0 }
+        let all = Array(byID.values)
+        let files = all.filter { faceKeep($0.id) }.sorted { lhs, rhs in
+            if lhs.seconds != rhs.seconds { return lhs.seconds > rhs.seconds }
+            return lhs.name < rhs.name
+        }
+        let rest = all.filter { !faceKeep($0.id) }.sorted { lhs, rhs in
+            if lhs.viewers != rhs.viewers { return lhs.viewers > rhs.viewers }
+            return lhs.name < rhs.name
+        }
+        let keep = max(0, cap - files.count)
+        return Array(rest.prefix(keep)) + files
     }
 
     static func playlist(_ raw: String) -> String? {

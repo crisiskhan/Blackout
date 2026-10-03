@@ -26,7 +26,7 @@ struct TvPlate: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Button("TAP UPDATE") {
                         runtime.pullMapSnap()
-                        if naUnlocked { runtime.updateSocket.pullAdult() }
+                        if naUnlocked { runtime.updateSocket.pullAdult(topic: naKind) }
                     }
                     .buttonStyle(HUDActionStyle(filled: runtime.updateSocket.busy))
                     if !runtime.updateSocket.pipe {
@@ -63,7 +63,7 @@ struct TvPlate: View {
         .onChange(of: naUnlocked) { _, ok in
             if ok {
                 resetNaPage()
-                runtime.updateSocket.pullAdult()
+                runtime.updateSocket.pullAdult(topic: naKind)
             }
         }
         .onChange(of: runtime.updateSocket.adultRooms.count) { _, _ in
