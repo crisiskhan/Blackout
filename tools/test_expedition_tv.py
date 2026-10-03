@@ -351,6 +351,7 @@ ADULT_HIZ = (
     "hizbaeexx",
 )
 ADULT_YESS = (
+    "yessenialoch",
     "yess_enia69",
     "yessenia69",
     "yess enia69",
@@ -396,6 +397,7 @@ ADULT_JESSY = (
     "angeljessyy",
 )
 ADULT_GRACIE = (
+    "graciebon1",
     "itsgraciebonn",
     "gracie bonn",
 )
@@ -414,6 +416,7 @@ ADULT_PAMELA = (
     "pamela yamz",
 )
 ADULT_ANNABELLE = (
+    "annabellrio",
     "annabelleriossss",
     "annabelle rios",
     "annabellerios",
@@ -1122,6 +1125,24 @@ ADULT_FACE_HOLDS = (
     ("PAMELA YAMZ", (
         ("post", "https://video.twimg.com/ext_tw_video/1856457311075581952/pu/vid/avc1/720x1280/lQOCKUuxeqEZRD4n.mp4?tag=12", 8, "Pamela Yamz glute pump"),
     )),
+    ("YESS ENIA69", (
+        ("file", "https://v40.erome.com/8809/QuJsjzdM/YkQbHfv2_720p.mp4", 172, "Yessenialoch"),
+        ("file", "https://v40.erome.com/8809/QuJsjzdM/57QvmIrp_720p.mp4", 6, "Yessenialoch"),
+    )),
+    ("GRACIE BONN", (
+        ("post", "https://video.twimg.com/amplify_video/2094082244461662208/vid/avc1/2160x3840/_aOTP7lmij_AcXCq.mp4?tag=29", 41, "Graciebon1 body scan"),
+        ("post", "https://video.twimg.com/amplify_video/1729887557100683264/vid/avc1/720x1280/HuEPu5ag47rrOayB.mp4?tag=14", 18, "Graciebon1 trend"),
+        ("post", "https://video.twimg.com/amplify_video/2096650760713101312/vid/avc1/720x1280/QQ1zFXpVl4_G_cv4.mp4?tag=29", 8, "Graciebon1 body type"),
+    )),
+    ("ANNABELLE RIOS", (
+        ("file", "https://v55.erome.com/7870/uto61E9C/mYAIxyf4_720p.mp4", 1365, "Annabellrio"),
+        ("file", "https://v55.erome.com/7870/uto61E9C/sICofnzo_720p.mp4", 600, "Annabellrio"),
+        ("file", "https://v8.erome.com/1115/HTwoGgwW/VA1FxzMs_720p.mp4", 582, "Annabellrio"),
+        ("file", "https://v55.erome.com/7870/uto61E9C/v0ORDSO6_720p.mp4", 568, "Annabellrio"),
+        ("file", "https://v55.erome.com/7870/uto61E9C/FgIowfpJ_720p.mp4", 479, "Annabellrio"),
+        ("file", "https://v55.erome.com/7870/uto61E9C/e9OPZFlG_720p.mp4", 434, "Annabellrio"),
+        ("file", "https://v85.erome.com/3799/FDZSNMht/P3a9KZOZ_720p.mp4", 43, "Annabellrio"),
+    )),
     ("VAL2YUMMI", (("file", "https://v58.erome.com/8970/DMAsDEDH/3HYKACJR_720p.mp4", 152, "val2yummi"),)),
     ("FREAKYYSTACKSS", (("file", "https://v10.erome.com/8815/f17CQGFk/BvuzWQDY_720p.mp4", 668, "FreakyStackss x Slobhouse"),)),
     ("ASAIA HERNANDEZ", (("file", "https://v11.erome.com/5822/AvtUf9Tm/A5lnqNUK_720p.mp4", 29, "Asaia fine ass"),)),
@@ -1142,6 +1163,8 @@ ADULT_FACE_DESKS = (
     ("ASAIA HERNANDEZ", ("AvtUf9Tm",)),
     ("JASMINEGTV", ("5jd5lhgS",)),
     ("IMANGELJESSYY", ("hhyYdQUz",)),
+    ("YESS ENIA69", ("QuJsjzdM",)),
+    ("ANNABELLE RIOS", ("uto61E9C", "HTwoGgwW", "FDZSNMht")),
 )
 ADULT_DESK_ORIGIN = "https://www.erome.com"
 ADULT_DESK_FOLLOW = 12
@@ -1149,6 +1172,7 @@ ADULT_POST_ORIGIN = "https://syndication.twitter.com"
 ADULT_POST_STATUS = "https://api.fxtwitter.com"
 ADULT_POST_FOLLOW = 16
 ADULT_WEB_ORIGIN = "https://html.duckduckgo.com"
+ADULT_WEB_VIDEO = "https://www.bing.com"
 ADULT_FACE_POSTS = (
     ("ITSSTEPHHONEY21", ("itsstephhoneyxo21", "itsstephhoney21")),
     ("ITSSTEPHHONEYXO21", ("itsstephhoneyxo21", "itsstephhoney21")),
@@ -1165,7 +1189,7 @@ ADULT_FACE_POSTS = (
     ("SARIIXO", ("officialsariixo",)),
     ("MONA ACUTEE", ("monaacutee",)),
     ("IMHIZBAEEXX", ("imhizbaeexx_",)),
-    ("YESS ENIA69", ("yess_enia69",)),
+    ("YESS ENIA69", ("yessenialoch", "yess_enia69")),
     ("VAL2YUMMI", ("val2yummi",)),
     ("KIRAWWRRRA", ("kirawrrra",)),
     ("JACQIE VAINS", ("jacqievains",)),
@@ -1174,11 +1198,11 @@ ADULT_FACE_POSTS = (
     ("ASAIA HERNANDEZ", ("asaia_hernandez",)),
     ("JASMINEGTV", ("jasminegtv1",)),
     ("IMANGELJESSYY", ("imangeljessyy",)),
-    ("GRACIE BONN", ("itsgraciebonn",)),
+    ("GRACIE BONN", ("graciebon1", "itsgraciebonn")),
     ("DEBVARELA", ("debvarela_",)),
     ("DOUBLE DOSE TWINS", ("doubledosetwins",)),
     ("PAMELA YAMZ", ("pamelayamz",)),
-    ("ANNABELLE RIOS", ("annabelleriossss",)),
+    ("ANNABELLE RIOS", ("annabellrio", "annabelleriossss")),
     ("NICOLEEE 1329", ("_nicoleee_1329",)),
     ("EUNICEG", ("euniceg___",)),
     ("STRAWBERRY SANDRA", ("strawberrysandra20",)),
@@ -1203,6 +1227,9 @@ ADULT_FACE_STILLS = (
     ("xH0pvUTTQ5G5AJNe", "https://pbs.twimg.com/ext_tw_video_thumb/1878566880551862272/pu/img/XwOfZEDcSFR8nf_0.jpg"),
     ("r_l7Mr5BABbJlJXl", "https://pbs.twimg.com/amplify_video_thumb/2090576619694182400/img/w0GlIOuf_e8LNUfn.jpg"),
     ("lQOCKUuxeqEZRD4n", "https://pbs.twimg.com/ext_tw_video_thumb/1856457311075581952/pu/img/n13MThQEfvTsFvA6.jpg"),
+    ("_aOTP7lmij_AcXCq", "https://pbs.twimg.com/amplify_video_thumb/2094082244461662208/img/bJtLomDZgHidTVjf.jpg"),
+    ("HuEPu5ag47rrOayB", "https://pbs.twimg.com/amplify_video_thumb/1729887557100683264/img/VGhugB2H-T5-HeXa.jpg"),
+    ("QQ1zFXpVl4_G_cv4", "https://pbs.twimg.com/amplify_video_thumb/2096650760713101312/img/DqvxfJNEv3T15Fpx.jpg"),
 )
 ADULT_FACE_GIFTS = (
     ("ITSSTEPHHONEY21", ("itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip")),
@@ -1220,7 +1247,7 @@ ADULT_FACE_GIFTS = (
     ("SARIIXO", ("officialsariixo", "sariixo")),
     ("MONA ACUTEE", ("monaacutee", "monaacute")),
     ("IMHIZBAEEXX", ("imhizbaeexx", "imhizbaee", "imhizbae", "hizbaeexx")),
-    ("YESS ENIA69", ("yessenia69",)),
+    ("YESS ENIA69", ("yessenialoch", "yessenia69")),
     ("VAL2YUMMI", ("val2yummi", "val2yummy")),
     ("KIRAWWRRRA", ("kirawrrra", "kirawrrra2")),
     ("JACQIE VAINS", ("jacqievains",)),
@@ -1229,11 +1256,11 @@ ADULT_FACE_GIFTS = (
     ("ASAIA HERNANDEZ", ("asaiahernandez",)),
     ("JASMINEGTV", ("jasminegtv1", "jasminegtv")),
     ("IMANGELJESSYY", ("imangeljessyy", "imangeljessy", "angeljessyy")),
-    ("GRACIE BONN", ("itsgraciebonn",)),
+    ("GRACIE BONN", ("graciebon1", "itsgraciebonn")),
     ("DEBVARELA", ("debvarela",)),
     ("DOUBLE DOSE TWINS", ("doubledosetwins",)),
     ("PAMELA YAMZ", ("pamelayamz",)),
-    ("ANNABELLE RIOS", ("annabelleriossss", "annabellerios")),
+    ("ANNABELLE RIOS", ("annabellrio", "annabelleriossss", "annabellerios")),
     ("NICOLEEE 1329", ("nicoleee1329",)),
     ("EUNICEG", ("euniceg",)),
     ("STRAWBERRY SANDRA", ("strawberrysandra20", "strawberrysandra")),
@@ -1321,6 +1348,8 @@ def adult_face_hunt(kind: str) -> list[str]:
         add(adult_desk_search(query))
     for query in adult_face_queries(kind):
         add(adult_web_search(query))
+    for query in adult_face_queries(kind):
+        add(adult_web_video(query))
     gifts: list[str] = []
     gift_seen: set[str] = set()
     for raw in adult_face_gift_tokens(kind) + adult_face_queries(kind):
@@ -1429,7 +1458,18 @@ def adult_web_search(query: str) -> str | None:
 
 def adult_web_look(raw: str) -> bool:
     host = (urllib.parse.urlparse(str(raw or "")).hostname or "").lower()
-    return "duckduckgo.com" in host and "/html/" in str(raw or "").lower()
+    path = str(raw or "").lower()
+    if "duckduckgo.com" in host and "/html/" in path:
+        return True
+    return "bing.com" in host and "/videos/search" in path
+
+
+def adult_web_video(query: str) -> str | None:
+    q = str(query or "").strip()
+    if not q:
+        return None
+    encoded = urllib.parse.quote(q, safe="-")
+    return f"{ADULT_WEB_VIDEO}/videos/search?q={encoded}"
 
 
 def adult_web_albums(payload: object, kind: str) -> list[str]:
@@ -3942,6 +3982,15 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("thumbsize=big", desk)
         self.assertIn("per_page=80", desk)
         self.assertIn("yessenia69", desk)
+        self.assertIn("yessenialoch", desk)
+        self.assertIn("graciebon1", desk)
+        self.assertIn("annabellrio", desk)
+        self.assertIn("uto61E9C", desk)
+        self.assertIn("QuJsjzdM", desk)
+        self.assertIn("_aOTP7lmij_AcXCq", desk)
+        self.assertIn("bing.com", desk.lower())
+        self.assertIn("/videos/search", desk)
+        self.assertIn("static func webVideo(", desk)
         self.assertNotIn('"yessenia"', desk)
         self.assertNotIn("yess_enia\"", desk.replace("yess_enia69", ""))
         self.assertIn("beilaNeedles", desk)
@@ -4180,6 +4229,9 @@ class AdultDeskTests(unittest.TestCase):
         self.assertGreaterEqual(len(adult_face_hold_rooms("IMHIZBAEEXX")), 2)
         self.assertGreaterEqual(len(adult_face_hold_rooms("LILIANAS PAGE")), 2)
         self.assertGreaterEqual(len(adult_face_hold_rooms("PAMELA YAMZ")), 1)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("GRACIE BONN")), 2)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("ANNABELLE RIOS")), 4)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("YESS ENIA69")), 1)
         self.assertTrue(any(row["seconds"] >= 307 for row in adult_face_hold_rooms("ITSSTEPHHONEY21")))
         self.assertTrue(any(row["seconds"] >= 560 for row in adult_face_hold_rooms("JUICYJAS TV")))
         self.assertTrue(any(row["seconds"] >= 466 for row in adult_face_hold_rooms("JUICYJAS TV")))
@@ -4193,6 +4245,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("cmAruVHG", desk)
         self.assertIn("IQke7CWi", desk)
         self.assertTrue(any("syndication.twitter.com" in path for path in adult_face_hunt("LILIANAS PAGE")))
+        self.assertTrue(any("syndication.twitter.com" in path and "graciebon1" in path for path in adult_face_hunt("GRACIE BONN")))
         self.assertTrue(any("syndication.twitter.com" in path for path in adult_face_hunt("MONA ACUTEE")))
         self.assertTrue(any("erome.com/a/58Uaa6Ig" in path for path in adult_face_hunt("JUICYJAS TV")))
         self.assertTrue(any("erome.com/a/CZ4UXKiP" in path for path in adult_face_hunt("IMHIZBAEEXX")))
@@ -4235,7 +4288,13 @@ class AdultDeskTests(unittest.TestCase):
         self.assertNotIn("onlyfans", desk.lower())
         self.assertNotIn("fansly", desk.lower())
         self.assertNotIn("fanbase", desk.lower())
-        for row in adult_face_hold_rooms("IMHIZBAEEXX") + adult_face_hold_rooms("LILIANAS PAGE"):
+        for row in (
+            adult_face_hold_rooms("IMHIZBAEEXX")
+            + adult_face_hold_rooms("LILIANAS PAGE")
+            + adult_face_hold_rooms("GRACIE BONN")
+            + adult_face_hold_rooms("ANNABELLE RIOS")
+            + adult_face_hold_rooms("YESS ENIA69")
+        ):
             self.assertNotIn("onlyfans", row["name"].lower())
             self.assertNotIn("onlyfans", row["url"].lower())
         self.assertEqual(
@@ -4268,9 +4327,12 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("deskFollow = 12", desk)
         self.assertIn("html.duckduckgo.com", desk)
         self.assertIn("static func webSearch(", desk)
+        self.assertIn("static func webVideo(", desk)
         self.assertIn("static func webAlbums(", desk)
         self.assertIn("static func webPosts(", desk)
         self.assertIn("static func deskUser(", desk)
+        self.assertIn("www.bing.com", desk)
+        self.assertIn("/videos/search", desk)
         self.assertIn("fetchWebHits", sock)
         self.assertIn("webLook", sock)
         mona = adult_face_hunt("MONA ACUTEE")
@@ -4279,7 +4341,15 @@ class AdultDeskTests(unittest.TestCase):
         self.assertTrue(any("erome.com/monaacutee" in path for path in mona))
         self.assertTrue(any("html.duckduckgo.com/html/" in path and "monaacutee" in path for path in mona))
         self.assertTrue(any("erome.com/itsgraciebonn" in path for path in adult_face_hunt("GRACIE BONN")))
+        self.assertTrue(any("erome.com/graciebon1" in path for path in adult_face_hunt("GRACIE BONN")))
+        self.assertTrue(any("bing.com/videos/search" in path and "graciebon1" in path for path in adult_face_hunt("GRACIE BONN")))
+        self.assertTrue(any("erome.com/yessenialoch" in path for path in adult_face_hunt("YESS ENIA69")))
+        self.assertTrue(any("erome.com/a/QuJsjzdM" in path for path in adult_face_hunt("YESS ENIA69")))
+        self.assertTrue(any("bing.com/videos/search" in path and "yessenialoch" in path for path in adult_face_hunt("YESS ENIA69")))
+        self.assertTrue(any("erome.com/search?q=annabellrio" in path for path in adult_face_hunt("ANNABELLE RIOS")))
+        self.assertTrue(any("erome.com/a/uto61E9C" in path for path in adult_face_hunt("ANNABELLE RIOS")))
         self.assertTrue(any("html.duckduckgo.com/html/" in path for path in adult_face_hunt("ITOCHIANATA")))
+        self.assertTrue(any("bing.com/videos/search" in path and "itochianata" in path for path in adult_face_hunt("ITOCHIANATA")))
         self.assertLessEqual(len(adult_face_hunt("MULAN VUITTON")), ADULT_HUNT_CAP)
         self.assertLessEqual(len(adult_face_hunt("JUICYJAS TV")), ADULT_HUNT_CAP)
         html = (
@@ -4293,6 +4363,22 @@ class AdultDeskTests(unittest.TestCase):
         self.assertEqual(adult_web_albums(html, "YESS ENIA69"), [])
         self.assertEqual(adult_web_posts(html, "ANNABELLE RIOS"), [])
         self.assertTrue(adult_web_look("https://html.duckduckgo.com/html/?q=monaacutee"))
+        self.assertTrue(adult_web_look("https://www.bing.com/videos/search?q=graciebon1"))
+        self.assertFalse(adult_web_look("https://www.bing.com/search?q=graciebon1"))
+        self.assertEqual(
+            adult_web_posts(
+                'url":"https://x.com/graciebon1/status/2094082537190567998"',
+                "GRACIE BONN",
+            ),
+            ["2094082537190567998"],
+        )
+        self.assertEqual(
+            adult_web_posts(
+                'url":"https://x.com/graciebon1/status/2094082537190567998"',
+                "ITOCHIANATA",
+            ),
+            [],
+        )
         self.assertTrue(adult_desk_look("https://www.erome.com/monaacutee"))
         self.assertTrue(adult_desk_look("https://www.erome.com/search?q=monaacutee"))
         self.assertFalse(adult_desk_look("https://www.erome.com/a/CZ4UXKiP"))
@@ -4302,9 +4388,12 @@ class AdultDeskTests(unittest.TestCase):
         self.assertNotIn("fanbase", desk.lower())
         self.assertIn("public X", tv)
         self.assertIn("guest album", tv.lower())
+        self.assertIn("public video search", tv.lower())
         self.assertEqual(adult_face_hold_rooms("ITOCHIANATA"), [])
         self.assertEqual(adult_face_hold_rooms("MONA ACUTEE"), [])
-        self.assertEqual(adult_face_hold_rooms("GRACIE BONN"), [])
+        self.assertGreaterEqual(len(adult_face_hold_rooms("GRACIE BONN")), 2)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("ANNABELLE RIOS")), 4)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("YESS ENIA69")), 1)
 
 
 class NaLiveTests(unittest.TestCase):

@@ -250,6 +250,7 @@ enum AdultDesk {
         "hizbaeexx",
     ]
     static let yessNeedles = [
+        "yessenialoch",
         "yess_enia69",
         "yessenia69",
         "yess enia69",
@@ -295,6 +296,7 @@ enum AdultDesk {
         "angeljessyy",
     ]
     static let gracieNeedles = [
+        "graciebon1",
         "itsgraciebonn",
         "gracie bonn",
     ]
@@ -313,6 +315,7 @@ enum AdultDesk {
         "pamela yamz",
     ]
     static let annabelleNeedles = [
+        "annabellrio",
         "annabelleriossss",
         "annabelle rios",
         "annabellerios",
@@ -404,7 +407,7 @@ enum AdultDesk {
         ("SARIIXO", ["officialsariixo", "sariixo"]),
         ("MONA ACUTEE", ["monaacutee", "monaacute"]),
         ("IMHIZBAEEXX", ["imhizbaeexx", "imhizbaee", "imhizbae", "hizbaeexx"]),
-        ("YESS ENIA69", ["yessenia69"]),
+        ("YESS ENIA69", ["yessenialoch", "yessenia69"]),
         ("VAL2YUMMI", ["val2yummi", "val2yummy"]),
         ("KIRAWWRRRA", ["kirawrrra", "kirawrrra2"]),
         ("JACQIE VAINS", ["jacqievains"]),
@@ -413,11 +416,11 @@ enum AdultDesk {
         ("ASAIA HERNANDEZ", ["asaiahernandez"]),
         ("JASMINEGTV", ["jasminegtv1", "jasminegtv"]),
         ("IMANGELJESSYY", ["imangeljessyy", "imangeljessy", "angeljessyy"]),
-        ("GRACIE BONN", ["itsgraciebonn"]),
+        ("GRACIE BONN", ["graciebon1", "itsgraciebonn"]),
         ("DEBVARELA", ["debvarela"]),
         ("DOUBLE DOSE TWINS", ["doubledosetwins"]),
         ("PAMELA YAMZ", ["pamelayamz"]),
-        ("ANNABELLE RIOS", ["annabelleriossss", "annabellerios"]),
+        ("ANNABELLE RIOS", ["annabellrio", "annabelleriossss", "annabellerios"]),
         ("NICOLEEE 1329", ["nicoleee1329"]),
         ("EUNICEG", ["euniceg"]),
         ("STRAWBERRY SANDRA", ["strawberrysandra20", "strawberrysandra"]),
@@ -472,6 +475,8 @@ enum AdultDesk {
         ("ITSSTEPHHONEY21", ["RUX8bZH5"]),
         ("ITSSTEPHHONEYXO21", ["RUX8bZH5"]),
         ("IMHIZBAEEXX", ["CZ4UXKiP", "5Ap1AVt9"]),
+        ("YESS ENIA69", ["QuJsjzdM"]),
+        ("ANNABELLE RIOS", ["uto61E9C", "HTwoGgwW", "FDZSNMht"]),
     ]
     /// Public X handles. Hunt the guest timeline, not a paywalled store.
     static let facePosts: [(String, [String])] = [
@@ -490,7 +495,7 @@ enum AdultDesk {
         ("SARIIXO", ["officialsariixo"]),
         ("MONA ACUTEE", ["monaacutee"]),
         ("IMHIZBAEEXX", ["imhizbaeexx_"]),
-        ("YESS ENIA69", ["yess_enia69"]),
+        ("YESS ENIA69", ["yessenialoch", "yess_enia69"]),
         ("VAL2YUMMI", ["val2yummi"]),
         ("KIRAWWRRRA", ["kirawrrra"]),
         ("JACQIE VAINS", ["jacqievains"]),
@@ -499,11 +504,11 @@ enum AdultDesk {
         ("ASAIA HERNANDEZ", ["asaia_hernandez"]),
         ("JASMINEGTV", ["jasminegtv1"]),
         ("IMANGELJESSYY", ["imangeljessyy"]),
-        ("GRACIE BONN", ["itsgraciebonn"]),
+        ("GRACIE BONN", ["graciebon1", "itsgraciebonn"]),
         ("DEBVARELA", ["debvarela_"]),
         ("DOUBLE DOSE TWINS", ["doubledosetwins"]),
         ("PAMELA YAMZ", ["pamelayamz"]),
-        ("ANNABELLE RIOS", ["annabelleriossss"]),
+        ("ANNABELLE RIOS", ["annabellrio", "annabelleriossss"]),
         ("NICOLEEE 1329", ["_nicoleee_1329"]),
         ("EUNICEG", ["euniceg___"]),
         ("STRAWBERRY SANDRA", ["strawberrysandra20"]),
@@ -537,6 +542,7 @@ enum AdultDesk {
     static let postOrigin = "https://syndication.twitter.com"
     static let postStatusOrigin = "https://api.fxtwitter.com"
     static let webOrigin = "https://html.duckduckgo.com"
+    static let webVideoOrigin = "https://www.bing.com"
     /// Proven guest files. Mount before the hunt so a dead desk cannot blank the chip.
     static let faceHolds: [(String, [(String, String, Int, String)])] = [
         ("ITSSTEPHHONEY21", [
@@ -661,6 +667,24 @@ enum AdultDesk {
         ("PAMELA YAMZ", [
             ("post", "https://video.twimg.com/ext_tw_video/1856457311075581952/pu/vid/avc1/720x1280/lQOCKUuxeqEZRD4n.mp4?tag=12", 8, "Pamela Yamz glute pump"),
         ]),
+        ("YESS ENIA69", [
+            ("file", "https://v40.erome.com/8809/QuJsjzdM/YkQbHfv2_720p.mp4", 172, "Yessenialoch"),
+            ("file", "https://v40.erome.com/8809/QuJsjzdM/57QvmIrp_720p.mp4", 6, "Yessenialoch"),
+        ]),
+        ("GRACIE BONN", [
+            ("post", "https://video.twimg.com/amplify_video/2094082244461662208/vid/avc1/2160x3840/_aOTP7lmij_AcXCq.mp4?tag=29", 41, "Graciebon1 body scan"),
+            ("post", "https://video.twimg.com/amplify_video/1729887557100683264/vid/avc1/720x1280/HuEPu5ag47rrOayB.mp4?tag=14", 18, "Graciebon1 trend"),
+            ("post", "https://video.twimg.com/amplify_video/2096650760713101312/vid/avc1/720x1280/QQ1zFXpVl4_G_cv4.mp4?tag=29", 8, "Graciebon1 body type"),
+        ]),
+        ("ANNABELLE RIOS", [
+            ("file", "https://v55.erome.com/7870/uto61E9C/mYAIxyf4_720p.mp4", 1365, "Annabellrio"),
+            ("file", "https://v55.erome.com/7870/uto61E9C/sICofnzo_720p.mp4", 600, "Annabellrio"),
+            ("file", "https://v8.erome.com/1115/HTwoGgwW/VA1FxzMs_720p.mp4", 582, "Annabellrio"),
+            ("file", "https://v55.erome.com/7870/uto61E9C/v0ORDSO6_720p.mp4", 568, "Annabellrio"),
+            ("file", "https://v55.erome.com/7870/uto61E9C/FgIowfpJ_720p.mp4", 479, "Annabellrio"),
+            ("file", "https://v55.erome.com/7870/uto61E9C/e9OPZFlG_720p.mp4", 434, "Annabellrio"),
+            ("file", "https://v85.erome.com/3799/FDZSNMht/P3a9KZOZ_720p.mp4", 43, "Annabellrio"),
+        ]),
         ("VAL2YUMMI", [
             ("file", "https://v58.erome.com/8970/DMAsDEDH/3HYKACJR_720p.mp4", 152, "val2yummi"),
             ("file", "https://v68.erome.com/7860/6pKwUvNE/F4IiNqu8_720p.mp4", 117, "Val2yummi"),
@@ -699,6 +723,9 @@ enum AdultDesk {
         ("xH0pvUTTQ5G5AJNe", "https://pbs.twimg.com/ext_tw_video_thumb/1878566880551862272/pu/img/XwOfZEDcSFR8nf_0.jpg"),
         ("r_l7Mr5BABbJlJXl", "https://pbs.twimg.com/amplify_video_thumb/2090576619694182400/img/w0GlIOuf_e8LNUfn.jpg"),
         ("lQOCKUuxeqEZRD4n", "https://pbs.twimg.com/ext_tw_video_thumb/1856457311075581952/pu/img/n13MThQEfvTsFvA6.jpg"),
+        ("_aOTP7lmij_AcXCq", "https://pbs.twimg.com/amplify_video_thumb/2094082244461662208/img/bJtLomDZgHidTVjf.jpg"),
+        ("HuEPu5ag47rrOayB", "https://pbs.twimg.com/amplify_video_thumb/1729887557100683264/img/VGhugB2H-T5-HeXa.jpg"),
+        ("QQ1zFXpVl4_G_cv4", "https://pbs.twimg.com/amplify_video_thumb/2096650760713101312/img/DqvxfJNEv3T15Fpx.jpg"),
     ]
     static let loveAgent =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -815,7 +842,11 @@ enum AdultDesk {
         if giftHost(raw) { return "\(giftOrigin)/" }
         if deskHost(raw) { return "\(deskOrigin)/" }
         if postHost(raw) { return "https://x.com/" }
-        if webHost(raw) { return "https://duckduckgo.com/" }
+        if webHost(raw) {
+            let host = URL(string: raw)?.host?.lowercased() ?? ""
+            if host.contains("bing.com") { return "https://www.bing.com/" }
+            return "https://duckduckgo.com/"
+        }
         let host = URL(string: raw)?.host?.lowercased() ?? ""
         if host.contains("eporner") { return "https://www.eporner.com/" }
         if host.contains("bornstar") { return "https://bornstar.co/" }
@@ -929,11 +960,16 @@ enum AdultDesk {
 
     static func webHost(_ raw: String) -> Bool {
         let host = URL(string: raw)?.host?.lowercased() ?? ""
-        return host == "html.duckduckgo.com" || host.hasSuffix(".duckduckgo.com") || host.contains("duckduckgo.com")
+        if host == "html.duckduckgo.com" || host.hasSuffix(".duckduckgo.com") || host.contains("duckduckgo.com") {
+            return true
+        }
+        return host == "www.bing.com" || host.hasSuffix(".bing.com") || host.contains("bing.com")
     }
 
     static func webLook(_ raw: String) -> Bool {
-        webHost(raw) && raw.lowercased().contains("/html/")
+        let path = raw.lowercased()
+        if webHost(raw) && path.contains("/html/") { return true }
+        return webHost(raw) && path.contains("/videos/search")
     }
 
     static func webSearch(_ query: String) -> String? {
@@ -942,6 +978,14 @@ enum AdultDesk {
               let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
         else { return nil }
         return "\(webOrigin)/html/?q=\(encoded)"
+    }
+
+    static func webVideo(_ query: String) -> String? {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !q.isEmpty,
+              let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return nil }
+        return "\(webVideoOrigin)/videos/search?q=\(encoded)"
     }
 
     static func webAlbums(_ data: Data, kind: String) -> [String] {
@@ -1168,6 +1212,9 @@ enum AdultDesk {
         }
         for query in faceQueries(kind) {
             add(webSearch(query))
+        }
+        for query in faceQueries(kind) {
+            add(webVideo(query))
         }
         var gifts: [String] = []
         var giftSeen: Set<String> = []
