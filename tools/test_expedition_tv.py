@@ -441,6 +441,18 @@ ADULT_ITOCHI = (
     "ito_chianata",
     "ito-chianata",
 )
+ADULT_ELVANA = (
+    "elvanavitaa",
+    "elvana vitaa",
+)
+ADULT_SLAVIC = (
+    "slaviccaramel",
+    "slavic caramel",
+)
+ADULT_LILBUSSY = (
+    "lilbussygirl",
+    "lil bussy girl",
+)
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
     ("ITSSTEPHHONEYXO21", ADULT_STEPH),
@@ -475,6 +487,9 @@ ADULT_FACES = (
     ("EUNICEG", ADULT_EUNICE),
     ("STRAWBERRY SANDRA", ADULT_SANDRA),
     ("ITOCHIANATA", ADULT_ITOCHI),
+    ("ELVANA VITAA", ADULT_ELVANA),
+    ("SLAVIC CARAMEL", ADULT_SLAVIC),
+    ("LIL BUSSY GIRL", ADULT_LILBUSSY),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_LOVE_ORIGIN = "https://lovescape.cam"
@@ -739,6 +754,65 @@ def adult_face_needles(kind: str) -> list[str] | None:
     return None
 
 
+def adult_ask_kind(raw: str) -> str | None:
+    chip = str(raw or "").strip().upper()
+    if chip in ADULT_TOPIC:
+        return chip
+    plain = _adult_face_plain(raw)
+    compact = plain.replace(" ", "")
+    if not compact:
+        return None
+    for word, kind in ADULT_KIND_WORDS:
+        token = _adult_face_plain(word)
+        if token == plain or token.replace(" ", "") == compact:
+            return kind
+    return None
+
+
+def adult_ask_needles(raw: str) -> list[str] | None:
+    text = str(raw or "").strip()
+    if not text:
+        return None
+    chip = text.upper()
+    if chip in ("", "ALL") or adult_love_needles(chip):
+        return None
+    if needles := adult_face_needles(chip):
+        return needles
+    compact = _adult_face_plain(text).replace(" ", "")
+    if not compact:
+        return None
+    for name, needles in ADULT_FACES:
+        if _adult_face_plain(name).replace(" ", "") == compact:
+            return list(needles)
+        if any(_adult_face_plain(token).replace(" ", "") == compact for token in needles):
+            return list(needles)
+    mapped = adult_ask_kind(text)
+    if mapped:
+        out: list[str] = []
+        seen: set[str] = set()
+        for item in list(ADULT_TOPIC.get(mapped, ())) + [text.lower(), mapped.lower()]:
+            query = str(item or "").strip().lower()
+            if query and query not in seen:
+                seen.add(query)
+                out.append(query)
+        return out or None
+    if len(compact) < 4 or not _adult_face_ok(text):
+        return None
+    out = []
+    seen = set()
+    spaced = _adult_face_plain(text)
+    for item in (text.lower(), spaced, compact):
+        query = str(item or "").strip().lower()
+        if len(query) >= 4 and query not in seen:
+            seen.add(query)
+            out.append(query)
+    return out or None
+
+
+def adult_hunt_needles(kind: str) -> list[str] | None:
+    return adult_face_needles(kind) or adult_ask_needles(kind)
+
+
 def adult_love_needles(kind: str) -> bool:
     return str(kind or "").strip().upper() == ADULT_LOVE_CHIP
 
@@ -906,44 +980,37 @@ def adult_count(value: object) -> int:
 def adult_rail(rooms: list[dict]) -> list[str]:
     out: list[str] = []
     seen: set[str] = set()
-    always = (
-        ["ALL", ADULT_LOVE_CHIP]
-        + [name for name, _ in ADULT_FACES]
-        + list(ADULT_PIN)
-    )
-    for chip in always:
+    for chip in ["ALL", ADULT_LOVE_CHIP] + [name for name, _ in ADULT_FACES]:
         if chip not in seen:
             seen.add(chip)
             out.append(chip)
-    extra = 0
-    for chip in adult_kinds(rooms):
-        if chip in seen:
-            continue
-        seen.add(chip)
-        out.append(chip)
-        extra += 1
-        if extra >= ADULT_RAIL_EXTRA:
-            break
     return out
 
 
 def adult_pick(rooms: list[dict], kind: str = "", query: str = "") -> list[dict]:
     chip = str(kind or "").strip().upper()
     needle = str(query or "").strip().lower()
-    faces = adult_face_needles(chip)
-    love = adult_love_needles(chip)
+    ask = adult_hunt_needles(needle) if needle else None
+    faces = ask if needle else adult_hunt_needles(chip)
+    love = False if needle else adult_love_needles(chip)
     out: list[dict] = []
     for room in rooms:
         kinds = [str(item).strip().upper() for item in (room.get("kinds") or [])]
-        if faces:
-            blob = " ".join(
-                [
-                    str(room.get("name") or ""),
-                    str(room.get("handle") or ""),
-                    str(room.get("seek") or ""),
-                    " ".join(kinds),
-                ]
-            ).lower()
+        blob = " ".join(
+            [
+                str(room.get("name") or ""),
+                str(room.get("handle") or ""),
+                str(room.get("seek") or ""),
+                " ".join(kinds),
+            ]
+        ).lower()
+        if needle:
+            if ask:
+                if not _adult_face_hit(blob, ask):
+                    continue
+            elif needle not in blob:
+                continue
+        elif faces:
             if not any(token in blob for token in faces):
                 continue
         elif love:
@@ -951,19 +1018,8 @@ def adult_pick(rooms: list[dict], kind: str = "", query: str = "") -> list[dict]
                 continue
         elif chip and chip != "ALL" and chip not in kinds:
             continue
-        if needle:
-            blob = " ".join(
-                [
-                    str(room.get("name") or ""),
-                    str(room.get("handle") or ""),
-                    str(room.get("seek") or ""),
-                    " ".join(kinds),
-                ]
-            ).lower()
-            if needle not in blob:
-                continue
         out.append(room)
-    if faces:
+    if faces or ask or needle:
         out.sort(
             key=lambda room: (
                 -int(room.get("seconds") or 0),
@@ -1004,13 +1060,13 @@ def adult_face_room(handle: str, payload: object) -> dict | None:
 
 
 def adult_face_queries(kind: str) -> list[str]:
-    needles = adult_face_needles(kind) or []
+    needles = adult_hunt_needles(kind) or []
     out: list[str] = []
     seen: set[str] = set()
     chip = str(kind or "").strip().lower()
     for raw in list(needles) + [chip]:
         query = str(raw or "").strip().lower()
-        if len(query) < 6 or query in seen:
+        if len(query) < 3 or query in seen:
             continue
         seen.add(query)
         out.append(query)
@@ -1041,6 +1097,7 @@ ADULT_FACE_STARS = (
     ("ZURI BELLA ROSE", ("zuri-bella-rose",)),
     ("SARIIXO", ("sariixo",)),
     ("KIRAWWRRRA", ("kirawrrra2-0",)),
+    ("LIL BUSSY GIRL", ("lilbussygirl",)),
 )
 ADULT_FACE_HOLDS = (
     ("ITSSTEPHHONEY21", (
@@ -1148,6 +1205,7 @@ ADULT_FACE_HOLDS = (
     ("ASAIA HERNANDEZ", (("file", "https://v11.erome.com/5822/AvtUf9Tm/A5lnqNUK_720p.mp4", 29, "Asaia fine ass"),)),
     ("JASMINEGTV", (("file", "https://v62.erome.com/1768/5jd5lhgS/PDzcXq2Z_720p.mp4", 1434, "Jasminegtv"),)),
     ("IMANGELJESSYY", (("file", "https://v15.erome.com/9197/hhyYdQUz/ilQB0MKm_720p.mp4", 13, "Imangeljessyy"),)),
+    ("LIL BUSSY GIRL", (("star", "lilbussygirl-gets-cummed-after-steamy-boobjob", 147, "Lilbussygirl Gets Cummed After Steamy Boobjob"),)),
 )
 ADULT_FACE_DESKS = (
     ("ITSSTEPHHONEY21", ("RUX8bZH5",)),
@@ -1207,6 +1265,9 @@ ADULT_FACE_POSTS = (
     ("EUNICEG", ("euniceg___",)),
     ("STRAWBERRY SANDRA", ("strawberrysandra20",)),
     ("ITOCHIANATA", ("itochianata",)),
+    ("ELVANA VITAA", ("elvanavitaa",)),
+    ("SLAVIC CARAMEL", ("slaviccaramel",)),
+    ("LIL BUSSY GIRL", ("lilbussygirl",)),
 )
 ADULT_FACE_STILLS = (
     ("P283XrKRjsV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"),
@@ -1265,6 +1326,9 @@ ADULT_FACE_GIFTS = (
     ("EUNICEG", ("euniceg",)),
     ("STRAWBERRY SANDRA", ("strawberrysandra20", "strawberrysandra")),
     ("ITOCHIANATA", ("itochianata",)),
+    ("ELVANA VITAA", ("elvanavitaa",)),
+    ("SLAVIC CARAMEL", ("slaviccaramel",)),
+    ("LIL BUSSY GIRL", ("lilbussygirl",)),
 )
 ADULT_FACE_KILL = (
     "loli",
@@ -1334,12 +1398,15 @@ def adult_face_hunt(kind: str) -> list[str]:
         add(adult_post_profile(handle))
     users: list[str] = []
     user_seen: set[str] = set()
-    for raw in adult_face_post_tokens(kind) + adult_face_gift_tokens(kind):
+    for raw in adult_face_post_tokens(kind) + adult_face_gift_tokens(kind) + adult_face_queries(kind):
         name = str(raw or "").strip().lstrip("@").lower()
-        if name and name not in user_seen:
+        if not name or not all(ch.isalnum() or ch == "_" for ch in name):
+            continue
+        if name not in user_seen:
             user_seen.add(name)
             users.append(name)
     for handle in users:
+        add(adult_post_profile(handle))
         add(adult_desk_user(handle))
     for slug in adult_face_star_tokens(kind):
         for page in range(1, ADULT_HUNT_PAGES + 1):
@@ -1473,7 +1540,7 @@ def adult_web_video(query: str) -> str | None:
 
 
 def adult_web_albums(payload: object, kind: str) -> list[str]:
-    needles = adult_face_needles(kind) or []
+    needles = adult_hunt_needles(kind) or []
     text = payload.decode("utf-8", "replace") if isinstance(payload, bytes) else str(payload or "")
     out: list[str] = []
     seen: set[str] = set()
@@ -1491,7 +1558,7 @@ def adult_web_albums(payload: object, kind: str) -> list[str]:
 
 
 def adult_web_posts(payload: object, kind: str) -> list[str]:
-    needles = adult_face_needles(kind) or []
+    needles = adult_hunt_needles(kind) or []
     text = payload.decode("utf-8", "replace") if isinstance(payload, bytes) else str(payload or "")
     out: list[str] = []
     seen: set[str] = set()
@@ -1886,7 +1953,7 @@ def _adult_face_models(payload: object) -> list[dict]:
 
 
 def adult_parse_face(payload: object, kind: str) -> list[dict]:
-    needles = adult_face_needles(kind) or []
+    needles = adult_hunt_needles(kind) or []
     if not needles:
         return []
     if isinstance(payload, (bytes, str)):
@@ -1956,7 +2023,7 @@ def _adult_post_clip(model: dict, needles: list[str], kind: str) -> dict | None:
 
 
 def adult_desk_albums(payload: object, kind: str) -> list[str]:
-    needles = adult_face_needles(kind) or []
+    needles = adult_hunt_needles(kind) or []
     if not needles:
         return []
     text = payload.decode("utf-8", "replace") if isinstance(payload, bytes) else str(payload or "")
@@ -2038,7 +2105,7 @@ def _adult_desk_play(chunk: str) -> str | None:
 
 
 def adult_parse_desk(payload: object, kind: str) -> list[dict]:
-    needles = adult_face_needles(kind) or []
+    needles = adult_hunt_needles(kind) or []
     if not needles:
         return []
     text = payload.decode("utf-8", "replace") if isinstance(payload, bytes) else str(payload or "")
@@ -2814,7 +2881,10 @@ class AdultDeskTests(unittest.TestCase):
             [row["id"] for row in adult_pick(extra, kind="MULAN VUITTON")],
             ["adult-mulanvuitton"],
         )
-        self.assertEqual(adult_pick(extra, kind="ITSSTEPHHONEY21", query="mulan"), [])
+        self.assertEqual(
+            [row["id"] for row in adult_pick(extra, kind="ITSSTEPHHONEY21", query="mulan")],
+            ["adult-mulanvuitton"],
+        )
         self.assertEqual(
             adult_rail([]),
             [
@@ -2853,16 +2923,9 @@ class AdultDeskTests(unittest.TestCase):
                 "EUNICEG",
                 "STRAWBERRY SANDRA",
                 "ITOCHIANATA",
-                "COUPLE",
-                "ORGY",
-                "ROLEPLAY",
-                "BRAIDS",
-                "SLEEP",
-                "ROBBERY",
-                "FORCED",
-                "PAWN",
-                "THIEF",
-                "FAVORS",
+                "ELVANA VITAA",
+                "SLAVIC CARAMEL",
+                "LIL BUSSY GIRL",
             ],
         )
         fat_kinds = [f"KIND{index:02d}" for index in range(40)]
@@ -2880,10 +2943,10 @@ class AdultDeskTests(unittest.TestCase):
         ]
         rail = adult_rail(fat)
         empty = adult_rail([])
-        self.assertEqual(rail[:len(empty)], empty)
-        self.assertLessEqual(len(rail), len(empty) + ADULT_RAIL_EXTRA)
-        self.assertTrue(any(chip.startswith("KIND") for chip in rail))
-        self.assertLess(len(rail), 14 + len(fat_kinds))
+        self.assertEqual(rail, empty)
+        self.assertNotIn("COUPLE", rail)
+        self.assertNotIn("ROLEPLAY", rail)
+        self.assertFalse(any(chip.startswith("KIND") for chip in rail))
         love = adult_parse_love(
             {
                 "models": [
@@ -3956,8 +4019,18 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("EUNICEG", desk)
         self.assertIn("STRAWBERRY SANDRA", desk)
         self.assertIn("ITOCHIANATA", desk)
+        self.assertIn("ELVANA VITAA", desk)
+        self.assertIn("SLAVIC CARAMEL", desk)
+        self.assertIn("LIL BUSSY GIRL", desk)
+        self.assertIn("elvanavitaa", desk)
+        self.assertIn("slaviccaramel", desk)
+        self.assertIn("lilbussygirl", desk)
         self.assertIn("itochiNeedles", desk)
         self.assertIn("itochianata", desk)
+        self.assertIn("static func huntNeedles(", desk)
+        self.assertIn("static func askNeedles(", desk)
+        self.assertIn("static func askKind(", desk)
+        self.assertIn("static func askTopics(", desk)
         self.assertNotIn('"itochi"', desk)
         self.assertIn("iXWnuAL4FnV", desk)
         self.assertIn("NtQUcCtcTj0", desk)
@@ -4080,7 +4153,7 @@ class AdultDeskTests(unittest.TestCase):
         load = sock.split("private func loadAdult(topic")[1].split("private func fetchLovePages")[0]
         self.assertIn('faceHoldRooms("ALL")', load)
         self.assertNotIn("adultRooms = []", load)
-        self.assertIn("timeoutIntervalForResource = AdultDesk.faceNeedles(topic) != nil ? 180 : 40", sock)
+        self.assertIn("timeoutIntervalForResource = AdultDesk.huntNeedles(topic) != nil ? 180 : 40", sock)
         self.assertIn("inflight", sock)
         self.assertNotIn("CGImageSourceCreateImageAtIndex", sock)
         self.assertIn("&tag=", desk)
@@ -4111,7 +4184,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("func pullAdult(", sock)
         self.assertIn("pullAdult(topic:", sock)
         self.assertIn("AdultDesk.topics", sock)
-        self.assertIn("AdultDesk.faceNeedles", sock)
+        self.assertIn("AdultDesk.huntNeedles", sock)
         self.assertIn("AdultDesk.loveNeedles", sock)
         self.assertIn("AdultDesk.loveDirectory", sock)
         self.assertIn("AdultDesk.parseLove", sock)
@@ -4163,6 +4236,8 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("AdultDesk.pick", tv)
         self.assertIn("pullAdult(topic:", tv)
         self.assertIn("pullAdult(topic: naKind)", tv)
+        self.assertIn("pullNaHunt", tv)
+        self.assertIn("huntNeedles", tv)
         self.assertIn("NO MATCH", tv)
         self.assertIn("onPlay", tv)
         self.assertIn("liveAdult", tv)
@@ -4394,6 +4469,75 @@ class AdultDeskTests(unittest.TestCase):
         self.assertGreaterEqual(len(adult_face_hold_rooms("GRACIE BONN")), 2)
         self.assertGreaterEqual(len(adult_face_hold_rooms("ANNABELLE RIOS")), 4)
         self.assertGreaterEqual(len(adult_face_hold_rooms("YESS ENIA69")), 1)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("LIL BUSSY GIRL")), 1)
+        self.assertEqual(adult_face_hold_rooms("ELVANA VITAA"), [])
+        self.assertEqual(adult_face_hold_rooms("SLAVIC CARAMEL"), [])
+        self.assertIn("elvanavitaa", adult_face_needles("ELVANA VITAA") or [])
+        self.assertIn("slaviccaramel", adult_face_needles("SLAVIC CARAMEL") or [])
+        self.assertIn("lilbussygirl", adult_face_needles("LIL BUSSY GIRL") or [])
+        self.assertNotIn("elvana", adult_face_needles("ELVANA VITAA") or [])
+        self.assertNotIn("caramel", adult_face_needles("SLAVIC CARAMEL") or [])
+        self.assertNotIn("bussy", adult_face_needles("LIL BUSSY GIRL") or [])
+        self.assertIn("roleplay", adult_ask_needles("roleplay") or [])
+        self.assertIn("braids", adult_ask_needles("braids") or [])
+        self.assertEqual(adult_hunt_needles("elvanavitaa"), list(ADULT_ELVANA))
+        self.assertIsNone(adult_hunt_needles("ALL"))
+        self.assertTrue(any("erome.com/elvanavitaa" in path for path in adult_face_hunt("elvanavitaa")))
+        self.assertTrue(any("bing.com/videos/search" in path and "roleplay" in path for path in adult_face_hunt("roleplay")))
+        self.assertTrue(any("erome.com/search?q=roleplay" in path for path in adult_face_hunt("ROLEPLAY")))
+        self.assertNotIn("COUPLE", adult_rail([]))
+        self.assertNotIn("ROLEPLAY", adult_rail([]))
+        self.assertIn("ELVANA VITAA", adult_rail([]))
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "vita-celestine-teases-her-cunt-with-a-vibrator",
+                            "title": "Vita Celestine Teases Her Cunt With A Vibrator",
+                            "creator": "Vita Celestine",
+                            "durationSeconds": 936,
+                        }
+                    ]
+                },
+                "ELVANA VITAA",
+            )],
+            [],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "your-internet-girlfriend-spends-the-night-with-you",
+                            "title": "Salted Caramel - Your Internet Girlfriend Spends The Night With You",
+                            "creator": "Salted Caramel",
+                            "durationSeconds": 633,
+                        }
+                    ]
+                },
+                "SLAVIC CARAMEL",
+            )],
+            [],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "lilbussygirl-gets-cummed-after-steamy-boobjob",
+                            "title": "Lilbussygirl Gets Cummed After Steamy Boobjob",
+                            "creator": "Lilbussygirl",
+                            "durationSeconds": 147,
+                        }
+                    ]
+                },
+                "LIL BUSSY GIRL",
+            )],
+            ["adult-face-star-lilbussygirl-gets-cummed-after-steamy-boobjob"],
+        )
+        self.assertIn("Genre chips stay off", tv)
+        self.assertIn("longest first", tv.lower())
 
 
 class NaLiveTests(unittest.TestCase):
@@ -4557,6 +4701,11 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("JASMINEGTV", tv)
         self.assertIn("STRAWBERRY SANDRA", tv)
         self.assertIn("ITOCHIANATA", tv)
+        self.assertIn("ELVANA VITAA", tv)
+        self.assertIn("SLAVIC CARAMEL", tv)
+        self.assertIn("LIL BUSSY GIRL", tv)
+        self.assertIn("public video search", tv.lower())
+        self.assertIn("longest first", tv.lower())
         self.assertIn("LOVESCAPE", tv)
         self.assertIn("lovescape.cam", tv.lower())
         self.assertIn("cannot jet", tv)

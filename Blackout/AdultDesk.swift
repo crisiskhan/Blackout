@@ -340,6 +340,18 @@ enum AdultDesk {
         "ito_chianata",
         "ito-chianata",
     ]
+    static let elvanaNeedles = [
+        "elvanavitaa",
+        "elvana vitaa",
+    ]
+    static let slavicNeedles = [
+        "slaviccaramel",
+        "slavic caramel",
+    ]
+    static let lilbussyNeedles = [
+        "lilbussygirl",
+        "lil bussy girl",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
@@ -374,6 +386,9 @@ enum AdultDesk {
         ("EUNICEG", euniceNeedles),
         ("STRAWBERRY SANDRA", sandraNeedles),
         ("ITOCHIANATA", itochiNeedles),
+        ("ELVANA VITAA", elvanaNeedles),
+        ("SLAVIC CARAMEL", slavicNeedles),
+        ("LIL BUSSY GIRL", lilbussyNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -390,6 +405,7 @@ enum AdultDesk {
         ("ZURI BELLA ROSE", ["zuri-bella-rose"]),
         ("SARIIXO", ["sariixo"]),
         ("KIRAWWRRRA", ["kirawrrra2-0"]),
+        ("LIL BUSSY GIRL", ["lilbussygirl"]),
     ]
     static let faceGifts: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip"]),
@@ -425,6 +441,9 @@ enum AdultDesk {
         ("EUNICEG", ["euniceg"]),
         ("STRAWBERRY SANDRA", ["strawberrysandra20", "strawberrysandra"]),
         ("ITOCHIANATA", ["itochianata"]),
+        ("ELVANA VITAA", ["elvanavitaa"]),
+        ("SLAVIC CARAMEL", ["slaviccaramel"]),
+        ("LIL BUSSY GIRL", ["lilbussygirl"]),
     ]
     /// Proven guest albums. Hunt these first so a JSON desk cannot blank the chip.
     static let faceDesks: [(String, [String])] = [
@@ -513,6 +532,9 @@ enum AdultDesk {
         ("EUNICEG", ["euniceg___"]),
         ("STRAWBERRY SANDRA", ["strawberrysandra20"]),
         ("ITOCHIANATA", ["itochianata"]),
+        ("ELVANA VITAA", ["elvanavitaa"]),
+        ("SLAVIC CARAMEL", ["slaviccaramel"]),
+        ("LIL BUSSY GIRL", ["lilbussygirl"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
@@ -702,6 +724,9 @@ enum AdultDesk {
         ("IMANGELJESSYY", [
             ("file", "https://v15.erome.com/9197/hhyYdQUz/ilQB0MKm_720p.mp4", 13, "Imangeljessyy"),
         ]),
+        ("LIL BUSSY GIRL", [
+            ("star", "lilbussygirl-gets-cummed-after-steamy-boobjob", 147, "Lilbussygirl Gets Cummed After Steamy Boobjob"),
+        ]),
     ]
     /// Guest stills for baked pin tokens. Star stills are `preview-batch/{slug}/thumb.webp`.
     static let faceStills: [(String, String)] = [
@@ -755,11 +780,8 @@ enum AdultDesk {
         return url
     }
 
-    static func topics(_ kind: String) -> [String] {
-        if faceNeedles(kind) != nil || loveNeedles(kind) { return [] }
+    static func askTopics(_ kind: String) -> [String] {
         switch kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() {
-        case "", "ALL":
-            return []
         case "BRAIDS":
             return ["braids", "braid", "cornrows"]
         case "SLEEP":
@@ -803,9 +825,18 @@ enum AdultDesk {
         case "COUPLE":
             return ["couple"]
         default:
-            let tag = kind.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-            return tag.isEmpty ? [] : [tag]
+            return []
         }
+    }
+
+    static func topics(_ kind: String) -> [String] {
+        if faceNeedles(kind) != nil || loveNeedles(kind) { return [] }
+        let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        if chip.isEmpty || chip == "ALL" { return [] }
+        let pinned = askTopics(chip)
+        if !pinned.isEmpty { return pinned }
+        let tag = kind.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return tag.isEmpty ? [] : [tag]
     }
 
     static func faceNeedles(_ kind: String) -> [String]? {
@@ -814,6 +845,63 @@ enum AdultDesk {
             return pair.1
         }
         return nil
+    }
+
+    static func askKind(_ raw: String) -> String? {
+        let chip = raw.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        if !askTopics(chip).isEmpty { return chip }
+        let plain = facePlain(raw)
+        let compact = plain.replacingOccurrences(of: " ", with: "")
+        guard !compact.isEmpty else { return nil }
+        for pair in kindWords {
+            let token = facePlain(pair.0)
+            if token == plain || token.replacingOccurrences(of: " ", with: "") == compact {
+                return pair.1
+            }
+        }
+        return nil
+    }
+
+    static func askNeedles(_ raw: String) -> [String]? {
+        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if text.isEmpty { return nil }
+        let chip = text.uppercased()
+        if chip == "ALL" || loveNeedles(chip) { return nil }
+        if let faces = faceNeedles(chip) { return faces }
+        let compact = facePlain(text).replacingOccurrences(of: " ", with: "")
+        guard !compact.isEmpty else { return nil }
+        for pair in faces {
+            if facePlain(pair.0).replacingOccurrences(of: " ", with: "") == compact {
+                return pair.1
+            }
+            if pair.1.contains(where: { facePlain($0).replacingOccurrences(of: " ", with: "") == compact }) {
+                return pair.1
+            }
+        }
+        if let mapped = askKind(text) {
+            var out: [String] = []
+            var seen: Set<String> = []
+            for item in askTopics(mapped) + [text.lowercased(), mapped.lowercased()] {
+                let query = item.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                guard !query.isEmpty, seen.insert(query).inserted else { continue }
+                out.append(query)
+            }
+            return out.isEmpty ? nil : out
+        }
+        guard compact.count >= 4, faceOk(text) else { return nil }
+        var out: [String] = []
+        var seen: Set<String> = []
+        let spaced = facePlain(text)
+        for item in [text.lowercased(), spaced, compact] {
+            let query = item.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            guard query.count >= 4, seen.insert(query).inserted else { continue }
+            out.append(query)
+        }
+        return out.isEmpty ? nil : out
+    }
+
+    static func huntNeedles(_ kind: String) -> [String]? {
+        faceNeedles(kind) ?? askNeedles(kind)
     }
 
     static func loveNeedles(_ kind: String) -> Bool {
@@ -989,7 +1077,7 @@ enum AdultDesk {
     }
 
     static func webAlbums(_ data: Data, kind: String) -> [String] {
-        guard let needles = faceNeedles(kind),
+        guard let needles = huntNeedles(kind),
               let text = String(data: data, encoding: .utf8)
         else { return [] }
         var out: [String] = []
@@ -1011,7 +1099,7 @@ enum AdultDesk {
     }
 
     static func webPosts(_ data: Data, kind: String) -> [String] {
-        guard let needles = faceNeedles(kind),
+        guard let needles = huntNeedles(kind),
               let text = String(data: data, encoding: .utf8)
         else { return [] }
         var out: [String] = []
@@ -1058,13 +1146,13 @@ enum AdultDesk {
     }
 
     static func faceQueries(_ kind: String) -> [String] {
-        guard let needles = faceNeedles(kind) else { return [] }
+        guard let needles = huntNeedles(kind) else { return [] }
         var out: [String] = []
         var seen: Set<String> = []
         let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         for raw in needles + [chip] {
             let query = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-            if query.count < 6 { continue }
+            if query.count < 3 { continue }
             if seen.insert(query).inserted {
                 out.append(query)
             }
@@ -1194,12 +1282,15 @@ enum AdultDesk {
         }
         var users: [String] = []
         var userSeen: Set<String> = []
-        for raw in facePostTokens(kind) + faceGiftTokens(kind) {
-            let name = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-            guard !name.isEmpty, userSeen.insert(name).inserted else { continue }
+        for raw in facePostTokens(kind) + faceGiftTokens(kind) + faceQueries(kind) {
+            var name = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            if name.hasPrefix("@") { name.removeFirst() }
+            guard !name.isEmpty, name.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" }) else { continue }
+            guard userSeen.insert(name).inserted else { continue }
             users.append(name)
         }
         for handle in users {
+            add(postProfile(handle))
             add(deskUser(handle))
         }
         for slug in faceStarTokens(kind) {
@@ -1356,7 +1447,7 @@ enum AdultDesk {
     }
 
     static func parseFace(_ data: Data, kind: String) -> [Room] {
-        guard let needles = faceNeedles(kind) else { return [] }
+        guard let needles = huntNeedles(kind) else { return [] }
         if let obj = try? JSONSerialization.jsonObject(with: data) {
             if let dict = obj as? [String: Any], let tweet = dict["tweet"] as? [String: Any] {
                 if let room = postClip(tweet, needles: needles, kind: kind) {
@@ -1385,7 +1476,7 @@ enum AdultDesk {
     }
 
     static func deskAlbums(_ data: Data, kind: String) -> [String] {
-        guard let needles = faceNeedles(kind),
+        guard let needles = huntNeedles(kind),
               let text = String(data: data, encoding: .utf8)
         else { return [] }
         let held = Set(faceDeskTokens(kind).map { $0.lowercased() })
@@ -1457,7 +1548,7 @@ enum AdultDesk {
     }
 
     private static func parseDesk(_ data: Data, kind: String) -> [Room] {
-        guard let needles = faceNeedles(kind) else { return [] }
+        guard let needles = huntNeedles(kind) else { return [] }
         guard let text = String(data: data, encoding: .utf8) else { return [] }
         let title = deskTitle(text)
         guard !title.isEmpty, faceOk(title) else { return [] }
@@ -1947,30 +2038,31 @@ enum AdultDesk {
     static func pick(_ rooms: [Room], kind: String, query: String) -> [Room] {
         let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        let faces = faceNeedles(chip)
-        let love = loveNeedles(chip)
+        let ask = needle.isEmpty ? nil : huntNeedles(needle)
+        let faces = needle.isEmpty ? huntNeedles(chip) : ask
+        let love = needle.isEmpty && loveNeedles(chip)
         let picked = rooms.filter { room in
-            if let faces {
-                let blob = ([room.name, room.handle, room.seek] + room.kinds)
-                    .joined(separator: " ")
-                    .lowercased()
-                if !faces.contains(where: { blob.contains($0) }) {
-                    return false
-                }
-            } else if love {
-                if !room.kinds.contains(loveChip) {
-                    return false
-                }
-            } else if !chip.isEmpty && chip != "ALL" && !room.kinds.contains(chip) {
-                return false
-            }
+            let blob = ([room.name, room.handle, room.seek] + room.kinds)
+                .joined(separator: " ")
+                .lowercased()
             if !needle.isEmpty {
-                let blob = ([room.name, room.handle, room.seek] + room.kinds).joined(separator: " ").lowercased()
-                if !blob.contains(needle) { return false }
+                if let ask {
+                    return faceHit(blob, needles: ask)
+                }
+                return blob.contains(needle)
+            }
+            if let faces {
+                return faces.contains(where: { blob.contains($0) })
+            }
+            if love {
+                return room.kinds.contains(loveChip)
+            }
+            if !chip.isEmpty && chip != "ALL" {
+                return room.kinds.contains(chip)
             }
             return true
         }
-        if faces == nil { return picked }
+        if faces == nil && ask == nil && needle.isEmpty { return picked }
         return picked.sorted { lhs, rhs in
             if lhs.seconds != rhs.seconds { return lhs.seconds > rhs.seconds }
             if lhs.viewers != rhs.viewers { return lhs.viewers > rhs.viewers }
@@ -1993,17 +2085,10 @@ enum AdultDesk {
     static func rail(_ rooms: [Room]) -> [String] {
         var out: [String] = []
         var seen: Set<String> = []
-        for chip in ["ALL", loveChip] + faces.map(\.0) + pin {
+        for chip in ["ALL", loveChip] + faces.map(\.0) {
             if seen.insert(chip).inserted {
                 out.append(chip)
             }
-        }
-        var extra = 0
-        for chip in kinds(rooms) {
-            guard seen.insert(chip).inserted else { continue }
-            out.append(chip)
-            extra += 1
-            if extra >= railExtra { break }
         }
         return out
     }

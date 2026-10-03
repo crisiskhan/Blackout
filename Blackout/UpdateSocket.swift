@@ -220,7 +220,7 @@ final class UpdateSocket {
         guard pipe else { return }
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 8
-        config.timeoutIntervalForResource = AdultDesk.faceNeedles(topic) != nil ? 180 : 40
+        config.timeoutIntervalForResource = AdultDesk.huntNeedles(topic) != nil ? 180 : 40
         config.waitsForConnectivity = false
         config.allowsExpensiveNetworkAccess = true
         config.allowsConstrainedNetworkAccess = true
@@ -230,7 +230,7 @@ final class UpdateSocket {
         if AdultDesk.loveNeedles(topic) {
             batches = await fetchLovePages(session)
             adultRooms = AdultDesk.merge(batches)
-        } else if AdultDesk.faceNeedles(topic) != nil {
+        } else if AdultDesk.huntNeedles(topic) != nil {
             batches = await fetchFacePages(session, topic)
             adultRooms = AdultDesk.merge([held] + batches)
         } else {
