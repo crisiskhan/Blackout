@@ -278,7 +278,7 @@ struct NaPlate: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }
-            .frame(width: 132, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
+            .frame(minWidth: 132, maxWidth: 132, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
             .overlay {
                 if picked {
                     Theme.plateRect()

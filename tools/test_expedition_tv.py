@@ -5501,6 +5501,11 @@ class NaTheaterTests(unittest.TestCase):
         self.assertIn("BROWSE", na)
         self.assertIn("keepChip", na)
         self.assertIn("keepTapped", na)
+        self.assertNotRegex(
+            na,
+            r"\.frame\(width:[^)]*minHeight:",
+            "Xcode 16 device: frame(width:minHeight:) is not an overload",
+        )
         self.assertIn("KEEP", live)
         self.assertIn("DROP", live)
         self.assertIn("PREV", live)
