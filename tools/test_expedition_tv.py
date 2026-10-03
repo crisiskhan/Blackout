@@ -501,7 +501,7 @@ ADULT_LOVE_TAGS = ("girls", "couples")
 ADULT_RAIL_EXTRA = 8
 ADULT_HUNT_AT_ONCE = 4
 ADULT_HUNT_PAGES = 2
-ADULT_HUNT_CAP = 160
+ADULT_HUNT_CAP = 256
 ADULT_COUNT_CAP = 1_000_000_000
 ADULT_TOPIC = {
     "BRAIDS": ("braids", "braid", "cornrows"),
@@ -1392,6 +1392,17 @@ ADULT_WEB_LANDS = (
     "ja-jp",
     "ru-ru",
     "es-mx",
+    "pl-pl",
+    "it-it",
+    "nl-nl",
+    "ko-kr",
+    "cs-cz",
+    "uk-ua",
+    "tr-tr",
+    "sv-se",
+    "ar-sa",
+    "th-th",
+    "vi-vn",
 )
 ADULT_WEB_VIDEO_LANDS = (
     "en-US",
@@ -1403,12 +1414,29 @@ ADULT_WEB_VIDEO_LANDS = (
     "ja-JP",
     "ru-RU",
     "es-MX",
+    "pl-PL",
+    "it-IT",
+    "nl-NL",
+    "ko-KR",
+    "cs-CZ",
+    "uk-UA",
+    "tr-TR",
+    "sv-SE",
+    "ar-SA",
+    "th-TH",
+    "vi-VN",
 )
 ADULT_LAND_ORIGIN = "https://yandex.com"
 ADULT_LAND_ALT = "https://www.qwant.com"
+ADULT_LAND_BRAVE = "https://search.brave.com"
+ADULT_LAND_EAST = "https://search.yahoo.co.jp"
+ADULT_LAND_NAVER = "https://search.naver.com"
+ADULT_LAND_START = "https://www.startpage.com"
 ADULT_TUBE_XV = "https://www.xvideos.com"
 ADULT_TUBE_XN = "https://www.xnxx.com"
 ADULT_TUBE_XH = "https://xhamster.com"
+ADULT_TUBE_SB = "https://spankbang.com"
+ADULT_TUBE_TX = "https://txxx.com"
 ADULT_FACE_POSTS = (
     ("ITSSTEPHHONEY21", ("itsstephhoneyxo21", "itsstephhoney21")),
     ("ITSSTEPHHONEYXO21", ("itsstephhoneyxo21", "itsstephhoney21")),
@@ -1597,15 +1625,6 @@ def adult_face_hunt(kind: str) -> list[str]:
         add(adult_web_search(query))
     for query in adult_face_queries(kind):
         add(adult_web_video(query))
-    for query in adult_face_queries(kind)[:2]:
-        for land in ADULT_WEB_LANDS:
-            add(adult_web_search(query, land=land))
-        for land in ADULT_WEB_VIDEO_LANDS:
-            add(adult_web_video(query, land=land))
-        add(adult_land_search(query))
-        add(adult_land_alt(query))
-        for path in adult_tube_search(query):
-            add(path)
     gifts: list[str] = []
     gift_seen: set[str] = set()
     for raw in adult_face_gift_tokens(kind) + adult_face_queries(kind):
@@ -1622,6 +1641,19 @@ def adult_face_hunt(kind: str) -> list[str]:
             add(adult_face_search(query, page=page))
         for page in range(1, ADULT_HUNT_PAGES + 1):
             add(adult_star_search(query, page=page))
+    for query in adult_face_queries(kind)[:3]:
+        for land in ADULT_WEB_LANDS:
+            add(adult_web_search(query, land=land))
+        for land in ADULT_WEB_VIDEO_LANDS:
+            add(adult_web_video(query, land=land))
+        add(adult_land_search(query))
+        add(adult_land_alt(query))
+        add(adult_land_brave(query))
+        add(adult_land_east(query))
+        add(adult_land_naver(query))
+        add(adult_land_start(query))
+        for path in adult_tube_search(query):
+            add(path)
     return out[:ADULT_HUNT_CAP]
 
 
@@ -1717,7 +1749,13 @@ def adult_web_search(query: str, land: str = "") -> str | None:
 
 def adult_tube_host(raw: str) -> bool:
     host = (urllib.parse.urlparse(str(raw or "")).hostname or "").lower()
-    return "xvideos.com" in host or "xnxx.com" in host or "xhamster.com" in host
+    return (
+        "xvideos.com" in host
+        or "xnxx.com" in host
+        or "xhamster.com" in host
+        or "spankbang.com" in host
+        or "txxx.com" in host
+    )
 
 
 def adult_web_look(raw: str) -> bool:
@@ -1731,8 +1769,16 @@ def adult_web_look(raw: str) -> bool:
         return True
     if "qwant.com" in host:
         return True
-    if adult_tube_host(raw) and ("?k=" in path or "/search" in path):
+    if "brave.com" in host and "/search" in path:
         return True
+    if "yahoo.co.jp" in host and "/search" in path:
+        return True
+    if "naver.com" in host and "/search" in path:
+        return True
+    if "startpage.com" in host and "/search" in path:
+        return True
+    if adult_tube_host(raw) and ("?k=" in path or "/search" in path or "/s/" in path):
+        return "/video/" not in path
     return False
 
 
@@ -1763,6 +1809,38 @@ def adult_land_alt(query: str) -> str | None:
     return f"{ADULT_LAND_ALT}/?q={encoded}"
 
 
+def adult_land_brave(query: str) -> str | None:
+    q = str(query or "").strip()
+    if not q:
+        return None
+    encoded = urllib.parse.quote(q, safe="-")
+    return f"{ADULT_LAND_BRAVE}/search?q={encoded}"
+
+
+def adult_land_east(query: str) -> str | None:
+    q = str(query or "").strip()
+    if not q:
+        return None
+    encoded = urllib.parse.quote(q, safe="-")
+    return f"{ADULT_LAND_EAST}/search?p={encoded}"
+
+
+def adult_land_naver(query: str) -> str | None:
+    q = str(query or "").strip()
+    if not q:
+        return None
+    encoded = urllib.parse.quote(q, safe="-")
+    return f"{ADULT_LAND_NAVER}/search.naver?query={encoded}"
+
+
+def adult_land_start(query: str) -> str | None:
+    q = str(query or "").strip()
+    if not q:
+        return None
+    encoded = urllib.parse.quote(q, safe="-")
+    return f"{ADULT_LAND_START}/sp/search?query={encoded}"
+
+
 def adult_tube_search(query: str) -> list[str]:
     q = str(query or "").strip()
     if not q:
@@ -1772,6 +1850,8 @@ def adult_tube_search(query: str) -> list[str]:
         f"{ADULT_TUBE_XV}/?k={encoded}",
         f"{ADULT_TUBE_XN}/search/{encoded}",
         f"{ADULT_TUBE_XH}/search/{encoded}",
+        f"{ADULT_TUBE_SB}/s/{encoded}/",
+        f"{ADULT_TUBE_TX}/search/{encoded}/",
     ]
 
 
@@ -1830,6 +1910,10 @@ def adult_web_tubes(payload: object, kind: str, from_raw: str = "") -> list[str]
                 play = f"{ADULT_TUBE_XN}{play}"
             elif "xhamster.com" in host:
                 play = f"{ADULT_TUBE_XH}{play}"
+            elif "spankbang.com" in host:
+                play = f"{ADULT_TUBE_SB}{play}"
+            elif "txxx.com" in host:
+                play = f"{ADULT_TUBE_TX}{play}"
             else:
                 return
         parsed = urllib.parse.urlparse(play)
@@ -1840,6 +1924,8 @@ def adult_web_tubes(payload: object, kind: str, from_raw: str = "") -> list[str]
             "xvideos.com" in page.lower()
             or "xnxx.com" in page.lower()
             or "xhamster.com" in page.lower()
+            or "spankbang.com" in page.lower()
+            or "txxx.com" in page.lower()
         ):
             return
         key = play.split("#", 1)[0]
@@ -1851,7 +1937,7 @@ def adult_web_tubes(payload: object, kind: str, from_raw: str = "") -> list[str]
         out.append(key)
 
     for match in re.finditer(
-        r"https?://(?:www\.)?(?:xvideos\.com/video[^\s\"'<>]+|xnxx\.com/video[^\s\"'<>]+|xhamster\.com/videos/[^\s\"'<>]+)",
+        r"https?://(?:www\.)?(?:xvideos\.com/video[^\s\"'<>]+|xnxx\.com/video[^\s\"'<>]+|xhamster\.com/videos/[^\s\"'<>]+|spankbang\.com/[^\s\"'<>]+|txxx\.com/videos/[^\s\"'<>]+)",
         text,
         re.I,
     ):
@@ -2519,6 +2605,10 @@ def _adult_tube_play(text: str) -> str | None:
         r"setVideoHLS\(['\"](https://[^'\"]+)['\"]",
         r'"contentUrl"\s*:\s*"(https://[^"]+)"',
         r'property=["\']og:video["\'][^>]*content=["\'](https://[^"\']+)',
+        r'video_url["\']?\s*[:=]\s*["\'](https://[^"\']+)',
+        r'videoUrl["\']?\s*[:=]\s*["\'](https://[^"\']+)',
+        r'stream_data[^"]*"(https://[^"]+)',
+        r'source\s+src=["\'](https://[^"\']+)',
     ):
         match = re.search(pattern, text, re.I)
         if match:
@@ -4738,7 +4828,7 @@ class AdultDeskTests(unittest.TestCase):
             ["1878566900231553384", "2090576669124002084"],
         )
         self.assertIn("static let facePosts", desk)
-        self.assertIn("huntCap = 160", desk)
+        self.assertIn("huntCap = 256", desk)
         self.assertIn("postFollow = 16", desk)
         self.assertIn("deskFollow = 12", desk)
         self.assertIn("syndication.twitter.com", desk)
@@ -4786,7 +4876,7 @@ class AdultDeskTests(unittest.TestCase):
         desk = read("Blackout", "AdultDesk.swift")
         sock = read("Blackout", "UpdateSocket.swift")
         tv = read("docs", "SOLO_QA.md")
-        self.assertIn("huntCap = 160", desk)
+        self.assertIn("huntCap = 256", desk)
         self.assertIn("postFollow = 16", desk)
         self.assertIn("deskFollow = 12", desk)
         self.assertIn("html.duckduckgo.com", desk)
@@ -4939,11 +5029,23 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("xvideos.com", desk)
         self.assertIn("xnxx.com", desk)
         self.assertIn("xhamster.com", desk)
+        self.assertIn("spankbang.com", desk)
+        self.assertIn("txxx.com", desk)
+        self.assertIn("search.brave.com", desk)
+        self.assertIn("yahoo.co.jp", desk)
+        self.assertIn("search.naver.com", desk)
+        self.assertIn("startpage.com", desk)
+        self.assertIn("kl=pl-pl", "\n".join(adult_face_hunt("elvanavitaa")))
         self.assertIn("webTubes", desk)
         self.assertIn("webTubes", sock)
         self.assertIn("func parseTube(", desk)
         self.assertIn("creator page", tv)
         self.assertIn("other countries", tv)
+        self.assertIn("Yahoo JP", tv)
+        self.assertIn("SpankBang", tv)
+        self.assertIn("Naver", tv)
+        self.assertIn("Startpage", tv)
+        self.assertIn("Txxx", tv)
         self.assertEqual(adult_page_name("https://x.com/elvanavitaa"), "elvanavitaa")
         self.assertEqual(
             adult_page_name("https://www.erome.com/search?q=annabellrio&o=new"),
@@ -5001,11 +5103,30 @@ class AdultDeskTests(unittest.TestCase):
         self.assertTrue(
             any("kl=es-es" in path or "kl=pt-br" in path for path in adult_face_hunt("elvanavitaa"))
         )
+        self.assertTrue(any("kl=pl-pl" in path for path in adult_face_hunt("elvanavitaa")))
+        self.assertTrue(any("kl=ja-jp" in path for path in adult_face_hunt("elvanavitaa")))
+        self.assertTrue(any("kl=ko-kr" in path for path in adult_face_hunt("elvanavitaa")))
+        self.assertTrue(any("kl=th-th" in path for path in adult_face_hunt("elvanavitaa")))
+        self.assertTrue(any("setmkt=pt-BR" in path for path in adult_face_hunt("elvanavitaa")))
+        self.assertTrue(any("search.brave.com" in path and "elvanavitaa" in path for path in adult_face_hunt("elvanavitaa")))
+        self.assertTrue(any("yahoo.co.jp" in path and "elvanavitaa" in path for path in adult_face_hunt("elvanavitaa")))
+        self.assertTrue(any("search.naver.com" in path and "elvanavitaa" in path for path in adult_face_hunt("elvanavitaa")))
+        self.assertTrue(any("startpage.com" in path and "slaviccaramel" in path for path in adult_face_hunt("slaviccaramel")))
+        self.assertTrue(any("spankbang.com/s/" in path for path in adult_face_hunt("elvanavitaa")))
+        self.assertTrue(any("txxx.com/search/" in path for path in adult_face_hunt("roleplay")))
+        self.assertTrue(any("spankbang.com" in path for path in adult_face_hunt("itisashley")))
         self.assertTrue(adult_web_look("https://yandex.com/search/?text=elvanavitaa"))
         self.assertTrue(adult_web_look("https://www.qwant.com/?q=elvanavitaa"))
+        self.assertTrue(adult_web_look("https://search.brave.com/search?q=elvanavitaa"))
+        self.assertTrue(adult_web_look("https://search.yahoo.co.jp/search?p=elvanavitaa"))
+        self.assertTrue(adult_web_look("https://search.naver.com/search.naver?query=elvanavitaa"))
+        self.assertTrue(adult_web_look("https://www.startpage.com/sp/search?query=elvanavitaa"))
         self.assertTrue(adult_web_look("https://www.xvideos.com/?k=elvanavitaa"))
         self.assertTrue(adult_web_look("https://www.xnxx.com/search/roleplay"))
+        self.assertTrue(adult_web_look("https://spankbang.com/s/elvanavitaa/"))
+        self.assertTrue(adult_web_look("https://txxx.com/search/roleplay/"))
         self.assertFalse(adult_web_look("https://www.xvideos.com/video123/elvanavitaa-cut"))
+        self.assertFalse(adult_web_look("https://spankbang.com/2abc/video/elvanavitaa-cut"))
         self.assertEqual(
             adult_web_tubes(
                 'href="https://www.xvideos.com/video123/elvanavitaa-cut" elvanavitaa guest',
@@ -5020,6 +5141,35 @@ class AdultDeskTests(unittest.TestCase):
             ),
             [],
         )
+        self.assertEqual(
+            adult_web_tubes(
+                'href="https://spankbang.com/2abc/video/elvanavitaa-cut" elvanavitaa guest',
+                "ELVANA VITAA",
+            ),
+            ["https://spankbang.com/2abc/video/elvanavitaa-cut"],
+        )
+        self.assertEqual(
+            adult_web_tubes(
+                'href="https://txxx.com/videos/123/elvanavitaa-cut/" elvanavitaa guest',
+                "ELVANA VITAA",
+            ),
+            ["https://txxx.com/videos/123/elvanavitaa-cut/"],
+        )
+        self.assertEqual(
+            adult_web_tubes(
+                'href="https://spankbang.com/9xyz/video/vita-celestine" vita celestine',
+                "ELVANA VITAA",
+            ),
+            [],
+        )
+        east_html = (
+            "<title>Elvanavitaa guest cut</title>"
+            'video_url: "https://cdn.example.com/elvanaeast.mp4"'
+            '"duration":92'
+        )
+        east_rows = adult_parse_face(east_html, "ELVANA VITAA")
+        self.assertEqual([row["id"] for row in east_rows], ["adult-face-tube-elvanaeast"])
+        self.assertIn("cdn.example.com/elvanaeast.mp4", east_rows[0]["url"])
         tube_html = (
             "<title>Elvanavitaa guest cut</title>"
             "html5player.setVideoUrlHigh('https://cdn.example.com/elvana.mp4')"

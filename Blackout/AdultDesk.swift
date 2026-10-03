@@ -563,7 +563,7 @@ enum AdultDesk {
     static let railExtra = 8
     static let huntAtOnce = 4
     static let huntPages = 2
-    static let huntCap = 160
+    static let huntCap = 256
     static let webLands = [
         "us-en",
         "uk-en",
@@ -574,6 +574,17 @@ enum AdultDesk {
         "ja-jp",
         "ru-ru",
         "es-mx",
+        "pl-pl",
+        "it-it",
+        "nl-nl",
+        "ko-kr",
+        "cs-cz",
+        "uk-ua",
+        "tr-tr",
+        "sv-se",
+        "ar-sa",
+        "th-th",
+        "vi-vn",
     ]
     static let webVideoLands = [
         "en-US",
@@ -585,12 +596,29 @@ enum AdultDesk {
         "ja-JP",
         "ru-RU",
         "es-MX",
+        "pl-PL",
+        "it-IT",
+        "nl-NL",
+        "ko-KR",
+        "cs-CZ",
+        "uk-UA",
+        "tr-TR",
+        "sv-SE",
+        "ar-SA",
+        "th-TH",
+        "vi-VN",
     ]
     static let landOrigin = "https://yandex.com"
     static let landAltOrigin = "https://www.qwant.com"
+    static let landBraveOrigin = "https://search.brave.com"
+    static let landEastOrigin = "https://search.yahoo.co.jp"
+    static let landNaverOrigin = "https://search.naver.com"
+    static let landStartOrigin = "https://www.startpage.com"
     static let tubeXV = "https://www.xvideos.com"
     static let tubeXN = "https://www.xnxx.com"
     static let tubeXH = "https://xhamster.com"
+    static let tubeSB = "https://spankbang.com"
+    static let tubeTX = "https://txxx.com"
     static let deskFollow = 12
     static let deskOrigin = "https://www.erome.com"
     static let postFollow = 16
@@ -1111,12 +1139,18 @@ enum AdultDesk {
             if host.contains("bing.com") { return "https://www.bing.com/" }
             if host.contains("yandex.") { return "\(landOrigin)/" }
             if host.contains("qwant.com") { return "\(landAltOrigin)/" }
+            if host.contains("brave.com") { return "\(landBraveOrigin)/" }
+            if host.contains("yahoo.co.jp") { return "\(landEastOrigin)/" }
+            if host.contains("naver.com") { return "\(landNaverOrigin)/" }
+            if host.contains("startpage.com") { return "\(landStartOrigin)/" }
             return "https://duckduckgo.com/"
         }
         if tubeHost(raw) {
             let host = URL(string: raw)?.host?.lowercased() ?? ""
             if host.contains("xnxx.com") { return "\(tubeXN)/" }
             if host.contains("xhamster.com") { return "\(tubeXH)/" }
+            if host.contains("spankbang.com") { return "\(tubeSB)/" }
+            if host.contains("txxx.com") { return "\(tubeTX)/" }
             return "\(tubeXV)/"
         }
         let host = URL(string: raw)?.host?.lowercased() ?? ""
@@ -1240,12 +1274,20 @@ enum AdultDesk {
         }
         if host.contains("yandex.") { return true }
         if host.contains("qwant.com") { return true }
+        if host.contains("brave.com") { return true }
+        if host.contains("yahoo.co.jp") { return true }
+        if host.contains("naver.com") { return true }
+        if host.contains("startpage.com") { return true }
         return false
     }
 
     static func tubeHost(_ raw: String) -> Bool {
         let host = URL(string: raw)?.host?.lowercased() ?? ""
-        return host.contains("xvideos.com") || host.contains("xnxx.com") || host.contains("xhamster.com")
+        return host.contains("xvideos.com")
+            || host.contains("xnxx.com")
+            || host.contains("xhamster.com")
+            || host.contains("spankbang.com")
+            || host.contains("txxx.com")
     }
 
     static func webLook(_ raw: String) -> Bool {
@@ -1254,7 +1296,13 @@ enum AdultDesk {
         if webHost(raw) && path.contains("/videos/search") { return true }
         if webHost(raw) && path.contains("yandex.") && path.contains("/search") { return true }
         if webHost(raw) && path.contains("qwant.com") { return true }
-        if tubeHost(raw) && (path.contains("?k=") || path.contains("/search")) { return true }
+        if webHost(raw) && path.contains("brave.com") && path.contains("/search") { return true }
+        if webHost(raw) && path.contains("yahoo.co.jp") && path.contains("/search") { return true }
+        if webHost(raw) && path.contains("naver.com") && path.contains("/search") { return true }
+        if webHost(raw) && path.contains("startpage.com") && path.contains("/search") { return true }
+        if tubeHost(raw) && (path.contains("?k=") || path.contains("/search") || path.contains("/s/")) {
+            return !path.contains("/video/")
+        }
         return false
     }
 
@@ -1302,6 +1350,38 @@ enum AdultDesk {
         return "\(landAltOrigin)/?q=\(encoded)"
     }
 
+    static func landBrave(_ query: String) -> String? {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !q.isEmpty,
+              let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return nil }
+        return "\(landBraveOrigin)/search?q=\(encoded)"
+    }
+
+    static func landEast(_ query: String) -> String? {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !q.isEmpty,
+              let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return nil }
+        return "\(landEastOrigin)/search?p=\(encoded)"
+    }
+
+    static func landNaver(_ query: String) -> String? {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !q.isEmpty,
+              let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return nil }
+        return "\(landNaverOrigin)/search.naver?query=\(encoded)"
+    }
+
+    static func landStart(_ query: String) -> String? {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !q.isEmpty,
+              let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return nil }
+        return "\(landStartOrigin)/sp/search?query=\(encoded)"
+    }
+
     static func tubeSearch(_ query: String) -> [String] {
         let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !q.isEmpty,
@@ -1311,6 +1391,8 @@ enum AdultDesk {
             "\(tubeXV)/?k=\(encoded)",
             "\(tubeXN)/search/\(encoded)",
             "\(tubeXH)/search/\(encoded)",
+            "\(tubeSB)/s/\(encoded)/",
+            "\(tubeTX)/search/\(encoded)/",
         ]
     }
 
@@ -1378,13 +1460,21 @@ enum AdultDesk {
                     play = tubeXN + play
                 } else if host.contains("xhamster.com") {
                     play = tubeXH + play
+                } else if host.contains("spankbang.com") {
+                    play = tubeSB + play
+                } else if host.contains("txxx.com") {
+                    play = tubeTX + play
                 } else {
                     return
                 }
             }
             guard let url = URL(string: play), url.scheme?.lowercased() == "https" else { return }
             let page = url.host?.lowercased() ?? ""
-            guard page.contains("xvideos.com") || page.contains("xnxx.com") || page.contains("xhamster.com")
+            guard page.contains("xvideos.com")
+                || page.contains("xnxx.com")
+                || page.contains("xhamster.com")
+                || page.contains("spankbang.com")
+                || page.contains("txxx.com")
             else { return }
             var key = play
             if let hash = key.firstIndex(of: "#") {
@@ -1410,6 +1500,8 @@ enum AdultDesk {
         scan("xvideos.com/video")
         scan("xnxx.com/video")
         scan("xhamster.com/videos/")
+        scan("spankbang.com/")
+        scan("txxx.com/videos/")
         if !host.isEmpty {
             scan("/video")
             scan("/videos/")
@@ -1602,19 +1694,6 @@ enum AdultDesk {
         for query in faceQueries(kind) {
             add(webVideo(query))
         }
-        for query in faceQueries(kind).prefix(2) {
-            for land in webLands {
-                add(webSearch(query, land: land))
-            }
-            for land in webVideoLands {
-                add(webVideo(query, land: land))
-            }
-            add(landSearch(query))
-            add(landAlt(query))
-            for path in tubeSearch(query) {
-                add(path)
-            }
-        }
         var gifts: [String] = []
         var giftSeen: Set<String> = []
         for raw in faceGiftTokens(kind) + faceQueries(kind) {
@@ -1633,6 +1712,23 @@ enum AdultDesk {
             }
             for page in 1...huntPages {
                 add(starSearch(query, page: page))
+            }
+        }
+        for query in faceQueries(kind).prefix(3) {
+            for land in webLands {
+                add(webSearch(query, land: land))
+            }
+            for land in webVideoLands {
+                add(webVideo(query, land: land))
+            }
+            add(landSearch(query))
+            add(landAlt(query))
+            add(landBrave(query))
+            add(landEast(query))
+            add(landNaver(query))
+            add(landStart(query))
+            for path in tubeSearch(query) {
+                add(path)
             }
         }
         if out.count > huntCap {
@@ -1948,7 +2044,17 @@ enum AdultDesk {
     }
 
     private static func tubePlay(_ text: String) -> String? {
-        let marks = ["setVideoUrlHigh", "setVideoUrlLow", "setVideoHLS", "\"contentUrl\"", "og:video"]
+        let marks = [
+            "setVideoUrlHigh",
+            "setVideoUrlLow",
+            "setVideoHLS",
+            "\"contentUrl\"",
+            "og:video",
+            "video_url",
+            "videoUrl",
+            "stream_data",
+            "source src",
+        ]
         for mark in marks {
             var rest = text
             while let hit = rest.range(of: mark, options: .caseInsensitive) {
