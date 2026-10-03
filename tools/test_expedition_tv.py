@@ -459,6 +459,8 @@ ADULT_LOVE_ORIGIN = "https://lovescape.cam"
 ADULT_LOVE_TAGS = ("girls", "couples")
 ADULT_RAIL_EXTRA = 8
 ADULT_HUNT_AT_ONCE = 4
+ADULT_HUNT_PAGES = 2
+ADULT_HUNT_CAP = 48
 ADULT_COUNT_CAP = 1_000_000_000
 ADULT_TOPIC = {
     "BRAIDS": ("braids", "braid", "cornrows"),
@@ -1009,7 +1011,7 @@ ADULT_FACE_PINS = (
     ("NERDY BEILA", ("33TgD6OeUfp", "iaBJWcUXDqR", "XYqGeufLjxo", "3Okd36yQXGq")),
     ("HOT4LEXI", ("I9eggkAajv5",)),
     ("BRITTANYA RAZAVI", ("ZxMHa5OsXqH", "hdIUeKyK0Ux", "GvbBRAGihAQ", "mXbvfQ0ly1D")),
-    ("DOUBLE DOSE TWINS", ("iXWnuAL4FnV", "NtQUcCtcTj0")),
+    ("DOUBLE DOSE TWINS", ("7bg2FgwidLS", "NtQUcCtcTj0", "iXWnuAL4FnV")),
 )
 ADULT_FACE_STARS = (
     ("MULAN VUITTON", ("mulan-vuitton",)),
@@ -1017,6 +1019,30 @@ ADULT_FACE_STARS = (
     ("ZURI BELLA ROSE", ("zuri-bella-rose",)),
     ("SARIIXO", ("sariixo",)),
     ("KIRAWWRRRA", ("kirawrrra2-0",)),
+)
+ADULT_FACE_HOLDS = (
+    ("ITSSTEPHHONEY21", (("pin", "P283XrKRjsV", 158, "stephaniehvip twerks and jiggles"),)),
+    ("ITSSTEPHHONEYXO21", (("pin", "P283XrKRjsV", 158, "stephaniehvip twerks and jiggles"),)),
+    ("MULAN VUITTON", (
+        ("star", "mulan-vuitton-gets-pounded-while-in-a-skirt", 984, "Mulan Vuitton Gets Pounded While In A Skirt"),
+        ("star", "mulan-vuitton-has-sex-with-a-thief", 712, "Mulan Vuitton Has Sex With A Thief"),
+        ("pin", "L3HLNRZy6sk", 184, "Mulan Vuitton"),
+        ("pin", "pYaoSJlMR79", 362, "Mulanvuitton Oiled Up Fucking Doggy Style By Black Cock"),
+    )),
+    ("NERDY BEILA", (("pin", "33TgD6OeUfp", 1472, "Beila B/Nerdy B Big Tits Cosplay PMV (Pt. 2)"),)),
+    ("HOT4LEXI", (
+        ("star", "hot4lexi-missionary-sextape-video-leaked", 517, "Hot4lexi Missionary Sextape Video Leaked"),
+        ("pin", "I9eggkAajv5", 409, "Hot4lexi Reverse Cowgirl Sex Tape"),
+    )),
+    ("BRITTANYA RAZAVI", (("pin", "ZxMHa5OsXqH", 503, "Brittanya Razavi"),)),
+    ("ZURI BELLA ROSE", (("star", "zuri-bella-rose-takes-a-dick-in-multiple-positions", 792, "Zuri Bella Rose Takes A Dick In Multiple Positions"),)),
+    ("SARIIXO", (("star", "sariixo-fucks-her-pussy-with-a-bbc-dildo-in-bed", 602, "Sariixo Fucks Her Pussy With A BBC Dildo In Bed"),)),
+    ("KIRAWWRRRA", (("star", "kirawrrra2-0-fills-her-ass-for-the-first-time", 211, "Kirawrrra2.0 Fills Her Ass For The First Time"),)),
+    ("DOUBLE DOSE TWINS", (
+        ("pin", "7bg2FgwidLS", 660, "Double Dose Twins Fanvan They Porno Tubes"),
+        ("pin", "NtQUcCtcTj0", 199, "Doubledose Twins Blowjob GAWD DAMN I NEED DAT"),
+        ("pin", "iXWnuAL4FnV", 140, "Doubledose Twins Blowjob"),
+    )),
 )
 ADULT_FACE_GIFTS = (
     ("ITSSTEPHHONEY21", ("itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip")),
@@ -1115,13 +1141,8 @@ def adult_face_hunt(kind: str) -> list[str]:
     for token in adult_face_pin_tokens(kind):
         add(adult_face_id(token))
     for slug in adult_face_star_tokens(kind):
-        for page in range(1, 5):
+        for page in range(1, ADULT_HUNT_PAGES + 1):
             add(adult_star_search(slug, page=page))
-    for query in adult_face_queries(kind):
-        for page in range(1, 5):
-            add(adult_face_search(query, page=page))
-        for page in range(1, 5):
-            add(adult_star_search(query, page=page))
     gifts: list[str] = []
     gift_seen: set[str] = set()
     for raw in adult_face_gift_tokens(kind) + adult_face_queries(kind):
@@ -1130,11 +1151,53 @@ def adult_face_hunt(kind: str) -> list[str]:
             gift_seen.add(key)
             gifts.append(key)
     for query in gifts:
-        for page in range(1, 5):
+        for page in range(1, ADULT_HUNT_PAGES + 1):
             add(adult_gift_search(query, page=page))
-        for page in range(1, 3):
-            add(adult_gift_user(query, page=page))
-    return out
+        add(adult_gift_user(query, page=1))
+    for query in adult_face_queries(kind):
+        for page in range(1, ADULT_HUNT_PAGES + 1):
+            add(adult_face_search(query, page=page))
+        for page in range(1, ADULT_HUNT_PAGES + 1):
+            add(adult_star_search(query, page=page))
+    return out[:ADULT_HUNT_CAP]
+
+
+def adult_face_hold_rooms(kind: str) -> list[dict]:
+    needles = adult_face_needles(kind) or []
+    if not needles:
+        return []
+    chip = str(kind or "").strip().upper()
+    rows: list[dict] = []
+    seen: set[str] = set()
+    for name, holds in ADULT_FACE_HOLDS:
+        if name != chip:
+            continue
+        for desk, token, seconds, title in holds:
+            if seconds <= 0 or not str(title).strip() or not _adult_face_ok(title):
+                continue
+            if desk == "star":
+                play = adult_playlist(adult_star_file(token) or "")
+                rid = f"adult-face-star-{token.lower()}"
+            else:
+                play = adult_playlist(adult_face_file(token) or "")
+                rid = f"adult-face-{token.lower()}"
+            if not play or rid in seen:
+                continue
+            seen.add(rid)
+            rows.append(
+                {
+                    "id": rid,
+                    "name": title.upper(),
+                    "handle": token,
+                    "url": play,
+                    "viewers": 0,
+                    "kinds": [chip],
+                    "seek": f"{title} {' '.join(needles)}".strip().lower(),
+                    "seconds": int(seconds),
+                }
+            )
+    rows.sort(key=lambda row: (-int(row["seconds"]), str(row["name"])))
+    return rows
 
 
 def adult_gift_search(query: str, page: int = 1) -> str | None:
@@ -1199,7 +1262,7 @@ def adult_face_search(query: str, page: int = 1) -> str | None:
     encoded = urllib.parse.quote(q, safe="-")
     return (
         "https://www.eporner.com/api/v2/video/search/"
-        f"?query={encoded}&per_page=30&page={start}&order=longest&format=json&gay=0"
+        f"?query={encoded}&per_page=80&page={start}&order=longest&format=json&gay=0&thumbsize=big"
     )
 
 
@@ -2690,6 +2753,23 @@ class AdultDeskTests(unittest.TestCase):
         ), [])
         self.assertTrue(any("id=iXWnuAL4FnV" in path for path in adult_face_hunt("DOUBLE DOSE TWINS")))
         self.assertTrue(any("id=NtQUcCtcTj0" in path for path in adult_face_hunt("DOUBLE DOSE TWINS")))
+        self.assertTrue(any("id=7bg2FgwidLS" in path for path in adult_face_hunt("DOUBLE DOSE TWINS")))
+        self.assertEqual(
+            [row["id"] for row in adult_face_hold_rooms("KIRAWWRRRA")],
+            ["adult-face-star-kirawrrra2-0-fills-her-ass-for-the-first-time"],
+        )
+        self.assertEqual(adult_face_hold_rooms("KIRAWWRRRA")[0]["seconds"], 211)
+        self.assertEqual(
+            [row["id"] for row in adult_pick(adult_face_hold_rooms("KIRAWWRRRA"), kind="KIRAWWRRRA")],
+            ["adult-face-star-kirawrrra2-0-fills-her-ass-for-the-first-time"],
+        )
+        self.assertEqual(adult_face_hold_rooms("IMHIZBAEEXX"), [])
+        self.assertLessEqual(len(adult_face_hunt("MULAN VUITTON")), ADULT_HUNT_CAP)
+        self.assertLessEqual(len(adult_face_hunt("KIRAWWRRRA")), ADULT_HUNT_CAP)
+        self.assertTrue(any("thumbsize=big" in path for path in adult_face_hunt("MULAN VUITTON")))
+        self.assertTrue(any("per_page=80" in path for path in adult_face_hunt("MULAN VUITTON")))
+        self.assertGreaterEqual(len(adult_face_hold_rooms("MULAN VUITTON")), 4)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("DOUBLE DOSE TWINS")), 3)
         self.assertNotIn("double dose", adult_face_needles("DOUBLE DOSE TWINS") or [])
         self.assertEqual(
             [row["id"] for row in adult_parse_face(
@@ -3093,7 +3173,16 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("STRAWBERRY SANDRA", desk)
         self.assertIn("iXWnuAL4FnV", desk)
         self.assertIn("NtQUcCtcTj0", desk)
+        self.assertIn("7bg2FgwidLS", desk)
         self.assertIn("kirawrrra2-0", desk)
+        self.assertIn("static let faceHolds", desk)
+        self.assertIn("static let huntCap", desk)
+        self.assertIn("static let huntPages", desk)
+        self.assertIn("static func faceHoldRooms(", desk)
+        self.assertIn("kirawrrra2-0-fills-her-ass-for-the-first-time", desk)
+        self.assertIn("mulan-vuitton-has-sex-with-a-thief", desk)
+        self.assertIn("thumbsize=big", desk)
+        self.assertIn("per_page=80", desk)
         self.assertIn("yessenia69", desk)
         self.assertNotIn('"yessenia"', desk)
         self.assertNotIn("yess_enia\"", desk.replace("yess_enia69", ""))
@@ -3169,10 +3258,14 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("Authorization", desk)
         self.assertIn("Bearer", desk)
         face_load = sock.split("private func fetchFacePages")[1].split("private func fetchAdultPages")[0]
-        self.assertNotIn("fetchAdultFaces", face_load)
+        self.assertIn("faceHoldRooms", face_load)
+        self.assertIn("parseFace", face_load)
+        self.assertIn("fetchAdultFaces", face_load)
         self.assertIn("adultRooms = AdultDesk.merge", face_load)
         self.assertIn("fetchGiftAuth", face_load)
         self.assertIn("huntAtOnce", sock)
+        self.assertIn("adultReady = false", sock)
+        self.assertIn("timeoutIntervalForResource = AdultDesk.faceNeedles(topic) != nil ? 180 : 40", sock)
         self.assertIn("inflight", sock)
         self.assertNotIn("CGImageSourceCreateImageAtIndex", sock)
         self.assertIn("&tag=", desk)

@@ -360,7 +360,7 @@ enum AdultDesk {
         ("NERDY BEILA", ["33TgD6OeUfp", "iaBJWcUXDqR", "XYqGeufLjxo", "3Okd36yQXGq"]),
         ("HOT4LEXI", ["I9eggkAajv5"]),
         ("BRITTANYA RAZAVI", ["ZxMHa5OsXqH", "hdIUeKyK0Ux", "GvbBRAGihAQ", "mXbvfQ0ly1D"]),
-        ("DOUBLE DOSE TWINS", ["iXWnuAL4FnV", "NtQUcCtcTj0"]),
+        ("DOUBLE DOSE TWINS", ["7bg2FgwidLS", "NtQUcCtcTj0", "iXWnuAL4FnV"]),
     ]
     static let faceStars: [(String, [String])] = [
         ("MULAN VUITTON", ["mulan-vuitton"]),
@@ -423,6 +423,77 @@ enum AdultDesk {
     static let loveTags = ["girls", "couples"]
     static let railExtra = 8
     static let huntAtOnce = 4
+    static let huntPages = 2
+    static let huntCap = 48
+    /// Proven guest files. Mount before the hunt so a dead desk cannot blank the chip.
+    static let faceHolds: [(String, [(String, String, Int, String)])] = [
+        ("ITSSTEPHHONEY21", [
+            ("pin", "P283XrKRjsV", 158, "stephaniehvip twerks and jiggles"),
+        ]),
+        ("ITSSTEPHHONEYXO21", [
+            ("pin", "P283XrKRjsV", 158, "stephaniehvip twerks and jiggles"),
+        ]),
+        ("MULAN VUITTON", [
+            ("star", "mulan-vuitton-gets-pounded-while-in-a-skirt", 984, "Mulan Vuitton Gets Pounded While In A Skirt"),
+            ("star", "mulan-vuitton-is-penetrated-by-a-stranger-s-bbc-while-sleeping", 731, "Mulan Vuitton Is Penetrated By A Stranger's BBC While Sleeping"),
+            ("star", "mulan-vuitton-has-sex-with-a-thief", 712, "Mulan Vuitton Has Sex With A Thief"),
+            ("star", "mulan-vuitton-has-fun-with-her-sex-machine", 646, "Mulan Vuitton Has Fun With Her Sex Machine"),
+            ("star", "gamer-girl-mulan-vuitton-fucks-her-bf-s-dick", 563, "Gamer Girl Mulan Vuitton Fucks Her BF's Dick"),
+            ("star", "mulan-vuitton-gets-her-booty-clapped-in-fishnets", 557, "Mulan Vuitton Gets Her Booty Clapped In Fishnets"),
+            ("star", "mulan-vuitton-gets-pounded-from-behind", 488, "Mulan Vuitton Gets Pounded From Behind"),
+            ("star", "mulan-vuitton-gets-pounded-hard-on-the-couch", 442, "Mulan Vuitton Gets Pounded Hard On The Couch"),
+            ("star", "mulan-vuitton-has-sex-on-all-fours", 430, "Mulan Vuitton Has Sex On All Fours"),
+            ("star", "mulan-vuitton-gets-fucked-in-a-storage-unit", 373, "Mulan Vuitton Gets Fucked In A Storage Unit"),
+            ("pin", "pYaoSJlMR79", 362, "Mulanvuitton Oiled Up Fucking Doggy Style By Black Cock"),
+            ("star", "mulan-vuitton-gets-fingered-and-fucked-from-behind", 341, "Mulan Vuitton Gets Fingered And Fucked From Behind"),
+            ("star", "mulan-vuitton-gets-a-dildo-shoved-up-her-pussy-by-her-friend", 325, "Mulan Vuitton Gets A Dildo Shoved Up Her Pussy By Her Friend"),
+            ("star", "mulan-vuitton-gets-fucked-in-the-laundry-room", 289, "Mulan Vuitton Gets Fucked In The Laundry Room"),
+            ("star", "gamer-mulan-vuitton-gets-pounded", 280, "Gamer Mulan Vuitton Gets Pounded"),
+            ("star", "succubus-mulan-vuitton-gets-her-pussy-smashed", 270, "Succubus Mulan Vuitton Gets Her Pussy Smashed"),
+            ("star", "mulan-vuitton-gets-fucked-hard", 269, "Mulan Vuitton Gets Fucked Hard"),
+            ("star", "mulan-vuitton-doggystyles-on-the-balcony", 259, "Mulan Vuitton Doggystyles On The Balcony"),
+            ("star", "mulan-vuitton-gets-her-pussy-fingered-fucked", 209, "Mulan Vuitton Gets Her Pussy Fingered & Fucked"),
+            ("pin", "L3HLNRZy6sk", 184, "Mulan Vuitton"),
+            ("star", "mulan-vuitton-gets-her-ass-oiled-up-before-sex", 184, "Mulan Vuitton Gets Her Ass Oiled Up Before Sex"),
+        ]),
+        ("NERDY BEILA", [
+            ("pin", "33TgD6OeUfp", 1472, "Beila B/Nerdy B Big Tits Cosplay PMV (Pt. 2)"),
+            ("pin", "XYqGeufLjxo", 921, "Cow Girl Vip.Nerdyb Masturbates After Teasing"),
+            ("pin", "iaBJWcUXDqR", 557, "Beila B/Nerdy B Big Tits Cosplay PMV"),
+            ("pin", "3Okd36yQXGq", 319, "Vip.Nerdyb Pumps Her Tight Pussy"),
+        ]),
+        ("HOT4LEXI", [
+            ("star", "hot4lexi-pov-sex-scene-in-lingerie-video-leaked", 700, "Hot4lexi POV Sex Scene In Lingerie Video Leaked"),
+            ("star", "hot4lexi-missionary-sextape-video-leaked", 517, "Hot4lexi Missionary Sextape Video Leaked"),
+            ("star", "hot4lexi-let-me-be-your-sex-doll-video-leaked", 496, "Hot4lexi Let Me Be Your Sex Doll Video Leaked"),
+            ("star", "hot4lexi-blue-bodysuit-sextape-video-leaked", 476, "Hot4lexi Blue Bodysuit Sextape Video Leaked"),
+            ("star", "hot4lexi-intense-bg-porn-part-2-video-leaked", 411, "Hot4lexi Intense BG Porn Part 2 Video Leaked"),
+            ("pin", "I9eggkAajv5", 409, "Hot4lexi Reverse Cowgirl Sex Tape"),
+            ("star", "hot4lexi-bg-fuck-porn-video-leaked", 339, "Hot4lexi BG Fuck Porn Video Leaked"),
+        ]),
+        ("BRITTANYA RAZAVI", [
+            ("pin", "ZxMHa5OsXqH", 503, "Brittanya Razavi"),
+            ("pin", "hdIUeKyK0Ux", 445, "Brittanya Razavi Profesor licking-pussy"),
+            ("pin", "GvbBRAGihAQ", 358, "Seebrittanya Slut"),
+            ("pin", "mXbvfQ0ly1D", 303, "SeeBrittanya Car Sextape After Grocery Market"),
+        ]),
+        ("ZURI BELLA ROSE", [
+            ("star", "zuri-bella-rose-takes-a-dick-in-multiple-positions", 792, "Zuri Bella Rose Takes A Dick In Multiple Positions"),
+            ("star", "zuri-bella-rose-pleases-a-cock-with-her-oily-tits", 354, "Zuri Bella Rose Pleases A Cock With Her Oily Tits"),
+        ]),
+        ("SARIIXO", [
+            ("star", "sariixo-fucks-her-pussy-with-a-bbc-dildo-in-bed", 602, "Sariixo Fucks Her Pussy With A BBC Dildo In Bed"),
+            ("star", "sariixo-rides-a-dildo-on-the-bathroom-floor", 320, "Sariixo Rides A Dildo On The Bathroom Floor"),
+        ]),
+        ("KIRAWWRRRA", [
+            ("star", "kirawrrra2-0-fills-her-ass-for-the-first-time", 211, "Kirawrrra2.0 Fills Her Ass For The First Time"),
+        ]),
+        ("DOUBLE DOSE TWINS", [
+            ("pin", "7bg2FgwidLS", 660, "Double Dose Twins Fanvan They Porno Tubes"),
+            ("pin", "NtQUcCtcTj0", 199, "Doubledose Twins Blowjob GAWD DAMN I NEED DAT"),
+            ("pin", "iXWnuAL4FnV", 140, "Doubledose Twins Blowjob"),
+        ]),
+    ]
     static let loveAgent =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
@@ -572,7 +643,7 @@ enum AdultDesk {
               let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
         else { return nil }
         let start = max(1, page)
-        return "https://www.eporner.com/api/v2/video/search/?query=\(encoded)&per_page=30&page=\(start)&order=longest&format=json&gay=0"
+        return "https://www.eporner.com/api/v2/video/search/?query=\(encoded)&per_page=80&page=\(start)&order=longest&format=json&gay=0&thumbsize=big"
     }
 
     static func starSearch(_ query: String, page: Int = 1) -> String? {
@@ -681,16 +752,8 @@ enum AdultDesk {
             add(faceId(token))
         }
         for slug in faceStarTokens(kind) {
-            for page in 1...4 {
+            for page in 1...huntPages {
                 add(starSearch(slug, page: page))
-            }
-        }
-        for query in faceQueries(kind) {
-            for page in 1...4 {
-                add(faceSearch(query, page: page))
-            }
-            for page in 1...4 {
-                add(starSearch(query, page: page))
             }
         }
         var gifts: [String] = []
@@ -700,14 +763,66 @@ enum AdultDesk {
             gifts.append(key)
         }
         for query in gifts {
-            for page in 1...4 {
+            for page in 1...huntPages {
                 add(giftSearch(query, page: page))
             }
-            for page in 1...2 {
-                add(giftUser(query, page: page))
+            add(giftUser(query, page: 1))
+        }
+        for query in faceQueries(kind) {
+            for page in 1...huntPages {
+                add(faceSearch(query, page: page))
+            }
+            for page in 1...huntPages {
+                add(starSearch(query, page: page))
             }
         }
+        if out.count > huntCap {
+            return Array(out.prefix(huntCap))
+        }
         return out
+    }
+
+    static func faceHoldRooms(_ kind: String) -> [Room] {
+        guard let needles = faceNeedles(kind) else { return [] }
+        let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        var rows: [Room] = []
+        var seen: Set<String> = []
+        for pair in faceHolds where pair.0 == chip {
+            for hold in pair.1 {
+                let desk = hold.0
+                let token = hold.1
+                let seconds = hold.2
+                let title = hold.3
+                guard seconds > 0, !title.isEmpty, faceOk(title) else { continue }
+                let play: String?
+                let rid: String
+                if desk == "star" {
+                    play = playlist(starFile(token) ?? "")
+                    rid = "adult-face-star-\(token.lowercased())"
+                } else {
+                    play = playlist(faceFile(token) ?? "")
+                    rid = "adult-face-\(token.lowercased())"
+                }
+                guard let play, seen.insert(rid).inserted else { continue }
+                rows.append(
+                    Room(
+                        id: rid,
+                        name: title.uppercased(),
+                        handle: token,
+                        url: play,
+                        viewers: 0,
+                        image: "",
+                        kinds: [chip],
+                        seek: (title + " " + needles.joined(separator: " ")).lowercased(),
+                        seconds: seconds
+                    )
+                )
+            }
+        }
+        return rows.sorted { lhs, rhs in
+            if lhs.seconds != rhs.seconds { return lhs.seconds > rhs.seconds }
+            return lhs.name < rhs.name
+        }
     }
 
     static func faceFile(_ token: String) -> String? {

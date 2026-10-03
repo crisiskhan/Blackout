@@ -204,6 +204,8 @@ final class UpdateSocket {
     }
 
     private func loadAdult(topic: String = "") async {
+        adultReady = false
+        adultRooms = []
         defer {
             let again = adultWanted
             adultBusy = false
@@ -215,7 +217,7 @@ final class UpdateSocket {
         guard pipe else { return }
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 8
-        config.timeoutIntervalForResource = AdultDesk.faceNeedles(topic) != nil ? 90 : 40
+        config.timeoutIntervalForResource = AdultDesk.faceNeedles(topic) != nil ? 180 : 40
         config.waitsForConnectivity = false
         config.allowsExpensiveNetworkAccess = true
         config.allowsConstrainedNetworkAccess = true
@@ -262,6 +264,11 @@ final class UpdateSocket {
 
     private func fetchFacePages(_ session: URLSession, _ kind: String) async -> [[AdultDesk.Room]] {
         var batches: [[AdultDesk.Room]] = []
+        let held = AdultDesk.faceHoldRooms(kind)
+        if !held.isEmpty {
+            batches.append(held)
+            adultRooms = AdultDesk.merge(batches)
+        }
         let paths = AdultDesk.faceHunt(kind)
         let gift = await fetchGiftAuth(session)
         await withTaskGroup(of: [AdultDesk.Room].self) { group in
@@ -293,6 +300,19 @@ final class UpdateSocket {
                 inflight -= 1
                 enqueue()
             }
+        }
+        let lives = await fetchAdultFaces(session, AdultDesk.faceGiftTokens(kind))
+        if !lives.isEmpty {
+            let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+            let tagged = lives.map { room -> AdultDesk.Room in
+                var next = room
+                if !chip.isEmpty, !next.kinds.contains(chip) {
+                    next.kinds.insert(chip, at: 0)
+                }
+                return next
+            }
+            batches.append(tagged)
+            adultRooms = AdultDesk.merge(batches)
         }
         return batches
     }
