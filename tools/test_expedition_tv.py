@@ -455,6 +455,7 @@ ADULT_LILBUSSY = (
 )
 ADULT_ASHLEY = (
     "itisashley",
+    "itis ashley",
 )
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
@@ -1357,6 +1358,11 @@ ADULT_FACE_HOLDS = (
     ("JASMINEGTV", (("file", "https://v62.erome.com/1768/5jd5lhgS/PDzcXq2Z_720p.mp4", 1434, "Jasminegtv"),)),
     ("IMANGELJESSYY", (("file", "https://v15.erome.com/9197/hhyYdQUz/ilQB0MKm_720p.mp4", 13, "Imangeljessyy"),)),
     ("LIL BUSSY GIRL", (("star", "lilbussygirl-gets-cummed-after-steamy-boobjob", 147, "Lilbussygirl Gets Cummed After Steamy Boobjob"),)),
+    ("ITISASHLEY", (
+        ("file", "https://v4.erome.com/9070/tNRwgjor/xvjyRiKx_720p.mp4", 696, "Itisashley oily"),
+        ("file", "https://v83.erome.com/9070/kcGtCmxt/w2jpmOZy_720p.mp4", 202, "Itisashley shower"),
+        ("file", "https://v16.erome.com/9070/PoAT0le0/yrGKoVla_720p.mp4", 136, "Itisashley shower cut"),
+    )),
 )
 ADULT_FACE_DESKS = (
     ("ITSSTEPHHONEY21", ("RUX8bZH5",)),
@@ -1374,6 +1380,7 @@ ADULT_FACE_DESKS = (
     ("IMANGELJESSYY", ("hhyYdQUz",)),
     ("YESS ENIA69", ("QuJsjzdM",)),
     ("ANNABELLE RIOS", ("uto61E9C", "HTwoGgwW", "FDZSNMht")),
+    ("ITISASHLEY", ("tNRwgjor", "kcGtCmxt", "PoAT0le0")),
 )
 ADULT_DESK_ORIGIN = "https://www.erome.com"
 ADULT_DESK_FOLLOW = 12
@@ -4968,9 +4975,17 @@ class AdultDeskTests(unittest.TestCase):
         self.assertNotIn("ROLEPLAY", adult_rail([]))
         self.assertIn("ELVANA VITAA", adult_rail([]))
         self.assertIn("ITISASHLEY", adult_rail([]))
-        self.assertEqual(adult_face_hold_rooms("ITISASHLEY"), [])
+        self.assertGreaterEqual(len(adult_face_hold_rooms("ITISASHLEY")), 3)
+        self.assertEqual(adult_face_hold_rooms("ITISASHLEY")[0]["seconds"], 696)
+        self.assertTrue(any("tNRwgjor" in path for path in adult_face_hunt("ITISASHLEY")))
+        self.assertTrue(any("erome.com/a/kcGtCmxt" in path for path in adult_face_hunt("ITISASHLEY")))
+        self.assertTrue(any("erome.com/a/PoAT0le0" in path for path in adult_face_hunt("ITISASHLEY")))
         self.assertEqual(adult_hunt_needles("itisashley"), list(ADULT_ASHLEY))
         self.assertNotIn("ashley", adult_face_needles("ITISASHLEY") or [])
+        for row in adult_face_hold_rooms("ITISASHLEY"):
+            self.assertNotIn("onlyfans", row["name"].lower())
+            self.assertNotIn("onlyfans", row["url"].lower())
+            self.assertIn("itisashley", row["seek"])
         self.assertEqual(
             [row["id"] for row in adult_parse_face(
                 {
@@ -5018,6 +5033,22 @@ class AdultDeskTests(unittest.TestCase):
                 "LIL BUSSY GIRL",
             )],
             ["adult-face-star-lilbussygirl-gets-cummed-after-steamy-boobjob"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "ashley-aoky-s-bathroom-bbc-smash",
+                            "title": "Ashley Aoky's Bathroom BBC Smash",
+                            "creator": "Ashley Aoky",
+                            "durationSeconds": 412,
+                        }
+                    ]
+                },
+                "ITISASHLEY",
+            )],
+            [],
         )
         self.assertIn("Genre chips stay off", tv)
         self.assertIn("longest first", tv.lower())

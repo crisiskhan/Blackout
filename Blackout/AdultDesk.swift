@@ -354,6 +354,7 @@ enum AdultDesk {
     ]
     static let ashleyNeedles = [
         "itisashley",
+        "itis ashley",
     ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
@@ -501,6 +502,7 @@ enum AdultDesk {
         ("IMHIZBAEEXX", ["CZ4UXKiP", "5Ap1AVt9"]),
         ("YESS ENIA69", ["QuJsjzdM"]),
         ("ANNABELLE RIOS", ["uto61E9C", "HTwoGgwW", "FDZSNMht"]),
+        ("ITISASHLEY", ["tNRwgjor", "kcGtCmxt", "PoAT0le0"]),
     ]
     /// Public X handles. Hunt the guest timeline, not a paywalled store.
     static let facePosts: [(String, [String])] = [
@@ -787,6 +789,11 @@ enum AdultDesk {
         ]),
         ("LIL BUSSY GIRL", [
             ("star", "lilbussygirl-gets-cummed-after-steamy-boobjob", 147, "Lilbussygirl Gets Cummed After Steamy Boobjob"),
+        ]),
+        ("ITISASHLEY", [
+            ("file", "https://v4.erome.com/9070/tNRwgjor/xvjyRiKx_720p.mp4", 696, "Itisashley oily"),
+            ("file", "https://v83.erome.com/9070/kcGtCmxt/w2jpmOZy_720p.mp4", 202, "Itisashley shower"),
+            ("file", "https://v16.erome.com/9070/PoAT0le0/yrGKoVla_720p.mp4", 136, "Itisashley shower cut"),
         ]),
     ]
     /// Guest stills for baked pin tokens. Star stills are `preview-batch/{slug}/thumb.webp`.
