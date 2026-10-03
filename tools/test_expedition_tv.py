@@ -237,10 +237,21 @@ ADULT_STEPH = (
     "stephaniehvip",
     "itsstephhoney21free",
 )
+ADULT_MULAN = (
+    "mulanvuitton",
+    "mulan_vuitton",
+    "mulan-vuitton",
+    "mulan vuitton",
+    "mulanvuittontv",
+    "mulan vuittontv",
+    "mulan vuitton tv",
+    "mulan.vuitton",
+    "vuitton mulan",
+)
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
     ("ITSSTEPHHONEYXO21", ADULT_STEPH),
-    ("MULAN VUITTON", ("mulanvuitton", "mulan_vuitton", "mulan vuitton", "mulanvuittontv")),
+    ("MULAN VUITTON", ADULT_MULAN),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_LOVE_ORIGIN = "https://lovescape.cam"
@@ -795,6 +806,14 @@ ADULT_FACE_PINS = (
     ("ITSSTEPHHONEYXO21", ("P283XrKRjsV",)),
     ("MULAN VUITTON", ("L3HLNRZy6sk", "pYaoSJlMR79")),
 )
+ADULT_FACE_STARS = (
+    ("MULAN VUITTON", ("mulan-vuitton",)),
+)
+ADULT_FACE_GIFTS = (
+    ("ITSSTEPHHONEY21", ("itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip")),
+    ("ITSSTEPHHONEYXO21", ("itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip")),
+    ("MULAN VUITTON", ("mulanvuitton", "mulanvuittontv")),
+)
 ADULT_FACE_KILL = (
     "loli",
     "shota",
@@ -818,40 +837,64 @@ def adult_face_id(token: str) -> str | None:
     return f"https://www.eporner.com/api/v2/video/id/?id={ident}&format=json"
 
 
+def _adult_face_tokens(table: tuple, kind: str) -> list[str]:
+    chip = str(kind or "").strip().upper()
+    for name, tokens in table:
+        if name == chip:
+            return [str(token) for token in tokens]
+    return []
+
+
+def adult_face_pin_tokens(kind: str) -> list[str]:
+    return _adult_face_tokens(ADULT_FACE_PINS, kind)
+
+
+def adult_face_star_tokens(kind: str) -> list[str]:
+    return _adult_face_tokens(ADULT_FACE_STARS, kind)
+
+
+def adult_face_gift_tokens(kind: str) -> list[str]:
+    return _adult_face_tokens(ADULT_FACE_GIFTS, kind)
+
+
+def adult_gift_key(raw: str) -> str | None:
+    compact = "".join(ch for ch in str(raw or "").lower() if ch.isalnum())
+    if len(compact) < 6:
+        return None
+    return compact
+
+
 def adult_face_hunt(kind: str) -> list[str]:
     out: list[str] = []
     seen: set[str] = set()
-    chip = str(kind or "").strip().upper()
-    for name, tokens in ADULT_FACE_PINS:
-        if name != chip:
-            continue
-        for token in tokens:
-            path = adult_face_id(token)
-            if path and path not in seen:
-                seen.add(path)
-                out.append(path)
+
+    def add(path: str | None) -> None:
+        if path and path not in seen:
+            seen.add(path)
+            out.append(path)
+
+    for token in adult_face_pin_tokens(kind):
+        add(adult_face_id(token))
+    for slug in adult_face_star_tokens(kind):
+        for page in range(1, 5):
+            add(adult_star_search(slug, page=page))
     for query in adult_face_queries(kind):
         for page in range(1, 5):
-            path = adult_face_search(query, page=page)
-            if path and path not in seen:
-                seen.add(path)
-                out.append(path)
+            add(adult_face_search(query, page=page))
         for page in range(1, 5):
-            path = adult_star_search(query, page=page)
-            if path and path not in seen:
-                seen.add(path)
-                out.append(path)
-        if " " not in query:
-            for page in range(1, 5):
-                path = adult_gift_search(query, page=page)
-                if path and path not in seen:
-                    seen.add(path)
-                    out.append(path)
-            for page in range(1, 3):
-                path = adult_gift_user(query, page=page)
-                if path and path not in seen:
-                    seen.add(path)
-                    out.append(path)
+            add(adult_star_search(query, page=page))
+    gifts: list[str] = []
+    gift_seen: set[str] = set()
+    for raw in adult_face_gift_tokens(kind) + adult_face_queries(kind):
+        key = adult_gift_key(raw)
+        if key and key not in gift_seen:
+            gift_seen.add(key)
+            gifts.append(key)
+    for query in gifts:
+        for page in range(1, 5):
+            add(adult_gift_search(query, page=page))
+        for page in range(1, 3):
+            add(adult_gift_user(query, page=page))
     return out
 
 
@@ -865,8 +908,8 @@ def adult_gift_search(query: str, page: int = 1) -> str | None:
 
 
 def adult_gift_user(query: str, page: int = 1) -> str | None:
-    q = str(query or "").strip().lower()
-    if len(q) < 6 or not q.isalnum():
+    q = adult_gift_key(query)
+    if not q:
         return None
     start = max(1, int(page))
     return f"https://api.redgifs.com/v2/users/{q}/search?count=40&page={start}"
@@ -969,7 +1012,8 @@ def _adult_face_clip(model: dict, needles: list[str], kind: str = "") -> dict | 
     keys = str(model.get("keywords") or "").replace("\u200b", " ")
     if not play or not title or not _adult_face_ok(title) or not _adult_face_ok(keys):
         return None
-    if not _adult_face_hit(f"{title} {keys}", needles):
+    held = any(pin.lower() == token.lower() for pin in adult_face_pin_tokens(kind))
+    if not held and not _adult_face_hit(f"{title} {keys}", needles):
         return None
     thumb = ""
     default = model.get("default_thumb")
@@ -1004,7 +1048,26 @@ def _adult_star_clip(model: dict, needles: list[str], kind: str = "") -> dict | 
         return None
     if creator and not _adult_face_ok(creator):
         return None
-    if not _adult_face_hit(f"{title} {creator} {slug}", needles):
+    blob = f"{title} {creator} {slug}"
+    stars = adult_face_star_tokens(kind)
+    held = any(
+        _adult_face_plain(star) in (_adult_face_plain(slug), _adult_face_plain(creator))
+        for star in stars
+    )
+    for row in model.get("performers") or []:
+        if not isinstance(row, dict):
+            continue
+        name = str(row.get("name") or "").replace("\u200b", " ")
+        star = str(row.get("slug") or "").replace("\u200b", " ")
+        if not _adult_face_ok(name) or not _adult_face_ok(star):
+            return None
+        blob += f" {name} {star}"
+        if any(
+            _adult_face_plain(token) in (_adult_face_plain(star), _adult_face_plain(name))
+            for token in stars
+        ):
+            held = True
+    if not held and not _adult_face_hit(blob, needles):
         return None
     seconds = adult_count(model.get("durationSeconds"))
     if seconds <= 0:
@@ -2009,6 +2072,14 @@ class AdultDeskTests(unittest.TestCase):
             )
         )
         self.assertIn("mulan vuitton", adult_face_queries("MULAN VUITTON"))
+        self.assertIn("mulan-vuitton", adult_face_queries("MULAN VUITTON"))
+        self.assertIn("vuitton mulan", adult_face_queries("MULAN VUITTON"))
+        self.assertIn("mulan vuitton tv", adult_face_queries("MULAN VUITTON"))
+        self.assertNotIn("erika vuitton", adult_face_queries("MULAN VUITTON"))
+        self.assertEqual(adult_gift_key("mulan vuitton"), "mulanvuitton")
+        self.assertEqual(adult_gift_key("mulan-vuitton"), "mulanvuitton")
+        self.assertIn("mulan-vuitton", adult_face_star_tokens("MULAN VUITTON"))
+        self.assertIn("mulanvuittontv", adult_face_gift_tokens("MULAN VUITTON"))
         self.assertIn("itsstephhoney21", adult_face_queries("ITSSTEPHHONEY21"))
         self.assertIn("query=mulan%20vuitton", adult_face_search("mulan vuitton") or "")
         self.assertEqual(
@@ -2126,7 +2197,46 @@ class AdultDeskTests(unittest.TestCase):
         self.assertTrue(any("eporner.com/api/v2/video/id/?id=P283XrKRjsV" in path for path in adult_face_hunt("ITSSTEPHHONEY21")))
         self.assertTrue(any("api.redgifs.com/v2/gifs/search" in path for path in adult_face_hunt("ITSSTEPHHONEY21")))
         self.assertTrue(any("api.redgifs.com/v2/users/itsstephhoney21/search" in path for path in adult_face_hunt("ITSSTEPHHONEY21")))
-        self.assertGreaterEqual(len(adult_face_hunt("MULAN VUITTON")), 8)
+        mulan_hunt = adult_face_hunt("MULAN VUITTON")
+        self.assertTrue(mulan_hunt[0].endswith("id=L3HLNRZy6sk&format=json"))
+        self.assertTrue(any("api/v2/video/id/?id=pYaoSJlMR79" in path for path in mulan_hunt))
+        self.assertTrue(any("bornstar.co/api/search?q=mulan-vuitton" in path for path in mulan_hunt))
+        self.assertTrue(any("gifs/search?search_text=mulanvuitton" in path for path in mulan_hunt))
+        self.assertTrue(any("users/mulanvuitton/search" in path for path in mulan_hunt))
+        self.assertTrue(any("users/mulanvuittontv/search" in path for path in mulan_hunt))
+        self.assertGreaterEqual(len(mulan_hunt), 8)
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "id": "L3HLNRZy6sk",
+                    "title": "Untitled guest file",
+                    "length_sec": 184,
+                    "views": 4,
+                    "keywords": "",
+                    "default_thumb": {"src": "https://img.example/pin.jpg"},
+                },
+                "MULAN VUITTON",
+            )],
+            ["adult-face-l3hlnrzy6sk"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "scene-three",
+                            "title": "Scene 3",
+                            "creator": "",
+                            "durationSeconds": 940,
+                            "thumbnailUrl": "https://cdn.example/scene.webp",
+                            "performers": [{"name": "", "slug": "mulan-vuitton"}],
+                        }
+                    ]
+                },
+                "MULAN VUITTON",
+            )],
+            ["adult-face-star-scene-three"],
+        )
         steph = adult_parse_face(
             {
                 "videos": [
@@ -2322,6 +2432,16 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("stephaniehvip", desk)
         self.assertIn("P283XrKRjsV", desk)
         self.assertIn("MULAN VUITTON", desk)
+        self.assertIn("mulanNeedles", desk)
+        self.assertIn("mulan-vuitton", desk)
+        self.assertIn("vuitton mulan", desk)
+        self.assertIn("static let faceStars", desk)
+        self.assertIn("static let faceGifts", desk)
+        self.assertIn("static func giftKey(", desk)
+        self.assertIn("static func facePinTokens(", desk)
+        self.assertIn("static func faceStarTokens(", desk)
+        self.assertIn("static func faceGiftTokens(", desk)
+        self.assertNotIn("erika vuitton", desk.lower())
         self.assertIn("LOVESCAPE", desk)
         self.assertIn("giftAuth", desk)
         self.assertIn("giftSearch", desk)

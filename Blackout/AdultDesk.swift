@@ -136,15 +136,34 @@ enum AdultDesk {
         "stephaniehvip",
         "itsstephhoney21free",
     ]
+    static let mulanNeedles = [
+        "mulanvuitton",
+        "mulan_vuitton",
+        "mulan-vuitton",
+        "mulan vuitton",
+        "mulanvuittontv",
+        "mulan vuittontv",
+        "mulan vuitton tv",
+        "mulan.vuitton",
+        "vuitton mulan",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
-        ("MULAN VUITTON", ["mulanvuitton", "mulan_vuitton", "mulan vuitton", "mulanvuittontv"]),
+        ("MULAN VUITTON", mulanNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
         ("ITSSTEPHHONEYXO21", ["P283XrKRjsV"]),
         ("MULAN VUITTON", ["L3HLNRZy6sk", "pYaoSJlMR79"]),
+    ]
+    static let faceStars: [(String, [String])] = [
+        ("MULAN VUITTON", ["mulan-vuitton"]),
+    ]
+    static let faceGifts: [(String, [String])] = [
+        ("ITSSTEPHHONEY21", ["itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip"]),
+        ("ITSSTEPHHONEYXO21", ["itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip"]),
+        ("MULAN VUITTON", ["mulanvuitton", "mulanvuittontv"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
@@ -335,11 +354,40 @@ enum AdultDesk {
         return "https://api.redgifs.com/v2/gifs/search?search_text=\(encoded)&count=40&page=\(start)"
     }
 
+    static func giftKey(_ raw: String) -> String? {
+        let compact = raw.lowercased().filter { $0.isLetter || $0.isNumber }
+        guard compact.count >= 6 else { return nil }
+        return compact
+    }
+
     static func giftUser(_ query: String, page: Int = 1) -> String? {
-        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard q.count >= 6, q.allSatisfy({ $0.isLetter || $0.isNumber }) else { return nil }
+        guard let q = giftKey(query) else { return nil }
         let start = max(1, page)
         return "https://api.redgifs.com/v2/users/\(q)/search?count=40&page=\(start)"
+    }
+
+    static func facePinTokens(_ kind: String) -> [String] {
+        let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        for pair in facePins where pair.0 == chip {
+            return pair.1
+        }
+        return []
+    }
+
+    static func faceStarTokens(_ kind: String) -> [String] {
+        let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        for pair in faceStars where pair.0 == chip {
+            return pair.1
+        }
+        return []
+    }
+
+    static func faceGiftTokens(_ kind: String) -> [String] {
+        let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        for pair in faceGifts where pair.0 == chip {
+            return pair.1
+        }
+        return []
     }
 
     static func giftToken(_ data: Data) -> String? {
@@ -386,36 +434,38 @@ enum AdultDesk {
     static func faceHunt(_ kind: String) -> [String] {
         var out: [String] = []
         var seen: Set<String> = []
-        let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        for pair in facePins where pair.0 == chip {
-            for token in pair.1 {
-                if let path = faceId(token), seen.insert(path).inserted {
-                    out.append(path)
-                }
+        func add(_ path: String?) {
+            guard let path, seen.insert(path).inserted else { return }
+            out.append(path)
+        }
+        for token in facePinTokens(kind) {
+            add(faceId(token))
+        }
+        for slug in faceStarTokens(kind) {
+            for page in 1...4 {
+                add(starSearch(slug, page: page))
             }
         }
         for query in faceQueries(kind) {
             for page in 1...4 {
-                if let path = faceSearch(query, page: page), seen.insert(path).inserted {
-                    out.append(path)
-                }
+                add(faceSearch(query, page: page))
             }
             for page in 1...4 {
-                if let path = starSearch(query, page: page), seen.insert(path).inserted {
-                    out.append(path)
-                }
+                add(starSearch(query, page: page))
             }
-            if !query.contains(" ") {
-                for page in 1...4 {
-                    if let path = giftSearch(query, page: page), seen.insert(path).inserted {
-                        out.append(path)
-                    }
-                }
-                for page in 1...2 {
-                    if let path = giftUser(query, page: page), seen.insert(path).inserted {
-                        out.append(path)
-                    }
-                }
+        }
+        var gifts: [String] = []
+        var giftSeen: Set<String> = []
+        for raw in faceGiftTokens(kind) + faceQueries(kind) {
+            guard let key = giftKey(raw), giftSeen.insert(key).inserted else { continue }
+            gifts.append(key)
+        }
+        for query in gifts {
+            for page in 1...4 {
+                add(giftSearch(query, page: page))
+            }
+            for page in 1...2 {
+                add(giftUser(query, page: page))
             }
         }
         return out
@@ -484,7 +534,8 @@ enum AdultDesk {
         let title = rawTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         let keys = string(model["keywords"]).replacingOccurrences(of: "\u{200B}", with: " ")
         guard !title.isEmpty, faceOk(title), faceOk(keys) else { return nil }
-        guard faceHit(title + " " + keys, needles: needles) else { return nil }
+        let held = facePinTokens(kind).contains { $0.caseInsensitiveCompare(token) == .orderedSame }
+        guard held || faceHit(title + " " + keys, needles: needles) else { return nil }
         var thumb = ""
         if let dict = model["default_thumb"] as? [String: Any] {
             thumb = still(string(dict["src"])) ?? ""
@@ -515,8 +566,20 @@ enum AdultDesk {
         let title = rawTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         let creator = string(model["creator"]).replacingOccurrences(of: "\u{200B}", with: " ")
         guard !title.isEmpty, faceOk(title), creator.isEmpty || faceOk(creator) else { return nil }
-        let blob = title + " " + creator + " " + slug
-        guard faceHit(blob, needles: needles) else { return nil }
+        var blob = title + " " + creator + " " + slug
+        var held = faceStarTokens(kind).contains { facePlain($0) == facePlain(slug) || facePlain($0) == facePlain(creator) }
+        if let list = model["performers"] as? [[String: Any]] {
+            for row in list {
+                let name = string(row["name"]).replacingOccurrences(of: "\u{200B}", with: " ")
+                let star = string(row["slug"]).replacingOccurrences(of: "\u{200B}", with: " ")
+                guard faceOk(name), faceOk(star) else { return nil }
+                blob += " " + name + " " + star
+                if faceStarTokens(kind).contains(where: { facePlain($0) == facePlain(star) || facePlain($0) == facePlain(name) }) {
+                    held = true
+                }
+            }
+        }
+        guard held || faceHit(blob, needles: needles) else { return nil }
         let seconds = max(0, number(model["durationSeconds"]))
         guard seconds > 0 else { return nil }
         let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
