@@ -530,20 +530,23 @@ enum AdultDesk {
     static let railExtra = 8
     static let huntAtOnce = 4
     static let huntPages = 2
-    static let huntCap = 64
-    static let deskFollow = 8
+    static let huntCap = 96
+    static let deskFollow = 12
     static let deskOrigin = "https://www.erome.com"
-    static let postFollow = 8
+    static let postFollow = 16
     static let postOrigin = "https://syndication.twitter.com"
     static let postStatusOrigin = "https://api.fxtwitter.com"
+    static let webOrigin = "https://html.duckduckgo.com"
     /// Proven guest files. Mount before the hunt so a dead desk cannot blank the chip.
     static let faceHolds: [(String, [(String, String, Int, String)])] = [
         ("ITSSTEPHHONEY21", [
-            ("file", "https://v22.erome.com/8210/RUX8bZH5/jxw826NR_720p.mp4", 197, "STEPHANIEHVIP"),
+            ("file", "https://v22.erome.com/8210/RUX8bZH5/jxw826NR_720p.mp4", 307, "STEPHANIEHVIP"),
+            ("file", "https://v22.erome.com/8210/RUX8bZH5/SYWLKfqa_720p.mp4", 197, "STEPHANIEHVIP"),
             ("pin", "P283XrKRjsV", 158, "stephaniehvip twerks and jiggles"),
         ]),
         ("ITSSTEPHHONEYXO21", [
-            ("file", "https://v22.erome.com/8210/RUX8bZH5/jxw826NR_720p.mp4", 197, "STEPHANIEHVIP"),
+            ("file", "https://v22.erome.com/8210/RUX8bZH5/jxw826NR_720p.mp4", 307, "STEPHANIEHVIP"),
+            ("file", "https://v22.erome.com/8210/RUX8bZH5/SYWLKfqa_720p.mp4", 197, "STEPHANIEHVIP"),
             ("pin", "P283XrKRjsV", 158, "stephaniehvip twerks and jiggles"),
         ]),
         ("MULAN VUITTON", [
@@ -607,38 +610,49 @@ enum AdultDesk {
             ("pin", "iXWnuAL4FnV", 140, "Doubledose Twins Blowjob"),
         ]),
         ("MIKEILA J", [
-            ("file", "https://v15.erome.com/959/iLRhKOjv/AWEOf5Iy_720p.mp4", 456, "MikeilaJ"),
-            ("file", "https://v15.erome.com/959/iLRhKOjv/Qv7OXyIm_720p.mp4", 387, "MikeilaJ"),
+            ("file", "https://v15.erome.com/959/iLRhKOjv/bQN8Lo1B_720p.mp4", 456, "MikeilaJ"),
+            ("file", "https://v203.erome.com/325/TqelxrBL/Ut4hcj7J_720p.mp4", 456, "Mikeilaj"),
+            ("file", "https://v15.erome.com/959/iLRhKOjv/LQY9VEiF_720p.mp4", 387, "MikeilaJ"),
             ("file", "https://v6.erome.com/2377/RLcyK3T5/M3ZqMB7z_720p.mp4", 387, "3-29-24 Mikeilaj 3 SEXY SEXY SEXY"),
-            ("file", "https://v203.erome.com/325/TqelxrBL/tBwdtoR3_720p.mp4", 238, "Mikeilaj"),
+            ("file", "https://v201.erome.com/237/MUVu2GxH/YEKfH2Jz_480p.mp4", 387, "Mikeila J solo"),
+            ("file", "https://v203.erome.com/237/WENqgh3u/fGMjYVty_480p.mp4", 387, "Mikeila J solo 2"),
+            ("file", "https://v15.erome.com/959/iLRhKOjv/h91kkrYB_720p.mp4", 380, "MikeilaJ"),
+            ("file", "https://v15.erome.com/959/iLRhKOjv/oRWzrIjH_720p.mp4", 379, "MikeilaJ"),
         ]),
         ("JUICYJAS TV", [
             ("file", "https://v13.erome.com/1454/OWRwt8jD/gOUvm3em_720p.mp4", 567, "Juicyjass"),
-            ("file", "https://v108.erome.com/7136/58Uaa6Ig/8feiQ8cD_720p.mp4", 562, "jjuicyjass"),
-            ("file", "https://v78.erome.com/7455/KmjJcLJT/IApjGeGF_720p.mp4", 445, "jjuicyjass"),
+            ("file", "https://v108.erome.com/7136/58Uaa6Ig/KltwO3PB_720p.mp4", 562, "jjuicyjass"),
+            ("file", "https://v108.erome.com/7136/58Uaa6Ig/uAnW7V8o_720p.mp4", 466, "jjuicyjass"),
             ("file", "https://v105.erome.com/7729/p5AlhPzA/shXMd6w8_720p.mp4", 445, "JJUICYJASS AKA BABYFACEJASS"),
+            ("file", "https://v78.erome.com/7455/KmjJcLJT/NNAdFmNN_720p.mp4", 445, "jjuicyjass"),
             ("file", "https://v102.erome.com/1968/bYEwXbLM/3nwkSE2f_720p.mp4", 406, "Juicyjass"),
-            ("file", "https://v108.erome.com/7136/58Uaa6Ig/uAnW7V8o_720p.mp4", 375, "jjuicyjass"),
+            ("file", "https://v102.erome.com/1968/bYEwXbLM/2AyuHVzF_720p.mp4", 354, "Juicyjass"),
+            ("file", "https://v54.erome.com/1475/30gEMEg3/4yCGE1s8_720p.mp4", 354, "Juicyjass"),
+            ("file", "https://v105.erome.com/7729/p5AlhPzA/ZPEnIqip_720p.mp4", 291, "JJUICYJASS AKA BABYFACEJASS"),
             ("file", "https://v3.erome.com/7455/yz4tK6d5/g9QnFotZ_720p.mp4", 281, "jjuicyjass"),
         ]),
         ("HONEYTEASSEE", [
-            ("file", "https://v103.erome.com/8076/4WuSM4Do/yxNQr8Sq_720p.mp4", 45, "kittylunaxx luna dream"),
-            ("file", "https://v103.erome.com/8076/4WuSM4Do/RO9SNpQe_720p.mp4", 37, "kittylunaxx luna dream"),
-            ("file", "https://v90.erome.com/8216/wFCSXuwr/FDo2iIPI_720p.mp4", 20, "kittylunaxx fine ass fully nude"),
+            ("file", "https://v103.erome.com/8076/4WuSM4Do/NLPXJlNS_720p.mp4", 45, "kittylunaxx luna dream"),
+            ("file", "https://v103.erome.com/8076/4WuSM4Do/yNuCC5LF_720p.mp4", 37, "kittylunaxx luna dream"),
+            ("file", "https://v103.erome.com/8076/4WuSM4Do/pHopCf6A_720p.mp4", 35, "kittylunaxx luna dream"),
+            ("file", "https://v90.erome.com/8216/wFCSXuwr/FDo2iIPI_720p.mp4", 23, "kittylunaxx fine ass fully nude"),
         ]),
         ("TANIA RAMOS", [
             ("file", "https://v46.erome.com/8279/rRy8eW9u/ziltWEbq_720p.mp4", 3591, "Tania Ramos guest cut"),
             ("file", "https://v103.erome.com/2665/WJD2aTMn/SQLCCerD_720p.mp4", 648, "Tania Ramos AKA Waifutania"),
+            ("file", "https://v46.erome.com/8279/rRy8eW9u/9HX9umpO_720p.mp4", 577, "Tania Ramos guest cut"),
             ("file", "https://v53.erome.com/7949/yYXjVfnM/UJ7h7VQw_720p.mp4", 577, "Tania Ramos"),
+            ("file", "https://v42.erome.com/8197/DoEO25fA/IQke7CWi_720p.mp4", 231, "Waifutania"),
         ]),
         ("LILI VICTORIA", [
-            ("file", "https://v2.erome.com/8917/i3ukXKfK/C4q2YdX7_720p.mp4", 63, "lilivictoria32"),
+            ("file", "https://v2.erome.com/8917/i3ukXKfK/tYUWdkYx_720p.mp4", 63, "lilivictoria32"),
+            ("file", "https://v2.erome.com/8917/i3ukXKfK/C4q2YdX7_720p.mp4", 32, "lilivictoria32"),
             ("file", "https://v93.erome.com/9093/c6S6qfYl/Pbi2woWQ_720p.mp4", 15, "lilivictoria32"),
         ]),
         ("IMHIZBAEEXX", [
-            ("file", "https://v320.erome.com/5241/CZ4UXKiP/k8qQdw8F_720p.mp4", 33, "Imhizbae"),
-            ("file", "https://v320.erome.com/5241/CZ4UXKiP/buFOXuzD_720p.mp4", 32, "Imhizbae"),
-            ("file", "https://v18.erome.com/5462/5Ap1AVt9/wcPBccoY_720p.mp4", 12, "Imhizbaee outside"),
+            ("file", "https://v320.erome.com/5241/CZ4UXKiP/cmAruVHG_720p.mp4", 33, "Imhizbae"),
+            ("file", "https://v320.erome.com/5241/CZ4UXKiP/k8qQdw8F_720p.mp4", 32, "Imhizbae"),
+            ("file", "https://v18.erome.com/5462/5Ap1AVt9/XjXyNPZP_720p.mp4", 12, "Imhizbaee outside"),
         ]),
         ("LILIANAS PAGE", [
             ("post", "https://video.twimg.com/ext_tw_video/1878566880551862272/pu/vid/avc1/720x1280/xH0pvUTTQ5G5AJNe.mp4?tag=12", 7, "Lilianaspage"),
@@ -788,7 +802,9 @@ enum AdultDesk {
 
     static func userAgent(_ raw: String) -> String {
         let host = URL(string: raw)?.host?.lowercased() ?? ""
-        if loveHost(raw) || giftHost(raw) || deskHost(raw) || postHost(raw) || host.contains("bornstar") {
+        if loveHost(raw) || giftHost(raw) || deskHost(raw) || postHost(raw) || webHost(raw)
+            || host.contains("bornstar")
+        {
             return loveAgent
         }
         return agent
@@ -799,6 +815,7 @@ enum AdultDesk {
         if giftHost(raw) { return "\(giftOrigin)/" }
         if deskHost(raw) { return "\(deskOrigin)/" }
         if postHost(raw) { return "https://x.com/" }
+        if webHost(raw) { return "https://duckduckgo.com/" }
         let host = URL(string: raw)?.host?.lowercased() ?? ""
         if host.contains("eporner") { return "https://www.eporner.com/" }
         if host.contains("bornstar") { return "https://bornstar.co/" }
@@ -896,7 +913,82 @@ enum AdultDesk {
     }
 
     static func deskLook(_ raw: String) -> Bool {
-        deskHost(raw) && raw.lowercased().contains("/search")
+        deskHost(raw) && !raw.lowercased().contains("/a/")
+    }
+
+    static func deskUser(_ handle: String) -> String? {
+        var name = handle.trimmingCharacters(in: .whitespacesAndNewlines)
+        if name.hasPrefix("@") { name.removeFirst() }
+        guard !name.isEmpty, name.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" }) else {
+            return nil
+        }
+        guard let encoded = name.addingPercentEncoding(withAllowedCharacters: CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "_")))
+        else { return nil }
+        return "\(deskOrigin)/\(encoded)"
+    }
+
+    static func webHost(_ raw: String) -> Bool {
+        let host = URL(string: raw)?.host?.lowercased() ?? ""
+        return host == "html.duckduckgo.com" || host.hasSuffix(".duckduckgo.com") || host.contains("duckduckgo.com")
+    }
+
+    static func webLook(_ raw: String) -> Bool {
+        webHost(raw) && raw.lowercased().contains("/html/")
+    }
+
+    static func webSearch(_ query: String) -> String? {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !q.isEmpty,
+              let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return nil }
+        return "\(webOrigin)/html/?q=\(encoded)"
+    }
+
+    static func webAlbums(_ data: Data, kind: String) -> [String] {
+        guard let needles = faceNeedles(kind),
+              let text = String(data: data, encoding: .utf8)
+        else { return [] }
+        var out: [String] = []
+        var seen: Set<String> = []
+        var rest = text
+        while let mark = rest.range(of: "erome.com/a/") {
+            let before = String(rest[..<mark.lowerBound].suffix(48))
+            rest = String(rest[mark.upperBound...])
+            let token = String(rest.prefix { $0.isLetter || $0.isNumber })
+            guard token.count >= 4 else { continue }
+            let after = String(rest.prefix(48))
+            let blob = before + token + after
+            guard faceHit(blob, needles: needles) else { continue }
+            if seen.insert(token.lowercased()).inserted {
+                out.append(token)
+            }
+        }
+        return out
+    }
+
+    static func webPosts(_ data: Data, kind: String) -> [String] {
+        guard let needles = faceNeedles(kind),
+              let text = String(data: data, encoding: .utf8)
+        else { return [] }
+        var out: [String] = []
+        var seen: Set<String> = []
+        func take(handle: String, token: String) {
+            guard token.count >= 16, token.count <= 20, token.allSatisfy(\.isNumber) else { return }
+            guard faceHit(handle, needles: needles) else { return }
+            if seen.insert(token).inserted { out.append(token) }
+        }
+        var rest = text
+        while let mark = rest.range(of: "/status/") {
+            let before = String(rest[..<mark.lowerBound])
+            rest = String(rest[mark.upperBound...])
+            let token = String(rest.prefix { $0.isNumber })
+            var handle = ""
+            if let slash = before.lastIndex(of: "/") {
+                handle = String(before[before.index(after: slash)...])
+            }
+            take(handle: handle, token: token)
+        }
+        return out
     }
 
     static func deskSearch(_ query: String) -> String? {
@@ -1056,6 +1148,16 @@ enum AdultDesk {
         for handle in facePostTokens(kind) {
             add(postProfile(handle))
         }
+        var users: [String] = []
+        var userSeen: Set<String> = []
+        for raw in facePostTokens(kind) + faceGiftTokens(kind) {
+            let name = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            guard !name.isEmpty, userSeen.insert(name).inserted else { continue }
+            users.append(name)
+        }
+        for handle in users {
+            add(deskUser(handle))
+        }
         for slug in faceStarTokens(kind) {
             for page in 1...huntPages {
                 add(starSearch(slug, page: page))
@@ -1063,6 +1165,9 @@ enum AdultDesk {
         }
         for query in faceQueries(kind) {
             add(deskSearch(query))
+        }
+        for query in faceQueries(kind) {
+            add(webSearch(query))
         }
         var gifts: [String] = []
         var giftSeen: Set<String> = []
