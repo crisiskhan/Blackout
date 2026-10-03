@@ -346,6 +346,8 @@ ADULT_MONA = (
 ADULT_HIZ = (
     "imhizbaeexx",
     "imhizbaeexx_",
+    "imhizbaee",
+    "imhizbae",
     "hizbaeexx",
 )
 ADULT_YESS = (
@@ -477,7 +479,7 @@ ADULT_LOVE_TAGS = ("girls", "couples")
 ADULT_RAIL_EXTRA = 8
 ADULT_HUNT_AT_ONCE = 4
 ADULT_HUNT_PAGES = 2
-ADULT_HUNT_CAP = 48
+ADULT_HUNT_CAP = 64
 ADULT_COUNT_CAP = 1_000_000_000
 ADULT_TOPIC = {
     "BRAIDS": ("braids", "braid", "cornrows"),
@@ -1038,8 +1040,14 @@ ADULT_FACE_STARS = (
     ("KIRAWWRRRA", ("kirawrrra2-0",)),
 )
 ADULT_FACE_HOLDS = (
-    ("ITSSTEPHHONEY21", (("pin", "P283XrKRjsV", 158, "stephaniehvip twerks and jiggles"),)),
-    ("ITSSTEPHHONEYXO21", (("pin", "P283XrKRjsV", 158, "stephaniehvip twerks and jiggles"),)),
+    ("ITSSTEPHHONEY21", (
+        ("file", "https://v22.erome.com/8210/RUX8bZH5/jxw826NR_720p.mp4", 197, "STEPHANIEHVIP"),
+        ("pin", "P283XrKRjsV", 158, "stephaniehvip twerks and jiggles"),
+    )),
+    ("ITSSTEPHHONEYXO21", (
+        ("file", "https://v22.erome.com/8210/RUX8bZH5/jxw826NR_720p.mp4", 197, "STEPHANIEHVIP"),
+        ("pin", "P283XrKRjsV", 158, "stephaniehvip twerks and jiggles"),
+    )),
     ("MULAN VUITTON", (
         ("star", "mulan-vuitton-gets-pounded-while-in-a-skirt", 984, "Mulan Vuitton Gets Pounded While In A Skirt"),
         ("star", "mulan-vuitton-has-sex-with-a-thief", 712, "Mulan Vuitton Has Sex With A Thief"),
@@ -1061,20 +1069,44 @@ ADULT_FACE_HOLDS = (
         ("pin", "iXWnuAL4FnV", 140, "Doubledose Twins Blowjob"),
     )),
     ("MIKEILA J", (
-        ("file", "https://v203.erome.com/325/TqelxrBL/Ut4hcj7J_720p.mp4", 456, "Mikeilaj"),
-        ("file", "https://v15.erome.com/959/iLRhKOjv/bQN8Lo1B_720p.mp4", 456, "MikeilaJ"),
+        ("file", "https://v15.erome.com/959/iLRhKOjv/AWEOf5Iy_720p.mp4", 456, "MikeilaJ"),
+        ("file", "https://v15.erome.com/959/iLRhKOjv/Qv7OXyIm_720p.mp4", 387, "MikeilaJ"),
         ("file", "https://v6.erome.com/2377/RLcyK3T5/M3ZqMB7z_720p.mp4", 387, "3-29-24 Mikeilaj 3 SEXY SEXY SEXY"),
+        ("file", "https://v203.erome.com/325/TqelxrBL/tBwdtoR3_720p.mp4", 238, "Mikeilaj"),
     )),
     ("JUICYJAS TV", (
         ("file", "https://v13.erome.com/1454/OWRwt8jD/gOUvm3em_720p.mp4", 567, "Juicyjass"),
+        ("file", "https://v108.erome.com/7136/58Uaa6Ig/8feiQ8cD_720p.mp4", 562, "jjuicyjass"),
+        ("file", "https://v78.erome.com/7455/KmjJcLJT/IApjGeGF_720p.mp4", 445, "jjuicyjass"),
         ("file", "https://v105.erome.com/7729/p5AlhPzA/shXMd6w8_720p.mp4", 445, "JJUICYJASS AKA BABYFACEJASS"),
+        ("file", "https://v108.erome.com/7136/58Uaa6Ig/uAnW7V8o_720p.mp4", 375, "jjuicyjass"),
+        ("file", "https://v3.erome.com/7455/yz4tK6d5/g9QnFotZ_720p.mp4", 281, "jjuicyjass"),
     )),
-    ("HONEYTEASSEE", (("file", "https://v103.erome.com/8076/4WuSM4Do/NLPXJlNS_720p.mp4", 45, "kittylunaxx luna dream"),)),
+    ("HONEYTEASSEE", (
+        ("file", "https://v103.erome.com/8076/4WuSM4Do/yxNQr8Sq_720p.mp4", 45, "kittylunaxx luna dream"),
+        ("file", "https://v103.erome.com/8076/4WuSM4Do/RO9SNpQe_720p.mp4", 37, "kittylunaxx luna dream"),
+        ("file", "https://v90.erome.com/8216/wFCSXuwr/FDo2iIPI_720p.mp4", 20, "kittylunaxx fine ass fully nude"),
+    )),
     ("TANIA RAMOS", (
         ("file", "https://v46.erome.com/8279/rRy8eW9u/ziltWEbq_720p.mp4", 3591, "Tania Ramos guest cut"),
         ("file", "https://v103.erome.com/2665/WJD2aTMn/SQLCCerD_720p.mp4", 648, "Tania Ramos AKA Waifutania"),
     )),
-    ("LILI VICTORIA", (("file", "https://v2.erome.com/8917/i3ukXKfK/tYUWdkYx_720p.mp4", 63, "lilivictoria32"),)),
+    ("LILI VICTORIA", (
+        ("file", "https://v2.erome.com/8917/i3ukXKfK/C4q2YdX7_720p.mp4", 63, "lilivictoria32"),
+        ("file", "https://v93.erome.com/9093/c6S6qfYl/Pbi2woWQ_720p.mp4", 15, "lilivictoria32"),
+    )),
+    ("IMHIZBAEEXX", (
+        ("file", "https://v320.erome.com/5241/CZ4UXKiP/k8qQdw8F_720p.mp4", 33, "Imhizbae"),
+        ("file", "https://v320.erome.com/5241/CZ4UXKiP/buFOXuzD_720p.mp4", 32, "Imhizbae"),
+        ("file", "https://v18.erome.com/5462/5Ap1AVt9/wcPBccoY_720p.mp4", 12, "Imhizbaee outside"),
+    )),
+    ("LILIANAS PAGE", (
+        ("post", "https://video.twimg.com/ext_tw_video/1878566880551862272/pu/vid/avc1/720x1280/xH0pvUTTQ5G5AJNe.mp4?tag=12", 7, "Lilianaspage"),
+        ("post", "https://video.twimg.com/amplify_video/2090576619694182400/vid/avc1/720x1280/r_l7Mr5BABbJlJXl.mp4?tag=29", 4, "Lilianaspage"),
+    )),
+    ("PAMELA YAMZ", (
+        ("post", "https://video.twimg.com/ext_tw_video/1856457311075581952/pu/vid/avc1/720x1280/lQOCKUuxeqEZRD4n.mp4?tag=12", 8, "Pamela Yamz glute pump"),
+    )),
     ("VAL2YUMMI", (("file", "https://v58.erome.com/8970/DMAsDEDH/3HYKACJR_720p.mp4", 152, "val2yummi"),)),
     ("FREAKYYSTACKSS", (("file", "https://v10.erome.com/8815/f17CQGFk/BvuzWQDY_720p.mp4", 668, "FreakyStackss x Slobhouse"),)),
     ("ASAIA HERNANDEZ", (("file", "https://v11.erome.com/5822/AvtUf9Tm/A5lnqNUK_720p.mp4", 29, "Asaia fine ass"),)),
@@ -1082,11 +1114,14 @@ ADULT_FACE_HOLDS = (
     ("IMANGELJESSYY", (("file", "https://v15.erome.com/9197/hhyYdQUz/ilQB0MKm_720p.mp4", 13, "Imangeljessyy"),)),
 )
 ADULT_FACE_DESKS = (
+    ("ITSSTEPHHONEY21", ("RUX8bZH5",)),
+    ("ITSSTEPHHONEYXO21", ("RUX8bZH5",)),
     ("MIKEILA J", ("edMkQtmB", "iLRhKOjv", "TqelxrBL", "RLcyK3T5")),
-    ("JUICYJAS TV", ("bYEwXbLM", "OWRwt8jD", "p5AlhPzA")),
+    ("JUICYJAS TV", ("bYEwXbLM", "OWRwt8jD", "p5AlhPzA", "58Uaa6Ig", "KmjJcLJT", "yz4tK6d5")),
     ("HONEYTEASSEE", ("4WuSM4Do", "wFCSXuwr")),
     ("TANIA RAMOS", ("WJD2aTMn", "rRy8eW9u", "yYXjVfnM")),
-    ("LILI VICTORIA", ("i3ukXKfK",)),
+    ("LILI VICTORIA", ("i3ukXKfK", "c6S6qfYl")),
+    ("IMHIZBAEEXX", ("CZ4UXKiP", "5Ap1AVt9")),
     ("VAL2YUMMI", ("DMAsDEDH", "6pKwUvNE")),
     ("FREAKYYSTACKSS", ("f17CQGFk",)),
     ("ASAIA HERNANDEZ", ("AvtUf9Tm",)),
@@ -1095,6 +1130,44 @@ ADULT_FACE_DESKS = (
 )
 ADULT_DESK_ORIGIN = "https://www.erome.com"
 ADULT_DESK_FOLLOW = 8
+ADULT_POST_ORIGIN = "https://syndication.twitter.com"
+ADULT_POST_STATUS = "https://api.fxtwitter.com"
+ADULT_POST_FOLLOW = 8
+ADULT_FACE_POSTS = (
+    ("ITSSTEPHHONEY21", ("itsstephhoneyxo21", "itsstephhoney21")),
+    ("ITSSTEPHHONEYXO21", ("itsstephhoneyxo21", "itsstephhoney21")),
+    ("MULAN VUITTON", ("mulanvuitton",)),
+    ("MIKEILA J", ("mikeilaj", "theemikeilaj")),
+    ("NERDY BEILA", ("nerdybeila",)),
+    ("JUICYJAS TV", ("juicyjastv",)),
+    ("HONEYTEASSEE", ("honeyteassee", "kittylunaxx")),
+    ("TANIA RAMOS", ("taniaaaramos",)),
+    ("BRITTANYA RAZAVI", ("seebrittanya",)),
+    ("HOT4LEXI", ("hot4lexi",)),
+    ("LILI VICTORIA", ("lilivictoria32",)),
+    ("ZURI BELLA ROSE", ("zuribellarose",)),
+    ("SARIIXO", ("officialsariixo",)),
+    ("MONA ACUTEE", ("monaacutee",)),
+    ("IMHIZBAEEXX", ("imhizbaeexx_",)),
+    ("YESS ENIA69", ("yess_enia69",)),
+    ("VAL2YUMMI", ("val2yummi",)),
+    ("KIRAWWRRRA", ("kirawrrra",)),
+    ("JACQIE VAINS", ("jacqievains",)),
+    ("LILIANAS PAGE", ("lilianaspage",)),
+    ("FREAKYYSTACKSS", ("freakyystackss",)),
+    ("ASAIA HERNANDEZ", ("asaia_hernandez",)),
+    ("JASMINEGTV", ("jasminegtv1",)),
+    ("IMANGELJESSYY", ("imangeljessyy",)),
+    ("GRACIE BONN", ("itsgraciebonn",)),
+    ("DEBVARELA", ("debvarela_",)),
+    ("DOUBLE DOSE TWINS", ("doubledosetwins",)),
+    ("PAMELA YAMZ", ("pamelayamz",)),
+    ("ANNABELLE RIOS", ("annabelleriossss",)),
+    ("NICOLEEE 1329", ("_nicoleee_1329",)),
+    ("EUNICEG", ("euniceg___",)),
+    ("STRAWBERRY SANDRA", ("strawberrysandra20",)),
+    ("ITOCHIANATA", ("itochianata",)),
+)
 ADULT_FACE_STILLS = (
     ("P283XrKRjsV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"),
     ("pYaoSJlMR79", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/175/17518776/4_360.jpg"),
@@ -1111,6 +1184,9 @@ ADULT_FACE_STILLS = (
     ("7bg2FgwidLS", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/171/17109075/14_360.jpg"),
     ("NtQUcCtcTj0", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/173/17399374/14_360.jpg"),
     ("iXWnuAL4FnV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/15/157/15712160/13_360.jpg"),
+    ("xH0pvUTTQ5G5AJNe", "https://pbs.twimg.com/ext_tw_video_thumb/1878566880551862272/pu/img/XwOfZEDcSFR8nf_0.jpg"),
+    ("r_l7Mr5BABbJlJXl", "https://pbs.twimg.com/amplify_video_thumb/2090576619694182400/img/w0GlIOuf_e8LNUfn.jpg"),
+    ("lQOCKUuxeqEZRD4n", "https://pbs.twimg.com/ext_tw_video_thumb/1856457311075581952/pu/img/n13MThQEfvTsFvA6.jpg"),
 )
 ADULT_FACE_GIFTS = (
     ("ITSSTEPHHONEY21", ("itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip")),
@@ -1127,7 +1203,7 @@ ADULT_FACE_GIFTS = (
     ("ZURI BELLA ROSE", ("zuribellarose",)),
     ("SARIIXO", ("officialsariixo", "sariixo")),
     ("MONA ACUTEE", ("monaacutee", "monaacute")),
-    ("IMHIZBAEEXX", ("imhizbaeexx", "hizbaeexx")),
+    ("IMHIZBAEEXX", ("imhizbaeexx", "imhizbaee", "imhizbae", "hizbaeexx")),
     ("YESS ENIA69", ("yessenia69",)),
     ("VAL2YUMMI", ("val2yummi", "val2yummy")),
     ("KIRAWWRRRA", ("kirawrrra", "kirawrrra2")),
@@ -1211,6 +1287,8 @@ def adult_face_hunt(kind: str) -> list[str]:
         add(adult_face_id(token))
     for token in adult_face_desk_tokens(kind):
         add(adult_desk_album(token))
+    for handle in adult_face_post_tokens(kind):
+        add(adult_post_profile(handle))
     for slug in adult_face_star_tokens(kind):
         for page in range(1, ADULT_HUNT_PAGES + 1):
             add(adult_star_search(slug, page=page))
@@ -1241,6 +1319,54 @@ def adult_face_keep(ident: str) -> bool:
 
 def adult_face_desk_tokens(kind: str) -> list[str]:
     return _adult_face_tokens(ADULT_FACE_DESKS, kind)
+
+
+def adult_face_post_tokens(kind: str) -> list[str]:
+    return _adult_face_tokens(ADULT_FACE_POSTS, kind)
+
+
+def adult_post_profile(handle: str) -> str | None:
+    name = str(handle or "").strip().lstrip("@")
+    if not name or not all(ch.isalnum() or ch == "_" for ch in name):
+        return None
+    encoded = urllib.parse.quote(name, safe="_")
+    return f"{ADULT_POST_ORIGIN}/srv/timeline-profile/screen-name/{encoded}"
+
+
+def adult_post_status(token: str) -> str | None:
+    ident = str(token or "").strip()
+    if len(ident) < 16 or not ident.isdigit():
+        return None
+    return f"{ADULT_POST_STATUS}/status/{ident}"
+
+
+def adult_post_ids(payload: object) -> list[str]:
+    text = payload.decode("utf-8", "replace") if isinstance(payload, bytes) else str(payload or "")
+    out: list[str] = []
+    seen: set[str] = set()
+    for match in re.finditer(r'"id_str":"(\d{16,20})"', text):
+        ident = match.group(1)
+        if ident not in seen:
+            seen.add(ident)
+            out.append(ident)
+    for match in re.finditer(r"/status/(\d{16,20})", text):
+        ident = match.group(1)
+        if ident not in seen:
+            seen.add(ident)
+            out.append(ident)
+    return out
+
+
+def adult_post_key(raw: str) -> str | None:
+    path = urllib.parse.urlparse(str(raw or "")).path.strip("/").split("/")
+    if not path:
+        return None
+    file = path[-1].lower()
+    if "." in file:
+        file = file.split(".", 1)[0]
+    if len(file) < 4 or not all(ch.isalnum() or ch == "_" for ch in file):
+        return None
+    return file
 
 
 def adult_desk_search(query: str) -> str | None:
@@ -1302,6 +1428,12 @@ def adult_face_still(desk: str, token: str) -> str | None:
         return None
     if desk == "file":
         return adult_desk_still(token)
+    if desk == "post":
+        ident = adult_post_key(token) or str(token or "").strip()
+        for name, src in ADULT_FACE_STILLS:
+            if name.lower() == ident.lower():
+                return adult_still(src)
+        return None
     ident = str(token or "").strip()
     for name, src in ADULT_FACE_STILLS:
         if name.lower() == ident.lower():
@@ -1333,6 +1465,9 @@ def adult_face_hold_rooms(kind: str) -> list[dict]:
                 elif desk == "file":
                     play = adult_playlist(token)
                     rid = f"adult-face-desk-{adult_desk_key(token) or token.lower()}"
+                elif desk == "post":
+                    play = adult_playlist(token)
+                    rid = f"adult-face-post-{adult_post_key(token) or token.lower()}"
                 else:
                     play = adult_playlist(adult_face_file(token) or "")
                     rid = f"adult-face-{token.lower()}"
@@ -1624,6 +1759,9 @@ def adult_parse_face(payload: object, kind: str) -> list[dict]:
         return []
     if isinstance(payload, (bytes, str)):
         return adult_parse_desk(payload, kind)
+    if isinstance(payload, dict) and isinstance(payload.get("tweet"), dict):
+        room = _adult_post_clip(payload["tweet"], needles, kind)
+        return [room] if room else []
     rows: list[dict] = []
     seen: set[str] = set()
     for model in _adult_face_models(payload):
@@ -1640,6 +1778,49 @@ def adult_parse_face(payload: object, kind: str) -> list[dict]:
         rows.sort(key=lambda row: (-int(row["seconds"]), str(row["name"])))
         return rows
     return adult_parse_desk(payload, kind)
+
+
+def _adult_post_clip(model: dict, needles: list[str], kind: str) -> dict | None:
+    media = model.get("media") if isinstance(model.get("media"), dict) else {}
+    videos = media.get("videos") if isinstance(media, dict) else None
+    if not isinstance(videos, list) or not videos:
+        return None
+    clip = videos[0] if isinstance(videos[0], dict) else {}
+    play = adult_playlist(str(clip.get("url") or ""))
+    key = adult_post_key(str(clip.get("url") or ""))
+    if not play or not key:
+        return None
+    author = model.get("author") if isinstance(model.get("author"), dict) else {}
+    user = str((author or {}).get("screen_name") or "")
+    title = str(model.get("text") or user).replace("\u200b", " ").strip()
+    if not title:
+        title = user
+    if not title or not _adult_face_ok(title) or not _adult_face_ok(user):
+        return None
+    blob = f"{title} {user} {key}"
+    if not _adult_face_hit(blob, needles):
+        return None
+    raw_seconds = clip.get("duration")
+    try:
+        seconds = int(round(float(raw_seconds)))
+    except (TypeError, ValueError):
+        seconds = 0
+    seconds = max(1, seconds) if raw_seconds not in (None, "") else 0
+    if seconds <= 0:
+        return None
+    chip = str(kind or "").strip().upper()
+    thumb = adult_still(str(clip.get("thumbnail_url") or "")) or ""
+    return {
+        "id": f"adult-face-post-{key}",
+        "name": title.upper(),
+        "handle": key,
+        "url": play,
+        "viewers": 0,
+        "image": thumb,
+        "kinds": [chip] if chip else [],
+        "seek": f"{title} {user} {' '.join(needles)}".strip().lower(),
+        "seconds": seconds,
+    }
 
 
 def adult_desk_albums(payload: object, kind: str) -> list[str]:
@@ -3093,7 +3274,7 @@ class AdultDeskTests(unittest.TestCase):
             [row["id"] for row in adult_pick(adult_face_hold_rooms("KIRAWWRRRA"), kind="KIRAWWRRRA")],
             ["adult-face-star-kirawrrra2-0-fills-her-ass-for-the-first-time"],
         )
-        self.assertEqual(adult_face_hold_rooms("IMHIZBAEEXX"), [])
+        self.assertGreaterEqual(len(adult_face_hold_rooms("IMHIZBAEEXX")), 2)
         self.assertGreaterEqual(len(adult_face_hold_rooms("ALL")), 10)
         self.assertGreaterEqual(len(adult_face_hold_rooms("")), 10)
         self.assertEqual(
@@ -3896,6 +4077,79 @@ class AdultDeskTests(unittest.TestCase):
         for word in ("chaturbate",):
             self.assertNotIn(word, live.lower())
             self.assertNotIn(word, sock.lower())
+
+    def test_named_chips_hunt_public_posts_and_held_files(self):
+        desk = read("Blackout", "AdultDesk.swift")
+        sock = read("Blackout", "UpdateSocket.swift")
+        self.assertIn("imhizbae", adult_face_needles("IMHIZBAEEXX") or [])
+        self.assertIn("imhizbaee", adult_face_needles("IMHIZBAEEXX") or [])
+        self.assertGreaterEqual(len(adult_face_hold_rooms("IMHIZBAEEXX")), 2)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("LILIANAS PAGE")), 2)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("PAMELA YAMZ")), 1)
+        self.assertTrue(any(row["seconds"] >= 197 for row in adult_face_hold_rooms("ITSSTEPHHONEY21")))
+        self.assertTrue(any(row["seconds"] >= 560 for row in adult_face_hold_rooms("JUICYJAS TV")))
+        self.assertTrue(any(row["seconds"] >= 63 for row in adult_face_hold_rooms("LILI VICTORIA")))
+        self.assertTrue(any("syndication.twitter.com" in path for path in adult_face_hunt("LILIANAS PAGE")))
+        self.assertTrue(any("syndication.twitter.com" in path for path in adult_face_hunt("MONA ACUTEE")))
+        self.assertTrue(any("erome.com/a/58Uaa6Ig" in path for path in adult_face_hunt("JUICYJAS TV")))
+        self.assertTrue(any("erome.com/a/CZ4UXKiP" in path for path in adult_face_hunt("IMHIZBAEEXX")))
+        self.assertTrue(any("erome.com/a/RUX8bZH5" in path for path in adult_face_hunt("ITSSTEPHHONEY21")))
+        post = {
+            "tweet": {
+                "author": {"screen_name": "Lilianaspage"},
+                "text": "web me up?",
+                "media": {
+                    "videos": [
+                        {
+                            "url": "https://video.twimg.com/ext_tw_video/1878566880551862272/pu/vid/avc1/720x1280/xH0pvUTTQ5G5AJNe.mp4?tag=12",
+                            "thumbnail_url": "https://pbs.twimg.com/ext_tw_video_thumb/1878566880551862272/pu/img/XwOfZEDcSFR8nf_0.jpg",
+                            "duration": 6.833,
+                        }
+                    ]
+                },
+            }
+        }
+        rows = adult_parse_face(post, "LILIANAS PAGE")
+        self.assertEqual([row["id"] for row in rows], ["adult-face-post-xh0pvuttq5g5ajne"])
+        self.assertEqual(rows[0]["seconds"], 7)
+        self.assertIn("video.twimg.com", rows[0]["url"])
+        self.assertEqual(
+            adult_post_ids('{"id_str":"1878566900231553384"} /status/2090576669124002084'),
+            ["1878566900231553384", "2090576669124002084"],
+        )
+        self.assertIn("static let facePosts", desk)
+        self.assertIn("huntCap = 64", desk)
+        self.assertIn("syndication.twitter.com", desk)
+        self.assertIn("fxtwitter.com", desk)
+        self.assertIn("video.twimg.com", desk.lower())
+        self.assertIn("fetchPostStatuses", sock)
+        self.assertIn("postLook", sock)
+        self.assertNotIn("onlyfans", desk.lower())
+        self.assertNotIn("fansly", desk.lower())
+        self.assertNotIn("fanbase", desk.lower())
+        for row in adult_face_hold_rooms("IMHIZBAEEXX") + adult_face_hold_rooms("LILIANAS PAGE"):
+            self.assertNotIn("onlyfans", row["name"].lower())
+            self.assertNotIn("onlyfans", row["url"].lower())
+        self.assertEqual(
+            adult_parse_face(
+                {
+                    "tweet": {
+                        "author": {"screen_name": "annabellerio"},
+                        "text": "Annabelle Rio lookalike",
+                        "media": {
+                            "videos": [
+                                {
+                                    "url": "https://video.twimg.com/ext_tw_video/1/pu/vid/avc1/720x1280/lookalike.mp4",
+                                    "duration": 12,
+                                }
+                            ]
+                        },
+                    }
+                },
+                "ANNABELLE RIOS",
+            ),
+            [],
+        )
 
 
 class NaLiveTests(unittest.TestCase):

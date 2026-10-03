@@ -291,6 +291,9 @@ final class UpdateSocket {
                         if AdultDesk.deskLook(path) {
                             return await UpdateSocket.fetchDeskAlbums(session, data, kind: kind)
                         }
+                        if AdultDesk.postLook(path) {
+                            return await UpdateSocket.fetchPostStatuses(session, data, kind: kind)
+                        }
                         return await Task.detached(priority: .utility) {
                             AdultDesk.parseFace(data, kind: kind)
                         }.value
@@ -409,6 +412,21 @@ final class UpdateSocket {
             }
         }
         return batches
+    }
+
+    nonisolated private static func fetchPostStatuses(
+        _ session: URLSession,
+        _ data: Data,
+        kind: String
+    ) async -> [AdultDesk.Room] {
+        var rows: [AdultDesk.Room] = []
+        var seen: Set<String> = []
+        for token in AdultDesk.postIds(data).prefix(AdultDesk.postFollow) {
+            guard let path = AdultDesk.postStatus(token), seen.insert(path).inserted else { continue }
+            guard let body = await UpdateSocket.fetchAdult(session, path) else { continue }
+            rows.append(contentsOf: AdultDesk.parseFace(body, kind: kind))
+        }
+        return rows
     }
 
     nonisolated private static func fetchDeskAlbums(
@@ -744,7 +762,7 @@ final class UpdateSocket {
         request.timeoutInterval = 8
         request.setValue(AdultDesk.userAgent(raw), forHTTPHeaderField: "User-Agent")
         request.setValue(AdultDesk.referer(raw), forHTTPHeaderField: "Referer")
-        if AdultDesk.deskHost(raw) {
+        if AdultDesk.deskHost(raw) || AdultDesk.postLook(raw) {
             request.setValue(
                 "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
                 forHTTPHeaderField: "Accept"

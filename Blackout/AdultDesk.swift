@@ -245,6 +245,8 @@ enum AdultDesk {
     static let hizNeedles = [
         "imhizbaeexx",
         "imhizbaeexx_",
+        "imhizbaee",
+        "imhizbae",
         "hizbaeexx",
     ]
     static let yessNeedles = [
@@ -401,7 +403,7 @@ enum AdultDesk {
         ("ZURI BELLA ROSE", ["zuribellarose"]),
         ("SARIIXO", ["officialsariixo", "sariixo"]),
         ("MONA ACUTEE", ["monaacutee", "monaacute"]),
-        ("IMHIZBAEEXX", ["imhizbaeexx", "hizbaeexx"]),
+        ("IMHIZBAEEXX", ["imhizbaeexx", "imhizbaee", "imhizbae", "hizbaeexx"]),
         ("YESS ENIA69", ["yessenia69"]),
         ("VAL2YUMMI", ["val2yummi", "val2yummy"]),
         ("KIRAWWRRRA", ["kirawrrra", "kirawrrra2"]),
@@ -445,6 +447,10 @@ enum AdultDesk {
             "zhnMi5Bh",
             "p5AlhPzA",
             "0V28kOfA",
+            "58Uaa6Ig",
+            "KmjJcLJT",
+            "yz4tK6d5",
+            "wHFqflcw",
         ]),
         ("HONEYTEASSEE", ["4WuSM4Do", "wFCSXuwr"]),
         ("TANIA RAMOS", [
@@ -463,6 +469,45 @@ enum AdultDesk {
         ("ASAIA HERNANDEZ", ["AvtUf9Tm"]),
         ("JASMINEGTV", ["5jd5lhgS"]),
         ("IMANGELJESSYY", ["hhyYdQUz"]),
+        ("ITSSTEPHHONEY21", ["RUX8bZH5"]),
+        ("ITSSTEPHHONEYXO21", ["RUX8bZH5"]),
+        ("IMHIZBAEEXX", ["CZ4UXKiP", "5Ap1AVt9"]),
+    ]
+    /// Public X handles. Hunt the guest timeline, not a paywalled store.
+    static let facePosts: [(String, [String])] = [
+        ("ITSSTEPHHONEY21", ["itsstephhoneyxo21", "itsstephhoney21"]),
+        ("ITSSTEPHHONEYXO21", ["itsstephhoneyxo21", "itsstephhoney21"]),
+        ("MULAN VUITTON", ["mulanvuitton"]),
+        ("MIKEILA J", ["mikeilaj", "theemikeilaj"]),
+        ("NERDY BEILA", ["nerdybeila"]),
+        ("JUICYJAS TV", ["juicyjastv"]),
+        ("HONEYTEASSEE", ["honeyteassee", "kittylunaxx"]),
+        ("TANIA RAMOS", ["taniaaaramos"]),
+        ("BRITTANYA RAZAVI", ["seebrittanya"]),
+        ("HOT4LEXI", ["hot4lexi"]),
+        ("LILI VICTORIA", ["lilivictoria32"]),
+        ("ZURI BELLA ROSE", ["zuribellarose"]),
+        ("SARIIXO", ["officialsariixo"]),
+        ("MONA ACUTEE", ["monaacutee"]),
+        ("IMHIZBAEEXX", ["imhizbaeexx_"]),
+        ("YESS ENIA69", ["yess_enia69"]),
+        ("VAL2YUMMI", ["val2yummi"]),
+        ("KIRAWWRRRA", ["kirawrrra"]),
+        ("JACQIE VAINS", ["jacqievains"]),
+        ("LILIANAS PAGE", ["lilianaspage"]),
+        ("FREAKYYSTACKSS", ["freakyystackss"]),
+        ("ASAIA HERNANDEZ", ["asaia_hernandez"]),
+        ("JASMINEGTV", ["jasminegtv1"]),
+        ("IMANGELJESSYY", ["imangeljessyy"]),
+        ("GRACIE BONN", ["itsgraciebonn"]),
+        ("DEBVARELA", ["debvarela_"]),
+        ("DOUBLE DOSE TWINS", ["doubledosetwins"]),
+        ("PAMELA YAMZ", ["pamelayamz"]),
+        ("ANNABELLE RIOS", ["annabelleriossss"]),
+        ("NICOLEEE 1329", ["_nicoleee_1329"]),
+        ("EUNICEG", ["euniceg___"]),
+        ("STRAWBERRY SANDRA", ["strawberrysandra20"]),
+        ("ITOCHIANATA", ["itochianata"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
@@ -485,15 +530,20 @@ enum AdultDesk {
     static let railExtra = 8
     static let huntAtOnce = 4
     static let huntPages = 2
-    static let huntCap = 48
+    static let huntCap = 64
     static let deskFollow = 8
     static let deskOrigin = "https://www.erome.com"
+    static let postFollow = 8
+    static let postOrigin = "https://syndication.twitter.com"
+    static let postStatusOrigin = "https://api.fxtwitter.com"
     /// Proven guest files. Mount before the hunt so a dead desk cannot blank the chip.
     static let faceHolds: [(String, [(String, String, Int, String)])] = [
         ("ITSSTEPHHONEY21", [
+            ("file", "https://v22.erome.com/8210/RUX8bZH5/jxw826NR_720p.mp4", 197, "STEPHANIEHVIP"),
             ("pin", "P283XrKRjsV", 158, "stephaniehvip twerks and jiggles"),
         ]),
         ("ITSSTEPHHONEYXO21", [
+            ("file", "https://v22.erome.com/8210/RUX8bZH5/jxw826NR_720p.mp4", 197, "STEPHANIEHVIP"),
             ("pin", "P283XrKRjsV", 158, "stephaniehvip twerks and jiggles"),
         ]),
         ("MULAN VUITTON", [
@@ -557,17 +607,24 @@ enum AdultDesk {
             ("pin", "iXWnuAL4FnV", 140, "Doubledose Twins Blowjob"),
         ]),
         ("MIKEILA J", [
-            ("file", "https://v203.erome.com/325/TqelxrBL/Ut4hcj7J_720p.mp4", 456, "Mikeilaj"),
-            ("file", "https://v15.erome.com/959/iLRhKOjv/bQN8Lo1B_720p.mp4", 456, "MikeilaJ"),
+            ("file", "https://v15.erome.com/959/iLRhKOjv/AWEOf5Iy_720p.mp4", 456, "MikeilaJ"),
+            ("file", "https://v15.erome.com/959/iLRhKOjv/Qv7OXyIm_720p.mp4", 387, "MikeilaJ"),
             ("file", "https://v6.erome.com/2377/RLcyK3T5/M3ZqMB7z_720p.mp4", 387, "3-29-24 Mikeilaj 3 SEXY SEXY SEXY"),
+            ("file", "https://v203.erome.com/325/TqelxrBL/tBwdtoR3_720p.mp4", 238, "Mikeilaj"),
         ]),
         ("JUICYJAS TV", [
             ("file", "https://v13.erome.com/1454/OWRwt8jD/gOUvm3em_720p.mp4", 567, "Juicyjass"),
+            ("file", "https://v108.erome.com/7136/58Uaa6Ig/8feiQ8cD_720p.mp4", 562, "jjuicyjass"),
+            ("file", "https://v78.erome.com/7455/KmjJcLJT/IApjGeGF_720p.mp4", 445, "jjuicyjass"),
             ("file", "https://v105.erome.com/7729/p5AlhPzA/shXMd6w8_720p.mp4", 445, "JJUICYJASS AKA BABYFACEJASS"),
             ("file", "https://v102.erome.com/1968/bYEwXbLM/3nwkSE2f_720p.mp4", 406, "Juicyjass"),
+            ("file", "https://v108.erome.com/7136/58Uaa6Ig/uAnW7V8o_720p.mp4", 375, "jjuicyjass"),
+            ("file", "https://v3.erome.com/7455/yz4tK6d5/g9QnFotZ_720p.mp4", 281, "jjuicyjass"),
         ]),
         ("HONEYTEASSEE", [
-            ("file", "https://v103.erome.com/8076/4WuSM4Do/NLPXJlNS_720p.mp4", 45, "kittylunaxx luna dream"),
+            ("file", "https://v103.erome.com/8076/4WuSM4Do/yxNQr8Sq_720p.mp4", 45, "kittylunaxx luna dream"),
+            ("file", "https://v103.erome.com/8076/4WuSM4Do/RO9SNpQe_720p.mp4", 37, "kittylunaxx luna dream"),
+            ("file", "https://v90.erome.com/8216/wFCSXuwr/FDo2iIPI_720p.mp4", 20, "kittylunaxx fine ass fully nude"),
         ]),
         ("TANIA RAMOS", [
             ("file", "https://v46.erome.com/8279/rRy8eW9u/ziltWEbq_720p.mp4", 3591, "Tania Ramos guest cut"),
@@ -575,7 +632,20 @@ enum AdultDesk {
             ("file", "https://v53.erome.com/7949/yYXjVfnM/UJ7h7VQw_720p.mp4", 577, "Tania Ramos"),
         ]),
         ("LILI VICTORIA", [
-            ("file", "https://v2.erome.com/8917/i3ukXKfK/tYUWdkYx_720p.mp4", 63, "lilivictoria32"),
+            ("file", "https://v2.erome.com/8917/i3ukXKfK/C4q2YdX7_720p.mp4", 63, "lilivictoria32"),
+            ("file", "https://v93.erome.com/9093/c6S6qfYl/Pbi2woWQ_720p.mp4", 15, "lilivictoria32"),
+        ]),
+        ("IMHIZBAEEXX", [
+            ("file", "https://v320.erome.com/5241/CZ4UXKiP/k8qQdw8F_720p.mp4", 33, "Imhizbae"),
+            ("file", "https://v320.erome.com/5241/CZ4UXKiP/buFOXuzD_720p.mp4", 32, "Imhizbae"),
+            ("file", "https://v18.erome.com/5462/5Ap1AVt9/wcPBccoY_720p.mp4", 12, "Imhizbaee outside"),
+        ]),
+        ("LILIANAS PAGE", [
+            ("post", "https://video.twimg.com/ext_tw_video/1878566880551862272/pu/vid/avc1/720x1280/xH0pvUTTQ5G5AJNe.mp4?tag=12", 7, "Lilianaspage"),
+            ("post", "https://video.twimg.com/amplify_video/2090576619694182400/vid/avc1/720x1280/r_l7Mr5BABbJlJXl.mp4?tag=29", 4, "Lilianaspage"),
+        ]),
+        ("PAMELA YAMZ", [
+            ("post", "https://video.twimg.com/ext_tw_video/1856457311075581952/pu/vid/avc1/720x1280/lQOCKUuxeqEZRD4n.mp4?tag=12", 8, "Pamela Yamz glute pump"),
         ]),
         ("VAL2YUMMI", [
             ("file", "https://v58.erome.com/8970/DMAsDEDH/3HYKACJR_720p.mp4", 152, "val2yummi"),
@@ -612,6 +682,9 @@ enum AdultDesk {
         ("7bg2FgwidLS", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/171/17109075/14_360.jpg"),
         ("NtQUcCtcTj0", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/173/17399374/14_360.jpg"),
         ("iXWnuAL4FnV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/15/157/15712160/13_360.jpg"),
+        ("xH0pvUTTQ5G5AJNe", "https://pbs.twimg.com/ext_tw_video_thumb/1878566880551862272/pu/img/XwOfZEDcSFR8nf_0.jpg"),
+        ("r_l7Mr5BABbJlJXl", "https://pbs.twimg.com/amplify_video_thumb/2090576619694182400/img/w0GlIOuf_e8LNUfn.jpg"),
+        ("lQOCKUuxeqEZRD4n", "https://pbs.twimg.com/ext_tw_video_thumb/1856457311075581952/pu/img/n13MThQEfvTsFvA6.jpg"),
     ]
     static let loveAgent =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -715,7 +788,7 @@ enum AdultDesk {
 
     static func userAgent(_ raw: String) -> String {
         let host = URL(string: raw)?.host?.lowercased() ?? ""
-        if loveHost(raw) || giftHost(raw) || deskHost(raw) || host.contains("bornstar") {
+        if loveHost(raw) || giftHost(raw) || deskHost(raw) || postHost(raw) || host.contains("bornstar") {
             return loveAgent
         }
         return agent
@@ -725,6 +798,7 @@ enum AdultDesk {
         if loveHost(raw) { return "\(loveOrigin)/" }
         if giftHost(raw) { return "\(giftOrigin)/" }
         if deskHost(raw) { return "\(deskOrigin)/" }
+        if postHost(raw) { return "https://x.com/" }
         let host = URL(string: raw)?.host?.lowercased() ?? ""
         if host.contains("eporner") { return "https://www.eporner.com/" }
         if host.contains("bornstar") { return "https://bornstar.co/" }
@@ -747,6 +821,78 @@ enum AdultDesk {
     static func deskHost(_ raw: String) -> Bool {
         let host = URL(string: raw)?.host?.lowercased() ?? ""
         return host == "erome.com" || host.hasSuffix(".erome.com") || host.contains("erome.com")
+    }
+
+    static func postHost(_ raw: String) -> Bool {
+        let host = URL(string: raw)?.host?.lowercased() ?? ""
+        if host == "syndication.twitter.com" { return true }
+        if host == "api.fxtwitter.com" || host.hasSuffix(".fxtwitter.com") { return true }
+        if host == "video.twimg.com" || host.hasSuffix(".twimg.com") { return true }
+        return host.contains("twitter.com") || host.contains("fxtwitter.com")
+    }
+
+    static func postLook(_ raw: String) -> Bool {
+        postHost(raw) && raw.lowercased().contains("timeline-profile")
+    }
+
+    static func postProfile(_ handle: String) -> String? {
+        var name = handle.trimmingCharacters(in: .whitespacesAndNewlines)
+        if name.hasPrefix("@") { name.removeFirst() }
+        guard !name.isEmpty, name.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" }) else {
+            return nil
+        }
+        guard let encoded = name.addingPercentEncoding(withAllowedCharacters: CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "_")))
+        else { return nil }
+        return "\(postOrigin)/srv/timeline-profile/screen-name/\(encoded)"
+    }
+
+    static func postStatus(_ token: String) -> String? {
+        let id = token.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard id.count >= 16, id.allSatisfy(\.isNumber) else { return nil }
+        return "\(postStatusOrigin)/status/\(id)"
+    }
+
+    static func facePostTokens(_ kind: String) -> [String] {
+        let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        for pair in facePosts where pair.0 == chip {
+            return pair.1
+        }
+        return []
+    }
+
+    static func postIds(_ data: Data) -> [String] {
+        guard let text = String(data: data, encoding: .utf8) else { return [] }
+        var out: [String] = []
+        var seen: Set<String> = []
+        func take(_ token: String) {
+            guard token.count >= 16, token.count <= 20, token.allSatisfy(\.isNumber) else { return }
+            if seen.insert(token).inserted { out.append(token) }
+        }
+        var rest = text
+        while let mark = rest.range(of: "\"id_str\":\"") {
+            rest = String(rest[mark.upperBound...])
+            let token = String(rest.prefix { $0.isNumber })
+            take(token)
+        }
+        rest = text
+        while let mark = rest.range(of: "/status/") {
+            rest = String(rest[mark.upperBound...])
+            let token = String(rest.prefix { $0.isNumber })
+            take(token)
+        }
+        return out
+    }
+
+    static func postKey(_ raw: String) -> String? {
+        guard let url = URL(string: raw) else { return nil }
+        var file = url.lastPathComponent.lowercased()
+        if let cut = file.range(of: ".") {
+            file = String(file[..<cut.lowerBound])
+        }
+        guard file.count >= 4, file.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" }) else {
+            return nil
+        }
+        return file
     }
 
     static func deskLook(_ raw: String) -> Bool {
@@ -907,6 +1053,9 @@ enum AdultDesk {
         for token in faceDeskTokens(kind) {
             add(deskAlbum(token))
         }
+        for handle in facePostTokens(kind) {
+            add(postProfile(handle))
+        }
         for slug in faceStarTokens(kind) {
             for page in 1...huntPages {
                 add(starSearch(slug, page: page))
@@ -970,6 +1119,9 @@ enum AdultDesk {
                     } else if desk == "file" {
                         play = playlist(token)
                         rid = "adult-face-desk-\(deskKey(token) ?? token.lowercased())"
+                    } else if desk == "post" {
+                        play = playlist(token)
+                        rid = "adult-face-post-\(postKey(token) ?? token.lowercased())"
                     } else {
                         play = playlist(faceFile(token) ?? "")
                         rid = "adult-face-\(token.lowercased())"
@@ -1012,6 +1164,13 @@ enum AdultDesk {
         if desk == "file" {
             return deskStill(token)
         }
+        if desk == "post" {
+            let id = postKey(token) ?? token.trimmingCharacters(in: .whitespacesAndNewlines)
+            for pair in faceStills where pair.0.caseInsensitiveCompare(id) == .orderedSame {
+                return still(pair.1)
+            }
+            return nil
+        }
         let id = token.trimmingCharacters(in: .whitespacesAndNewlines)
         for pair in faceStills where pair.0.caseInsensitiveCompare(id) == .orderedSame {
             return still(pair.1)
@@ -1047,6 +1206,12 @@ enum AdultDesk {
     static func parseFace(_ data: Data, kind: String) -> [Room] {
         guard let needles = faceNeedles(kind) else { return [] }
         if let obj = try? JSONSerialization.jsonObject(with: data) {
+            if let dict = obj as? [String: Any], let tweet = dict["tweet"] as? [String: Any] {
+                if let room = postClip(tweet, needles: needles, kind: kind) {
+                    return [room]
+                }
+                return []
+            }
             var seen: Set<String> = []
             var rows: [Room] = []
             for model in faceModels(obj) {
@@ -1334,6 +1499,44 @@ enum AdultDesk {
             image: still(string(model["thumbnailUrl"])) ?? "",
             kinds: chip.isEmpty ? [] : [chip],
             seek: (title + " " + creator + " " + needles.joined(separator: " ")).lowercased(),
+            seconds: seconds
+        )
+    }
+
+    private static func postClip(_ model: [String: Any], needles: [String], kind: String) -> Room? {
+        let media = model["media"] as? [String: Any] ?? [:]
+        let videos = media["videos"] as? [[String: Any]] ?? []
+        guard let clip = videos.first else { return nil }
+        let rawPlay = string(clip["url"])
+        guard let play = playlist(rawPlay), let key = postKey(rawPlay) else { return nil }
+        let author = model["author"] as? [String: Any] ?? [:]
+        let user = string(author["screen_name"])
+        var title = string(model["text"]).replacingOccurrences(of: "\u{200B}", with: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        if title.isEmpty { title = user }
+        guard !title.isEmpty, faceOk(title), faceOk(user) else { return nil }
+        let blob = title + " " + user + " " + key
+        guard faceHit(blob, needles: needles) else { return nil }
+        var seconds = 0
+        if let n = clip["duration"] as? Double, n.isFinite, n > 0 {
+            seconds = max(1, Int(n.rounded()))
+        } else if let n = clip["duration"] as? Int, n > 0 {
+            seconds = n
+        } else {
+            seconds = max(0, number(clip["duration"]))
+            if seconds > 0 { seconds = max(1, seconds) }
+        }
+        guard seconds > 0 else { return nil }
+        let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        return Room(
+            id: "adult-face-post-\(key)",
+            name: title.uppercased(),
+            handle: key,
+            url: play,
+            viewers: 0,
+            image: still(string(clip["thumbnail_url"])) ?? "",
+            kinds: chip.isEmpty ? [] : [chip],
+            seek: (title + " " + user + " " + needles.joined(separator: " ")).lowercased(),
             seconds: seconds
         )
     }
