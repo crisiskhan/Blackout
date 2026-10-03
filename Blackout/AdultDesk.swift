@@ -147,10 +147,24 @@ enum AdultDesk {
         "mulan.vuitton",
         "vuitton mulan",
     ]
+    static let mikeilaNeedles = [
+        "mikeilaj",
+        "mikeila j",
+        "mikeila_j",
+        "mikeila-j",
+        "mikeila.j",
+        "mikeila j.",
+        "mikeilajbaee",
+        "mikeilajduhh",
+        "theemikeilaj",
+        "mikeilaj duhh",
+        "mikeilaj baee",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
         ("MULAN VUITTON", mulanNeedles),
+        ("MIKEILA J", mikeilaNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -164,6 +178,7 @@ enum AdultDesk {
         ("ITSSTEPHHONEY21", ["itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip"]),
         ("ITSSTEPHHONEYXO21", ["itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip"]),
         ("MULAN VUITTON", ["mulanvuitton", "mulanvuittontv"]),
+        ("MIKEILA J", ["mikeilaj", "mikeilajbaee", "mikeilajduhh", "theemikeilaj"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"

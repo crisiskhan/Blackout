@@ -248,10 +248,24 @@ ADULT_MULAN = (
     "mulan.vuitton",
     "vuitton mulan",
 )
+ADULT_MIKEILA = (
+    "mikeilaj",
+    "mikeila j",
+    "mikeila_j",
+    "mikeila-j",
+    "mikeila.j",
+    "mikeila j.",
+    "mikeilajbaee",
+    "mikeilajduhh",
+    "theemikeilaj",
+    "mikeilaj duhh",
+    "mikeilaj baee",
+)
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
     ("ITSSTEPHHONEYXO21", ADULT_STEPH),
     ("MULAN VUITTON", ADULT_MULAN),
+    ("MIKEILA J", ADULT_MIKEILA),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_LOVE_ORIGIN = "https://lovescape.cam"
@@ -813,6 +827,7 @@ ADULT_FACE_GIFTS = (
     ("ITSSTEPHHONEY21", ("itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip")),
     ("ITSSTEPHHONEYXO21", ("itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip")),
     ("MULAN VUITTON", ("mulanvuitton", "mulanvuittontv")),
+    ("MIKEILA J", ("mikeilaj", "mikeilajbaee", "mikeilajduhh", "theemikeilaj")),
 )
 ADULT_FACE_KILL = (
     "loli",
@@ -1879,6 +1894,7 @@ class AdultDeskTests(unittest.TestCase):
                 "ITSSTEPHHONEY21",
                 "ITSSTEPHHONEYXO21",
                 "MULAN VUITTON",
+                "MIKEILA J",
                 "COUPLE",
                 "ORGY",
                 "ROLEPLAY",
@@ -1905,8 +1921,9 @@ class AdultDeskTests(unittest.TestCase):
             }
         ]
         rail = adult_rail(fat)
-        self.assertEqual(rail[:15], adult_rail([]))
-        self.assertLessEqual(len(rail), 23)
+        empty = adult_rail([])
+        self.assertEqual(rail[:len(empty)], empty)
+        self.assertLessEqual(len(rail), len(empty) + ADULT_RAIL_EXTRA)
         self.assertTrue(any(chip.startswith("KIND") for chip in rail))
         self.assertLess(len(rail), 14 + len(fat_kinds))
         love = adult_parse_love(
@@ -2076,6 +2093,15 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("vuitton mulan", adult_face_queries("MULAN VUITTON"))
         self.assertIn("mulan vuitton tv", adult_face_queries("MULAN VUITTON"))
         self.assertNotIn("erika vuitton", adult_face_queries("MULAN VUITTON"))
+        self.assertEqual(adult_face_queries("MIKEILA J")[0], "mikeilaj")
+        self.assertIn("mikeila j", adult_face_queries("MIKEILA J"))
+        self.assertIn("theemikeilaj", adult_face_queries("MIKEILA J"))
+        self.assertIn("mikeilajbaee", adult_face_queries("MIKEILA J"))
+        self.assertIn("mikeilajduhh", adult_face_gift_tokens("MIKEILA J"))
+        self.assertNotIn("mikeila", adult_face_needles("MIKEILA J") or [])
+        self.assertEqual(adult_topics("MIKEILA J"), [])
+        self.assertEqual(adult_face_star_tokens("MIKEILA J"), [])
+        self.assertEqual(adult_face_pin_tokens("MIKEILA J"), [])
         self.assertEqual(adult_gift_key("mulan vuitton"), "mulanvuitton")
         self.assertEqual(adult_gift_key("mulan-vuitton"), "mulanvuitton")
         self.assertIn("mulan-vuitton", adult_face_star_tokens("MULAN VUITTON"))
@@ -2205,6 +2231,46 @@ class AdultDeskTests(unittest.TestCase):
         self.assertTrue(any("users/mulanvuitton/search" in path for path in mulan_hunt))
         self.assertTrue(any("users/mulanvuittontv/search" in path for path in mulan_hunt))
         self.assertGreaterEqual(len(mulan_hunt), 8)
+        mikeila_hunt = adult_face_hunt("MIKEILA J")
+        self.assertTrue(any("eporner.com/api/v2/video/search/?query=mikeilaj" in path for path in mikeila_hunt))
+        self.assertTrue(any("bornstar.co/api/search?q=mikeilaj" in path for path in mikeila_hunt))
+        self.assertTrue(any("gifs/search?search_text=mikeilaj" in path for path in mikeila_hunt))
+        self.assertTrue(any("users/mikeilaj/search" in path for path in mikeila_hunt))
+        self.assertTrue(any("users/theemikeilaj/search" in path for path in mikeila_hunt))
+        self.assertTrue(any("users/mikeilajbaee/search" in path for path in mikeila_hunt))
+        self.assertFalse(any("video/id/" in path for path in mikeila_hunt))
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "id": "mikekeep1",
+                            "title": "mikeilaj guest file",
+                            "length_sec": 640,
+                            "views": 4,
+                            "keywords": "mikeilaj",
+                            "default_thumb": {"src": "https://img.example/mikeila.jpg"},
+                        },
+                        {
+                            "id": "mikewrong1",
+                            "title": "Olive Evans Gets Her Ass Plowed By Mike Williams",
+                            "length_sec": 3156,
+                            "views": 9,
+                            "keywords": "mike williams",
+                        },
+                        {
+                            "id": "mikaelawrong",
+                            "title": "Mikaela Testa Sucks Cock Then Gets Plowed In The Kitchen",
+                            "length_sec": 323,
+                            "views": 3,
+                            "keywords": "mikaela testa",
+                        },
+                    ]
+                },
+                "MIKEILA J",
+            )],
+            ["adult-face-mikekeep1"],
+        )
         self.assertEqual(
             [row["id"] for row in adult_parse_face(
                 {
@@ -2432,6 +2498,10 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("stephaniehvip", desk)
         self.assertIn("P283XrKRjsV", desk)
         self.assertIn("MULAN VUITTON", desk)
+        self.assertIn("MIKEILA J", desk)
+        self.assertIn("mikeilaNeedles", desk)
+        self.assertIn("mikeilajbaee", desk)
+        self.assertIn("theemikeilaj", desk)
         self.assertIn("mulanNeedles", desk)
         self.assertIn("mulan-vuitton", desk)
         self.assertIn("vuitton mulan", desk)
@@ -2782,6 +2852,7 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("ITSSTEPHHONEY21", tv)
         self.assertIn("ITSSTEPHHONEYXO21", tv)
         self.assertIn("MULAN VUITTON", tv)
+        self.assertIn("MIKEILA J", tv)
         self.assertIn("LOVESCAPE", tv)
         self.assertIn("lovescape.cam", tv.lower())
         self.assertIn("cannot jet", tv)
