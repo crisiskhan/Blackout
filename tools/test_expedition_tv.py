@@ -4,7 +4,7 @@
 Packs populate on open. Hop cameras use the same disc and the same SNAP
 rules. TV is TRAFFIC / BRIDGE / AIRPORT / VENUE / HOP, nearest to farthest
 inside each section. Empty sections omit. Open sections never a live
-stream — JPEG SNAP only. N/A is a 10s hold, then adult HTTPS HLS.
+stream — JPEG SNAP only. N/A is a 10s hold, then its own theater plate.
 Tap a still to pinch-zoom the packed JPEG.
 """
 from __future__ import annotations
@@ -497,6 +497,7 @@ ADULT_FACES = (
     ("ITISASHLEY", ADULT_ASHLEY),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
+ADULT_KEEP_CHIP = "KEEP"
 ADULT_LOVE_ORIGIN = "https://lovescape.cam"
 ADULT_LOVE_TAGS = ("girls", "couples")
 ADULT_RAIL_EXTRA = 8
@@ -925,7 +926,7 @@ def adult_ask_needles(raw: str) -> list[str] | None:
     if not text:
         return None
     chip = text.upper()
-    if chip in ("", "ALL") or adult_love_needles(chip):
+    if chip in ("", "ALL", ADULT_KEEP_CHIP) or adult_love_needles(chip):
         return None
     if needles := adult_face_needles(chip):
         return needles
@@ -966,6 +967,10 @@ def adult_hunt_needles(kind: str) -> list[str] | None:
 
 def adult_love_needles(kind: str) -> bool:
     return str(kind or "").strip().upper() == ADULT_LOVE_CHIP
+
+
+def adult_keep_needles(kind: str) -> bool:
+    return str(kind or "").strip().upper() == ADULT_KEEP_CHIP
 
 
 def adult_love_directory(tag: str, offset: int = 0) -> str:
@@ -1131,7 +1136,7 @@ def adult_count(value: object) -> int:
 def adult_rail(rooms: list[dict]) -> list[str]:
     out: list[str] = []
     seen: set[str] = set()
-    for chip in ["ALL", ADULT_LOVE_CHIP] + [name for name, _ in ADULT_FACES]:
+    for chip in ["ALL", ADULT_KEEP_CHIP, ADULT_LOVE_CHIP] + [name for name, _ in ADULT_FACES]:
         if chip not in seen:
             seen.add(chip)
             out.append(chip)
@@ -1144,6 +1149,7 @@ def adult_pick(rooms: list[dict], kind: str = "", query: str = "") -> list[dict]
     ask = adult_hunt_needles(needle) if needle else None
     faces = ask if needle else adult_hunt_needles(chip)
     love = False if needle else adult_love_needles(chip)
+    keep = False if needle else adult_keep_needles(chip)
     out: list[dict] = []
     for room in rooms:
         kinds = [str(item).strip().upper() for item in (room.get("kinds") or [])]
@@ -1163,6 +1169,9 @@ def adult_pick(rooms: list[dict], kind: str = "", query: str = "") -> list[dict]
                 continue
         elif faces:
             if not any(token in blob for token in faces):
+                continue
+        elif keep:
+            if ADULT_KEEP_CHIP not in kinds:
                 continue
         elif love:
             if ADULT_LOVE_CHIP not in kinds:
@@ -2080,7 +2089,7 @@ def adult_face_hold_rooms(kind: str) -> list[dict]:
 def adult_merge(batches: list[list[dict]]) -> list[dict]:
     by_id: dict[str, dict] = {}
     for room in (row for batch in batches for row in batch):
-        rid = str(room.get("id") or "")
+        rid = str(room.get("id") or "").strip()
         if not rid:
             continue
         old = by_id.get(rid)
@@ -2821,8 +2830,11 @@ class OneDiscTests(unittest.TestCase):
         tv = read("Blackout", "TvPlate.swift")
         sock = read("Blackout", "UpdateSocket.swift")
         self.assertIn("case .tv", exped)
+        self.assertIn("case .na", exped)
         self.assertIn('return "TV"', exped)
+        self.assertIn('return "N/A"', exped)
         self.assertIn("TvPlate", exped)
+        self.assertIn("NaPlate", exped)
         self.assertIn("pullMapSnap()", exped)
         self.assertIn("struct TvPlate", tv)
         self.assertIn("CamDesk.feeds", tv)
@@ -2839,7 +2851,6 @@ class OneDiscTests(unittest.TestCase):
         self.assertNotIn("rtmp", tv.lower())
         self.assertNotIn("AVPlayer", sock)
         self.assertNotIn("WKWebView", sock)
-        self.assertIn("NaLive", tv)
         self.assertIn("openStill", tv)
         self.assertIn("func pullMapSnap(", app)
         self.assertIn("tapUpdate()", app.split("func pullMapSnap")[1].split("func tapUpdate")[0])
@@ -3368,6 +3379,7 @@ class AdultDeskTests(unittest.TestCase):
             adult_rail([]),
             [
                 "ALL",
+                "KEEP",
                 "LOVESCAPE",
                 "ITSSTEPHHONEY21",
                 "ITSSTEPHHONEYXO21",
@@ -4431,6 +4443,8 @@ class AdultDeskTests(unittest.TestCase):
         sock = read("Blackout", "UpdateSocket.swift")
         live = read("Blackout", "NaLive.swift")
         tv = read("Blackout", "TvPlate.swift")
+        na = read("Blackout", "NaPlate.swift")
+        keep = read("Blackout", "AdultKeep.swift")
         app = read("Blackout", "AppRuntime.swift")
         self.assertIn("enum AdultDesk", desk)
         self.assertIn("static let cap", desk)
@@ -4577,6 +4591,9 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("redgifs.com", desk.lower())
         self.assertIn("lovescape.cam", desk.lower())
         self.assertIn("static let loveChip", desk)
+        self.assertIn("static let keepChip", desk)
+        self.assertIn("static func keepNeedles(", desk)
+        self.assertIn("static func shelfKeep(", desk)
         self.assertIn("static let loveOrigin", desk)
         self.assertIn("static let faces", desk)
         self.assertIn("static func topics(", desk)
@@ -4633,6 +4650,8 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("adultReady = false", sock)
         load = sock.split("private func loadAdult(topic")[1].split("private func fetchLovePages")[0]
         self.assertIn('faceHoldRooms("ALL")', load)
+        self.assertIn("AdultKeep.load()", load)
+        self.assertIn("keepNeedles", load)
         self.assertNotIn("adultRooms = []", load)
         self.assertIn("timeoutIntervalForResource = AdultDesk.huntNeedles(topic) != nil ? 180 : 40", sock)
         self.assertIn("inflight", sock)
@@ -4667,6 +4686,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("AdultDesk.topics", sock)
         self.assertIn("AdultDesk.huntNeedles", sock)
         self.assertIn("AdultDesk.loveNeedles", sock)
+        self.assertIn("AdultDesk.keepNeedles", sock)
         self.assertIn("AdultDesk.loveDirectory", sock)
         self.assertIn("AdultDesk.parseLove", sock)
         self.assertIn("AdultDesk.livePlay", sock)
@@ -4704,35 +4724,51 @@ class AdultDeskTests(unittest.TestCase):
         self.assertNotIn("URLSession", desk)
         self.assertNotIn("AVPlayer", sock)
         self.assertNotIn("AVPlayer", desk)
-        self.assertIn("NaLive.rows", tv)
-        self.assertIn("adultRooms", tv)
-        self.assertIn("pullAdult", tv)
-        self.assertIn("pullAdultStills", tv)
-        self.assertIn('HUDField("SEARCH"', tv)
-        self.assertIn("HUDWrapRail", tv)
-        self.assertIn("AdultDesk.rail", tv)
-        self.assertIn("naStillCache", tv)
-        self.assertIn("naKind", tv)
-        self.assertIn("naQuery", tv)
-        self.assertIn("AdultDesk.pick", tv)
-        self.assertIn("pullAdult(topic:", tv)
-        self.assertIn("pullAdult(topic: naKind)", tv)
-        self.assertIn("pullNaHunt", tv)
-        self.assertIn("huntNeedles", tv)
-        self.assertIn('Button("PASTE")', tv)
-        self.assertIn("NO PASTE", tv)
-        self.assertIn("UIPasteboard", tv)
-        self.assertIn("pasteNaSearch", tv)
-        self.assertIn("pageName", tv)
-        self.assertIn("NO MATCH", tv)
-        self.assertIn("onPlay", tv)
-        self.assertIn("liveAdult", tv)
+        self.assertNotIn("AVPlayer", na)
+        self.assertNotIn("AVPlayer", keep)
+        self.assertNotIn("URLSession", na)
+        self.assertNotIn("URLSession", keep)
+        self.assertNotIn("WKWebView", na)
+        self.assertNotIn("WKWebView", keep)
+        self.assertIn("NaLive.rows", na)
+        self.assertIn("adultRooms", na)
+        self.assertIn("pullAdult", na)
+        self.assertIn("pullAdultStills", na)
+        self.assertIn('HUDField("SEARCH"', na)
+        self.assertIn("HUDWrapRail", na)
+        self.assertIn("AdultDesk.rail", na)
+        self.assertIn("naStillCache", na)
+        self.assertIn("naKind", na)
+        self.assertIn("naQuery", na)
+        self.assertIn("AdultDesk.pick", na)
+        self.assertIn("pullAdult(topic:", na)
+        self.assertIn("pullAdult(topic: naKind)", na)
+        self.assertIn("pullNaHunt", na)
+        self.assertIn("huntNeedles", na)
+        self.assertIn('Button("PASTE")', na)
+        self.assertIn("NO PASTE", na)
+        self.assertIn("UIPasteboard", na)
+        self.assertIn("pasteNaSearch", na)
+        self.assertIn("pageName", na)
+        self.assertIn("NO MATCH", na)
+        self.assertIn("onPlay", na)
+        self.assertIn("liveAdult", na)
         self.assertIn("liveAdult", app)
+        self.assertIn("openNa", app)
+        self.assertIn("keepNa", app)
+        self.assertIn("stepLive", app)
+        self.assertIn("NaWatch", live)
+        self.assertIn("REWIND 15", live)
+        self.assertIn("AHEAD 15", live)
+        self.assertIn("PAUSE", live)
+        self.assertIn("KEEP", live)
         gate = na_gate_body(tv)
-        self.assertIn("NaLiveWell", gate)
-        self.assertIn("naLiveRows", gate)
+        self.assertNotIn("NaLiveWell", gate)
         self.assertNotIn("pullAdultStills", gate)
         self.assertNotIn("NaLiveWell", open_body(tv))
+        self.assertIn("NaLiveWell", na)
+        self.assertIn("WATCH", na)
+        self.assertIn("BROWSE", na)
         self.assertIn("LIVE", live)
         self.assertIn("AdultDesk.clock", live)
         self.assertIn("AdultDesk.Room", live)
@@ -4742,29 +4778,34 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("handle", live)
         self.assertIn("var image:", live)
         self.assertIn("var kinds:", live)
+        self.assertIn("var seconds:", live)
         self.assertIn("let still: UIImage?", live)
         self.assertIn("static let screen", live)
         self.assertIn("static func page(", live)
         self.assertIn("static let screen = 8", live)
         self.assertIn("preferredForwardBufferDuration", live)
         self.assertNotIn("zoocams.elpasozoo.org", live.lower())
-        self.assertIn("ForEach(naPageRows)", tv)
-        self.assertNotIn("ForEach(naLiveRows)", tv)
-        self.assertIn("MORE", gate)
-        self.assertIn("BACK", gate)
-        self.assertIn("adultReady", tv)
-        self.assertIn("if naUnlocked { naGate }", tv)
-        self.assertLess(tv.find("if naUnlocked { naGate }"), tv.find("ForEach(openBlocks)"))
+        self.assertIn("ForEach(naPageRows)", na)
+        self.assertNotIn("ForEach(naLiveRows)", na)
+        self.assertIn("MORE", na)
+        self.assertIn("BACK", na)
+        self.assertIn("adultReady", na)
+        self.assertIn("if !runtime.naOpen { naGate }", tv)
+        self.assertLess(tv.find("if !runtime.naOpen { naGate }"), tv.find("ForEach(openBlocks)"))
+        self.assertIn("runtime.openNa()", tv)
         self.assertIn("adultReady", sock)
         self.assertIn("fetchAdultPages", sock)
         self.assertIn("Task.detached", sock)
         watch = tv.split(".task")[1].split("private var you")[0]
         self.assertNotIn("pullAdult", watch)
-        count = tv.split("onChange(of: runtime.updateSocket.adultRooms.count)")[1].split("onChange(of: naPageKey)")[0]
+        count = na.split("onChange(of: runtime.updateSocket.adultRooms.count)")[1].split("onChange(of: naPageKey)")[0]
         self.assertNotIn("pullAdultStills", count)
-        page = tv.split("onChange(of: naPageKey)")[1].split(".task")[0]
+        page = na.split("onChange(of: naPageKey)")[1].split(".onChange(of: runtime.updateSocket.updatedAt)")[0]
         self.assertIn("pullAdultStills", page)
         self.assertIn("Task {", page)
+        self.assertIn("adult.keep.v1", keep)
+        self.assertIn("static let cap = 64", keep)
+        self.assertIn("playlist", keep)
         rooms = [
             {"id": f"adult-{index}", "name": f"R{index}", "handle": f"r{index}", "url": "", "viewers": 100 - index}
             for index in range(30)
@@ -4973,6 +5014,8 @@ class AdultDeskTests(unittest.TestCase):
         self.assertTrue(any("erome.com/search?q=roleplay" in path for path in adult_face_hunt("ROLEPLAY")))
         self.assertNotIn("COUPLE", adult_rail([]))
         self.assertNotIn("ROLEPLAY", adult_rail([]))
+        self.assertIn("KEEP", adult_rail([]))
+        self.assertEqual(adult_rail([])[0:3], ["ALL", "KEEP", "LOVESCAPE"])
         self.assertIn("ELVANA VITAA", adult_rail([]))
         self.assertIn("ITISASHLEY", adult_rail([]))
         self.assertGreaterEqual(len(adult_face_hold_rooms("ITISASHLEY")), 3)
@@ -5241,21 +5284,25 @@ class NaLiveTests(unittest.TestCase):
     def test_na_is_adult_only_after_hold(self):
         live = read("Blackout", "NaLive.swift")
         tv = read("Blackout", "TvPlate.swift")
+        na = read("Blackout", "NaPlate.swift")
         self.assertIn("enum NaLive", live)
         self.assertIn("AVPlayer", live)
         self.assertNotIn("WKWebView", live)
         self.assertNotIn("rtmp", live.lower())
         self.assertNotIn("zoocams.elpasozoo.org", live)
-        self.assertIn("NaLive.rows", tv)
-        self.assertIn("NaLiveWell", tv)
+        self.assertIn("NaLive.rows", na)
+        self.assertIn("NaLiveWell", na)
         self.assertIn("HOLD 10", tv)
+        self.assertIn("runtime.openNa()", tv)
         gate = na_gate_body(tv)
-        self.assertIn("naLiveRows", gate)
-        self.assertIn('HUDField("SEARCH"', gate)
-        self.assertIn("HUDWrapRail", gate)
-        self.assertIn("still:", gate)
+        self.assertNotIn("NaLiveWell", gate)
+        self.assertIn("naHoldRow", gate)
+        self.assertIn('HUDField("SEARCH"', na)
+        self.assertIn("HUDWrapRail", na)
+        self.assertIn("still:", na)
         self.assertNotIn("pullAdultStills", gate)
         self.assertNotIn("DeskLive", gate)
+        self.assertNotIn("DeskLive", na)
 
 
 class StillZoomTests(unittest.TestCase):
@@ -5287,7 +5334,7 @@ class LiveZoomTests(unittest.TestCase):
     def test_live_tap_opens_full_field_pinch(self):
         zoom = read("Blackout", "LiveZoom.swift")
         live = read("Blackout", "NaLive.swift")
-        tv = read("Blackout", "TvPlate.swift")
+        na = read("Blackout", "NaPlate.swift")
         root = read("Blackout", "RootChrome.swift")
         app = read("Blackout", "AppRuntime.swift")
         self.assertIn("struct LiveZoom", zoom)
@@ -5297,14 +5344,21 @@ class LiveZoomTests(unittest.TestCase):
         self.assertIn("UIScrollView", zoom)
         self.assertIn("maximumZoomScale", zoom)
         self.assertIn("CLOSE", zoom)
+        self.assertIn("PREV", zoom)
+        self.assertIn("NEXT", zoom)
+        self.assertIn("KEEP", zoom)
+        self.assertIn("REWIND 15", zoom)
+        self.assertIn("AHEAD 15", zoom)
         self.assertIn("TAP FULL", live)
         self.assertIn("onFull", live)
-        self.assertIn("openLive", tv)
+        self.assertIn("openLive", na)
         self.assertIn("zoomLive", app)
         self.assertIn("func openLive(", app)
+        self.assertIn("func stepLive(", app)
         self.assertIn("func closeLive(", app)
         self.assertIn("LiveZoom", root)
         self.assertIn("closeLive", root)
+        self.assertIn("stepLive", root)
         self.assertNotIn("fullScreenCover", zoom)
         self.assertNotIn("WKWebView", zoom)
         self.assertNotIn(".spring(", zoom)
@@ -5317,6 +5371,8 @@ class ClosedSourcesTests(unittest.TestCase):
             ("tools", "v3", "cams.py"),
             ("Blackout", "CamDesk.swift"),
             ("Blackout", "TvPlate.swift"),
+            ("Blackout", "NaPlate.swift"),
+            ("Blackout", "AdultKeep.swift"),
             ("Blackout", "UpdateSocket.swift"),
             ("Resources", "Packs", "tx-west", "cameras.json"),
         )
@@ -5363,6 +5419,16 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("HOLD 10", tv)
         self.assertIn("10s hold", tv)
         self.assertIn("adult", tv.lower())
+        self.assertIn("own `N/A` plate", tv)
+        self.assertIn("theater", tv.lower())
+        self.assertIn("defers the N/A plate switch", tv)
+        self.assertIn("empty queue", tv)
+        self.assertIn("KEEP", tv)
+        self.assertIn("PAUSE", tv)
+        self.assertIn("PREV", tv)
+        self.assertIn("NEXT", tv)
+        self.assertIn("REWIND 15", tv)
+        self.assertIn("AHEAD 15", tv)
         self.assertIn("TAP FULL", tv)
         self.assertIn("zoom", tv.lower())
         self.assertIn("section", tv.lower())
@@ -5421,6 +5487,170 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("test_expedition_tv.py", agents)
         self.assertIn("test_expedition_tv.py", validate)
         self.assertIn("expedition_tv()", validate)
+
+
+class NaTheaterTests(unittest.TestCase):
+    def test_na_is_its_own_watch_browse_keep_plate(self):
+        na = read("Blackout", "NaPlate.swift")
+        keep = read("Blackout", "AdultKeep.swift")
+        live = read("Blackout", "NaLive.swift")
+        zoom = read("Blackout", "LiveZoom.swift")
+        exped = read("Blackout", "ExpeditionTab.swift")
+        tv = read("Blackout", "TvPlate.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        self.assertIn("struct NaPlate", na)
+        self.assertIn("WATCH", na)
+        self.assertIn("BROWSE", na)
+        self.assertIn("keepChip", na)
+        self.assertIn("keepTapped", na)
+        self.assertNotRegex(
+            na,
+            r"\.frame\(width:[^)]*minHeight:",
+            "Xcode 16 device: frame(width:minHeight:) is not an overload",
+        )
+        self.assertIn("KEEP", live)
+        self.assertIn("DROP", live)
+        self.assertIn("PREV", live)
+        self.assertIn("NEXT", live)
+        self.assertIn("REWIND 15", live)
+        self.assertIn("AHEAD 15", live)
+        self.assertIn("PAUSE", live)
+        self.assertIn("NaWatch", live)
+        self.assertIn("enum AdultKeep", keep)
+        self.assertIn("adult.keep.v1", keep)
+        self.assertIn("static let cap = 64", keep)
+        self.assertIn("AdultDesk.playlist", keep)
+        self.assertIn("case .na", exped)
+        self.assertIn("NaPlate(runtime: runtime)", exped)
+        self.assertIn("runtime.naOpen", exped)
+        self.assertIn("HOLD 10", tv)
+        self.assertIn("runtime.openNa()", tv)
+        self.assertNotIn("NaLiveWell", tv)
+        self.assertNotIn("AVPlayer", na)
+        self.assertNotIn("AVPlayer", keep)
+        self.assertNotIn("URLSession", na)
+        self.assertNotIn("URLSession", keep)
+        self.assertIn("func openNa(", app)
+        self.assertIn("func keepNa(", app)
+        self.assertIn("func stepLive(", app)
+        self.assertIn("naQueue", app)
+        self.assertIn("naLiveSeq", app)
+        self.assertIn("PREV", zoom)
+        self.assertIn("NEXT", zoom)
+        self.assertIn("KEEP", zoom)
+        self.assertIn("REWIND 15", zoom)
+        self.assertIn("AHEAD 15", zoom)
+        kept = {
+            "id": "adult-keep",
+            "name": "SHELF",
+            "handle": "shelf",
+            "url": "https://cdn.example.com/keep.mp4",
+            "viewers": 1,
+            "kinds": ["KEEP"],
+            "seek": "shelf",
+            "seconds": 40,
+        }
+        live_row = {
+            "id": "adult-live",
+            "name": "LIVE",
+            "handle": "live",
+            "url": "",
+            "viewers": 9,
+            "kinds": ["LOVESCAPE"],
+            "seek": "live",
+            "seconds": 0,
+        }
+        self.assertEqual([row["id"] for row in adult_pick([kept, live_row], "KEEP")], ["adult-keep"])
+        self.assertIsNone(adult_hunt_needles("KEEP"))
+        self.assertTrue(adult_keep_needles("KEEP"))
+
+
+class NaTheaterCrashTests(unittest.TestCase):
+    def test_na_theater_cannot_index_or_tear_down_on_the_same_turn(self):
+        app = read("Blackout", "AppRuntime.swift")
+        exped = read("Blackout", "ExpeditionTab.swift")
+        tv = read("Blackout", "TvPlate.swift")
+        keep = read("Blackout", "AdultKeep.swift")
+        desk = read("Blackout", "AdultDesk.swift")
+        live = read("Blackout", "NaLive.swift")
+        zoom = read("Blackout", "LiveZoom.swift")
+        na = read("Blackout", "NaPlate.swift")
+        qa = read("docs", "SOLO_QA.md")
+
+        open_live = app.split("func openLive(")[1].split("func stepLive(")[0]
+        self.assertIn("let target = naQueue[naIndex]", open_live)
+        self.assertIn("presentLive(target, seq: seq)", open_live)
+        self.assertNotIn("presentLive(naQueue[naIndex])", open_live)
+        self.assertIn("naLiveSeq", open_live)
+
+        step = app.split("func stepLive(")[1].split("private func presentLive(")[0]
+        self.assertIn("let target = naQueue[next]", step)
+        self.assertIn("presentLive(target, seq: seq)", step)
+        self.assertNotIn("presentLive(naQueue[", step)
+        self.assertIn("naQueue.indices.contains(next)", step)
+
+        present = app.split("private func presentLive(")[1].split("func closeLive(")[0]
+        self.assertIn("guard seq == naLiveSeq", present)
+        self.assertIn("AdultDesk.playlist", present)
+
+        close = app.split("func closeLive()")[1].split("func holdCam(")[0]
+        self.assertIn("naLiveSeq &+= 1", close)
+        self.assertIn("naQueue = []", close)
+        self.assertIn("zoomLive = nil", close)
+
+        change = exped.split("onChange(of: runtime.naOpen)")[1].split("private var plateCases")[0]
+        self.assertIn("Task { @MainActor in", change)
+        self.assertIn("plate = .na", change)
+        sync = change.split("Task { @MainActor in", 1)[0]
+        self.assertNotIn("plate = .na", sync)
+
+        hold = tv.split("CamDesk.naUnlocks(elapsed: elapsed)")[1].split("onEnded")[0]
+        self.assertIn("Task { @MainActor in", hold)
+        self.assertIn("runtime.openNa()", hold)
+        sync_hold = hold.split("Task { @MainActor in", 1)[0]
+        self.assertNotIn("runtime.openNa()", sync_hold)
+
+        self.assertIn("static let byteCap = 256_000", keep)
+        self.assertIn("data.count <= byteCap", keep)
+        self.assertIn("guard !id.isEmpty", keep)
+        self.assertIn("seen.insert(room.id)", keep)
+
+        merge = desk.split("static func merge(")[1].split("static func playlist(")[0]
+        self.assertIn("guard !rid.isEmpty", merge)
+
+        rows = live.split("static func rows(")[1].split("static func page(")[0]
+        self.assertIn("seen.insert(id)", rows)
+        self.assertIn("guard !id.isEmpty", rows)
+        self.assertIn("playSeq", live)
+        self.assertIn("AdultDesk.playlist(raw)", live)
+
+        self.assertIn("AdultDesk.playlist(row.url)", zoom)
+        self.assertNotRegex(
+            na,
+            r"\.frame\(width:[^)]*minHeight:",
+            "Xcode 16 device: frame(width:minHeight:) is not an overload",
+        )
+        self.assertIn("clampNaOffset()", na)
+        self.assertIn("let rows = naLiveRows", na)
+        self.assertIn("rows.indices.contains(index)", na)
+        self.assertIn("defers the N/A plate switch", qa)
+        self.assertIn("empty queue", qa)
+
+        self.assertEqual(
+            [
+                row["id"]
+                for row in adult_merge(
+                    [
+                        [
+                            {"id": "", "name": "EMPTY", "viewers": 9, "seconds": 0},
+                            {"id": "  ", "name": "SPACE", "viewers": 8, "seconds": 0},
+                            {"id": "adult-ok", "name": "OK", "viewers": 1, "seconds": 0},
+                        ]
+                    ]
+                )
+            ],
+            ["adult-ok"],
+        )
 
 
 def desk_text() -> str:

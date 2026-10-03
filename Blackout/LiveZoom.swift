@@ -1,32 +1,79 @@
 import AVFoundation
+import CoreMedia
 import SwiftUI
 import Tokens
 import UIKit
 
-/// Full-field adult HLS. Pinch zooms the player. No web view.
+/// Full-field adult HLS. Pinch zooms the player. Watch chrome on glass.
 struct LiveZoom: View {
     let row: NaLive.Row
     let pipe: Bool
-    let onClose: () -> Void
+    var kept: Bool = false
+    var canPrev: Bool = false
+    var canNext: Bool = false
+    var onClose: () -> Void
+    var onKeep: ((NaLive.Row) -> Void)?
+    var onPrev: (() -> Void)?
+    var onNext: (() -> Void)?
     @State private var player: AVPlayer?
+    @State private var chrome: String?
 
     var body: some View {
         ZStack {
             Theme.void.ignoresSafeArea()
             well
-            VStack {
-                HStack {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 8) {
                     Button("CLOSE") { stop(); onClose() }
                         .buttonStyle(HUDOverlayChipStyle(filled: true))
                     Spacer(minLength: 0)
+                    Button(kept ? "DROP" : "KEEP") { onKeep?(row) }
+                        .buttonStyle(HUDOverlayChipStyle(filled: kept))
                 }
-                .padding(12)
+                HStack(spacing: 8) {
+                    Text(row.name)
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(Color.white)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.7)
+                    Spacer(minLength: 8)
+                    TimelineView(.periodic(from: .now, by: 0.25)) { _ in
+                        Text(NaWatch.clock(player, seconds: row.seconds, armed: player != nil))
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Theme.silver)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
+                }
+                .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
+                HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                    Button("PREV") { step(-1) }
+                        .buttonStyle(HUDOverlayChipStyle())
+                    Button("NEXT") { step(1) }
+                        .buttonStyle(HUDOverlayChipStyle())
+                    Button("REWIND 15") { jump(-Double(NaWatch.jump)) }
+                        .buttonStyle(HUDOverlayChipStyle())
+                    Button("AHEAD 15") { jump(Double(NaWatch.jump)) }
+                        .buttonStyle(HUDOverlayChipStyle())
+                }
+                if let chrome {
+                    Text(chrome)
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(Theme.warn)
+                        .textCase(.uppercase)
+                }
                 Spacer()
             }
+            .padding(12)
         }
         .onAppear { start() }
         .onChange(of: pipe) { _, ok in
             if !ok { stop() }
+        }
+        .onChange(of: row.id) { _, _ in
+            chrome = nil
+            stop()
+            start()
         }
         .onDisappear { stop() }
         .accessibilityElement(children: .contain)
@@ -51,11 +98,13 @@ struct LiveZoom: View {
     }
 
     private func start() {
-        guard pipe, let url = URL(string: row.url), url.scheme == "https" else { return }
+        guard pipe, let play = AdultDesk.playlist(row.url),
+              let url = URL(string: play), url.scheme == "https"
+        else { return }
         let item = AVPlayerItem(
             asset: AVURLAsset(
                 url: url,
-                options: ["AVURLAssetHTTPHeaderFieldsKey": AdultDesk.playHeaders(row.url)]
+                options: ["AVURLAssetHTTPHeaderFieldsKey": AdultDesk.playHeaders(play)]
             )
         )
         item.preferredForwardBufferDuration = 6
@@ -70,6 +119,31 @@ struct LiveZoom: View {
         player?.pause()
         player?.replaceCurrentItem(with: nil)
         player = nil
+    }
+
+    private func jump(_ by: Double) {
+        if let why = NaWatch.seek(player, url: row.url, by: by) {
+            chrome = why
+            return
+        }
+        chrome = nil
+    }
+
+    private func step(_ delta: Int) {
+        if delta < 0, !canPrev {
+            chrome = "FIRST"
+            return
+        }
+        if delta > 0, !canNext {
+            chrome = "LAST"
+            return
+        }
+        chrome = nil
+        if delta < 0 {
+            onPrev?()
+        } else {
+            onNext?()
+        }
     }
 }
 

@@ -560,6 +560,7 @@ enum AdultDesk {
         "little girl",
     ]
     static let loveChip = "LOVESCAPE"
+    static let keepChip = "KEEP"
     static let loveOrigin = "https://lovescape.cam"
     static let loveTags = ["girls", "couples"]
     static let railExtra = 8
@@ -1077,7 +1078,7 @@ enum AdultDesk {
         let text = incoming
         if text.isEmpty { return nil }
         let chip = text.uppercased()
-        if chip == "ALL" || loveNeedles(chip) { return nil }
+        if chip == "ALL" || loveNeedles(chip) || keepNeedles(chip) { return nil }
         if let faces = faceNeedles(chip) { return faces }
         let compact = facePlain(text).replacingOccurrences(of: " ", with: "")
         guard !compact.isEmpty else { return nil }
@@ -1117,6 +1118,10 @@ enum AdultDesk {
 
     static func loveNeedles(_ kind: String) -> Bool {
         kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() == loveChip
+    }
+
+    static func keepNeedles(_ kind: String) -> Bool {
+        kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() == keepChip
     }
 
     static func loveDirectory(tag: String, offset: Int = 0) -> String {
@@ -1807,6 +1812,10 @@ enum AdultDesk {
         id.hasPrefix("adult-face-")
     }
 
+    static func shelfKeep(_ room: Room) -> Bool {
+        faceKeep(room.id) || room.kinds.contains(keepChip)
+    }
+
     static func faceStill(_ desk: String, _ token: String) -> String? {
         if desk == "star" {
             let id = token.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -2156,7 +2165,9 @@ enum AdultDesk {
             } else {
                 score = 1
             }
-            if best == nil || score > best!.0 {
+            if let hit = best {
+                if score > hit.0 { best = (score, play) }
+            } else {
                 best = (score, play)
             }
         }
@@ -2430,25 +2441,28 @@ enum AdultDesk {
     static func merge(_ batches: [[Room]]) -> [Room] {
         var byID: [String: Room] = [:]
         for room in batches.joined() {
-            if var old = byID[room.id] {
-                if room.viewers > old.viewers {
-                    var next = room
-                    if next.image.isEmpty { next.image = old.image }
-                    byID[room.id] = next
-                } else if old.image.isEmpty, !room.image.isEmpty {
-                    old.image = room.image
-                    byID[room.id] = old
+            let rid = room.id.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !rid.isEmpty else { continue }
+            var incoming = room
+            incoming.id = rid
+            if var old = byID[rid] {
+                if incoming.viewers > old.viewers {
+                    if incoming.image.isEmpty { incoming.image = old.image }
+                    byID[rid] = incoming
+                } else if old.image.isEmpty, !incoming.image.isEmpty {
+                    old.image = incoming.image
+                    byID[rid] = old
                 }
                 continue
             }
-            byID[room.id] = room
+            byID[rid] = incoming
         }
         let all = Array(byID.values)
-        let files = all.filter { faceKeep($0.id) }.sorted { lhs, rhs in
+        let files = all.filter { shelfKeep($0) }.sorted { lhs, rhs in
             if lhs.seconds != rhs.seconds { return lhs.seconds > rhs.seconds }
             return lhs.name < rhs.name
         }
-        let rest = all.filter { !faceKeep($0.id) }.sorted { lhs, rhs in
+        let rest = all.filter { !shelfKeep($0) }.sorted { lhs, rhs in
             if lhs.viewers != rhs.viewers { return lhs.viewers > rhs.viewers }
             return lhs.name < rhs.name
         }
@@ -2558,6 +2572,9 @@ enum AdultDesk {
     static func pick(_ rooms: [Room], kind: String, query: String) -> [Room] {
         let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if needle.isEmpty && keepNeedles(chip) {
+            return rooms.filter { $0.kinds.contains(keepChip) }
+        }
         let ask = needle.isEmpty ? nil : huntNeedles(needle)
         let faces = needle.isEmpty ? huntNeedles(chip) : ask
         let love = needle.isEmpty && loveNeedles(chip)
@@ -2605,7 +2622,7 @@ enum AdultDesk {
     static func rail(_ rooms: [Room]) -> [String] {
         var out: [String] = []
         var seen: Set<String> = []
-        for chip in ["ALL", loveChip] + faces.map(\.0) {
+        for chip in ["ALL", keepChip, loveChip] + faces.map(\.0) {
             if seen.insert(chip).inserted {
                 out.append(chip)
             }
