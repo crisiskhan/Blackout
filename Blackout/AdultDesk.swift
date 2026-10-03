@@ -180,15 +180,26 @@ enum AdultDesk {
         "juicy jas tv",
         "juicyjas tv",
         "juicyjas",
+        "juicyjass",
+        "jjuicyjass",
+        "juicy jass",
+        "babyfacejas",
+        "babyfacejass",
+        "babyface jass",
     ]
     static let honeyteaNeedles = [
         "honeyteassee",
         "honey teassee",
+        "kittylunaxx",
+        "kitty luna xx",
     ]
     static let taniaNeedles = [
         "taniaaaramos",
         "taniaaa ramos",
         "taniaa ramos",
+        "waifutania",
+        "waifu tania",
+        "waifu_tania",
     ]
     static let brittanyaNeedles = [
         "brittanya razavi",
@@ -284,7 +295,6 @@ enum AdultDesk {
     static let gracieNeedles = [
         "itsgraciebonn",
         "gracie bonn",
-        "graciebonn",
     ]
     static let debNeedles = [
         "debvarela",
@@ -382,9 +392,9 @@ enum AdultDesk {
         ("MULAN VUITTON", ["mulanvuitton", "mulanvuittontv"]),
         ("MIKEILA J", ["mikeilaj", "mikeilajbaee", "mikeilajduhh", "theemikeilaj"]),
         ("NERDY BEILA", ["nerdybeila", "vipnerdyb", "beilacosplay"]),
-        ("JUICYJAS TV", ["juicyjastv", "juicyjas"]),
-        ("HONEYTEASSEE", ["honeyteassee"]),
-        ("TANIA RAMOS", ["taniaaaramos"]),
+        ("JUICYJAS TV", ["juicyjastv", "juicyjas", "juicyjass", "jjuicyjass", "babyfacejas"]),
+        ("HONEYTEASSEE", ["honeyteassee", "kittylunaxx"]),
+        ("TANIA RAMOS", ["taniaaaramos", "waifutania"]),
         ("BRITTANYA RAZAVI", ["brittanyarazavi", "seebrittanya", "brittanya2horny"]),
         ("HOT4LEXI", ["hot4lexi", "hott4lexi", "lexi2legit"]),
         ("LILI VICTORIA", ["lilivictoria32", "lilivictoria"]),
@@ -401,7 +411,7 @@ enum AdultDesk {
         ("ASAIA HERNANDEZ", ["asaiahernandez"]),
         ("JASMINEGTV", ["jasminegtv1", "jasminegtv"]),
         ("IMANGELJESSYY", ["imangeljessyy", "imangeljessy", "angeljessyy"]),
-        ("GRACIE BONN", ["itsgraciebonn", "graciebonn"]),
+        ("GRACIE BONN", ["itsgraciebonn"]),
         ("DEBVARELA", ["debvarela"]),
         ("DOUBLE DOSE TWINS", ["doubledosetwins"]),
         ("PAMELA YAMZ", ["pamelayamz"]),
@@ -410,6 +420,49 @@ enum AdultDesk {
         ("EUNICEG", ["euniceg"]),
         ("STRAWBERRY SANDRA", ["strawberrysandra20", "strawberrysandra"]),
         ("ITOCHIANATA", ["itochianata"]),
+    ]
+    /// Proven guest albums. Hunt these first so a JSON desk cannot blank the chip.
+    static let faceDesks: [(String, [String])] = [
+        ("MIKEILA J", [
+            "edMkQtmB",
+            "iLRhKOjv",
+            "TqelxrBL",
+            "RLcyK3T5",
+            "bfLDjjOB",
+            "ZcfWNKPT",
+            "WKXrg3je",
+            "MUVu2GxH",
+            "WENqgh3u",
+            "nhPSw6n0",
+        ]),
+        ("JUICYJAS TV", [
+            "bYEwXbLM",
+            "MxESZ9ui",
+            "30gEMEg3",
+            "OWRwt8jD",
+            "2Moj4ufr",
+            "xAyhB4PW",
+            "zhnMi5Bh",
+            "p5AlhPzA",
+            "0V28kOfA",
+        ]),
+        ("HONEYTEASSEE", ["4WuSM4Do", "wFCSXuwr"]),
+        ("TANIA RAMOS", [
+            "WJD2aTMn",
+            "wNIDWrYp",
+            "DoEO25fA",
+            "rRy8eW9u",
+            "RUxicDID",
+            "bu2E10vq",
+            "BehpGC3x",
+            "yYXjVfnM",
+        ]),
+        ("LILI VICTORIA", ["i3ukXKfK", "c6S6qfYl", "1mwYGAtU"]),
+        ("VAL2YUMMI", ["DMAsDEDH", "6pKwUvNE", "AN9ubyyI"]),
+        ("FREAKYYSTACKSS", ["f17CQGFk"]),
+        ("ASAIA HERNANDEZ", ["AvtUf9Tm"]),
+        ("JASMINEGTV", ["5jd5lhgS"]),
+        ("IMANGELJESSYY", ["hhyYdQUz"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
@@ -433,6 +486,8 @@ enum AdultDesk {
     static let huntAtOnce = 4
     static let huntPages = 2
     static let huntCap = 48
+    static let deskFollow = 8
+    static let deskOrigin = "https://www.erome.com"
     /// Proven guest files. Mount before the hunt so a dead desk cannot blank the chip.
     static let faceHolds: [(String, [(String, String, Int, String)])] = [
         ("ITSSTEPHHONEY21", [
@@ -500,6 +555,44 @@ enum AdultDesk {
             ("pin", "7bg2FgwidLS", 660, "Double Dose Twins Fanvan They Porno Tubes"),
             ("pin", "NtQUcCtcTj0", 199, "Doubledose Twins Blowjob GAWD DAMN I NEED DAT"),
             ("pin", "iXWnuAL4FnV", 140, "Doubledose Twins Blowjob"),
+        ]),
+        ("MIKEILA J", [
+            ("file", "https://v203.erome.com/325/TqelxrBL/Ut4hcj7J_720p.mp4", 456, "Mikeilaj"),
+            ("file", "https://v15.erome.com/959/iLRhKOjv/bQN8Lo1B_720p.mp4", 456, "MikeilaJ"),
+            ("file", "https://v6.erome.com/2377/RLcyK3T5/M3ZqMB7z_720p.mp4", 387, "3-29-24 Mikeilaj 3 SEXY SEXY SEXY"),
+        ]),
+        ("JUICYJAS TV", [
+            ("file", "https://v13.erome.com/1454/OWRwt8jD/gOUvm3em_720p.mp4", 567, "Juicyjass"),
+            ("file", "https://v105.erome.com/7729/p5AlhPzA/shXMd6w8_720p.mp4", 445, "JJUICYJASS AKA BABYFACEJASS"),
+            ("file", "https://v102.erome.com/1968/bYEwXbLM/3nwkSE2f_720p.mp4", 406, "Juicyjass"),
+        ]),
+        ("HONEYTEASSEE", [
+            ("file", "https://v103.erome.com/8076/4WuSM4Do/NLPXJlNS_720p.mp4", 45, "kittylunaxx luna dream"),
+        ]),
+        ("TANIA RAMOS", [
+            ("file", "https://v46.erome.com/8279/rRy8eW9u/ziltWEbq_720p.mp4", 3591, "Tania Ramos guest cut"),
+            ("file", "https://v103.erome.com/2665/WJD2aTMn/SQLCCerD_720p.mp4", 648, "Tania Ramos AKA Waifutania"),
+            ("file", "https://v53.erome.com/7949/yYXjVfnM/UJ7h7VQw_720p.mp4", 577, "Tania Ramos"),
+        ]),
+        ("LILI VICTORIA", [
+            ("file", "https://v2.erome.com/8917/i3ukXKfK/tYUWdkYx_720p.mp4", 63, "lilivictoria32"),
+        ]),
+        ("VAL2YUMMI", [
+            ("file", "https://v58.erome.com/8970/DMAsDEDH/3HYKACJR_720p.mp4", 152, "val2yummi"),
+            ("file", "https://v68.erome.com/7860/6pKwUvNE/F4IiNqu8_720p.mp4", 117, "Val2yummi"),
+        ]),
+        ("FREAKYYSTACKSS", [
+            ("file", "https://v10.erome.com/8815/f17CQGFk/BvuzWQDY_720p.mp4", 668, "FreakyStackss x Slobhouse"),
+        ]),
+        ("ASAIA HERNANDEZ", [
+            ("file", "https://v11.erome.com/5822/AvtUf9Tm/A5lnqNUK_720p.mp4", 29, "Asaia fine ass"),
+        ]),
+        ("JASMINEGTV", [
+            ("file", "https://v62.erome.com/1768/5jd5lhgS/PDzcXq2Z_720p.mp4", 1434, "Jasminegtv"),
+            ("file", "https://v62.erome.com/1768/5jd5lhgS/0ns0ZI9C_720p.mp4", 832, "Jasminegtv"),
+        ]),
+        ("IMANGELJESSYY", [
+            ("file", "https://v15.erome.com/9197/hhyYdQUz/ilQB0MKm_720p.mp4", 13, "Imangeljessyy"),
         ]),
     ]
     /// Guest stills for baked pin tokens. Star stills are `preview-batch/{slug}/thumb.webp`.
@@ -622,13 +715,16 @@ enum AdultDesk {
 
     static func userAgent(_ raw: String) -> String {
         let host = URL(string: raw)?.host?.lowercased() ?? ""
-        if loveHost(raw) || giftHost(raw) || host.contains("bornstar") { return loveAgent }
+        if loveHost(raw) || giftHost(raw) || deskHost(raw) || host.contains("bornstar") {
+            return loveAgent
+        }
         return agent
     }
 
     static func referer(_ raw: String) -> String {
         if loveHost(raw) { return "\(loveOrigin)/" }
         if giftHost(raw) { return "\(giftOrigin)/" }
+        if deskHost(raw) { return "\(deskOrigin)/" }
         let host = URL(string: raw)?.host?.lowercased() ?? ""
         if host.contains("eporner") { return "https://www.eporner.com/" }
         if host.contains("bornstar") { return "https://bornstar.co/" }
@@ -646,6 +742,37 @@ enum AdultDesk {
         if host.contains("doppiocdn") { return true }
         if host.contains("strpst") { return true }
         return false
+    }
+
+    static func deskHost(_ raw: String) -> Bool {
+        let host = URL(string: raw)?.host?.lowercased() ?? ""
+        return host == "erome.com" || host.hasSuffix(".erome.com") || host.contains("erome.com")
+    }
+
+    static func deskLook(_ raw: String) -> Bool {
+        deskHost(raw) && raw.lowercased().contains("/search")
+    }
+
+    static func deskSearch(_ query: String) -> String? {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !q.isEmpty,
+              let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return nil }
+        return "\(deskOrigin)/search?q=\(encoded)"
+    }
+
+    static func deskAlbum(_ token: String) -> String? {
+        let id = token.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard id.count >= 4, id.allSatisfy({ $0.isLetter || $0.isNumber }) else { return nil }
+        return "\(deskOrigin)/a/\(id)"
+    }
+
+    static func faceDeskTokens(_ kind: String) -> [String] {
+        let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        for pair in faceDesks where pair.0 == chip {
+            return pair.1
+        }
+        return []
     }
 
     static func faceQueries(_ kind: String) -> [String] {
@@ -777,10 +904,16 @@ enum AdultDesk {
         for token in facePinTokens(kind) {
             add(faceId(token))
         }
+        for token in faceDeskTokens(kind) {
+            add(deskAlbum(token))
+        }
         for slug in faceStarTokens(kind) {
             for page in 1...huntPages {
                 add(starSearch(slug, page: page))
             }
+        }
+        for query in faceQueries(kind) {
+            add(deskSearch(query))
         }
         var gifts: [String] = []
         var giftSeen: Set<String> = []
@@ -834,6 +967,9 @@ enum AdultDesk {
                     if desk == "star" {
                         play = playlist(starFile(token) ?? "")
                         rid = "adult-face-star-\(token.lowercased())"
+                    } else if desk == "file" {
+                        play = playlist(token)
+                        rid = "adult-face-desk-\(deskKey(token) ?? token.lowercased())"
                     } else {
                         play = playlist(faceFile(token) ?? "")
                         rid = "adult-face-\(token.lowercased())"
@@ -873,6 +1009,9 @@ enum AdultDesk {
             }
             return still("https://cdn.bornstar.co/preview-batch/\(id)/thumb.webp")
         }
+        if desk == "file" {
+            return deskStill(token)
+        }
         let id = token.trimmingCharacters(in: .whitespacesAndNewlines)
         for pair in faceStills where pair.0.caseInsensitiveCompare(id) == .orderedSame {
             return still(pair.1)
@@ -907,21 +1046,215 @@ enum AdultDesk {
 
     static func parseFace(_ data: Data, kind: String) -> [Room] {
         guard let needles = faceNeedles(kind) else { return [] }
-        guard let obj = try? JSONSerialization.jsonObject(with: data) else { return [] }
+        if let obj = try? JSONSerialization.jsonObject(with: data) {
+            var seen: Set<String> = []
+            var rows: [Room] = []
+            for model in faceModels(obj) {
+                guard let room = giftClip(model, needles: needles, kind: kind)
+                    ?? starClip(model, needles: needles, kind: kind)
+                    ?? faceClip(model, needles: needles, kind: kind)
+                else { continue }
+                guard seen.insert(room.id).inserted else { continue }
+                rows.append(room)
+            }
+            if !rows.isEmpty {
+                return rows.sorted { lhs, rhs in
+                    if lhs.seconds != rhs.seconds { return lhs.seconds > rhs.seconds }
+                    return lhs.name < rhs.name
+                }
+            }
+        }
+        return parseDesk(data, kind: kind)
+    }
+
+    static func deskAlbums(_ data: Data, kind: String) -> [String] {
+        guard let needles = faceNeedles(kind),
+              let text = String(data: data, encoding: .utf8)
+        else { return [] }
+        let held = Set(faceDeskTokens(kind).map { $0.lowercased() })
+        var out: [String] = []
         var seen: Set<String> = []
+        var rest = text
+        while let mark = rest.range(of: "album-title") {
+            rest = String(rest[mark.upperBound...])
+            guard let href = rest.range(of: "/a/") else { continue }
+            let after = rest[href.upperBound...]
+            let token = String(after.prefix { $0.isLetter || $0.isNumber })
+            guard token.count >= 4 else { continue }
+            var title = ""
+            if let open = rest.range(of: ">"),
+               let close = rest[open.upperBound...].range(of: "<")
+            {
+                title = String(rest[open.upperBound..<close.lowerBound])
+            }
+            title = title.replacingOccurrences(of: "\u{200B}", with: " ")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            guard faceOk(title) else { continue }
+            if held.contains(token.lowercased()) || faceHit(title, needles: needles) {
+                if seen.insert(token.lowercased()).inserted {
+                    out.append(token)
+                }
+            }
+        }
+        return out
+    }
+
+    static func deskKey(_ raw: String) -> String? {
+        guard let url = URL(string: raw) else { return nil }
+        let parts = url.path.split(separator: "/").map(String.init)
+        guard parts.count >= 2 else { return nil }
+        let album = parts[parts.count - 2].lowercased()
+        var file = parts[parts.count - 1].lowercased()
+        if let cut = file.range(of: "_") {
+            file = String(file[..<cut.lowerBound])
+        }
+        if let cut = file.range(of: ".") {
+            file = String(file[..<cut.lowerBound])
+        }
+        guard album.count >= 4, file.count >= 4,
+              album.allSatisfy({ $0.isLetter || $0.isNumber }),
+              file.allSatisfy({ $0.isLetter || $0.isNumber })
+        else { return nil }
+        return "\(album)-\(file)"
+    }
+
+    static func deskStill(_ raw: String) -> String? {
+        guard deskHost(raw), let url = URL(string: raw), var host = url.host else { return nil }
+        if host.hasPrefix("v") {
+            host = "s" + host.dropFirst()
+        }
+        var file = url.lastPathComponent
+        if let cut = file.range(of: "_", options: .backwards),
+           file[cut.upperBound...].lowercased().hasSuffix(".mp4")
+        {
+            file = String(file[..<cut.lowerBound]) + ".jpg"
+        } else if file.lowercased().hasSuffix(".mp4") {
+            file = String(file.dropLast(4)) + ".jpg"
+        } else {
+            return nil
+        }
+        var parts = url.path.split(separator: "/").map(String.init)
+        guard !parts.isEmpty else { return nil }
+        parts[parts.count - 1] = file
+        return still("https://\(host)/\(parts.joined(separator: "/"))")
+    }
+
+    private static func parseDesk(_ data: Data, kind: String) -> [Room] {
+        guard let needles = faceNeedles(kind) else { return [] }
+        guard let text = String(data: data, encoding: .utf8) else { return [] }
+        let title = deskTitle(text)
+        guard !title.isEmpty, faceOk(title) else { return [] }
+        let held = faceDeskTokens(kind).contains { token in
+            text.range(of: "/a/\(token)", options: .caseInsensitive) != nil
+                || text.range(of: "/\(token)/", options: .caseInsensitive) != nil
+        }
+        guard held || faceHit(title, needles: needles) else { return [] }
+        let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         var rows: [Room] = []
-        for model in faceModels(obj) {
-            guard let room = giftClip(model, needles: needles, kind: kind)
-                ?? starClip(model, needles: needles, kind: kind)
-                ?? faceClip(model, needles: needles, kind: kind)
-            else { continue }
-            guard seen.insert(room.id).inserted else { continue }
-            rows.append(room)
+        var seen: Set<String> = []
+        for clip in deskClips(text) {
+            let rid = "adult-face-desk-\(clip.key)"
+            guard seen.insert(rid).inserted else { continue }
+            rows.append(
+                Room(
+                    id: rid,
+                    name: title.uppercased(),
+                    handle: clip.key,
+                    url: clip.play,
+                    viewers: 0,
+                    image: clip.poster,
+                    kinds: chip.isEmpty ? [] : [chip],
+                    seek: (title + " " + needles.joined(separator: " ")).lowercased(),
+                    seconds: clip.seconds
+                )
+            )
         }
         return rows.sorted { lhs, rhs in
             if lhs.seconds != rhs.seconds { return lhs.seconds > rhs.seconds }
             return lhs.name < rhs.name
         }
+    }
+
+    private static func deskTitle(_ text: String) -> String {
+        guard let start = text.range(of: "<h1", options: .caseInsensitive),
+              let open = text[start.lowerBound...].range(of: ">"),
+              let close = text[open.upperBound...].range(of: "</h1>", options: .caseInsensitive)
+        else { return "" }
+        let raw = String(text[open.upperBound..<close.lowerBound])
+        return raw.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+            .replacingOccurrences(of: "\u{200B}", with: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static func deskClips(_ text: String) -> [(key: String, play: String, seconds: Int, poster: String)] {
+        var out: [(key: String, play: String, seconds: Int, poster: String)] = []
+        var seen: Set<String> = []
+        var rest = text
+        while let mark = rest.range(of: "class=\"video\"") ?? rest.range(of: "class='video'") {
+            rest = String(rest[mark.upperBound...])
+            let chunk: String
+            if let end = rest.range(of: "gate-overlay") {
+                chunk = String(rest[..<end.lowerBound])
+            } else {
+                chunk = String(rest.prefix(2500))
+            }
+            guard let play = deskPlay(chunk), let key = deskKey(play), seen.insert(key).inserted else {
+                continue
+            }
+            let seconds = deskSeconds(chunk)
+            guard seconds > 0 else { continue }
+            out.append((key, play, seconds, deskPoster(chunk) ?? deskStill(play) ?? ""))
+        }
+        return out
+    }
+
+    private static func deskPlay(_ chunk: String) -> String? {
+        var best: (Int, String)?
+        var rest = chunk
+        while let range = rest.range(of: "https://v") {
+            let tail = rest[range.lowerBound...]
+            let raw = String(tail.prefix { ch in
+                !ch.isWhitespace && ch != "\"" && ch != "'" && ch != "<" && ch != ">"
+            })
+            rest = String(tail.dropFirst(8))
+            guard raw.lowercased().contains(".mp4"), let play = playlist(raw) else { continue }
+            let score: Int
+            if raw.contains("1080") {
+                score = 1080
+            } else if raw.contains("720") {
+                score = 720
+            } else if raw.contains("480") {
+                score = 480
+            } else {
+                score = 1
+            }
+            if best == nil || score > best!.0 {
+                best = (score, play)
+            }
+        }
+        return best?.1
+    }
+
+    private static func deskSeconds(_ chunk: String) -> Int {
+        guard let mark = chunk.range(of: "duration") else { return 0 }
+        let tail = chunk[mark.upperBound...]
+        guard let start = tail.range(of: ">") else { return 0 }
+        let body = tail[start.upperBound...]
+        guard let end = body.range(of: "<") else { return 0 }
+        let clock = String(body[..<end.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+        let parts = clock.split(separator: ":").compactMap { Int($0) }
+        if parts.count == 3 { return parts[0] * 3600 + parts[1] * 60 + parts[2] }
+        if parts.count == 2 { return parts[0] * 60 + parts[1] }
+        return 0
+    }
+
+    private static func deskPoster(_ chunk: String) -> String? {
+        guard let mark = chunk.range(of: "poster=\"") ?? chunk.range(of: "poster='") else {
+            return nil
+        }
+        let tail = chunk[mark.upperBound...]
+        let raw = String(tail.prefix { $0 != "\"" && $0 != "'" })
+        return still(raw)
     }
 
     private static func faceModels(_ obj: Any) -> [[String: Any]] {

@@ -281,15 +281,26 @@ ADULT_JUICY = (
     "juicy jas tv",
     "juicyjas tv",
     "juicyjas",
+    "juicyjass",
+    "jjuicyjass",
+    "juicy jass",
+    "babyfacejas",
+    "babyfacejass",
+    "babyface jass",
 )
 ADULT_HONEYTEA = (
     "honeyteassee",
     "honey teassee",
+    "kittylunaxx",
+    "kitty luna xx",
 )
 ADULT_TANIA = (
     "taniaaaramos",
     "taniaaa ramos",
     "taniaa ramos",
+    "waifutania",
+    "waifu tania",
+    "waifu_tania",
 )
 ADULT_BRITTANYA = (
     "brittanya razavi",
@@ -385,7 +396,6 @@ ADULT_JESSY = (
 ADULT_GRACIE = (
     "itsgraciebonn",
     "gracie bonn",
-    "graciebonn",
 )
 ADULT_DEB = (
     "debvarela",
@@ -1050,7 +1060,41 @@ ADULT_FACE_HOLDS = (
         ("pin", "NtQUcCtcTj0", 199, "Doubledose Twins Blowjob GAWD DAMN I NEED DAT"),
         ("pin", "iXWnuAL4FnV", 140, "Doubledose Twins Blowjob"),
     )),
+    ("MIKEILA J", (
+        ("file", "https://v203.erome.com/325/TqelxrBL/Ut4hcj7J_720p.mp4", 456, "Mikeilaj"),
+        ("file", "https://v15.erome.com/959/iLRhKOjv/bQN8Lo1B_720p.mp4", 456, "MikeilaJ"),
+        ("file", "https://v6.erome.com/2377/RLcyK3T5/M3ZqMB7z_720p.mp4", 387, "3-29-24 Mikeilaj 3 SEXY SEXY SEXY"),
+    )),
+    ("JUICYJAS TV", (
+        ("file", "https://v13.erome.com/1454/OWRwt8jD/gOUvm3em_720p.mp4", 567, "Juicyjass"),
+        ("file", "https://v105.erome.com/7729/p5AlhPzA/shXMd6w8_720p.mp4", 445, "JJUICYJASS AKA BABYFACEJASS"),
+    )),
+    ("HONEYTEASSEE", (("file", "https://v103.erome.com/8076/4WuSM4Do/NLPXJlNS_720p.mp4", 45, "kittylunaxx luna dream"),)),
+    ("TANIA RAMOS", (
+        ("file", "https://v46.erome.com/8279/rRy8eW9u/ziltWEbq_720p.mp4", 3591, "Tania Ramos guest cut"),
+        ("file", "https://v103.erome.com/2665/WJD2aTMn/SQLCCerD_720p.mp4", 648, "Tania Ramos AKA Waifutania"),
+    )),
+    ("LILI VICTORIA", (("file", "https://v2.erome.com/8917/i3ukXKfK/tYUWdkYx_720p.mp4", 63, "lilivictoria32"),)),
+    ("VAL2YUMMI", (("file", "https://v58.erome.com/8970/DMAsDEDH/3HYKACJR_720p.mp4", 152, "val2yummi"),)),
+    ("FREAKYYSTACKSS", (("file", "https://v10.erome.com/8815/f17CQGFk/BvuzWQDY_720p.mp4", 668, "FreakyStackss x Slobhouse"),)),
+    ("ASAIA HERNANDEZ", (("file", "https://v11.erome.com/5822/AvtUf9Tm/A5lnqNUK_720p.mp4", 29, "Asaia fine ass"),)),
+    ("JASMINEGTV", (("file", "https://v62.erome.com/1768/5jd5lhgS/PDzcXq2Z_720p.mp4", 1434, "Jasminegtv"),)),
+    ("IMANGELJESSYY", (("file", "https://v15.erome.com/9197/hhyYdQUz/ilQB0MKm_720p.mp4", 13, "Imangeljessyy"),)),
 )
+ADULT_FACE_DESKS = (
+    ("MIKEILA J", ("edMkQtmB", "iLRhKOjv", "TqelxrBL", "RLcyK3T5")),
+    ("JUICYJAS TV", ("bYEwXbLM", "OWRwt8jD", "p5AlhPzA")),
+    ("HONEYTEASSEE", ("4WuSM4Do", "wFCSXuwr")),
+    ("TANIA RAMOS", ("WJD2aTMn", "rRy8eW9u", "yYXjVfnM")),
+    ("LILI VICTORIA", ("i3ukXKfK",)),
+    ("VAL2YUMMI", ("DMAsDEDH", "6pKwUvNE")),
+    ("FREAKYYSTACKSS", ("f17CQGFk",)),
+    ("ASAIA HERNANDEZ", ("AvtUf9Tm",)),
+    ("JASMINEGTV", ("5jd5lhgS",)),
+    ("IMANGELJESSYY", ("hhyYdQUz",)),
+)
+ADULT_DESK_ORIGIN = "https://www.erome.com"
+ADULT_DESK_FOLLOW = 8
 ADULT_FACE_STILLS = (
     ("P283XrKRjsV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"),
     ("pYaoSJlMR79", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/175/17518776/4_360.jpg"),
@@ -1074,9 +1118,9 @@ ADULT_FACE_GIFTS = (
     ("MULAN VUITTON", ("mulanvuitton", "mulanvuittontv")),
     ("MIKEILA J", ("mikeilaj", "mikeilajbaee", "mikeilajduhh", "theemikeilaj")),
     ("NERDY BEILA", ("nerdybeila", "vipnerdyb", "beilacosplay")),
-    ("JUICYJAS TV", ("juicyjastv", "juicyjas")),
-    ("HONEYTEASSEE", ("honeyteassee",)),
-    ("TANIA RAMOS", ("taniaaaramos",)),
+    ("JUICYJAS TV", ("juicyjastv", "juicyjas", "juicyjass", "jjuicyjass", "babyfacejas")),
+    ("HONEYTEASSEE", ("honeyteassee", "kittylunaxx")),
+    ("TANIA RAMOS", ("taniaaaramos", "waifutania")),
     ("BRITTANYA RAZAVI", ("brittanyarazavi", "seebrittanya", "brittanya2horny")),
     ("HOT4LEXI", ("hot4lexi", "hott4lexi", "lexi2legit")),
     ("LILI VICTORIA", ("lilivictoria32", "lilivictoria")),
@@ -1093,7 +1137,7 @@ ADULT_FACE_GIFTS = (
     ("ASAIA HERNANDEZ", ("asaiahernandez",)),
     ("JASMINEGTV", ("jasminegtv1", "jasminegtv")),
     ("IMANGELJESSYY", ("imangeljessyy", "imangeljessy", "angeljessyy")),
-    ("GRACIE BONN", ("itsgraciebonn", "graciebonn")),
+    ("GRACIE BONN", ("itsgraciebonn",)),
     ("DEBVARELA", ("debvarela",)),
     ("DOUBLE DOSE TWINS", ("doubledosetwins",)),
     ("PAMELA YAMZ", ("pamelayamz",)),
@@ -1165,9 +1209,13 @@ def adult_face_hunt(kind: str) -> list[str]:
 
     for token in adult_face_pin_tokens(kind):
         add(adult_face_id(token))
+    for token in adult_face_desk_tokens(kind):
+        add(adult_desk_album(token))
     for slug in adult_face_star_tokens(kind):
         for page in range(1, ADULT_HUNT_PAGES + 1):
             add(adult_star_search(slug, page=page))
+    for query in adult_face_queries(kind):
+        add(adult_desk_search(query))
     gifts: list[str] = []
     gift_seen: set[str] = set()
     for raw in adult_face_gift_tokens(kind) + adult_face_queries(kind):
@@ -1191,12 +1239,69 @@ def adult_face_keep(ident: str) -> bool:
     return str(ident or "").startswith("adult-face-")
 
 
+def adult_face_desk_tokens(kind: str) -> list[str]:
+    return _adult_face_tokens(ADULT_FACE_DESKS, kind)
+
+
+def adult_desk_search(query: str) -> str | None:
+    q = str(query or "").strip()
+    if not q:
+        return None
+    encoded = urllib.parse.quote(q, safe="-")
+    return f"{ADULT_DESK_ORIGIN}/search?q={encoded}"
+
+
+def adult_desk_album(token: str) -> str | None:
+    ident = str(token or "").strip()
+    if len(ident) < 4 or not all(ch.isalnum() for ch in ident):
+        return None
+    return f"{ADULT_DESK_ORIGIN}/a/{ident}"
+
+
+def adult_desk_key(raw: str) -> str | None:
+    path = urllib.parse.urlparse(str(raw or "")).path.strip("/").split("/")
+    if len(path) < 2:
+        return None
+    album = path[-2].lower()
+    file = path[-1].lower()
+    if "_" in file:
+        file = file.split("_", 1)[0]
+    if "." in file:
+        file = file.split(".", 1)[0]
+    if len(album) < 4 or len(file) < 4 or not album.isalnum() or not file.isalnum():
+        return None
+    return f"{album}-{file}"
+
+
+def adult_desk_still(raw: str) -> str | None:
+    parsed = urllib.parse.urlparse(str(raw or ""))
+    host = (parsed.hostname or "").lower()
+    if "erome.com" not in host:
+        return None
+    if host.startswith("v"):
+        host = "s" + host[1:]
+    parts = [part for part in parsed.path.split("/") if part]
+    if not parts:
+        return None
+    file = parts[-1]
+    if "_" in file and file.lower().endswith(".mp4"):
+        file = file.rsplit("_", 1)[0] + ".jpg"
+    elif file.lower().endswith(".mp4"):
+        file = file[:-4] + ".jpg"
+    else:
+        return None
+    parts[-1] = file
+    return adult_still(f"https://{host}/{'/'.join(parts)}")
+
+
 def adult_face_still(desk: str, token: str) -> str | None:
     if desk == "star":
         slug = str(token or "").strip().lower()
         if slug and all(ch.isalnum() or ch == "-" for ch in slug):
             return adult_still(f"https://cdn.bornstar.co/preview-batch/{slug}/thumb.webp")
         return None
+    if desk == "file":
+        return adult_desk_still(token)
     ident = str(token or "").strip()
     for name, src in ADULT_FACE_STILLS:
         if name.lower() == ident.lower():
@@ -1225,6 +1330,9 @@ def adult_face_hold_rooms(kind: str) -> list[dict]:
                 if desk == "star":
                     play = adult_playlist(adult_star_file(token) or "")
                     rid = f"adult-face-star-{token.lower()}"
+                elif desk == "file":
+                    play = adult_playlist(token)
+                    rid = f"adult-face-desk-{adult_desk_key(token) or token.lower()}"
                 else:
                     play = adult_playlist(adult_face_file(token) or "")
                     rid = f"adult-face-{token.lower()}"
@@ -1514,6 +1622,8 @@ def adult_parse_face(payload: object, kind: str) -> list[dict]:
     needles = adult_face_needles(kind) or []
     if not needles:
         return []
+    if isinstance(payload, (bytes, str)):
+        return adult_parse_desk(payload, kind)
     rows: list[dict] = []
     seen: set[str] = set()
     for model in _adult_face_models(payload):
@@ -1526,6 +1636,149 @@ def adult_parse_face(payload: object, kind: str) -> list[dict]:
             continue
         seen.add(room["id"])
         rows.append(room)
+    if rows:
+        rows.sort(key=lambda row: (-int(row["seconds"]), str(row["name"])))
+        return rows
+    return adult_parse_desk(payload, kind)
+
+
+def adult_desk_albums(payload: object, kind: str) -> list[str]:
+    needles = adult_face_needles(kind) or []
+    if not needles:
+        return []
+    text = payload.decode("utf-8", "replace") if isinstance(payload, bytes) else str(payload or "")
+    held = {token.lower() for token in adult_face_desk_tokens(kind)}
+    out: list[str] = []
+    seen: set[str] = set()
+    rest = text
+    while True:
+        mark = rest.find("album-title")
+        if mark < 0:
+            break
+        rest = rest[mark + 11 :]
+        href = rest.find("/a/")
+        if href < 0:
+            continue
+        ident = ""
+        for ch in rest[href + 3 :]:
+            if ch.isalnum():
+                ident += ch
+            else:
+                break
+        if len(ident) < 4:
+            continue
+        title = ""
+        open_at = rest.find(">")
+        close_at = rest.find("<", open_at + 1) if open_at >= 0 else -1
+        if open_at >= 0 and close_at > open_at:
+            title = rest[open_at + 1 : close_at]
+        title = title.replace("\u200b", " ").strip()
+        if not _adult_face_ok(title):
+            continue
+        if ident.lower() in held or _adult_face_hit(title, needles):
+            if ident.lower() not in seen:
+                seen.add(ident.lower())
+                out.append(ident)
+    return out
+
+
+def _adult_desk_title(text: str) -> str:
+    start = text.lower().find("<h1")
+    if start < 0:
+        return ""
+    open_at = text.find(">", start)
+    close_at = text.lower().find("</h1>", open_at + 1) if open_at >= 0 else -1
+    if open_at < 0 or close_at < 0:
+        return ""
+    raw = re.sub(r"<[^>]+>", "", text[open_at + 1 : close_at])
+    return raw.replace("\u200b", " ").strip()
+
+
+def _adult_desk_seconds(chunk: str) -> int:
+    mark = chunk.find("duration")
+    if mark < 0:
+        return 0
+    start = chunk.find(">", mark)
+    end = chunk.find("<", start + 1) if start >= 0 else -1
+    if start < 0 or end < 0:
+        return 0
+    clock = chunk[start + 1 : end].strip()
+    parts = [int(part) for part in clock.split(":") if part.isdigit()]
+    if len(parts) == 3:
+        return parts[0] * 3600 + parts[1] * 60 + parts[2]
+    if len(parts) == 2:
+        return parts[0] * 60 + parts[1]
+    return 0
+
+
+def _adult_desk_play(chunk: str) -> str | None:
+    best: tuple[int, str] | None = None
+    for match in re.finditer(r"https://v[^\s\"'<>]+\.mp4", chunk):
+        play = adult_playlist(match.group(0))
+        if not play:
+            continue
+        raw = match.group(0)
+        score = 1080 if "1080" in raw else 720 if "720" in raw else 480 if "480" in raw else 1
+        if best is None or score > best[0]:
+            best = (score, play)
+    return best[1] if best else None
+
+
+def adult_parse_desk(payload: object, kind: str) -> list[dict]:
+    needles = adult_face_needles(kind) or []
+    if not needles:
+        return []
+    text = payload.decode("utf-8", "replace") if isinstance(payload, bytes) else str(payload or "")
+    title = _adult_desk_title(text)
+    if not title or not _adult_face_ok(title):
+        return []
+    held = any(
+        f"/a/{token.lower()}" in text.lower() or f"/{token.lower()}/" in text.lower()
+        for token in adult_face_desk_tokens(kind)
+    )
+    if not held and not _adult_face_hit(title, needles):
+        return []
+    chip = str(kind or "").strip().upper()
+    rows: list[dict] = []
+    seen: set[str] = set()
+    rest = text
+    while True:
+        mark = rest.find('class="video"')
+        if mark < 0:
+            mark = rest.find("class='video'")
+        if mark < 0:
+            break
+        rest = rest[mark + 13 :]
+        end = rest.find("gate-overlay")
+        chunk = rest[:end] if end >= 0 else rest[:2500]
+        play = _adult_desk_play(chunk)
+        key = adult_desk_key(play or "")
+        seconds = _adult_desk_seconds(chunk)
+        if not play or not key or seconds <= 0 or key in seen:
+            continue
+        seen.add(key)
+        poster = ""
+        poster_at = chunk.find('poster="')
+        if poster_at < 0:
+            poster_at = chunk.find("poster='")
+        if poster_at >= 0:
+            tail = chunk[poster_at + 8 :]
+            poster = adult_still(tail.split('"', 1)[0].split("'", 1)[0]) or ""
+        if not poster:
+            poster = adult_desk_still(play) or ""
+        rows.append(
+            {
+                "id": f"adult-face-desk-{key}",
+                "name": title.upper(),
+                "handle": key,
+                "url": play,
+                "viewers": 0,
+                "image": poster,
+                "kinds": [] if not chip else [chip],
+                "seek": f"{title} {' '.join(needles)}".strip().lower(),
+                "seconds": seconds,
+            }
+        )
     rows.sort(key=lambda row: (-int(row["seconds"]), str(row["name"])))
     return rows
 
@@ -3067,7 +3320,66 @@ class AdultDeskTests(unittest.TestCase):
         self.assertEqual(adult_face_queries("HONEYTEASSEE")[0], "honeyteassee")
         self.assertNotIn("honey tea", adult_face_needles("HONEYTEASSEE") or [])
         self.assertIn("taniaaaramos", adult_face_queries("TANIA RAMOS"))
+        self.assertIn("waifutania", adult_face_needles("TANIA RAMOS") or [])
         self.assertNotIn("tania ramos", adult_face_needles("TANIA RAMOS") or [])
+        self.assertIn("juicyjass", adult_face_needles("JUICYJAS TV") or [])
+        self.assertIn("kittylunaxx", adult_face_needles("HONEYTEASSEE") or [])
+        self.assertNotIn("graciebonn", adult_face_needles("GRACIE BONN") or [])
+        self.assertTrue(any("erome.com/a/iLRhKOjv" in path for path in adult_face_hunt("MIKEILA J")))
+        self.assertTrue(any("erome.com/search?q=mikeilaj" in path for path in adult_face_hunt("MIKEILA J")))
+        self.assertTrue(any("erome.com/a/WJD2aTMn" in path for path in adult_face_hunt("TANIA RAMOS")))
+        self.assertTrue(any("erome.com/a/OWRwt8jD" in path for path in adult_face_hunt("JUICYJAS TV")))
+        self.assertGreaterEqual(len(adult_face_hold_rooms("MIKEILA J")), 3)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("JASMINEGTV")), 1)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("TANIA RAMOS")), 2)
+        self.assertTrue(
+            str(adult_face_hold_rooms("MIKEILA J")[0]["image"]).startswith("https://s")
+        )
+        desk_html = (
+            "<h1>MikeilaJ</h1>"
+            '<div class="video">'
+            '<video poster="https://s15.erome.com/959/iLRhKOjv/lkd4Xd4v.jpg">'
+            '<source src="https://v15.erome.com/959/iLRhKOjv/lkd4Xd4v_720p.mp4">'
+            "</video>"
+            '<span class="duration">03:23</span>'
+            "</div>"
+            '<div class="gate-overlay"></div>'
+        )
+        desk_rows = adult_parse_face(desk_html, "MIKEILA J")
+        self.assertEqual([row["id"] for row in desk_rows], ["adult-face-desk-ilrhkojv-lkd4xd4v"])
+        self.assertEqual(desk_rows[0]["seconds"], 203)
+        self.assertIn("erome.com", desk_rows[0]["url"])
+        self.assertEqual(
+            adult_desk_albums(
+                '<a class="album-title" href="https://www.erome.com/a/iLRhKOjv">MikeilaJ</a>',
+                "MIKEILA J",
+            ),
+            ["iLRhKOjv"],
+        )
+        self.assertEqual(
+            adult_parse_face(
+                "<h1>Nata Gold Gets Drilled</h1>"
+                '<div class="video">'
+                '<source src="https://v1.erome.com/1/NataGold/xxxx_720p.mp4">'
+                '<span class="duration">10:00</span>'
+                "</div>"
+                '<div class="gate-overlay"></div>',
+                "ITOCHIANATA",
+            ),
+            [],
+        )
+        self.assertEqual(
+            adult_parse_face(
+                "<h1>Gracie-Bonn-y-Karely-Ruiz-xxx</h1>"
+                '<div class="video">'
+                '<source src="https://v53.erome.com/4643/3F5xaXu2/W94178FM_720p.mp4">'
+                '<span class="duration">02:52</span>'
+                "</div>"
+                '<div class="gate-overlay"></div>',
+                "GRACIE BONN",
+            ),
+            [],
+        )
         self.assertIn("juicyjastv", adult_face_queries("JUICYJAS TV"))
         self.assertIn("lilivictoria32", adult_face_queries("LILI VICTORIA"))
         self.assertIn("monaacutee", adult_face_queries("MONA ACUTEE"))
@@ -3339,6 +3651,11 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("7bg2FgwidLS", desk)
         self.assertIn("kirawrrra2-0", desk)
         self.assertIn("static let faceHolds", desk)
+        self.assertIn("static let faceDesks", desk)
+        self.assertIn("func deskAlbums(", desk)
+        self.assertIn("func parseDesk(", desk)
+        self.assertIn("func deskLook(", desk)
+        self.assertIn("erome.com", desk.lower())
         self.assertIn("static let faceStills", desk)
         self.assertIn("static func faceStill(", desk)
         self.assertIn("static func faceKeep(", desk)
@@ -3429,6 +3746,8 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("faceHoldRooms", face_load)
         self.assertIn('faceHoldRooms("ALL")', face_load)
         self.assertIn("parseFace", face_load)
+        self.assertIn("deskLook", face_load)
+        self.assertIn("fetchDeskAlbums", face_load)
         self.assertIn("fetchAdultFaces", face_load)
         self.assertIn("adultRooms = AdultDesk.merge", face_load)
         self.assertIn("fetchGiftAuth", face_load)
