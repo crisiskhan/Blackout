@@ -52,7 +52,12 @@ struct LiveZoom: View {
 
     private func start() {
         guard pipe, let url = URL(string: row.url), url.scheme == "https" else { return }
-        let item = AVPlayerItem(url: url)
+        let item = AVPlayerItem(
+            asset: AVURLAsset(
+                url: url,
+                options: ["AVURLAssetHTTPHeaderFieldsKey": AdultDesk.playHeaders(row.url)]
+            )
+        )
         item.preferredForwardBufferDuration = 6
         item.preferredPeakBitRate = 0
         let next = AVPlayer(playerItem: item)

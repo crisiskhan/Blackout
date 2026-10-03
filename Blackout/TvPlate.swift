@@ -15,6 +15,9 @@ struct TvPlate: View {
     @State private var naOffset = 0
     @State private var naKind = "ALL"
     @State private var naQuery = ""
+    @State private var naPasteFailed = false
+    @State private var naHuntNow = false
+    @State private var naHuntTask: Task<Void, Never>?
     @State private var naStillCache: [String: UIImage] = [:]
 
     var body: some View {
@@ -26,7 +29,7 @@ struct TvPlate: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Button("TAP UPDATE") {
                         runtime.pullMapSnap()
-                        if naUnlocked { runtime.updateSocket.pullAdult() }
+                        if naUnlocked { pullNaHunt(now: true) }
                     }
                     .buttonStyle(HUDActionStyle(filled: runtime.updateSocket.busy))
                     if !runtime.updateSocket.pipe {
@@ -63,7 +66,7 @@ struct TvPlate: View {
         .onChange(of: naUnlocked) { _, ok in
             if ok {
                 resetNaPage()
-                runtime.updateSocket.pullAdult()
+                runtime.updateSocket.pullAdult(topic: naKind)
             }
         }
         .onChange(of: runtime.updateSocket.adultRooms.count) { _, _ in
@@ -130,8 +133,14 @@ struct TvPlate: View {
         )
     }
 
+    private var naHuntKind: String {
+        let query = naQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        return query.isEmpty ? naKind : query
+    }
+
     private var naPicked: [AdultDesk.Room] {
-        AdultDesk.pick(runtime.updateSocket.adultRooms, kind: naKind, query: naQuery)
+        let query = naQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        return AdultDesk.pick(runtime.updateSocket.adultRooms, kind: naHuntKind, query: query)
     }
 
     private var naLiveRows: [NaLive.Row] {
@@ -141,7 +150,7 @@ struct TvPlate: View {
     private var naPageRows: [NaLive.Row] {
         NaLive.page(
             runtime.updateSocket.adultRooms,
-            kind: naKind,
+            kind: naHuntKind,
             query: naQuery,
             offset: naOffset
         )
@@ -152,7 +161,7 @@ struct TvPlate: View {
     }
 
     private var naKindChips: [String] {
-        ["ALL"] + Array(AdultDesk.kinds(runtime.updateSocket.adultRooms).prefix(12))
+        AdultDesk.rail(runtime.updateSocket.adultRooms)
     }
 
     private var naEmptyChrome: String {
@@ -213,30 +222,52 @@ struct TvPlate: View {
 
     private var naFindRail: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HUDField("SEARCH",
-                text: $naQuery,
-                id: "tv.na.search",
-                submit: "DONE",
-                pointSize: 16,
-                onSubmit: {
-                    resetNaPage()
-                    return true
-                }
-            )
+            HStack(alignment: .center, spacing: 8) {
+                HUDField("SEARCH",
+                    text: $naQuery,
+                    id: "tv.na.search",
+                    submit: "DONE",
+                    pointSize: 16,
+                    onSubmit: {
+                        naHuntNow = true
+                        takeNaQuery(naQuery)
+                        resetNaPage()
+                        pullNaHunt(now: true)
+                        return true
+                    }
+                )
+                Button("PASTE") { pasteNaSearch() }
+                    .buttonStyle(HUDOverlayChipStyle())
+            }
+            if naPasteFailed {
+                Text("NO PASTE")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.warn)
+                    .textCase(.uppercase)
+            }
             HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
                 ForEach(naKindChips, id: \.self) { kind in
                     Button(kind) {
+                        naQuery = ""
+                        naPasteFailed = false
                         naKind = kind
                         resetNaPage()
+                        runtime.updateSocket.pullAdult(topic: kind)
                     }
                     .buttonStyle(HUDOverlayChipStyle(filled: naKind == kind))
                 }
             }
         }
         .onChange(of: naQuery) { _, _ in
+            naPasteFailed = false
             if naOffset != 0 || naPlayingID != nil {
                 resetNaPage()
             }
+            if naHuntNow {
+                naHuntNow = false
+                return
+            }
+            pullNaHunt(now: false)
         }
     }
 
@@ -262,6 +293,54 @@ struct TvPlate: View {
     private func resetNaPage() {
         naPlayingID = nil
         naOffset = 0
+    }
+
+    private func takeNaQuery(_ raw: String) {
+        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let name = AdultDesk.pageName(text) {
+            naQuery = name
+        } else {
+            naQuery = text
+        }
+    }
+
+    /// HUD typewriter has no iPhone paste. PASTE is the only way a
+    /// creator-page link lands on SEARCH.
+    private func pasteNaSearch() {
+        naPasteFailed = false
+        let text = (UIPasteboard.general.string ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else {
+            naPasteFailed = true
+            return
+        }
+        naHuntNow = true
+        takeNaQuery(text)
+        resetNaPage()
+        pullNaHunt(now: true)
+    }
+
+    private func pullNaHunt(now: Bool) {
+        naHuntTask?.cancel()
+        let query = naQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        if query.isEmpty {
+            runtime.updateSocket.pullAdult(topic: naKind)
+            return
+        }
+        if AdultDesk.huntNeedles(query) == nil {
+            return
+        }
+        if now {
+            runtime.updateSocket.pullAdult(topic: query)
+            return
+        }
+        naHuntTask = Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                runtime.updateSocket.pullAdult(topic: query)
+            }
+        }
     }
 
     private func clampNaOffset() {

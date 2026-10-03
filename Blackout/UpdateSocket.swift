@@ -19,6 +19,7 @@ final class UpdateSocket {
     var adultRooms: [AdultDesk.Room] = []
     var adultReady = false
     private var adultBusy = false
+    private var adultWanted = ""
     private var adultStillBusy = false
     private var adultStillQueued: [NaLive.Row] = []
     private var adultPlay: [String: String] = [:]
@@ -126,11 +127,12 @@ final class UpdateSocket {
         var onSnapStill: ((String, Data) -> Void)?
     }
 
-    func pullAdult() {
+    func pullAdult(topic: String = "") {
         guard pipe else { return }
+        adultWanted = topic
         if adultBusy { return }
         adultBusy = true
-        Task { await loadAdult() }
+        Task { await loadAdult(topic: topic) }
     }
 
     func pullAdultStills(_ rows: [NaLive.Row]) {
@@ -171,17 +173,28 @@ final class UpdateSocket {
         let session = URLSession(configuration: config)
         var wrote = false
         await withTaskGroup(of: (String, Data)?.self) { group in
-            for job in jobs {
-                group.addTask {
-                    guard let data = await UpdateSocket.fetchAdult(session, job.1) else { return nil }
-                    guard let jpeg = UpdateSocket.stillPreview(data), jpeg.count > 32 else { return nil }
-                    return (job.0, jpeg)
+            var next = 0
+            var inflight = 0
+            func enqueue() {
+                while inflight < AdultDesk.huntAtOnce, next < jobs.count {
+                    let job = jobs[next]
+                    next += 1
+                    inflight += 1
+                    group.addTask {
+                        guard let data = await UpdateSocket.fetchAdult(session, job.1) else { return nil }
+                        guard let jpeg = UpdateSocket.stillPreview(data), jpeg.count > 32 else { return nil }
+                        return (job.0, jpeg)
+                    }
                 }
             }
+            enqueue()
             for await hit in group {
-                guard let hit else { continue }
-                write("cam-\(hit.0).jpg", hit.1)
-                wrote = true
+                if let hit {
+                    write("cam-\(hit.0).jpg", hit.1)
+                    wrote = true
+                }
+                inflight -= 1
+                enqueue()
             }
         }
         session.invalidateAndCancel()
@@ -190,68 +203,281 @@ final class UpdateSocket {
         }
     }
 
-    private func loadAdult() async {
+    private func loadAdult(topic: String = "") async {
+        adultReady = false
+        let held = AdultDesk.faceHoldRooms("ALL")
+        if !held.isEmpty {
+            adultRooms = AdultDesk.merge([held, adultRooms])
+        }
         defer {
+            let again = adultWanted
             adultBusy = false
             adultReady = true
+            if again != topic {
+                pullAdult(topic: again)
+            }
         }
         guard pipe else { return }
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 8
-        config.timeoutIntervalForResource = 40
+        config.timeoutIntervalForResource = AdultDesk.huntNeedles(topic) != nil ? 180 : 40
         config.waitsForConnectivity = false
         config.allowsExpensiveNetworkAccess = true
         config.allowsConstrainedNetworkAccess = true
         config.tlsMinimumSupportedProtocolVersion = .TLSv12
         let session = URLSession(configuration: config)
-        var batches = await fetchAdultPages(session, from: 0, count: 1)
-        adultRooms = AdultDesk.merge(batches)
-        if AdultDesk.pages > 1 {
-            let rest = await fetchAdultPages(session, from: 1, count: AdultDesk.pages - 1)
-            if !rest.isEmpty {
-                batches.append(contentsOf: rest)
-                adultRooms = AdultDesk.merge(batches)
+        var batches: [[AdultDesk.Room]] = []
+        if AdultDesk.loveNeedles(topic) {
+            batches = await fetchLovePages(session)
+            adultRooms = AdultDesk.merge(batches)
+        } else if AdultDesk.huntNeedles(topic) != nil {
+            batches = await fetchFacePages(session, topic)
+            adultRooms = AdultDesk.merge([held] + batches)
+        } else {
+            batches = await fetchAdultPages(session, from: 0, count: 1)
+            adultRooms = AdultDesk.merge([held] + batches)
+            if AdultDesk.pages > 1 {
+                let rest = await fetchAdultPages(session, from: 1, count: AdultDesk.pages - 1)
+                if !rest.isEmpty {
+                    batches.append(contentsOf: rest)
+                    adultRooms = AdultDesk.merge([held] + batches)
+                }
+            }
+            for hashtag in AdultDesk.topics(topic) {
+                let extra = await fetchAdultPages(session, from: 0, count: 2, topic: hashtag)
+                if !extra.isEmpty {
+                    batches.append(contentsOf: extra)
+                    adultRooms = AdultDesk.merge([held] + batches)
+                }
             }
         }
         session.invalidateAndCancel()
         adultPlay = adultPlay.filter { key, _ in adultRooms.contains { $0.id == key } }
     }
 
-    private func fetchAdultPages(
-        _ session: URLSession,
-        from start: Int,
-        count: Int
-    ) async -> [[AdultDesk.Room]] {
-        let first = max(0, start)
-        let last = first + max(0, count)
+    private func fetchLovePages(_ session: URLSession) async -> [[AdultDesk.Room]] {
+        var paths: [String] = []
+        for tag in AdultDesk.loveTags {
+            for page in 0..<AdultDesk.pages {
+                paths.append(AdultDesk.loveDirectory(tag: tag, offset: page * AdultDesk.pageSize))
+            }
+        }
+        return await fetchAdultBatches(session, paths: paths) { AdultDesk.parseLove($0) }
+    }
+
+    private func fetchFacePages(_ session: URLSession, _ kind: String) async -> [[AdultDesk.Room]] {
         var batches: [[AdultDesk.Room]] = []
+        let held = AdultDesk.faceHoldRooms("ALL")
+        if !held.isEmpty {
+            batches.append(held)
+            adultRooms = AdultDesk.merge(batches)
+        }
+        let paths = AdultDesk.faceHunt(kind)
+        let gift = await fetchGiftAuth(session)
         await withTaskGroup(of: [AdultDesk.Room].self) { group in
-            for tag in AdultDesk.tags {
-                for page in first..<last {
+            var next = 0
+            var inflight = 0
+            func enqueue() {
+                while inflight < AdultDesk.huntAtOnce, next < paths.count {
+                    let path = paths[next]
+                    next += 1
+                    inflight += 1
                     group.addTask {
-                        let offset = page * AdultDesk.pageSize
                         guard let data = await UpdateSocket.fetchAdult(
                             session,
-                            AdultDesk.directory(tag: tag, offset: offset)
+                            path,
+                            headers: AdultDesk.giftHeaders(path, token: gift.token, session: gift.session)
                         ) else { return [] }
+                        if AdultDesk.deskLook(path) {
+                            return await UpdateSocket.fetchDeskAlbums(session, data, kind: kind)
+                        }
+                        if AdultDesk.postLook(path) {
+                            return await UpdateSocket.fetchPostStatuses(session, data, kind: kind)
+                        }
+                        if AdultDesk.webLook(path) {
+                            return await UpdateSocket.fetchWebHits(session, data, kind: kind, from: path)
+                        }
                         return await Task.detached(priority: .utility) {
-                            AdultDesk.parse(data)
+                            AdultDesk.parseFace(data, kind: kind)
                         }.value
                     }
                 }
             }
+            enqueue()
+            for await batch in group {
+                if !batch.isEmpty {
+                    batches.append(batch)
+                    adultRooms = AdultDesk.merge(batches)
+                }
+                inflight -= 1
+                enqueue()
+            }
+        }
+        let lives = await fetchAdultFaces(session, AdultDesk.faceGiftTokens(kind))
+        if !lives.isEmpty {
+            let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+            let tagged = lives.map { room -> AdultDesk.Room in
+                var next = room
+                if !chip.isEmpty, !next.kinds.contains(chip) {
+                    next.kinds.insert(chip, at: 0)
+                }
+                return next
+            }
+            batches.append(tagged)
+            adultRooms = AdultDesk.merge(batches)
+        }
+        return batches
+    }
+
+    private func fetchAdultPages(
+        _ session: URLSession,
+        from start: Int,
+        count: Int,
+        topic: String = ""
+    ) async -> [[AdultDesk.Room]] {
+        let first = max(0, start)
+        let last = first + max(0, count)
+        var paths: [String] = []
+        for tag in AdultDesk.tags {
+            for page in first..<last {
+                paths.append(AdultDesk.directory(tag: tag, offset: page * AdultDesk.pageSize, topic: topic))
+            }
+        }
+        return await fetchAdultBatches(session, paths: paths) { AdultDesk.parse($0) }
+    }
+
+    private func fetchAdultFaces(_ session: URLSession, _ needles: [String]) async -> [AdultDesk.Room] {
+        var rooms: [AdultDesk.Room] = []
+        await withTaskGroup(of: AdultDesk.Room?.self) { group in
+            for needle in needles {
+                guard let path = AdultDesk.context(needle) else { continue }
+                group.addTask {
+                    guard let data = await UpdateSocket.fetchAdult(session, path) else { return nil }
+                    return AdultDesk.faceRoom(handle: needle, data: data)
+                }
+            }
+            for await hit in group {
+                if let hit { rooms.append(hit) }
+            }
+        }
+        return rooms
+    }
+
+    private func fetchAdultFaceFiles(_ session: URLSession, _ kind: String) async -> [AdultDesk.Room] {
+        let gift = await fetchGiftAuth(session)
+        let batches = await fetchAdultBatches(
+            session,
+            paths: AdultDesk.faceHunt(kind),
+            headersFor: { AdultDesk.giftHeaders($0, token: gift.token, session: gift.session) }
+        ) {
+            AdultDesk.parseFace($0, kind: kind)
+        }
+        return batches.flatMap { $0 }
+    }
+
+    private func fetchGiftAuth(_ session: URLSession) async -> (token: String, session: String) {
+        guard let data = await UpdateSocket.fetchAdult(session, AdultDesk.giftAuth) else {
+            return ("", "")
+        }
+        return (AdultDesk.giftToken(data) ?? "", AdultDesk.giftSession(data) ?? "")
+    }
+
+    private func fetchAdultBatches(
+        _ session: URLSession,
+        paths: [String],
+        headersFor: (@Sendable (String) -> [String: String])? = nil,
+        parse: @escaping @Sendable (Data) -> [AdultDesk.Room]
+    ) async -> [[AdultDesk.Room]] {
+        var batches: [[AdultDesk.Room]] = []
+        await withTaskGroup(of: [AdultDesk.Room].self) { group in
+            var next = 0
+            var inflight = 0
+            func enqueue() {
+                while inflight < AdultDesk.huntAtOnce, next < paths.count {
+                    let path = paths[next]
+                    next += 1
+                    inflight += 1
+                    group.addTask {
+                        let headers = headersFor?(path) ?? [:]
+                        guard let data = await UpdateSocket.fetchAdult(session, path, headers: headers)
+                        else { return [] }
+                        return await Task.detached(priority: .utility) {
+                            parse(data)
+                        }.value
+                    }
+                }
+            }
+            enqueue()
             for await batch in group {
                 if !batch.isEmpty { batches.append(batch) }
+                inflight -= 1
+                enqueue()
             }
         }
         return batches
+    }
+
+    nonisolated private static func fetchPostStatuses(
+        _ session: URLSession,
+        _ data: Data,
+        kind: String
+    ) async -> [AdultDesk.Room] {
+        var rows: [AdultDesk.Room] = []
+        var seen: Set<String> = []
+        for token in AdultDesk.postIds(data).prefix(AdultDesk.postFollow) {
+            guard let path = AdultDesk.postStatus(token), seen.insert(path).inserted else { continue }
+            guard let body = await UpdateSocket.fetchAdult(session, path) else { continue }
+            rows.append(contentsOf: AdultDesk.parseFace(body, kind: kind))
+        }
+        return rows
+    }
+
+    nonisolated private static func fetchWebHits(
+        _ session: URLSession,
+        _ data: Data,
+        kind: String,
+        from raw: String = ""
+    ) async -> [AdultDesk.Room] {
+        var rows: [AdultDesk.Room] = []
+        var seen: Set<String> = []
+        for token in AdultDesk.webAlbums(data, kind: kind).prefix(AdultDesk.deskFollow) {
+            guard let path = AdultDesk.deskAlbum(token), seen.insert(path).inserted else { continue }
+            guard let album = await UpdateSocket.fetchAdult(session, path) else { continue }
+            rows.append(contentsOf: AdultDesk.parseFace(album, kind: kind))
+        }
+        for token in AdultDesk.webPosts(data, kind: kind).prefix(AdultDesk.postFollow) {
+            guard let path = AdultDesk.postStatus(token), seen.insert(path).inserted else { continue }
+            guard let body = await UpdateSocket.fetchAdult(session, path) else { continue }
+            rows.append(contentsOf: AdultDesk.parseFace(body, kind: kind))
+        }
+        for token in AdultDesk.webTubes(data, kind: kind, from: raw).prefix(AdultDesk.deskFollow) {
+            guard seen.insert(token).inserted else { continue }
+            guard let page = await UpdateSocket.fetchAdult(session, token) else { continue }
+            rows.append(contentsOf: AdultDesk.parseFace(page, kind: kind))
+        }
+        return rows
+    }
+
+    nonisolated private static func fetchDeskAlbums(
+        _ session: URLSession,
+        _ data: Data,
+        kind: String
+    ) async -> [AdultDesk.Room] {
+        var rows: [AdultDesk.Room] = []
+        var seen: Set<String> = []
+        for token in AdultDesk.deskAlbums(data, kind: kind).prefix(AdultDesk.deskFollow) {
+            guard let path = AdultDesk.deskAlbum(token), seen.insert(path).inserted else { continue }
+            guard let album = await UpdateSocket.fetchAdult(session, path) else { continue }
+            rows.append(contentsOf: AdultDesk.parseFace(album, kind: kind))
+        }
+        return rows
     }
 
     func liveAdult(_ row: NaLive.Row) async -> String? {
         if let cached = adultPlay[row.id], AdultDesk.playlist(cached) != nil {
             return cached
         }
-        if let ready = AdultDesk.playlist(row.url) {
+        if let ready = AdultDesk.playlist(row.url), AdultDesk.filePlay(ready) {
             adultPlay[row.id] = ready
             return ready
         }
@@ -265,18 +491,34 @@ final class UpdateSocket {
         config.tlsMinimumSupportedProtocolVersion = .TLSv12
         let session = URLSession(configuration: config)
         var url: String?
-        if let path = AdultDesk.context(row.handle),
-           let data = await Self.fetchAdult(session, path) {
-            url = AdultDesk.stream(data)
+        if let ready = AdultDesk.playlist(row.url) {
+            url = await Self.resolveAdult(session, ready)
         }
-        if url == nil, let edge = AdultDesk.edge(row.handle),
-           let data = await Self.fetchAdultPost(session, edge.path, body: edge.body) {
-            url = AdultDesk.stream(data)
+        if url == nil, !row.kinds.contains(AdultDesk.loveChip) {
+            if let path = AdultDesk.context(row.handle),
+               let data = await Self.fetchAdult(session, path)
+            {
+                url = AdultDesk.stream(data)
+            }
+            if url == nil, let edge = AdultDesk.edge(row.handle),
+               let data = await Self.fetchAdultPost(session, edge.path, body: edge.body)
+            {
+                url = AdultDesk.stream(data)
+            }
         }
         session.invalidateAndCancel()
         guard let url else { return nil }
         adultPlay[row.id] = url
         return url
+    }
+
+    nonisolated private static func resolveAdult(_ session: URLSession, _ raw: String) async -> String? {
+        guard let play = AdultDesk.playlist(raw) else { return nil }
+        guard let data = await fetchAdult(session, play) else { return nil }
+        if let hit = AdultDesk.livePlay(play, data) { return hit }
+        guard let next = AdultDesk.loveVariant(play, data) else { return nil }
+        guard let more = await fetchAdult(session, next) else { return nil }
+        return AdultDesk.livePlay(next, more)
     }
 
     func applyHopStills(_ hopStills: [(id: String, jpeg: Data)]) {
@@ -510,16 +752,24 @@ final class UpdateSocket {
         }
     }
 
-    nonisolated static func fetchAdult(_ session: URLSession, _ raw: String) async -> Data? {
-        await adultGet(session, raw)
+    nonisolated static func fetchAdult(
+        _ session: URLSession,
+        _ raw: String,
+        headers: [String: String] = [:]
+    ) async -> Data? {
+        await adultGet(session, raw, headers: headers)
     }
 
     nonisolated static func fetchAdultPost(_ session: URLSession, _ raw: String, body: String) async -> Data? {
         await adultPost(session, raw, body: body)
     }
 
-    nonisolated private static func adultGet(_ session: URLSession, _ raw: String) async -> Data? {
-        guard let request = adultRequest(raw) else { return nil }
+    nonisolated private static func adultGet(
+        _ session: URLSession,
+        _ raw: String,
+        headers: [String: String] = [:]
+    ) async -> Data? {
+        guard let request = adultRequest(raw, headers: headers) else { return nil }
         return await adultData(session, request)
     }
 
@@ -531,15 +781,30 @@ final class UpdateSocket {
         return await adultData(session, request)
     }
 
-    nonisolated private static func adultRequest(_ raw: String) -> URLRequest? {
+    nonisolated private static func adultRequest(
+        _ raw: String,
+        headers: [String: String] = [:]
+    ) -> URLRequest? {
         guard let url = URL(string: raw), url.scheme?.lowercased() == "https" else { return nil }
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.timeoutInterval = 8
-        request.setValue(AdultDesk.agent, forHTTPHeaderField: "User-Agent")
-        request.setValue(AdultDesk.origin, forHTTPHeaderField: "Referer")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("XMLHttpRequest", forHTTPHeaderField: "X-Requested-With")
+        request.setValue(AdultDesk.userAgent(raw), forHTTPHeaderField: "User-Agent")
+        request.setValue(AdultDesk.referer(raw), forHTTPHeaderField: "Referer")
+        if AdultDesk.deskHost(raw) || AdultDesk.postLook(raw) || AdultDesk.webLook(raw)
+            || AdultDesk.tubeHost(raw)
+        {
+            request.setValue(
+                "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
+                forHTTPHeaderField: "Accept"
+            )
+        } else {
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+            request.setValue("XMLHttpRequest", forHTTPHeaderField: "X-Requested-With")
+        }
+        for (key, value) in headers where !key.isEmpty && !value.isEmpty {
+            request.setValue(value, forHTTPHeaderField: key)
+        }
         return request
     }
 
@@ -606,37 +871,22 @@ final class UpdateSocket {
         return rows.filter { !$0.id.isEmpty && $0.url.hasPrefix("https://") }
     }
 
-    /// Adult well still. JPEG only, down to a 640px edge so TV does not jet.
+    /// Adult well still. JPEG or WebP, down to a 640px edge so TV does not jet.
     nonisolated static func stillPreview(_ data: Data, maxEdge: Int = 640) -> Data? {
-        guard let jpeg = stillJPEG(data), jpeg.count > 32 else { return nil }
-        guard let src = CGImageSourceCreateWithData(jpeg as CFData, nil) else { return jpeg }
-        let options: [CFString: Any] = [
-            kCGImageSourceCreateThumbnailFromImageAlways: true,
-            kCGImageSourceCreateThumbnailWithTransform: true,
-            kCGImageSourceThumbnailMaxPixelSize: max(64, maxEdge),
-        ]
-        guard let cg = CGImageSourceCreateThumbnailAtIndex(src, 0, options as CFDictionary) else {
-            return jpeg
-        }
-        let out = NSMutableData()
-        guard let dest = CGImageDestinationCreateWithData(out, "public.jpeg" as CFString, 1, nil) else {
-            return jpeg
-        }
-        CGImageDestinationAddImage(
-            dest,
-            cg,
-            [kCGImageDestinationLossyCompressionQuality: 0.7] as CFDictionary
-        )
-        guard CGImageDestinationFinalize(dest) else { return jpeg }
-        let preview = out as Data
-        return preview.count > 32 ? preview : jpeg
+        guard let raw = stillBytes(data), raw.count > 32 else { return nil }
+        return imageJPEG(raw, maxEdge: maxEdge)
     }
 
-    /// Raw JPEG, or TxDOT JSON `{snippet: base64 jpeg}`. Nothing else.
+    /// Raw JPEG, WebP converted to a bounded JPEG, or TxDOT JSON `{snippet: base64 jpeg}`.
     nonisolated static func stillJPEG(_ data: Data) -> Data? {
-        if data.count >= 3, data[0] == 0xFF, data[1] == 0xD8 {
-            return data
-        }
+        if stillMagic(data, jpeg: true) { return data }
+        if stillMagic(data, jpeg: false) { return imageJPEG(data, maxEdge: 1280) }
+        return stillBytes(data)
+    }
+
+    nonisolated private static func stillBytes(_ data: Data) -> Data? {
+        if stillMagic(data, jpeg: true) { return data }
+        if stillMagic(data, jpeg: false) { return data }
         guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return nil
         }
@@ -644,10 +894,41 @@ final class UpdateSocket {
         guard let snippet, !snippet.isEmpty, let raw = Data(base64Encoded: snippet) else {
             return nil
         }
-        if raw.count >= 3, raw[0] == 0xFF, raw[1] == 0xD8 {
-            return raw
+        return stillMagic(raw, jpeg: true) ? raw : nil
+    }
+
+    nonisolated private static func stillMagic(_ data: Data, jpeg: Bool) -> Bool {
+        if jpeg {
+            return data.count >= 3 && data[0] == 0xFF && data[1] == 0xD8
         }
-        return nil
+        return data.count >= 12
+            && data[0] == 0x52 && data[1] == 0x49 && data[2] == 0x46 && data[3] == 0x46
+            && data[8] == 0x57 && data[9] == 0x45 && data[10] == 0x42 && data[11] == 0x50
+    }
+
+    nonisolated private static func imageJPEG(_ data: Data, maxEdge: Int) -> Data? {
+        guard let src = CGImageSourceCreateWithData(data as CFData, nil) else { return nil }
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceShouldCache: false,
+            kCGImageSourceThumbnailMaxPixelSize: max(64, maxEdge),
+        ]
+        guard let cg = CGImageSourceCreateThumbnailAtIndex(src, 0, options as CFDictionary) else {
+            return nil
+        }
+        let out = NSMutableData()
+        guard let dest = CGImageDestinationCreateWithData(out, "public.jpeg" as CFString, 1, nil) else {
+            return nil
+        }
+        CGImageDestinationAddImage(
+            dest,
+            cg,
+            [kCGImageDestinationLossyCompressionQuality: 0.7] as CFDictionary
+        )
+        guard CGImageDestinationFinalize(dest) else { return nil }
+        let jpeg = out as Data
+        return jpeg.count > 32 ? jpeg : nil
     }
 
     private func range2(_ cam: PackCam, lat: Double, lon: Double) -> Double {

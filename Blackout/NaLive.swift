@@ -31,7 +31,7 @@ enum NaLive {
                 viewers: room.viewers,
                 image: room.image,
                 kinds: room.kinds,
-                range: "LIVE"
+                range: room.seconds > 0 ? AdultDesk.clock(room.seconds) : "LIVE"
             )
         }
     }
@@ -187,7 +187,12 @@ struct NaLiveWell: View {
             return
         }
         guard playingID == row.id else { return }
-        let item = AVPlayerItem(url: url)
+        let item = AVPlayerItem(
+            asset: AVURLAsset(
+                url: url,
+                options: ["AVURLAssetHTTPHeaderFieldsKey": AdultDesk.playHeaders(raw)]
+            )
+        )
         item.preferredForwardBufferDuration = 6
         item.preferredPeakBitRate = 0
         let next = AVPlayer(playerItem: item)
