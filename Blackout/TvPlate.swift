@@ -127,9 +127,11 @@ struct TvPlate: View {
                             DispatchQueue.main.asyncAfter(deadline: .now() + CamDesk.naHoldSeconds) {
                                 let elapsed = Date().timeIntervalSince(started)
                                 if naHolding, armed == naPress, CamDesk.naUnlocks(elapsed: elapsed) {
-                                    runtime.openNa()
                                     naHolding = false
                                     naChrome = nil
+                                    Task { @MainActor in
+                                        runtime.openNa()
+                                    }
                                 }
                             }
                         }

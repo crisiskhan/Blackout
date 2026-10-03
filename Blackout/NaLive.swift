@@ -22,12 +22,15 @@ enum NaLive {
     static let screen = 8
 
     static func rows(_ rooms: [AdultDesk.Room]) -> [Row] {
-        rooms.compactMap { room in
+        var seen: Set<String> = []
+        return rooms.compactMap { room in
+            let id = room.id.trimmingCharacters(in: .whitespacesAndNewlines)
             let handle = room.handle.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !handle.isEmpty else { return nil }
+            guard !id.isEmpty, !handle.isEmpty, seen.insert(id).inserted else { return nil }
+            let named = room.name.trimmingCharacters(in: .whitespacesAndNewlines)
             return Row(
-                id: room.id,
-                name: room.name,
+                id: id,
+                name: named.isEmpty ? handle.uppercased() : named,
                 handle: handle,
                 url: room.url,
                 viewers: room.viewers,
@@ -54,7 +57,7 @@ enum NaWatch {
     static let jump = 15
 
     static func seek(_ player: AVPlayer?, url: String, by: Double) -> String? {
-        guard let player else { return "NO STREAM" }
+        guard let player, player.currentItem != nil else { return "NO STREAM" }
         guard AdultDesk.filePlay(url) else { return "LIVE" }
         let now = player.currentTime().seconds
         guard now.isFinite else { return "NO STREAM" }
@@ -103,6 +106,7 @@ struct NaLiveWell: View {
     @State private var dead = false
     @State private var paused = false
     @State private var playURL = ""
+    @State private var playSeq = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -140,7 +144,10 @@ struct NaLiveWell: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .onChange(of: pipe) { _, ok in
-            if !ok { stop() }
+            if !ok {
+                stop()
+                if playingID == row.id { playingID = nil }
+            }
         }
         .onChange(of: playingID) { _, current in
             if current != row.id { stop() }
@@ -153,7 +160,10 @@ struct NaLiveWell: View {
                 Task { await start() }
             }
         }
-        .onDisappear { stop() }
+        .onDisappear {
+            stop()
+            if playingID == row.id { playingID = nil }
+        }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(row.name)
         .accessibilityValue(playing ? "LIVE" : row.range)
@@ -251,6 +261,7 @@ struct NaLiveWell: View {
     private func goFull() {
         let keep = playURL
         stop()
+        if playingID == row.id { playingID = nil }
         var next = row
         if AdultDesk.playlist(keep) != nil {
             next.url = keep
@@ -280,18 +291,23 @@ struct NaLiveWell: View {
     }
 
     private func start() async {
+        playSeq += 1
+        let seq = playSeq
         guard pipe, playingID == row.id else { return }
-        guard let raw = await onPlay(row), let url = URL(string: raw), url.scheme == "https" else {
+        guard let raw = await onPlay(row), let play = AdultDesk.playlist(raw),
+              let url = URL(string: play), url.scheme == "https"
+        else {
+            guard seq == playSeq else { return }
             if playingID == row.id { playingID = nil }
             dead = true
             return
         }
-        guard playingID == row.id else { return }
-        playURL = raw
+        guard playingID == row.id, seq == playSeq else { return }
+        playURL = play
         let item = AVPlayerItem(
             asset: AVURLAsset(
                 url: url,
-                options: ["AVURLAssetHTTPHeaderFieldsKey": AdultDesk.playHeaders(raw)]
+                options: ["AVURLAssetHTTPHeaderFieldsKey": AdultDesk.playHeaders(play)]
             )
         )
         item.preferredForwardBufferDuration = 6
@@ -299,17 +315,19 @@ struct NaLiveWell: View {
         let next = AVPlayer(playerItem: item)
         next.automaticallyWaitsToMinimizeStalling = true
         next.play()
+        player?.pause()
+        player?.replaceCurrentItem(with: nil)
         player = next
         paused = false
     }
 
     private func stop() {
+        playSeq += 1
         player?.pause()
         player?.replaceCurrentItem(with: nil)
         player = nil
         playURL = ""
         paused = false
-        if playingID == row.id { playingID = nil }
     }
 
     private func jump(_ by: Double) {

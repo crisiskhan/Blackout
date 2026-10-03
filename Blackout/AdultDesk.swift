@@ -2165,7 +2165,9 @@ enum AdultDesk {
             } else {
                 score = 1
             }
-            if best == nil || score > best!.0 {
+            if let hit = best {
+                if score > hit.0 { best = (score, play) }
+            } else {
                 best = (score, play)
             }
         }
@@ -2439,18 +2441,21 @@ enum AdultDesk {
     static func merge(_ batches: [[Room]]) -> [Room] {
         var byID: [String: Room] = [:]
         for room in batches.joined() {
-            if var old = byID[room.id] {
-                if room.viewers > old.viewers {
-                    var next = room
-                    if next.image.isEmpty { next.image = old.image }
-                    byID[room.id] = next
-                } else if old.image.isEmpty, !room.image.isEmpty {
-                    old.image = room.image
-                    byID[room.id] = old
+            let rid = room.id.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !rid.isEmpty else { continue }
+            var incoming = room
+            incoming.id = rid
+            if var old = byID[rid] {
+                if incoming.viewers > old.viewers {
+                    if incoming.image.isEmpty { incoming.image = old.image }
+                    byID[rid] = incoming
+                } else if old.image.isEmpty, !incoming.image.isEmpty {
+                    old.image = incoming.image
+                    byID[rid] = old
                 }
                 continue
             }
-            byID[room.id] = room
+            byID[rid] = incoming
         }
         let all = Array(byID.values)
         let files = all.filter { shelfKeep($0) }.sorted { lhs, rhs in

@@ -2089,7 +2089,7 @@ def adult_face_hold_rooms(kind: str) -> list[dict]:
 def adult_merge(batches: list[list[dict]]) -> list[dict]:
     by_id: dict[str, dict] = {}
     for room in (row for batch in batches for row in batch):
-        rid = str(room.get("id") or "")
+        rid = str(room.get("id") or "").strip()
         if not rid:
             continue
         old = by_id.get(rid)
@@ -5421,6 +5421,8 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("adult", tv.lower())
         self.assertIn("own `N/A` plate", tv)
         self.assertIn("theater", tv.lower())
+        self.assertIn("defers the N/A plate switch", tv)
+        self.assertIn("empty queue", tv)
         self.assertIn("KEEP", tv)
         self.assertIn("PAUSE", tv)
         self.assertIn("PREV", tv)
@@ -5532,6 +5534,7 @@ class NaTheaterTests(unittest.TestCase):
         self.assertIn("func keepNa(", app)
         self.assertIn("func stepLive(", app)
         self.assertIn("naQueue", app)
+        self.assertIn("naLiveSeq", app)
         self.assertIn("PREV", zoom)
         self.assertIn("NEXT", zoom)
         self.assertIn("KEEP", zoom)
@@ -5560,6 +5563,94 @@ class NaTheaterTests(unittest.TestCase):
         self.assertEqual([row["id"] for row in adult_pick([kept, live_row], "KEEP")], ["adult-keep"])
         self.assertIsNone(adult_hunt_needles("KEEP"))
         self.assertTrue(adult_keep_needles("KEEP"))
+
+
+class NaTheaterCrashTests(unittest.TestCase):
+    def test_na_theater_cannot_index_or_tear_down_on_the_same_turn(self):
+        app = read("Blackout", "AppRuntime.swift")
+        exped = read("Blackout", "ExpeditionTab.swift")
+        tv = read("Blackout", "TvPlate.swift")
+        keep = read("Blackout", "AdultKeep.swift")
+        desk = read("Blackout", "AdultDesk.swift")
+        live = read("Blackout", "NaLive.swift")
+        zoom = read("Blackout", "LiveZoom.swift")
+        na = read("Blackout", "NaPlate.swift")
+        qa = read("docs", "SOLO_QA.md")
+
+        open_live = app.split("func openLive(")[1].split("func stepLive(")[0]
+        self.assertIn("let target = naQueue[naIndex]", open_live)
+        self.assertIn("presentLive(target, seq: seq)", open_live)
+        self.assertNotIn("presentLive(naQueue[naIndex])", open_live)
+        self.assertIn("naLiveSeq", open_live)
+
+        step = app.split("func stepLive(")[1].split("private func presentLive(")[0]
+        self.assertIn("let target = naQueue[next]", step)
+        self.assertIn("presentLive(target, seq: seq)", step)
+        self.assertNotIn("presentLive(naQueue[", step)
+        self.assertIn("naQueue.indices.contains(next)", step)
+
+        present = app.split("private func presentLive(")[1].split("func closeLive(")[0]
+        self.assertIn("guard seq == naLiveSeq", present)
+        self.assertIn("AdultDesk.playlist", present)
+
+        close = app.split("func closeLive()")[1].split("func holdCam(")[0]
+        self.assertIn("naLiveSeq &+= 1", close)
+        self.assertIn("naQueue = []", close)
+        self.assertIn("zoomLive = nil", close)
+
+        change = exped.split("onChange(of: runtime.naOpen)")[1].split("private var plateCases")[0]
+        self.assertIn("Task { @MainActor in", change)
+        self.assertIn("plate = .na", change)
+        sync = change.split("Task { @MainActor in", 1)[0]
+        self.assertNotIn("plate = .na", sync)
+
+        hold = tv.split("CamDesk.naUnlocks(elapsed: elapsed)")[1].split("onEnded")[0]
+        self.assertIn("Task { @MainActor in", hold)
+        self.assertIn("runtime.openNa()", hold)
+        sync_hold = hold.split("Task { @MainActor in", 1)[0]
+        self.assertNotIn("runtime.openNa()", sync_hold)
+
+        self.assertIn("static let byteCap = 256_000", keep)
+        self.assertIn("data.count <= byteCap", keep)
+        self.assertIn("guard !id.isEmpty", keep)
+        self.assertIn("seen.insert(room.id)", keep)
+
+        merge = desk.split("static func merge(")[1].split("static func playlist(")[0]
+        self.assertIn("guard !rid.isEmpty", merge)
+
+        rows = live.split("static func rows(")[1].split("static func page(")[0]
+        self.assertIn("seen.insert(id)", rows)
+        self.assertIn("guard !id.isEmpty", rows)
+        self.assertIn("playSeq", live)
+        self.assertIn("AdultDesk.playlist(raw)", live)
+
+        self.assertIn("AdultDesk.playlist(row.url)", zoom)
+        self.assertNotRegex(
+            na,
+            r"\.frame\(width:[^)]*minHeight:",
+            "Xcode 16 device: frame(width:minHeight:) is not an overload",
+        )
+        self.assertIn("clampNaOffset()", na)
+        self.assertIn("let rows = naLiveRows", na)
+        self.assertIn("rows.indices.contains(index)", na)
+        self.assertIn("defers the N/A plate switch", qa)
+        self.assertIn("empty queue", qa)
+
+        self.assertEqual(
+            [
+                row["id"]
+                for row in adult_merge(
+                    [
+                        [
+                            {"id": "", "name": "EMPTY", "viewers": 9, "seconds": 0},
+                            {"id": "  ", "name": "SPACE", "viewers": 8, "seconds": 0},
+                            {"id": "adult-ok", "name": "OK", "viewers": 1, "seconds": 0},
+                        ]
+                    ]
+                )
+            ],
+            ["adult-ok"],
+        )
 
 
 def desk_text() -> str:

@@ -5,6 +5,7 @@ enum AdultKeep {
     static let key = "adult.keep.v1"
     static let openKey = "adult.na.open.v1"
     static let cap = 64
+    static let byteCap = 256_000
 
     private struct Item: Codable, Equatable {
         var id: String
@@ -28,9 +29,14 @@ enum AdultKeep {
 
     static func load() -> [AdultDesk.Room] {
         guard let data = UserDefaults.standard.data(forKey: key),
+              data.count <= byteCap,
               let items = try? JSONDecoder().decode([Item].self, from: data)
         else { return [] }
-        return items.compactMap(room)
+        var seen: Set<String> = []
+        return items.compactMap { item in
+            guard let room = room(item), seen.insert(room.id).inserted else { return nil }
+            return room
+        }
     }
 
     static func has(_ id: String) -> Bool {
@@ -40,9 +46,15 @@ enum AdultKeep {
     }
 
     static func take(_ room: AdultDesk.Room) -> [AdultDesk.Room] {
-        guard let play = AdultDesk.playlist(room.url) else { return load() }
-        var rows = load().filter { $0.id != room.id }
+        let id = room.id.trimmingCharacters(in: .whitespacesAndNewlines)
+        let handle = room.handle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !id.isEmpty, !handle.isEmpty, let play = AdultDesk.playlist(room.url) else {
+            return load()
+        }
+        var rows = load().filter { $0.id != id }
         var next = room
+        next.id = id
+        next.handle = handle
         next.url = play
         next.kinds = mark(next.kinds)
         rows.insert(next, at: 0)
@@ -72,12 +84,14 @@ enum AdultKeep {
     }
 
     private static func room(_ item: Item) -> AdultDesk.Room? {
-        guard AdultDesk.playlist(item.url) != nil else { return nil }
+        let id = item.id.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !id.isEmpty, AdultDesk.playlist(item.url) != nil else { return nil }
         let handle = item.handle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !handle.isEmpty else { return nil }
+        let name = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
         return AdultDesk.Room(
-            id: item.id,
-            name: item.name,
+            id: id,
+            name: name.isEmpty ? handle.uppercased() : name,
             handle: handle,
             url: item.url,
             viewers: max(0, item.viewers),
@@ -90,11 +104,15 @@ enum AdultKeep {
 
     private static func save(_ rooms: [AdultDesk.Room]) {
         let items = rooms.compactMap { room -> Item? in
-            guard let play = AdultDesk.playlist(room.url) else { return nil }
+            let id = room.id.trimmingCharacters(in: .whitespacesAndNewlines)
+            let handle = room.handle.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !id.isEmpty, !handle.isEmpty, let play = AdultDesk.playlist(room.url) else {
+                return nil
+            }
             return Item(
-                id: room.id,
+                id: id,
                 name: room.name,
-                handle: room.handle,
+                handle: handle,
                 url: play,
                 viewers: room.viewers,
                 image: room.image,

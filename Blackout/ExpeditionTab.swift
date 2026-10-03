@@ -63,7 +63,13 @@ struct ExpeditionTab: View {
             }
         }
         .onChange(of: runtime.naOpen) { _, ok in
-            if ok { plate = .na }
+            if ok {
+                // HOLD 10 still owns TvPlate. Switching plate here tore that
+                // row down on the same turn (ASC 72 class).
+                Task { @MainActor in
+                    plate = .na
+                }
+            }
         }
     }
 

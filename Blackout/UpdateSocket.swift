@@ -485,11 +485,13 @@ final class UpdateSocket {
     }
 
     func liveAdult(_ row: NaLive.Row) async -> String? {
-        if let cached = adultPlay[row.id], AdultDesk.playlist(cached) != nil {
+        let id = row.id.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !id.isEmpty else { return AdultDesk.playlist(row.url) }
+        if let cached = adultPlay[id], AdultDesk.playlist(cached) != nil {
             return cached
         }
         if let ready = AdultDesk.playlist(row.url), AdultDesk.filePlay(ready) {
-            adultPlay[row.id] = ready
+            adultPlay[id] = ready
             return ready
         }
         guard pipe else { return nil }
@@ -519,7 +521,7 @@ final class UpdateSocket {
         }
         session.invalidateAndCancel()
         guard let url else { return nil }
-        adultPlay[row.id] = url
+        adultPlay[id] = url
         return url
     }
 

@@ -309,6 +309,7 @@ struct NaPlate: View {
                 Button("MORE") {
                     naPlayingID = nil
                     naOffset += NaLive.screen
+                    clampNaOffset()
                 }
                 .buttonStyle(HUDActionStyle(filled: false))
             }
@@ -372,12 +373,13 @@ struct NaPlate: View {
 
     private func clampNaOffset() {
         let total = naLiveRows.count
+        let page = max(1, NaLive.screen)
         if total == 0 {
             naOffset = 0
             return
         }
         if naOffset >= total {
-            naOffset = (max(0, total - 1) / NaLive.screen) * NaLive.screen
+            naOffset = (max(0, total - 1) / page) * page
         }
     }
 
@@ -393,16 +395,17 @@ struct NaPlate: View {
     }
 
     private func stepStage(_ delta: Int) {
+        let rows = naLiveRows
         guard let row = naStageRow else { return }
-        let index = naLiveIndex(row) + delta
-        guard naLiveRows.indices.contains(index) else {
+        let index = (rows.firstIndex(where: { $0.id == row.id }) ?? -1) + delta
+        guard rows.indices.contains(index) else {
             naChrome = delta < 0 ? "FIRST" : "LAST"
             return
         }
-        let next = naLiveRows[index]
+        let next = rows[index]
         naChrome = nil
         naPick = next.id
-        let page = (index / NaLive.screen) * NaLive.screen
+        let page = (index / max(1, NaLive.screen)) * max(1, NaLive.screen)
         if page != naOffset {
             naOffset = page
         }
