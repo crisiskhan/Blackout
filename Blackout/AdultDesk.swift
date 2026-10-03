@@ -231,6 +231,94 @@ enum AdultDesk {
         "mona acutee",
         "monaacute",
     ]
+    static let hizNeedles = [
+        "imhizbaeexx",
+        "imhizbaeexx_",
+        "hizbaeexx",
+    ]
+    static let yessNeedles = [
+        "yess_enia69",
+        "yessenia69",
+        "yess enia69",
+    ]
+    static let valNeedles = [
+        "val2yummi",
+        "val 2 yummi",
+        "val2yummy",
+    ]
+    static let kiraNeedles = [
+        "kirawrrra",
+        "kirawrrra2",
+        "kirawrrra2.0",
+        "kirawrrra 2",
+    ]
+    static let jacqieNeedles = [
+        "jacqievains",
+        "jacqie vains",
+        "jackie vains",
+    ]
+    static let lilianaNeedles = [
+        "lilianaspage",
+        "lilianas page",
+    ]
+    static let freakyyNeedles = [
+        "freakyystackss",
+        "freakyy stackss",
+        "freakyystacks",
+    ]
+    static let asaiaNeedles = [
+        "asaia_hernandez",
+        "asaia hernandez",
+        "asaiahernandez",
+    ]
+    static let jasminegtvNeedles = [
+        "jasminegtv1",
+        "jasminegtv",
+        "jasmine gtv",
+    ]
+    static let jessyNeedles = [
+        "imangeljessyy",
+        "imangeljessy",
+        "angeljessyy",
+    ]
+    static let gracieNeedles = [
+        "itsgraciebonn",
+        "gracie bonn",
+        "graciebonn",
+    ]
+    static let debNeedles = [
+        "debvarela",
+        "deb varela",
+        "debvarela_",
+    ]
+    static let doseNeedles = [
+        "doubledosetwins",
+        "double dose twins",
+        "doubledose twins",
+    ]
+    static let pamelaNeedles = [
+        "pamelayamz",
+        "pamela yamz",
+    ]
+    static let annabelleNeedles = [
+        "annabelleriossss",
+        "annabelle rios",
+        "annabellerios",
+    ]
+    static let nicoleNeedles = [
+        "nicoleee1329",
+        "_nicoleee_1329",
+        "nicoleee 1329",
+    ]
+    static let euniceNeedles = [
+        "euniceg",
+        "euniceg___",
+    ]
+    static let sandraNeedles = [
+        "strawberrysandra20",
+        "strawberry sandra",
+        "strawberrysandra",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
@@ -246,6 +334,24 @@ enum AdultDesk {
         ("ZURI BELLA ROSE", zuriNeedles),
         ("SARIIXO", sariiNeedles),
         ("MONA ACUTEE", monaNeedles),
+        ("IMHIZBAEEXX", hizNeedles),
+        ("YESS ENIA69", yessNeedles),
+        ("VAL2YUMMI", valNeedles),
+        ("KIRAWWRRRA", kiraNeedles),
+        ("JACQIE VAINS", jacqieNeedles),
+        ("LILIANAS PAGE", lilianaNeedles),
+        ("FREAKYYSTACKSS", freakyyNeedles),
+        ("ASAIA HERNANDEZ", asaiaNeedles),
+        ("JASMINEGTV", jasminegtvNeedles),
+        ("IMANGELJESSYY", jessyNeedles),
+        ("GRACIE BONN", gracieNeedles),
+        ("DEBVARELA", debNeedles),
+        ("DOUBLE DOSE TWINS", doseNeedles),
+        ("PAMELA YAMZ", pamelaNeedles),
+        ("ANNABELLE RIOS", annabelleNeedles),
+        ("NICOLEEE 1329", nicoleNeedles),
+        ("EUNICEG", euniceNeedles),
+        ("STRAWBERRY SANDRA", sandraNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -254,12 +360,14 @@ enum AdultDesk {
         ("NERDY BEILA", ["33TgD6OeUfp", "iaBJWcUXDqR", "XYqGeufLjxo", "3Okd36yQXGq"]),
         ("HOT4LEXI", ["I9eggkAajv5"]),
         ("BRITTANYA RAZAVI", ["ZxMHa5OsXqH", "hdIUeKyK0Ux", "GvbBRAGihAQ", "mXbvfQ0ly1D"]),
+        ("DOUBLE DOSE TWINS", ["iXWnuAL4FnV", "NtQUcCtcTj0"]),
     ]
     static let faceStars: [(String, [String])] = [
         ("MULAN VUITTON", ["mulan-vuitton"]),
         ("HOT4LEXI", ["hot4lexi"]),
         ("ZURI BELLA ROSE", ["zuri-bella-rose"]),
         ("SARIIXO", ["sariixo"]),
+        ("KIRAWWRRRA", ["kirawrrra2-0"]),
     ]
     static let faceGifts: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip"]),
@@ -276,6 +384,24 @@ enum AdultDesk {
         ("ZURI BELLA ROSE", ["zuribellarose"]),
         ("SARIIXO", ["officialsariixo", "sariixo"]),
         ("MONA ACUTEE", ["monaacutee", "monaacute"]),
+        ("IMHIZBAEEXX", ["imhizbaeexx", "hizbaeexx"]),
+        ("YESS ENIA69", ["yessenia69"]),
+        ("VAL2YUMMI", ["val2yummi", "val2yummy"]),
+        ("KIRAWWRRRA", ["kirawrrra", "kirawrrra2"]),
+        ("JACQIE VAINS", ["jacqievains"]),
+        ("LILIANAS PAGE", ["lilianaspage"]),
+        ("FREAKYYSTACKSS", ["freakyystackss", "freakyystacks"]),
+        ("ASAIA HERNANDEZ", ["asaiahernandez"]),
+        ("JASMINEGTV", ["jasminegtv1", "jasminegtv"]),
+        ("IMANGELJESSYY", ["imangeljessyy", "imangeljessy", "angeljessyy"]),
+        ("GRACIE BONN", ["itsgraciebonn", "graciebonn"]),
+        ("DEBVARELA", ["debvarela"]),
+        ("DOUBLE DOSE TWINS", ["doubledosetwins"]),
+        ("PAMELA YAMZ", ["pamelayamz"]),
+        ("ANNABELLE RIOS", ["annabelleriossss", "annabellerios"]),
+        ("NICOLEEE 1329", ["nicoleee1329"]),
+        ("EUNICEG", ["euniceg"]),
+        ("STRAWBERRY SANDRA", ["strawberrysandra20", "strawberrysandra"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
@@ -290,6 +416,7 @@ enum AdultDesk {
         "underage",
         "under18",
         "younggirl",
+        "little girl",
     ]
     static let loveChip = "LOVESCAPE"
     static let loveOrigin = "https://lovescape.cam"

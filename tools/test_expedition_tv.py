@@ -332,6 +332,94 @@ ADULT_MONA = (
     "mona acutee",
     "monaacute",
 )
+ADULT_HIZ = (
+    "imhizbaeexx",
+    "imhizbaeexx_",
+    "hizbaeexx",
+)
+ADULT_YESS = (
+    "yess_enia69",
+    "yessenia69",
+    "yess enia69",
+)
+ADULT_VAL = (
+    "val2yummi",
+    "val 2 yummi",
+    "val2yummy",
+)
+ADULT_KIRA = (
+    "kirawrrra",
+    "kirawrrra2",
+    "kirawrrra2.0",
+    "kirawrrra 2",
+)
+ADULT_JACQIE = (
+    "jacqievains",
+    "jacqie vains",
+    "jackie vains",
+)
+ADULT_LILIANA = (
+    "lilianaspage",
+    "lilianas page",
+)
+ADULT_FREAKYY = (
+    "freakyystackss",
+    "freakyy stackss",
+    "freakyystacks",
+)
+ADULT_ASAIA = (
+    "asaia_hernandez",
+    "asaia hernandez",
+    "asaiahernandez",
+)
+ADULT_JASMINEGTV = (
+    "jasminegtv1",
+    "jasminegtv",
+    "jasmine gtv",
+)
+ADULT_JESSY = (
+    "imangeljessyy",
+    "imangeljessy",
+    "angeljessyy",
+)
+ADULT_GRACIE = (
+    "itsgraciebonn",
+    "gracie bonn",
+    "graciebonn",
+)
+ADULT_DEB = (
+    "debvarela",
+    "deb varela",
+    "debvarela_",
+)
+ADULT_DOSE = (
+    "doubledosetwins",
+    "double dose twins",
+    "doubledose twins",
+)
+ADULT_PAMELA = (
+    "pamelayamz",
+    "pamela yamz",
+)
+ADULT_ANNABELLE = (
+    "annabelleriossss",
+    "annabelle rios",
+    "annabellerios",
+)
+ADULT_NICOLE = (
+    "nicoleee1329",
+    "_nicoleee_1329",
+    "nicoleee 1329",
+)
+ADULT_EUNICE = (
+    "euniceg",
+    "euniceg___",
+)
+ADULT_SANDRA = (
+    "strawberrysandra20",
+    "strawberry sandra",
+    "strawberrysandra",
+)
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
     ("ITSSTEPHHONEYXO21", ADULT_STEPH),
@@ -347,6 +435,24 @@ ADULT_FACES = (
     ("ZURI BELLA ROSE", ADULT_ZURI),
     ("SARIIXO", ADULT_SARII),
     ("MONA ACUTEE", ADULT_MONA),
+    ("IMHIZBAEEXX", ADULT_HIZ),
+    ("YESS ENIA69", ADULT_YESS),
+    ("VAL2YUMMI", ADULT_VAL),
+    ("KIRAWWRRRA", ADULT_KIRA),
+    ("JACQIE VAINS", ADULT_JACQIE),
+    ("LILIANAS PAGE", ADULT_LILIANA),
+    ("FREAKYYSTACKSS", ADULT_FREAKYY),
+    ("ASAIA HERNANDEZ", ADULT_ASAIA),
+    ("JASMINEGTV", ADULT_JASMINEGTV),
+    ("IMANGELJESSYY", ADULT_JESSY),
+    ("GRACIE BONN", ADULT_GRACIE),
+    ("DEBVARELA", ADULT_DEB),
+    ("DOUBLE DOSE TWINS", ADULT_DOSE),
+    ("PAMELA YAMZ", ADULT_PAMELA),
+    ("ANNABELLE RIOS", ADULT_ANNABELLE),
+    ("NICOLEEE 1329", ADULT_NICOLE),
+    ("EUNICEG", ADULT_EUNICE),
+    ("STRAWBERRY SANDRA", ADULT_SANDRA),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_LOVE_ORIGIN = "https://lovescape.cam"
@@ -903,12 +1009,14 @@ ADULT_FACE_PINS = (
     ("NERDY BEILA", ("33TgD6OeUfp", "iaBJWcUXDqR", "XYqGeufLjxo", "3Okd36yQXGq")),
     ("HOT4LEXI", ("I9eggkAajv5",)),
     ("BRITTANYA RAZAVI", ("ZxMHa5OsXqH", "hdIUeKyK0Ux", "GvbBRAGihAQ", "mXbvfQ0ly1D")),
+    ("DOUBLE DOSE TWINS", ("iXWnuAL4FnV", "NtQUcCtcTj0")),
 )
 ADULT_FACE_STARS = (
     ("MULAN VUITTON", ("mulan-vuitton",)),
     ("HOT4LEXI", ("hot4lexi",)),
     ("ZURI BELLA ROSE", ("zuri-bella-rose",)),
     ("SARIIXO", ("sariixo",)),
+    ("KIRAWWRRRA", ("kirawrrra2-0",)),
 )
 ADULT_FACE_GIFTS = (
     ("ITSSTEPHHONEY21", ("itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip")),
@@ -925,6 +1033,24 @@ ADULT_FACE_GIFTS = (
     ("ZURI BELLA ROSE", ("zuribellarose",)),
     ("SARIIXO", ("officialsariixo", "sariixo")),
     ("MONA ACUTEE", ("monaacutee", "monaacute")),
+    ("IMHIZBAEEXX", ("imhizbaeexx", "hizbaeexx")),
+    ("YESS ENIA69", ("yessenia69",)),
+    ("VAL2YUMMI", ("val2yummi", "val2yummy")),
+    ("KIRAWWRRRA", ("kirawrrra", "kirawrrra2")),
+    ("JACQIE VAINS", ("jacqievains",)),
+    ("LILIANAS PAGE", ("lilianaspage",)),
+    ("FREAKYYSTACKSS", ("freakyystackss", "freakyystacks")),
+    ("ASAIA HERNANDEZ", ("asaiahernandez",)),
+    ("JASMINEGTV", ("jasminegtv1", "jasminegtv")),
+    ("IMANGELJESSYY", ("imangeljessyy", "imangeljessy", "angeljessyy")),
+    ("GRACIE BONN", ("itsgraciebonn", "graciebonn")),
+    ("DEBVARELA", ("debvarela",)),
+    ("DOUBLE DOSE TWINS", ("doubledosetwins",)),
+    ("PAMELA YAMZ", ("pamelayamz",)),
+    ("ANNABELLE RIOS", ("annabelleriossss", "annabellerios")),
+    ("NICOLEEE 1329", ("nicoleee1329",)),
+    ("EUNICEG", ("euniceg",)),
+    ("STRAWBERRY SANDRA", ("strawberrysandra20", "strawberrysandra")),
 )
 ADULT_FACE_KILL = (
     "loli",
@@ -937,6 +1063,7 @@ ADULT_FACE_KILL = (
     "underage",
     "under18",
     "younggirl",
+    "little girl",
 )
 ADULT_GIFT_AUTH = "https://api.redgifs.com/v2/auth/temporary"
 ADULT_GIFT_ORIGIN = "https://www.redgifs.com"
@@ -2002,6 +2129,24 @@ class AdultDeskTests(unittest.TestCase):
                 "ZURI BELLA ROSE",
                 "SARIIXO",
                 "MONA ACUTEE",
+                "IMHIZBAEEXX",
+                "YESS ENIA69",
+                "VAL2YUMMI",
+                "KIRAWWRRRA",
+                "JACQIE VAINS",
+                "LILIANAS PAGE",
+                "FREAKYYSTACKSS",
+                "ASAIA HERNANDEZ",
+                "JASMINEGTV",
+                "IMANGELJESSYY",
+                "GRACIE BONN",
+                "DEBVARELA",
+                "DOUBLE DOSE TWINS",
+                "PAMELA YAMZ",
+                "ANNABELLE RIOS",
+                "NICOLEEE 1329",
+                "EUNICEG",
+                "STRAWBERRY SANDRA",
                 "COUPLE",
                 "ORGY",
                 "ROLEPLAY",
@@ -2499,6 +2644,187 @@ class AdultDeskTests(unittest.TestCase):
             )],
             ["adult-face-star-sariixo-fucks-her-pussy-with-a-bbc-dildo-in-bed"],
         )
+        self.assertIn("kirawrrra2-0", adult_face_star_tokens("KIRAWWRRRA"))
+        self.assertTrue(any("bornstar.co/api/search?q=kirawrrra2.0" in path for path in adult_face_hunt("KIRAWWRRRA")))
+        self.assertTrue(any("bornstar.co/api/search?q=kirawrrra2-0" in path for path in adult_face_hunt("KIRAWWRRRA")))
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "kirawrrra2-0-fills-her-ass-for-the-first-time",
+                            "title": "Kirawrrra2.0 Fills Her Ass For The First Time",
+                            "creator": "Kirawrrra2.0",
+                            "durationSeconds": 211,
+                        },
+                        {
+                            "slug": "kira-pregiato-teases",
+                            "title": "Kira Pregiato Teases",
+                            "creator": "Kira Pregiato",
+                            "durationSeconds": 400,
+                        },
+                        {
+                            "slug": "your-kira-plays-with-a-dildo",
+                            "title": "Your Kira Plays With A Dildo Until She Cums",
+                            "creator": "Your Kira",
+                            "durationSeconds": 506,
+                        },
+                    ]
+                },
+                "KIRAWWRRRA",
+            )],
+            ["adult-face-star-kirawrrra2-0-fills-her-ass-for-the-first-time"],
+        )
+        self.assertEqual(adult_parse_face(
+            {
+                "videos": [
+                    {
+                        "slug": "a-little-girl-is-taking-a-bubble-bath-in-the-shower",
+                        "title": "Your Kira - A Little Girl Is Taking A Bubble Bath In The Shower",
+                        "creator": "Kirawrrra2.0",
+                        "durationSeconds": 362,
+                    }
+                ]
+            },
+            "KIRAWWRRRA",
+        ), [])
+        self.assertTrue(any("id=iXWnuAL4FnV" in path for path in adult_face_hunt("DOUBLE DOSE TWINS")))
+        self.assertTrue(any("id=NtQUcCtcTj0" in path for path in adult_face_hunt("DOUBLE DOSE TWINS")))
+        self.assertNotIn("double dose", adult_face_needles("DOUBLE DOSE TWINS") or [])
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "id": "iXWnuAL4FnV",
+                            "title": "Untitled guest file",
+                            "length_sec": 140,
+                            "views": 4,
+                            "keywords": "",
+                        },
+                        {
+                            "id": "NtQUcCtcTj0",
+                            "title": "Doubledose Twins Blowjob GAWD DAMN I NEED DAT",
+                            "length_sec": 199,
+                            "views": 6,
+                            "keywords": "Doubledose Twins",
+                        },
+                        {
+                            "id": "dosedosewrong",
+                            "title": "Double Dose Of Cum For This Slut",
+                            "length_sec": 900,
+                            "views": 9,
+                            "keywords": "double dose",
+                        },
+                    ]
+                },
+                "DOUBLE DOSE TWINS",
+            )],
+            ["adult-face-ntqucctctj0", "adult-face-ixwnual4fnv"],
+        )
+        self.assertNotIn("yessenia", adult_face_needles("YESS ENIA69") or [])
+        self.assertNotIn("yess_enia", adult_face_needles("YESS ENIA69") or [])
+        self.assertNotIn("yessenia", [adult_gift_key(query) for query in adult_face_queries("YESS ENIA69")])
+        self.assertFalse(any("users/yessenia/search" in path for path in adult_face_hunt("YESS ENIA69")))
+        self.assertTrue(any("users/yessenia69/search" in path for path in adult_face_hunt("YESS ENIA69")))
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "id": "yesswrong",
+                            "title": "Yessenia Shows Her Pretty Feet",
+                            "length_sec": 300,
+                            "views": 5,
+                            "keywords": "yessenia feet",
+                        }
+                    ]
+                },
+                "YESS ENIA69",
+            )],
+            [],
+        )
+        self.assertNotIn("graciebon", adult_face_needles("GRACIE BONN") or [])
+        self.assertFalse(any("users/graciebon/search" in path for path in adult_face_hunt("GRACIE BONN")))
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "graciebon-teases-with-a-huge-dildo",
+                            "title": "Graciebon Teases With A Huge Dildo",
+                            "creator": "Graciebon",
+                            "durationSeconds": 4532,
+                        }
+                    ]
+                },
+                "GRACIE BONN",
+            )],
+            [],
+        )
+        self.assertNotIn("jasmine", adult_face_needles("JASMINEGTV") or [])
+        self.assertNotIn("nicole", adult_face_needles("NICOLEEE 1329") or [])
+        self.assertNotIn("kira", adult_face_needles("KIRAWWRRRA") or [])
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "nina-lee-jasmine-teaa-share-mike-williams-bbc",
+                            "title": "Nina Lee & Jasmine Teaa Share Mike Williams BBC",
+                            "creator": "Jasmine Teaa",
+                            "durationSeconds": 1807,
+                        }
+                    ]
+                },
+                "JASMINEGTV",
+            )],
+            [],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "nicole-doshi-dresses-as-ada-wong",
+                            "title": "Nicole Doshi Dresses As Ada Wong",
+                            "creator": "Nicole Doshi",
+                            "durationSeconds": 1785,
+                        }
+                    ]
+                },
+                "NICOLEEE 1329",
+            )],
+            [],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "anna-ralphs-the-best-blowjob-ever",
+                            "title": "Anna Ralphs The Best Blowjob Ever",
+                            "creator": "Anna Ralphs",
+                            "durationSeconds": 2005,
+                        }
+                    ]
+                },
+                "ANNABELLE RIOS",
+            )],
+            [],
+        )
+        self.assertIn("imhizbaeexx", adult_face_queries("IMHIZBAEEXX"))
+        self.assertIn("val2yummi", adult_face_queries("VAL2YUMMI"))
+        self.assertIn("jacqievains", adult_face_queries("JACQIE VAINS"))
+        self.assertIn("lilianaspage", adult_face_queries("LILIANAS PAGE"))
+        self.assertIn("freakyystackss", adult_face_queries("FREAKYYSTACKSS"))
+        self.assertIn("asaiahernandez", adult_face_queries("ASAIA HERNANDEZ"))
+        self.assertIn("imangeljessyy", adult_face_queries("IMANGELJESSYY"))
+        self.assertIn("debvarela", adult_face_queries("DEBVARELA"))
+        self.assertIn("pamelayamz", adult_face_queries("PAMELA YAMZ"))
+        self.assertIn("euniceg", adult_face_queries("EUNICEG"))
+        self.assertIn("strawberrysandra20", adult_face_queries("STRAWBERRY SANDRA"))
+        self.assertTrue(any("users/imhizbaeexx/search" in path for path in adult_face_hunt("IMHIZBAEEXX")))
         self.assertEqual(adult_face_queries("HONEYTEASSEE")[0], "honeyteassee")
         self.assertNotIn("honey tea", adult_face_needles("HONEYTEASSEE") or [])
         self.assertIn("taniaaaramos", adult_face_queries("TANIA RAMOS"))
@@ -2747,6 +3073,30 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("ZURI BELLA ROSE", desk)
         self.assertIn("SARIIXO", desk)
         self.assertIn("MONA ACUTEE", desk)
+        self.assertIn("IMHIZBAEEXX", desk)
+        self.assertIn("YESS ENIA69", desk)
+        self.assertIn("VAL2YUMMI", desk)
+        self.assertIn("KIRAWWRRRA", desk)
+        self.assertIn("JACQIE VAINS", desk)
+        self.assertIn("LILIANAS PAGE", desk)
+        self.assertIn("FREAKYYSTACKSS", desk)
+        self.assertIn("ASAIA HERNANDEZ", desk)
+        self.assertIn("JASMINEGTV", desk)
+        self.assertIn("IMANGELJESSYY", desk)
+        self.assertIn("GRACIE BONN", desk)
+        self.assertIn("DEBVARELA", desk)
+        self.assertIn("DOUBLE DOSE TWINS", desk)
+        self.assertIn("PAMELA YAMZ", desk)
+        self.assertIn("ANNABELLE RIOS", desk)
+        self.assertIn("NICOLEEE 1329", desk)
+        self.assertIn("EUNICEG", desk)
+        self.assertIn("STRAWBERRY SANDRA", desk)
+        self.assertIn("iXWnuAL4FnV", desk)
+        self.assertIn("NtQUcCtcTj0", desk)
+        self.assertIn("kirawrrra2-0", desk)
+        self.assertIn("yessenia69", desk)
+        self.assertNotIn('"yessenia"', desk)
+        self.assertNotIn("yess_enia\"", desk.replace("yess_enia69", ""))
         self.assertIn("beilaNeedles", desk)
         self.assertIn("vip.nerdyb", desk)
         self.assertIn("lexi2legit", desk)
@@ -3116,6 +3466,13 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("TANIA RAMOS", tv)
         self.assertIn("LILI VICTORIA", tv)
         self.assertIn("MONA ACUTEE", tv)
+        self.assertIn("IMHIZBAEEXX", tv)
+        self.assertIn("YESS ENIA69", tv)
+        self.assertIn("KIRAWWRRRA", tv)
+        self.assertIn("DOUBLE DOSE TWINS", tv)
+        self.assertIn("GRACIE BONN", tv)
+        self.assertIn("JASMINEGTV", tv)
+        self.assertIn("STRAWBERRY SANDRA", tv)
         self.assertIn("LOVESCAPE", tv)
         self.assertIn("lovescape.cam", tv.lower())
         self.assertIn("cannot jet", tv)
