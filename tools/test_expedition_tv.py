@@ -420,6 +420,12 @@ ADULT_SANDRA = (
     "strawberry sandra",
     "strawberrysandra",
 )
+ADULT_ITOCHI = (
+    "itochianata",
+    "ito chianata",
+    "ito_chianata",
+    "ito-chianata",
+)
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
     ("ITSSTEPHHONEYXO21", ADULT_STEPH),
@@ -453,6 +459,7 @@ ADULT_FACES = (
     ("NICOLEEE 1329", ADULT_NICOLE),
     ("EUNICEG", ADULT_EUNICE),
     ("STRAWBERRY SANDRA", ADULT_SANDRA),
+    ("ITOCHIANATA", ADULT_ITOCHI),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_LOVE_ORIGIN = "https://lovescape.cam"
@@ -1094,6 +1101,7 @@ ADULT_FACE_GIFTS = (
     ("NICOLEEE 1329", ("nicoleee1329",)),
     ("EUNICEG", ("euniceg",)),
     ("STRAWBERRY SANDRA", ("strawberrysandra20", "strawberrysandra")),
+    ("ITOCHIANATA", ("itochianata",)),
 )
 ADULT_FACE_KILL = (
     "loli",
@@ -2278,6 +2286,7 @@ class AdultDeskTests(unittest.TestCase):
                 "NICOLEEE 1329",
                 "EUNICEG",
                 "STRAWBERRY SANDRA",
+                "ITOCHIANATA",
                 "COUPLE",
                 "ORGY",
                 "ROLEPLAY",
@@ -3014,6 +3023,46 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("pamelayamz", adult_face_queries("PAMELA YAMZ"))
         self.assertIn("euniceg", adult_face_queries("EUNICEG"))
         self.assertIn("strawberrysandra20", adult_face_queries("STRAWBERRY SANDRA"))
+        self.assertIn("itochianata", adult_face_queries("ITOCHIANATA"))
+        self.assertNotIn("itochi", adult_face_needles("ITOCHIANATA") or [])
+        self.assertNotIn("anata", adult_face_needles("ITOCHIANATA") or [])
+        self.assertEqual(adult_face_hold_rooms("ITOCHIANATA"), [])
+        self.assertTrue(any("users/itochianata/search" in path for path in adult_face_hunt("ITOCHIANATA")))
+        self.assertFalse(any("users/itochi/search" in path for path in adult_face_hunt("ITOCHIANATA")))
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "nata-gold-gets-her-tight-pussy-drilled-from-behind",
+                            "title": "Nata_Gold Gets Her Tight Pussy Drilled From Behind",
+                            "creator": "Nata_Gold",
+                            "durationSeconds": 739,
+                        },
+                        {
+                            "slug": "nata-ocean-and-eva-elfie-ride-a-nerd-s-cock-until-he-cums",
+                            "title": "Nata Ocean And Eva Elfie Ride A Nerd's Cock Until He Cums",
+                            "creator": "Eva Elfie",
+                            "durationSeconds": 2458,
+                        },
+                        {
+                            "slug": "karen-hanatani-seduces-stranger-in-public-pickup",
+                            "title": "Karen Hanatani Seduces Stranger In Public Pickup",
+                            "creator": "Karen Hanatani",
+                            "durationSeconds": 3863,
+                        },
+                        {
+                            "slug": "zirael-rem-gets-railed-and-creampied-as-hinata",
+                            "title": "Zirael Rem Gets Railed And Creampied As Hinata",
+                            "creator": "Zirael Rem",
+                            "durationSeconds": 1461,
+                        },
+                    ]
+                },
+                "ITOCHIANATA",
+            )],
+            [],
+        )
         self.assertTrue(any("users/imhizbaeexx/search" in path for path in adult_face_hunt("IMHIZBAEEXX")))
         self.assertEqual(adult_face_queries("HONEYTEASSEE")[0], "honeyteassee")
         self.assertNotIn("honey tea", adult_face_needles("HONEYTEASSEE") or [])
@@ -3281,6 +3330,10 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("NICOLEEE 1329", desk)
         self.assertIn("EUNICEG", desk)
         self.assertIn("STRAWBERRY SANDRA", desk)
+        self.assertIn("ITOCHIANATA", desk)
+        self.assertIn("itochiNeedles", desk)
+        self.assertIn("itochianata", desk)
+        self.assertNotIn('"itochi"', desk)
         self.assertIn("iXWnuAL4FnV", desk)
         self.assertIn("NtQUcCtcTj0", desk)
         self.assertIn("7bg2FgwidLS", desk)
@@ -3686,6 +3739,7 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("GRACIE BONN", tv)
         self.assertIn("JASMINEGTV", tv)
         self.assertIn("STRAWBERRY SANDRA", tv)
+        self.assertIn("ITOCHIANATA", tv)
         self.assertIn("LOVESCAPE", tv)
         self.assertIn("lovescape.cam", tv.lower())
         self.assertIn("cannot jet", tv)

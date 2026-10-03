@@ -319,6 +319,12 @@ enum AdultDesk {
         "strawberry sandra",
         "strawberrysandra",
     ]
+    static let itochiNeedles = [
+        "itochianata",
+        "ito chianata",
+        "ito_chianata",
+        "ito-chianata",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
@@ -352,6 +358,7 @@ enum AdultDesk {
         ("NICOLEEE 1329", nicoleNeedles),
         ("EUNICEG", euniceNeedles),
         ("STRAWBERRY SANDRA", sandraNeedles),
+        ("ITOCHIANATA", itochiNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -402,6 +409,7 @@ enum AdultDesk {
         ("NICOLEEE 1329", ["nicoleee1329"]),
         ("EUNICEG", ["euniceg"]),
         ("STRAWBERRY SANDRA", ["strawberrysandra20", "strawberrysandra"]),
+        ("ITOCHIANATA", ["itochianata"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
