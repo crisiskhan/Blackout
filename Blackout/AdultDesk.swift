@@ -160,25 +160,122 @@ enum AdultDesk {
         "mikeilaj duhh",
         "mikeilaj baee",
     ]
+    static let beilaNeedles = [
+        "nerdybeila",
+        "nerdy beila",
+        "nerdy_beila",
+        "nerdy-beila",
+        "nerdy.beila",
+        "beila nerdy",
+        "beila b",
+        "vip.nerdyb",
+        "vip nerdyb",
+        "vipnerdyb",
+        "beila_cosplay",
+        "beila cosplay",
+    ]
+    static let juicyNeedles = [
+        "juicyjastv",
+        "juicyjas.tv",
+        "juicy jas tv",
+        "juicyjas tv",
+        "juicyjas",
+    ]
+    static let honeyteaNeedles = [
+        "honeyteassee",
+        "honey teassee",
+    ]
+    static let taniaNeedles = [
+        "taniaaaramos",
+        "taniaaa ramos",
+        "taniaa ramos",
+    ]
+    static let brittanyaNeedles = [
+        "brittanya razavi",
+        "brittanyarazavi",
+        "brittanya_razavi",
+        "brittanya-razavi",
+        "seebrittanya",
+        "brittanya2horny",
+        "britt2legitt",
+        "brittanya187187",
+    ]
+    static let lexiNeedles = [
+        "hot4lexi",
+        "hot 4 lexi",
+        "hott4lexi",
+        "hotforlexi",
+        "lexi2legit",
+    ]
+    static let liliNeedles = [
+        "lilivictoria32",
+        "lili victoria 32",
+        "lilivictoria",
+        "lili victoria",
+    ]
+    static let zuriNeedles = [
+        "zuribellarose",
+        "zuri bella rose",
+        "zuri_bella_rose",
+        "zuri-bella-rose",
+    ]
+    static let sariiNeedles = [
+        "officialsariixo",
+        "sariixo",
+        "sarii xo",
+        "sarii.xo",
+        "official sariixo",
+    ]
+    static let monaNeedles = [
+        "monaacutee",
+        "mona acutee",
+        "monaacute",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
         ("MULAN VUITTON", mulanNeedles),
         ("MIKEILA J", mikeilaNeedles),
+        ("NERDY BEILA", beilaNeedles),
+        ("JUICYJAS TV", juicyNeedles),
+        ("HONEYTEASSEE", honeyteaNeedles),
+        ("TANIA RAMOS", taniaNeedles),
+        ("BRITTANYA RAZAVI", brittanyaNeedles),
+        ("HOT4LEXI", lexiNeedles),
+        ("LILI VICTORIA", liliNeedles),
+        ("ZURI BELLA ROSE", zuriNeedles),
+        ("SARIIXO", sariiNeedles),
+        ("MONA ACUTEE", monaNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
         ("ITSSTEPHHONEYXO21", ["P283XrKRjsV"]),
         ("MULAN VUITTON", ["L3HLNRZy6sk", "pYaoSJlMR79"]),
+        ("NERDY BEILA", ["33TgD6OeUfp", "iaBJWcUXDqR", "XYqGeufLjxo", "3Okd36yQXGq"]),
+        ("HOT4LEXI", ["I9eggkAajv5"]),
+        ("BRITTANYA RAZAVI", ["ZxMHa5OsXqH", "hdIUeKyK0Ux", "GvbBRAGihAQ", "mXbvfQ0ly1D"]),
     ]
     static let faceStars: [(String, [String])] = [
         ("MULAN VUITTON", ["mulan-vuitton"]),
+        ("HOT4LEXI", ["hot4lexi"]),
+        ("ZURI BELLA ROSE", ["zuri-bella-rose"]),
+        ("SARIIXO", ["sariixo"]),
     ]
     static let faceGifts: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip"]),
         ("ITSSTEPHHONEYXO21", ["itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip"]),
         ("MULAN VUITTON", ["mulanvuitton", "mulanvuittontv"]),
         ("MIKEILA J", ["mikeilaj", "mikeilajbaee", "mikeilajduhh", "theemikeilaj"]),
+        ("NERDY BEILA", ["nerdybeila", "vipnerdyb", "beilacosplay"]),
+        ("JUICYJAS TV", ["juicyjastv", "juicyjas"]),
+        ("HONEYTEASSEE", ["honeyteassee"]),
+        ("TANIA RAMOS", ["taniaaaramos"]),
+        ("BRITTANYA RAZAVI", ["brittanyarazavi", "seebrittanya", "brittanya2horny"]),
+        ("HOT4LEXI", ["hot4lexi", "hott4lexi", "lexi2legit"]),
+        ("LILI VICTORIA", ["lilivictoria32", "lilivictoria"]),
+        ("ZURI BELLA ROSE", ["zuribellarose"]),
+        ("SARIIXO", ["officialsariixo", "sariixo"]),
+        ("MONA ACUTEE", ["monaacutee", "monaacute"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"

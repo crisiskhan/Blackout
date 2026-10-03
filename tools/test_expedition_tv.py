@@ -261,11 +261,92 @@ ADULT_MIKEILA = (
     "mikeilaj duhh",
     "mikeilaj baee",
 )
+ADULT_BEILA = (
+    "nerdybeila",
+    "nerdy beila",
+    "nerdy_beila",
+    "nerdy-beila",
+    "nerdy.beila",
+    "beila nerdy",
+    "beila b",
+    "vip.nerdyb",
+    "vip nerdyb",
+    "vipnerdyb",
+    "beila_cosplay",
+    "beila cosplay",
+)
+ADULT_JUICY = (
+    "juicyjastv",
+    "juicyjas.tv",
+    "juicy jas tv",
+    "juicyjas tv",
+    "juicyjas",
+)
+ADULT_HONEYTEA = (
+    "honeyteassee",
+    "honey teassee",
+)
+ADULT_TANIA = (
+    "taniaaaramos",
+    "taniaaa ramos",
+    "taniaa ramos",
+)
+ADULT_BRITTANYA = (
+    "brittanya razavi",
+    "brittanyarazavi",
+    "brittanya_razavi",
+    "brittanya-razavi",
+    "seebrittanya",
+    "brittanya2horny",
+    "britt2legitt",
+    "brittanya187187",
+)
+ADULT_LEXI = (
+    "hot4lexi",
+    "hot 4 lexi",
+    "hott4lexi",
+    "hotforlexi",
+    "lexi2legit",
+)
+ADULT_LILI = (
+    "lilivictoria32",
+    "lili victoria 32",
+    "lilivictoria",
+    "lili victoria",
+)
+ADULT_ZURI = (
+    "zuribellarose",
+    "zuri bella rose",
+    "zuri_bella_rose",
+    "zuri-bella-rose",
+)
+ADULT_SARII = (
+    "officialsariixo",
+    "sariixo",
+    "sarii xo",
+    "sarii.xo",
+    "official sariixo",
+)
+ADULT_MONA = (
+    "monaacutee",
+    "mona acutee",
+    "monaacute",
+)
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
     ("ITSSTEPHHONEYXO21", ADULT_STEPH),
     ("MULAN VUITTON", ADULT_MULAN),
     ("MIKEILA J", ADULT_MIKEILA),
+    ("NERDY BEILA", ADULT_BEILA),
+    ("JUICYJAS TV", ADULT_JUICY),
+    ("HONEYTEASSEE", ADULT_HONEYTEA),
+    ("TANIA RAMOS", ADULT_TANIA),
+    ("BRITTANYA RAZAVI", ADULT_BRITTANYA),
+    ("HOT4LEXI", ADULT_LEXI),
+    ("LILI VICTORIA", ADULT_LILI),
+    ("ZURI BELLA ROSE", ADULT_ZURI),
+    ("SARIIXO", ADULT_SARII),
+    ("MONA ACUTEE", ADULT_MONA),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_LOVE_ORIGIN = "https://lovescape.cam"
@@ -819,15 +900,31 @@ ADULT_FACE_PINS = (
     ("ITSSTEPHHONEY21", ("P283XrKRjsV",)),
     ("ITSSTEPHHONEYXO21", ("P283XrKRjsV",)),
     ("MULAN VUITTON", ("L3HLNRZy6sk", "pYaoSJlMR79")),
+    ("NERDY BEILA", ("33TgD6OeUfp", "iaBJWcUXDqR", "XYqGeufLjxo", "3Okd36yQXGq")),
+    ("HOT4LEXI", ("I9eggkAajv5",)),
+    ("BRITTANYA RAZAVI", ("ZxMHa5OsXqH", "hdIUeKyK0Ux", "GvbBRAGihAQ", "mXbvfQ0ly1D")),
 )
 ADULT_FACE_STARS = (
     ("MULAN VUITTON", ("mulan-vuitton",)),
+    ("HOT4LEXI", ("hot4lexi",)),
+    ("ZURI BELLA ROSE", ("zuri-bella-rose",)),
+    ("SARIIXO", ("sariixo",)),
 )
 ADULT_FACE_GIFTS = (
     ("ITSSTEPHHONEY21", ("itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip")),
     ("ITSSTEPHHONEYXO21", ("itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip")),
     ("MULAN VUITTON", ("mulanvuitton", "mulanvuittontv")),
     ("MIKEILA J", ("mikeilaj", "mikeilajbaee", "mikeilajduhh", "theemikeilaj")),
+    ("NERDY BEILA", ("nerdybeila", "vipnerdyb", "beilacosplay")),
+    ("JUICYJAS TV", ("juicyjastv", "juicyjas")),
+    ("HONEYTEASSEE", ("honeyteassee",)),
+    ("TANIA RAMOS", ("taniaaaramos",)),
+    ("BRITTANYA RAZAVI", ("brittanyarazavi", "seebrittanya", "brittanya2horny")),
+    ("HOT4LEXI", ("hot4lexi", "hott4lexi", "lexi2legit")),
+    ("LILI VICTORIA", ("lilivictoria32", "lilivictoria")),
+    ("ZURI BELLA ROSE", ("zuribellarose",)),
+    ("SARIIXO", ("officialsariixo", "sariixo")),
+    ("MONA ACUTEE", ("monaacutee", "monaacute")),
 )
 ADULT_FACE_KILL = (
     "loli",
@@ -1895,6 +1992,16 @@ class AdultDeskTests(unittest.TestCase):
                 "ITSSTEPHHONEYXO21",
                 "MULAN VUITTON",
                 "MIKEILA J",
+                "NERDY BEILA",
+                "JUICYJAS TV",
+                "HONEYTEASSEE",
+                "TANIA RAMOS",
+                "BRITTANYA RAZAVI",
+                "HOT4LEXI",
+                "LILI VICTORIA",
+                "ZURI BELLA ROSE",
+                "SARIIXO",
+                "MONA ACUTEE",
                 "COUPLE",
                 "ORGY",
                 "ROLEPLAY",
@@ -2271,6 +2378,137 @@ class AdultDeskTests(unittest.TestCase):
             )],
             ["adult-face-mikekeep1"],
         )
+        self.assertIn("nerdy beila", adult_face_queries("NERDY BEILA"))
+        self.assertIn("vip.nerdyb", adult_face_queries("NERDY BEILA"))
+        self.assertNotIn("nerdy b", adult_face_needles("NERDY BEILA") or [])
+        self.assertTrue(any("id=33TgD6OeUfp" in path for path in adult_face_hunt("NERDY BEILA")))
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "id": "33TgD6OeUfp",
+                            "title": "Beila B/Nerdy B Big Tits Cosplay PMV (Pt. 2)",
+                            "length_sec": 1472,
+                            "views": 8,
+                            "keywords": "beila",
+                        },
+                        {
+                            "id": "nerdywrong",
+                            "title": "Nerdy Alina Lopez Gets Fucked Hard By A BWC",
+                            "length_sec": 2275,
+                            "views": 9,
+                            "keywords": "alina lopez",
+                        },
+                    ]
+                },
+                "NERDY BEILA",
+            )],
+            ["adult-face-33tgd6oeufp"],
+        )
+        self.assertIn("hot4lexi", adult_face_star_tokens("HOT4LEXI"))
+        self.assertTrue(any("bornstar.co/api/search?q=hot4lexi" in path for path in adult_face_hunt("HOT4LEXI")))
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "hot4lexi-missionary-sextape-video-leaked",
+                            "title": "Hot4lexi Missionary Sextape Video Leaked",
+                            "creator": "Hot4lexi",
+                            "durationSeconds": 517,
+                        },
+                        {
+                            "slug": "lexi-marvel-teases-in-her-lingerie",
+                            "title": "Lexi Marvel Teases In Her Lingerie",
+                            "creator": "Lexi Marvel",
+                            "durationSeconds": 381,
+                        },
+                    ]
+                },
+                "HOT4LEXI",
+            )],
+            ["adult-face-star-hot4lexi-missionary-sextape-video-leaked"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "id": "ZxMHa5OsXqH",
+                            "title": "Brittanya Razavi",
+                            "length_sec": 503,
+                            "views": 12,
+                            "keywords": "brittanya razavi",
+                        },
+                        {
+                            "id": "brittwrong",
+                            "title": "Brittany Elizabeth Welsh Flaunts Her Huge Tits",
+                            "length_sec": 458,
+                            "views": 7,
+                            "keywords": "brittany elizabeth",
+                        },
+                    ]
+                },
+                "BRITTANYA RAZAVI",
+            )],
+            ["adult-face-zxmha5osxqh"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "zuri-bella-rose-takes-a-dick-in-multiple-positions",
+                            "title": "Zuri Bella Rose Takes A Dick In Multiple Positions",
+                            "creator": "Zuri Bella Rose",
+                            "durationSeconds": 792,
+                            "performers": [{"slug": "zuri-bella-rose", "name": "Zuri Bella Rose"}],
+                        },
+                        {
+                            "slug": "hailey-rose-joins-her-friends",
+                            "title": "Hailey Rose Joins Her Friends Grind On Two BBCs",
+                            "creator": "Abella Danger",
+                            "durationSeconds": 2639,
+                        },
+                    ]
+                },
+                "ZURI BELLA ROSE",
+            )],
+            ["adult-face-star-zuri-bella-rose-takes-a-dick-in-multiple-positions"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "sariixo-fucks-her-pussy-with-a-bbc-dildo-in-bed",
+                            "title": "Sariixo Fucks Her Pussy With A BBC Dildo In Bed",
+                            "creator": "Sariixo",
+                            "durationSeconds": 602,
+                        },
+                        {
+                            "slug": "bustyema-official-teases",
+                            "title": "BustyEma_Official Teases And Gives A Titjob",
+                            "creator": "BustyEma_Official",
+                            "durationSeconds": 334,
+                        },
+                    ]
+                },
+                "SARIIXO",
+            )],
+            ["adult-face-star-sariixo-fucks-her-pussy-with-a-bbc-dildo-in-bed"],
+        )
+        self.assertEqual(adult_face_queries("HONEYTEASSEE")[0], "honeyteassee")
+        self.assertNotIn("honey tea", adult_face_needles("HONEYTEASSEE") or [])
+        self.assertIn("taniaaaramos", adult_face_queries("TANIA RAMOS"))
+        self.assertNotIn("tania ramos", adult_face_needles("TANIA RAMOS") or [])
+        self.assertIn("juicyjastv", adult_face_queries("JUICYJAS TV"))
+        self.assertIn("lilivictoria32", adult_face_queries("LILI VICTORIA"))
+        self.assertIn("monaacutee", adult_face_queries("MONA ACUTEE"))
+        self.assertTrue(any("users/honeyteassee/search" in path for path in adult_face_hunt("HONEYTEASSEE")))
+        self.assertTrue(any("users/taniaaaramos/search" in path for path in adult_face_hunt("TANIA RAMOS")))
+        self.assertTrue(any("users/juicyjastv/search" in path for path in adult_face_hunt("JUICYJAS TV")))
         self.assertEqual(
             [row["id"] for row in adult_parse_face(
                 {
@@ -2499,6 +2737,21 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("P283XrKRjsV", desk)
         self.assertIn("MULAN VUITTON", desk)
         self.assertIn("MIKEILA J", desk)
+        self.assertIn("NERDY BEILA", desk)
+        self.assertIn("JUICYJAS TV", desk)
+        self.assertIn("HONEYTEASSEE", desk)
+        self.assertIn("TANIA RAMOS", desk)
+        self.assertIn("BRITTANYA RAZAVI", desk)
+        self.assertIn("HOT4LEXI", desk)
+        self.assertIn("LILI VICTORIA", desk)
+        self.assertIn("ZURI BELLA ROSE", desk)
+        self.assertIn("SARIIXO", desk)
+        self.assertIn("MONA ACUTEE", desk)
+        self.assertIn("beilaNeedles", desk)
+        self.assertIn("vip.nerdyb", desk)
+        self.assertIn("lexi2legit", desk)
+        self.assertIn("seebrittanya", desk)
+        self.assertIn("zuri-bella-rose", desk)
         self.assertIn("mikeilaNeedles", desk)
         self.assertIn("mikeilajbaee", desk)
         self.assertIn("theemikeilaj", desk)
@@ -2853,6 +3106,16 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("ITSSTEPHHONEYXO21", tv)
         self.assertIn("MULAN VUITTON", tv)
         self.assertIn("MIKEILA J", tv)
+        self.assertIn("NERDY BEILA", tv)
+        self.assertIn("HOT4LEXI", tv)
+        self.assertIn("ZURI BELLA ROSE", tv)
+        self.assertIn("SARIIXO", tv)
+        self.assertIn("BRITTANYA RAZAVI", tv)
+        self.assertIn("JUICYJAS TV", tv)
+        self.assertIn("HONEYTEASSEE", tv)
+        self.assertIn("TANIA RAMOS", tv)
+        self.assertIn("LILI VICTORIA", tv)
+        self.assertIn("MONA ACUTEE", tv)
         self.assertIn("LOVESCAPE", tv)
         self.assertIn("lovescape.cam", tv.lower())
         self.assertIn("cannot jet", tv)
