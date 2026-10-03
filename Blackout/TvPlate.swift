@@ -15,6 +15,8 @@ struct TvPlate: View {
     @State private var naOffset = 0
     @State private var naKind = "ALL"
     @State private var naQuery = ""
+    @State private var naPasteFailed = false
+    @State private var naHuntNow = false
     @State private var naHuntTask: Task<Void, Never>?
     @State private var naStillCache: [String: UIImage] = [:]
 
@@ -220,21 +222,34 @@ struct TvPlate: View {
 
     private var naFindRail: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HUDField("SEARCH",
-                text: $naQuery,
-                id: "tv.na.search",
-                submit: "DONE",
-                pointSize: 16,
-                onSubmit: {
-                    resetNaPage()
-                    pullNaHunt(now: true)
-                    return true
-                }
-            )
+            HStack(alignment: .center, spacing: 8) {
+                HUDField("SEARCH",
+                    text: $naQuery,
+                    id: "tv.na.search",
+                    submit: "DONE",
+                    pointSize: 16,
+                    onSubmit: {
+                        naHuntNow = true
+                        takeNaQuery(naQuery)
+                        resetNaPage()
+                        pullNaHunt(now: true)
+                        return true
+                    }
+                )
+                Button("PASTE") { pasteNaSearch() }
+                    .buttonStyle(HUDOverlayChipStyle())
+            }
+            if naPasteFailed {
+                Text("NO PASTE")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.warn)
+                    .textCase(.uppercase)
+            }
             HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
                 ForEach(naKindChips, id: \.self) { kind in
                     Button(kind) {
                         naQuery = ""
+                        naPasteFailed = false
                         naKind = kind
                         resetNaPage()
                         runtime.updateSocket.pullAdult(topic: kind)
@@ -244,8 +259,13 @@ struct TvPlate: View {
             }
         }
         .onChange(of: naQuery) { _, _ in
+            naPasteFailed = false
             if naOffset != 0 || naPlayingID != nil {
                 resetNaPage()
+            }
+            if naHuntNow {
+                naHuntNow = false
+                return
             }
             pullNaHunt(now: false)
         }
@@ -273,6 +293,31 @@ struct TvPlate: View {
     private func resetNaPage() {
         naPlayingID = nil
         naOffset = 0
+    }
+
+    private func takeNaQuery(_ raw: String) {
+        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let name = AdultDesk.pageName(text) {
+            naQuery = name
+        } else {
+            naQuery = text
+        }
+    }
+
+    /// HUD typewriter has no iPhone paste. PASTE is the only way a
+    /// creator-page link lands on SEARCH.
+    private func pasteNaSearch() {
+        naPasteFailed = false
+        let text = (UIPasteboard.general.string ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else {
+            naPasteFailed = true
+            return
+        }
+        naHuntNow = true
+        takeNaQuery(text)
+        resetNaPage()
+        pullNaHunt(now: true)
     }
 
     private func pullNaHunt(now: Bool) {

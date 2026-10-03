@@ -352,6 +352,9 @@ enum AdultDesk {
         "lilbussygirl",
         "lil bussy girl",
     ]
+    static let ashleyNeedles = [
+        "itisashley",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
@@ -389,6 +392,7 @@ enum AdultDesk {
         ("ELVANA VITAA", elvanaNeedles),
         ("SLAVIC CARAMEL", slavicNeedles),
         ("LIL BUSSY GIRL", lilbussyNeedles),
+        ("ITISASHLEY", ashleyNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -444,6 +448,7 @@ enum AdultDesk {
         ("ELVANA VITAA", ["elvanavitaa"]),
         ("SLAVIC CARAMEL", ["slaviccaramel"]),
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
+        ("ITISASHLEY", ["itisashley"]),
     ]
     /// Proven guest albums. Hunt these first so a JSON desk cannot blank the chip.
     static let faceDesks: [(String, [String])] = [
@@ -535,6 +540,7 @@ enum AdultDesk {
         ("ELVANA VITAA", ["elvanavitaa"]),
         ("SLAVIC CARAMEL", ["slaviccaramel"]),
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
+        ("ITISASHLEY", ["itisashley"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
@@ -913,8 +919,11 @@ enum AdultDesk {
     }
 
     static func pageName(_ raw: String) -> String? {
-        var text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard pageLike(text) else { return nil }
+        var text = pageBlob(raw)
+        if !pageLike(text) {
+            text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard pageLike(text) else { return nil }
+        }
         if !text.contains("://") {
             text = "https://" + text
         }
@@ -922,15 +931,6 @@ enum AdultDesk {
             text = String(text[..<hash])
         }
         guard let url = URL(string: text) else { return nil }
-        if let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
-            for key in ["q", "query", "search", "username", "user", "u", "k", "p", "text"] {
-                if let value = items.first(where: { $0.name.lowercased() == key })?.value,
-                   let name = pageToken(value)
-                {
-                    return name
-                }
-            }
-        }
         let skip: Set<String> = [
             "",
             "search",
@@ -978,6 +978,26 @@ enum AdultDesk {
             "html",
             "mobile",
             "m",
+            "media",
+            "photos",
+            "photo",
+            "audio",
+            "chats",
+            "chat",
+            "messages",
+            "about",
+            "settings",
+            "shop",
+            "store",
+            "tipped",
+            "collections",
+            "likes",
+            "bookmarks",
+            "notifications",
+            "subscribers",
+            "subscription",
+            "paid",
+            "free",
         ]
         let parts = url.path.split(separator: "/").map(String.init)
         for part in parts.reversed() {
@@ -986,7 +1006,31 @@ enum AdultDesk {
             if piece.allSatisfy(\.isNumber), piece.count >= 8 { continue }
             if let name = pageToken(piece) { return name }
         }
+        if let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
+            for key in ["q", "query", "search", "username", "k", "text"] {
+                if let value = items.first(where: { $0.name.lowercased() == key })?.value,
+                   let name = pageToken(value)
+                {
+                    return name
+                }
+            }
+        }
         return nil
+    }
+
+    static func pageBlob(_ raw: String) -> String {
+        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        let low = text.lowercased()
+        var start: String.Index?
+        if let https = low.range(of: "https://") {
+            start = https.lowerBound
+        } else if let http = low.range(of: "http://") {
+            start = http.lowerBound
+        }
+        guard let from = start else { return text }
+        let rest = text[from...]
+        let token = rest.prefix { !$0.isWhitespace }
+        return String(token).trimmingCharacters(in: CharacterSet(charactersIn: ").,]}>\"'"))
     }
 
     static func askNeedles(_ raw: String) -> [String]? {

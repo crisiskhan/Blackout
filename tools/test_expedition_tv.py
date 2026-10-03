@@ -453,6 +453,9 @@ ADULT_LILBUSSY = (
     "lilbussygirl",
     "lil bussy girl",
 )
+ADULT_ASHLEY = (
+    "itisashley",
+)
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
     ("ITSSTEPHHONEYXO21", ADULT_STEPH),
@@ -490,6 +493,7 @@ ADULT_FACES = (
     ("ELVANA VITAA", ADULT_ELVANA),
     ("SLAVIC CARAMEL", ADULT_SLAVIC),
     ("LIL BUSSY GIRL", ADULT_LILBUSSY),
+    ("ITISASHLEY", ADULT_ASHLEY),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_LOVE_ORIGIN = "https://lovescape.cam"
@@ -842,24 +846,56 @@ ADULT_PAGE_SKIP = {
     "html",
     "mobile",
     "m",
+    "media",
+    "photos",
+    "photo",
+    "audio",
+    "chats",
+    "chat",
+    "messages",
+    "about",
+    "settings",
+    "shop",
+    "store",
+    "tipped",
+    "collections",
+    "likes",
+    "bookmarks",
+    "notifications",
+    "subscribers",
+    "subscription",
+    "paid",
+    "free",
 }
 
 
-def adult_page_name(raw: str) -> str | None:
+def adult_page_blob(raw: str) -> str:
     text = str(raw or "").strip()
-    if not adult_page_like(text):
+    low = text.lower()
+    start = -1
+    for mark in ("https://", "http://"):
+        start = low.find(mark)
+        if start >= 0:
+            break
+    if start < 0:
+        return text
+    end = start
+    while end < len(text) and not text[end].isspace():
+        end += 1
+    return text[start:end].rstrip(").,]}>\"'")
+
+
+def adult_page_name(raw: str) -> str | None:
+    text = adult_page_blob(raw)
+    if not adult_page_like(text) and not adult_page_like(str(raw or "").strip()):
         return None
+    if not adult_page_like(text):
+        text = str(raw or "").strip()
     if "://" not in text:
         text = "https://" + text
     if "#" in text:
         text = text.split("#", 1)[0]
     parsed = urllib.parse.urlparse(text)
-    keys = {key.lower(): value for key, value in urllib.parse.parse_qsl(parsed.query)}
-    for key in ("q", "query", "search", "username", "user", "u", "k", "p", "text"):
-        if key in keys:
-            token = adult_page_token(keys[key])
-            if token:
-                return token
     parts = [part for part in parsed.path.split("/") if part]
     for part in reversed(parts):
         piece = urllib.parse.unquote(part)
@@ -870,6 +906,12 @@ def adult_page_name(raw: str) -> str | None:
         token = adult_page_token(piece)
         if token:
             return token
+    keys = {key.lower(): value for key, value in urllib.parse.parse_qsl(parsed.query)}
+    for key in ("q", "query", "search", "username", "k", "text"):
+        if key in keys:
+            token = adult_page_token(keys[key])
+            if token:
+                return token
     return None
 
 
@@ -1404,6 +1446,7 @@ ADULT_FACE_POSTS = (
     ("ELVANA VITAA", ("elvanavitaa",)),
     ("SLAVIC CARAMEL", ("slaviccaramel",)),
     ("LIL BUSSY GIRL", ("lilbussygirl",)),
+    ("ITISASHLEY", ("itisashley",)),
 )
 ADULT_FACE_STILLS = (
     ("P283XrKRjsV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"),
@@ -1465,6 +1508,7 @@ ADULT_FACE_GIFTS = (
     ("ELVANA VITAA", ("elvanavitaa",)),
     ("SLAVIC CARAMEL", ("slaviccaramel",)),
     ("LIL BUSSY GIRL", ("lilbussygirl",)),
+    ("ITISASHLEY", ("itisashley",)),
 )
 ADULT_FACE_KILL = (
     "loli",
@@ -3264,6 +3308,7 @@ class AdultDeskTests(unittest.TestCase):
                 "ELVANA VITAA",
                 "SLAVIC CARAMEL",
                 "LIL BUSSY GIRL",
+                "ITISASHLEY",
             ],
         )
         fat_kinds = [f"KIND{index:02d}" for index in range(40)]
@@ -4360,6 +4405,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("ELVANA VITAA", desk)
         self.assertIn("SLAVIC CARAMEL", desk)
         self.assertIn("LIL BUSSY GIRL", desk)
+        self.assertIn("ITISASHLEY", desk)
         self.assertIn("elvanavitaa", desk)
         self.assertIn("slaviccaramel", desk)
         self.assertIn("lilbussygirl", desk)
@@ -4576,6 +4622,11 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("pullAdult(topic: naKind)", tv)
         self.assertIn("pullNaHunt", tv)
         self.assertIn("huntNeedles", tv)
+        self.assertIn('Button("PASTE")', tv)
+        self.assertIn("NO PASTE", tv)
+        self.assertIn("UIPasteboard", tv)
+        self.assertIn("pasteNaSearch", tv)
+        self.assertIn("pageName", tv)
         self.assertIn("NO MATCH", tv)
         self.assertIn("onPlay", tv)
         self.assertIn("liveAdult", tv)
@@ -4826,6 +4877,10 @@ class AdultDeskTests(unittest.TestCase):
         self.assertNotIn("COUPLE", adult_rail([]))
         self.assertNotIn("ROLEPLAY", adult_rail([]))
         self.assertIn("ELVANA VITAA", adult_rail([]))
+        self.assertIn("ITISASHLEY", adult_rail([]))
+        self.assertEqual(adult_face_hold_rooms("ITISASHLEY"), [])
+        self.assertEqual(adult_hunt_needles("itisashley"), list(ADULT_ASHLEY))
+        self.assertNotIn("ashley", adult_face_needles("ITISASHLEY") or [])
         self.assertEqual(
             [row["id"] for row in adult_parse_face(
                 {
@@ -4900,6 +4955,24 @@ class AdultDeskTests(unittest.TestCase):
             "graciebon1",
         )
         self.assertEqual(adult_page_name("https://www.erome.com/lilbussygirl/"), "lilbussygirl")
+        self.assertEqual(
+            adult_page_name(
+                "https://www.example.com/itisashley?fbclid=PAZXh0bgNhZW0CMTEAcGRvZgJmZGlkFlD5I2iqiK0s9M8j"
+            ),
+            "itisashley",
+        )
+        self.assertEqual(adult_page_name("https://www.example.com/elvanavitaa/media"), "elvanavitaa")
+        self.assertEqual(adult_page_name("https://www.example.com/u/slaviccaramel"), "slaviccaramel")
+        self.assertEqual(
+            adult_page_name("see https://x.com/elvanavitaa tonight"),
+            "elvanavitaa",
+        )
+        self.assertEqual(
+            adult_hunt_needles(
+                "https://www.example.com/itisashley?fbclid=PAZXh0bgNhZW0CMTEAcGRvZgJmZGlkFlD5I2iqiK0s9M8j"
+            ),
+            list(ADULT_ASHLEY),
+        )
         self.assertIsNone(adult_page_name("roleplay"))
         self.assertIsNone(adult_page_name("elvanavitaa"))
         self.assertEqual(adult_hunt_needles("https://x.com/elvanavitaa"), list(ADULT_ELVANA))
@@ -5147,6 +5220,9 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("ELVANA VITAA", tv)
         self.assertIn("SLAVIC CARAMEL", tv)
         self.assertIn("LIL BUSSY GIRL", tv)
+        self.assertIn("ITISASHLEY", tv)
+        self.assertIn("PASTE", tv)
+        self.assertIn("NO PASTE", tv)
         self.assertIn("public video search", tv.lower())
         self.assertIn("longest first", tv.lower())
         self.assertIn("creator page", tv)
