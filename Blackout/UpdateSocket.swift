@@ -206,8 +206,9 @@ final class UpdateSocket {
     private func loadAdult(topic: String = "") async {
         adultReady = false
         let held = AdultDesk.faceHoldRooms("ALL")
-        if !held.isEmpty {
-            adultRooms = AdultDesk.merge([held, adultRooms])
+        let kept = AdultKeep.load()
+        if !held.isEmpty || !kept.isEmpty {
+            adultRooms = AdultDesk.merge([held, kept, adultRooms])
         }
         defer {
             let again = adultWanted
@@ -218,6 +219,10 @@ final class UpdateSocket {
             }
         }
         guard pipe else { return }
+        if AdultDesk.keepNeedles(topic) {
+            adultRooms = AdultDesk.merge([held, kept, adultRooms])
+            return
+        }
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 8
         config.timeoutIntervalForResource = AdultDesk.huntNeedles(topic) != nil ? 180 : 40
@@ -229,25 +234,25 @@ final class UpdateSocket {
         var batches: [[AdultDesk.Room]] = []
         if AdultDesk.loveNeedles(topic) {
             batches = await fetchLovePages(session)
-            adultRooms = AdultDesk.merge(batches)
+            adultRooms = AdultDesk.merge([held, kept] + batches)
         } else if AdultDesk.huntNeedles(topic) != nil {
             batches = await fetchFacePages(session, topic)
-            adultRooms = AdultDesk.merge([held] + batches)
+            adultRooms = AdultDesk.merge([held, kept] + batches)
         } else {
             batches = await fetchAdultPages(session, from: 0, count: 1)
-            adultRooms = AdultDesk.merge([held] + batches)
+            adultRooms = AdultDesk.merge([held, kept] + batches)
             if AdultDesk.pages > 1 {
                 let rest = await fetchAdultPages(session, from: 1, count: AdultDesk.pages - 1)
                 if !rest.isEmpty {
                     batches.append(contentsOf: rest)
-                    adultRooms = AdultDesk.merge([held] + batches)
+                    adultRooms = AdultDesk.merge([held, kept] + batches)
                 }
             }
             for hashtag in AdultDesk.topics(topic) {
                 let extra = await fetchAdultPages(session, from: 0, count: 2, topic: hashtag)
                 if !extra.isEmpty {
                     batches.append(contentsOf: extra)
-                    adultRooms = AdultDesk.merge([held] + batches)
+                    adultRooms = AdultDesk.merge([held, kept] + batches)
                 }
             }
         }
@@ -268,8 +273,14 @@ final class UpdateSocket {
     private func fetchFacePages(_ session: URLSession, _ kind: String) async -> [[AdultDesk.Room]] {
         var batches: [[AdultDesk.Room]] = []
         let held = AdultDesk.faceHoldRooms("ALL")
+        let kept = AdultKeep.load()
         if !held.isEmpty {
             batches.append(held)
+        }
+        if !kept.isEmpty {
+            batches.append(kept)
+        }
+        if !batches.isEmpty {
             adultRooms = AdultDesk.merge(batches)
         }
         let paths = AdultDesk.faceHunt(kind)

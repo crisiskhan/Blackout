@@ -3080,10 +3080,12 @@ class HUDSeductionTests(unittest.TestCase):
             "Theme.swift",
             "HUDLayout.swift",
             "TvPlate.swift",
+            "NaPlate.swift",
             "StillZoom.swift",
             "LiveZoom.swift",
             "NaLive.swift",
             "AdultDesk.swift",
+            "AdultKeep.swift",
         ):
             body = read("Blackout", name)
             self.assertNotIn("Color(white:", body, name)
@@ -5010,10 +5012,12 @@ class FacetedMetalHUDTests(unittest.TestCase):
         "NearHoldCard.swift",
         "SpeakTurnCard.swift",
         "TvPlate.swift",
+        "NaPlate.swift",
         "StillZoom.swift",
         "LiveZoom.swift",
         "NaLive.swift",
         "AdultDesk.swift",
+        "AdultKeep.swift",
         "SOSHold.swift",
         "InstrumentsView.swift",
         "HUDKeyboard.swift",
@@ -5152,7 +5156,7 @@ class HUDKeyboardTests(unittest.TestCase):
         "CommsTab.swift",
         "PartyHoldCard.swift",
         "PlaceMarkCard.swift",
-        "TvPlate.swift",
+        "NaPlate.swift",
     )
 
     def test_every_field_is_hud_glass_not_uitextfield(self):
@@ -5254,7 +5258,7 @@ class HUDKeyboardTests(unittest.TestCase):
         self.assertIn('HUDField("PARTY CODE"', comms)
         party = read("Blackout", "PartyHoldCard.swift")
         self.assertIn('HUDField("NAME"', party)
-        tv = read("Blackout", "TvPlate.swift")
+        tv = read("Blackout", "NaPlate.swift")
         self.assertIn('HUDField("SEARCH"', tv)
         self.assertIn("locked: true", exped)
         self.assertIn("locked: true", party)

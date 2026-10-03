@@ -90,6 +90,13 @@ final class AppRuntime {
     var zoomStillName: String?
     /// Adult HLS row in the full-field player. Nil when closed.
     var zoomLive: NaLive.Row?
+    /// N/A plate after HOLD 10. Persists so the theater stays on the rail.
+    var naOpen = false
+    /// Local KEEP shelf. Playable HTTPS only.
+    var naKeep: [AdultDesk.Room] = []
+    /// Full-field queue for PREV / NEXT.
+    var naQueue: [NaLive.Row] = []
+    var naIndex = 0
     /// Clustered heard phones. Not a party body.
     var heldNear: NearHold?
     /// Packed cameras for the open extract. Empty is honest (NM).
@@ -270,6 +277,11 @@ final class AppRuntime {
         bootVessel()
         applyMapKeepAwake()
         updateSocket.start()
+        naOpen = AdultKeep.opened()
+        naKeep = AdultKeep.load()
+        if !naKeep.isEmpty {
+            updateSocket.adultRooms = AdultDesk.merge([naKeep, updateSocket.adultRooms])
+        }
     }
 
     var bootReady: Bool {
@@ -741,8 +753,76 @@ final class AppRuntime {
         zoomStillName = nil
     }
 
-    func openLive(_ row: NaLive.Row) {
-        Task { await presentLive(row) }
+    func openNa() {
+        naOpen = true
+        AdultKeep.setOpened(true)
+        updateSocket.pullAdult(topic: "ALL")
+    }
+
+    func heldNa(_ id: String) -> Bool {
+        let token = id.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !token.isEmpty else { return false }
+        if naKeep.contains(where: { $0.id == token }) { return true }
+        return AdultKeep.has(token)
+    }
+
+    @discardableResult
+    func toggleNa(_ row: NaLive.Row) async -> String? {
+        if heldNa(row.id) {
+            dropNa(row.id)
+            return nil
+        }
+        return await keepNa(row)
+    }
+
+    @discardableResult
+    func keepNa(_ row: NaLive.Row) async -> String? {
+        var next = row
+        if AdultDesk.playlist(next.url) == nil {
+            if let raw = await updateSocket.liveAdult(next) {
+                next.url = raw
+            }
+        }
+        guard AdultDesk.playlist(next.url) != nil else {
+            return updateSocket.pipe ? "NO STREAM" : "NO PIPE"
+        }
+        let room = AdultDesk.Room(
+            id: next.id,
+            name: next.name,
+            handle: next.handle,
+            url: next.url,
+            viewers: next.viewers,
+            image: next.image,
+            kinds: AdultKeep.mark(next.kinds),
+            seek: next.handle,
+            seconds: next.seconds
+        )
+        naKeep = AdultKeep.take(room)
+        updateSocket.adultRooms = AdultDesk.merge([naKeep, updateSocket.adultRooms])
+        return nil
+    }
+
+    func dropNa(_ id: String) {
+        naKeep = AdultKeep.drop(id)
+        updateSocket.adultRooms = updateSocket.adultRooms.map { room in
+            guard room.id == id else { return room }
+            var next = room
+            next.kinds = next.kinds.filter { $0 != AdultDesk.keepChip }
+            return next
+        }
+    }
+
+    func openLive(_ row: NaLive.Row, queue: [NaLive.Row] = []) {
+        naQueue = queue.isEmpty ? [row] : queue
+        naIndex = naQueue.firstIndex(where: { $0.id == row.id }) ?? 0
+        Task { await presentLive(naQueue[naIndex]) }
+    }
+
+    func stepLive(_ delta: Int) {
+        let next = naIndex + delta
+        guard naQueue.indices.contains(next) else { return }
+        naIndex = next
+        Task { await presentLive(naQueue[naIndex]) }
     }
 
     private func presentLive(_ row: NaLive.Row) async {
