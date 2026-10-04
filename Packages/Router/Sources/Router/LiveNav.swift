@@ -4,7 +4,9 @@ import Foundation
 /// The full script still belongs to SPEAK. This only names the next move as YOU move.
 public enum LiveNav: Sendable {
     public static let arriveMeters: Double = 25
+    public static let arriveDriveMeters: Double = 40
     public static let turnCueMeters: Double = 50
+    public static let turnCueDriveMeters: Double = 160
     public static let offRouteMeters: Double = 80
     public static let offRouteWalkMeters: Double = 45
     public static let replanSeconds: TimeInterval = 8
@@ -26,6 +28,20 @@ public enum LiveNav: Sendable {
         switch mode {
         case .walk: return offRouteWalkMeters
         case .drive: return offRouteMeters
+        }
+    }
+
+    public static func turnCueLimit(_ mode: TravelMode) -> Double {
+        switch mode {
+        case .walk: return turnCueMeters
+        case .drive: return turnCueDriveMeters
+        }
+    }
+
+    public static func arriveLimit(_ mode: TravelMode) -> Double {
+        switch mode {
+        case .walk: return arriveMeters
+        case .drive: return arriveDriveMeters
         }
     }
 
@@ -56,7 +72,7 @@ public enum LiveNav: Sendable {
                 nearestIndex: 0,
                 metersToLine: 0,
                 metersToTurn: 0,
-                arrived: span < arriveMeters,
+                arrived: span < arriveLimit(travelMode),
                 offRoute: false,
                 speakTurn: "",
                 nextHUD: ""
@@ -100,8 +116,9 @@ public enum LiveNav: Sendable {
         let remainingMeters = meters(remaining)
         let toDest = GraphRouter.haversine(you.lat, you.lon, destPt.lat, destPt.lon)
         let limit = offRouteLimit(travelMode)
+        let arrive = arriveLimit(travelMode)
         let onLine = bestDistance <= limit
-        let arrived = toDest < arriveMeters || (onLine && remainingMeters < arriveMeters)
+        let arrived = toDest < arrive || (onLine && remainingMeters < arrive)
         let offRoute = !arrived && bestDistance > limit
         var metersToTurn = remainingMeters
         if remaining.count >= 3 {
@@ -113,7 +130,7 @@ public enum LiveNav: Sendable {
         var speakTurn = ""
         if !arrived, !offRoute {
             let spoken = VoiceNav.steps(remaining, travelMode: travelMode, streets: sliced)
-            if metersToTurn <= turnCueMeters {
+            if metersToTurn <= turnCueLimit(travelMode) {
                 speakTurn = spoken.first { $0.hasPrefix("Turn") } ?? ""
             }
             if speakTurn.isEmpty {

@@ -644,6 +644,14 @@ public struct SearchIndex: Sendable {
             return ["e", "east"]
         case "w", "west":
             return ["w", "west"]
+        case "nw", "northwest":
+            return ["nw", "northwest"]
+        case "ne", "northeast":
+            return ["ne", "northeast"]
+        case "sw", "southwest":
+            return ["sw", "southwest"]
+        case "se", "southeast":
+            return ["se", "southeast"]
         case "mt", "mtn", "mount", "mountain":
             return ["mt", "mtn", "mount", "mountain"]
         case "pk", "peak", "summit":
@@ -677,9 +685,57 @@ public struct SearchIndex: Sendable {
     ]
 
     private static func ordinalAliases(_ token: String) -> Set<String>? {
+        if let n = Int(token), (1...99).contains(n) {
+            return ordinalSet(n)
+        }
+        if let n = parseNth(token) {
+            return ordinalSet(n)
+        }
         for pair in ordinalPairs {
-            if token == pair.0 || token == pair.1 {
-                return [pair.0, pair.1]
+            if token == pair.0 || token == pair.1, let n = parseNth(pair.0) {
+                return ordinalSet(n)
+            }
+        }
+        return nil
+    }
+
+    private static func ordinalSet(_ n: Int) -> Set<String> {
+        guard (1...99).contains(n) else { return [] }
+        var out: Set<String> = ["\(n)", nth(n)]
+        for pair in ordinalPairs where ordinalNumber(pair.0) == n {
+            out.insert(pair.0)
+            out.insert(pair.1)
+        }
+        return out
+    }
+
+    private static func nth(_ n: Int) -> String {
+        let teen = n % 100
+        if (11...13).contains(teen) { return "\(n)th" }
+        switch n % 10 {
+        case 1: return "\(n)st"
+        case 2: return "\(n)nd"
+        case 3: return "\(n)rd"
+        default: return "\(n)th"
+        }
+    }
+
+    private static func parseNth(_ token: String) -> Int? {
+        for suffix in ["st", "nd", "rd", "th"] {
+            guard token.hasSuffix(suffix), token.count > suffix.count else { continue }
+            let body = String(token.dropLast(suffix.count))
+            guard let n = Int(body), (1...99).contains(n), nth(n) == token else { continue }
+            return n
+        }
+        return nil
+    }
+
+    private static func ordinalNumber(_ token: String) -> Int? {
+        if let n = Int(token), (1...99).contains(n) { return n }
+        if let n = parseNth(token) { return n }
+        for (nthForm, word) in ordinalPairs {
+            if token == nthForm || token == word {
+                return parseNth(nthForm)
             }
         }
         return nil

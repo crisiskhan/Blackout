@@ -83,6 +83,13 @@ def should_replan(
     return now - last_replan_at >= replan_seconds
 
 
+def nth(n: int) -> str:
+    teen = n % 100
+    if 11 <= teen <= 13:
+        return f"{n}th"
+    return {1: f"{n}st", 2: f"{n}nd", 3: f"{n}rd"}.get(n % 10, f"{n}th")
+
+
 def ordinal_aliases(token: str) -> set[str] | None:
     pairs = {
         "1st": "first",
@@ -107,10 +114,25 @@ def ordinal_aliases(token: str) -> set[str] | None:
         "20th": "twentieth",
     }
     inverse = {word: token for token, word in pairs.items()}
+
+    def pack(n: int) -> set[str]:
+        out = {str(n), nth(n)}
+        key = nth(n)
+        if key in pairs:
+            out.add(pairs[key])
+        return out
+
+    if token.isdigit() and 1 <= int(token) <= 99:
+        return pack(int(token))
     if token in pairs:
-        return {token, pairs[token]}
+        return pack(int(token[:-2]))
     if token in inverse:
-        return {inverse[token], token}
+        return pack(int(inverse[token][:-2]))
+    for suffix in ("st", "nd", "rd", "th"):
+        if token.endswith(suffix) and token[: -len(suffix)].isdigit():
+            n = int(token[: -len(suffix)])
+            if 1 <= n <= 99 and nth(n) == token:
+                return pack(n)
     return None
 
 
@@ -145,7 +167,10 @@ class LiveGuideTests(unittest.TestCase):
         self.assertIn("func offRouteLimit(", live)
         self.assertIn("case .walk: return offRouteWalkMeters", live)
         self.assertIn("arriveMeters: Double = 25", live)
+        self.assertIn("arriveDriveMeters: Double = 40", live)
         self.assertIn("turnCueMeters: Double = 50", live)
+        self.assertIn("turnCueDriveMeters: Double = 160", live)
+        self.assertIn("func turnCueLimit(", live)
         self.assertIn("replanSeconds: TimeInterval = 8", live)
 
     def test_first_off_route_replans_now_and_far_off_does_not_wait(self):
@@ -162,6 +187,9 @@ class LiveGuideTests(unittest.TestCase):
         self.assertIn("LiveNav.shouldReplan(", guide)
         self.assertIn("fieldYou", guide)
         self.assertIn("gnssYou", guide)
+        self.assertIn('speakNextHUD = ""', guide)
+        self.assertIn("speakHUDTurns = []", guide)
+        self.assertIn("RouteSummary.chrome(", guide)
 
     def test_first_leg_is_the_next_move_until_the_turn_is_close(self):
         live = read("Packages", "Router", "Sources", "Router", "LiveNav.swift")
@@ -182,6 +210,18 @@ class LiveGuideTests(unittest.TestCase):
         self.assertIn("remainingCoords", route_enum)
         self.assertIn("RouteLine.paintCoords(", tab)
         self.assertIn("runtime.fieldYou", tab.split("OfflineMapView(")[1].split("destination:")[0])
+        remaining = route.split("func liveRemainingHUD(")[1].split("func destValue(")[0]
+        self.assertIn("cue.offRoute", remaining)
+        self.assertIn('return ""', remaining)
+        rail = tab.split("struct MapFieldDestRail")[1].split("private var hudReserve")[0]
+        self.assertNotIn(".lineLimit(1)", rail.split("if !turn.isEmpty")[1].split("if !remain.isEmpty")[0])
+        card = read("Blackout", "SpeakTurnCard.swift")
+        rows = card.split("ForEach(Array(turns.prefix(2)")[1]
+        self.assertNotIn(".lineLimit(1)", rows)
+        voice = read("Packages", "Router", "Sources", "Router", "VoiceNav.swift")
+        fit = voice.split("func hudFit(")[1].split("func turn(")[0]
+        self.assertNotIn("removeLast()", fit)
+        self.assertNotIn("count > 44", fit)
 
 
 class HonestFixTests(unittest.TestCase):
@@ -229,8 +269,10 @@ class PhotoDeskTests(unittest.TestCase):
 
 class SearchAliasTests(unittest.TestCase):
     def test_tenth_and_calle_are_the_same_street(self):
-        self.assertEqual(ordinal_aliases("10th"), {"10th", "tenth"})
-        self.assertEqual(ordinal_aliases("tenth"), {"10th", "tenth"})
+        self.assertEqual(ordinal_aliases("10th"), {"10", "10th", "tenth"})
+        self.assertEqual(ordinal_aliases("tenth"), {"10", "10th", "tenth"})
+        self.assertEqual(ordinal_aliases("21st"), {"21", "21st"})
+        self.assertEqual(ordinal_aliases("21"), {"21", "21st"})
         self.assertIsNone(ordinal_aliases("montana"))
         search = read("Packages", "Search", "Sources", "Search", "Search.swift")
         self.assertIn('"10th"', search)
@@ -238,8 +280,12 @@ class SearchAliasTests(unittest.TestCase):
         aliases = search.split("func aliases(of")[1].split("func exactOrAlias")[0]
         self.assertIn('"calle"', aliases)
         self.assertIn('"camino"', aliases)
+        self.assertIn('"northwest"', aliases)
+        self.assertIn("func ordinalSet(", search)
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("10th", qa)
+        self.assertIn("21st", qa)
+        self.assertIn("northwest", qa)
 
 
 class DeviceScriptTests(unittest.TestCase):
@@ -251,6 +297,8 @@ class DeviceScriptTests(unittest.TestCase):
             self.assertIn("silver line starts at YOU", blob)
             self.assertIn("LAST FIX", blob)
             self.assertIn("45 m", blob)
+            self.assertIn("160 m", blob)
+            self.assertIn("no ghost progress", blob)
             self.assertNotIn("best in class", blob.lower())
             self.assertNotIn("Waze", blob)
             self.assertNotIn("Google Maps", blob)

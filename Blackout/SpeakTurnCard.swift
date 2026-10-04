@@ -24,8 +24,7 @@ struct SpeakTurnCard: View {
                 Text(line)
                     .font(.system(size: 13, weight: .heavy))
                     .foregroundStyle(Theme.silver)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }

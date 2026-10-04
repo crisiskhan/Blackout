@@ -115,6 +115,20 @@ final class SearchTests: XCTestCase {
         XCTAssertEqual(hits.first?.name, "Montana Avenue")
     }
 
+    func testOrdinalAndCompassAliasesFindPackedStreets() {
+        let idx = SearchIndex(pois: [
+            ["name": "10th Street", "kind": "street", "lat": 31.77, "lon": -106.48],
+            ["name": "21st Street", "kind": "street", "lat": 31.78, "lon": -106.47],
+            ["name": "1st Street Northwest", "kind": "street", "lat": 31.79, "lon": -106.46],
+        ])
+        XCTAssertEqual(idx.lookup("tenth").first?.name, "10th Street")
+        XCTAssertEqual(idx.lookup("10").first?.name, "10th Street")
+        XCTAssertEqual(idx.lookup("21st").first?.name, "21st Street")
+        XCTAssertEqual(idx.lookup("21 street").first?.name, "21st Street")
+        XCTAssertEqual(idx.lookup("1st st nw").first?.name, "1st Street Northwest")
+        XCTAssertEqual(idx.lookup("first street northwest").first?.name, "1st Street Northwest")
+    }
+
     func testTypoFindsGardner() {
         let idx = SearchIndex(pois: [
             ["name": "Gardner Peak", "kind": "peak", "lat": 32.82, "lon": -106.56],

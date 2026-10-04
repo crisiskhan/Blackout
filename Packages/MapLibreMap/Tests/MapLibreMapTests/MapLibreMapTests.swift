@@ -825,6 +825,15 @@ final class MapLibreMapTests: XCTestCase {
             MapFieldChrome.liveRemainingHUD(you: nil, dest: line.last, coords: line, travelMode: .walk),
             VoiceNav.remainingHUD(line)
         )
+        XCTAssertEqual(
+            MapFieldChrome.liveRemainingHUD(
+                you: (0, -0.01),
+                dest: line.last,
+                coords: line,
+                travelMode: .walk
+            ),
+            ""
+        )
         XCTAssertLessThan(cue.remainingMeters, VoiceNav.remainingMeters(line))
     }
 

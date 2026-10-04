@@ -243,10 +243,20 @@ def prompt(
 
 
 LIVE_NAV_ARRIVE = 25.0
+LIVE_NAV_ARRIVE_DRIVE = 40.0
 LIVE_NAV_TURN = 50.0
+LIVE_NAV_TURN_DRIVE = 160.0
 LIVE_NAV_OFF = 80.0
 LIVE_NAV_OFF_WALK = 45.0
 LIVE_NAV_REPLAN = 8.0
+
+
+def turn_cue_limit(mode: str) -> float:
+    return LIVE_NAV_TURN if mode == "walk" else LIVE_NAV_TURN_DRIVE
+
+
+def arrive_limit(mode: str) -> float:
+    return LIVE_NAV_ARRIVE if mode == "walk" else LIVE_NAV_ARRIVE_DRIVE
 
 
 def off_route_limit(mode: str) -> float:
@@ -322,7 +332,7 @@ def live_nav_progress(
     if len(coords) < 2:
         dest_pt = dest or (coords[-1] if coords else you)
         span = haversine(you[0], you[1], dest_pt[0], dest_pt[1])
-        return LiveCue(0.0, list(coords), 0, 0.0, 0.0, span < LIVE_NAV_ARRIVE, False, "", "")
+        return LiveCue(0.0, list(coords), 0, 0.0, 0.0, span < arrive_limit(mode), False, "", "")
     best_d = float("inf")
     best_i = 0
     best_pt = coords[0]
@@ -358,7 +368,7 @@ def live_nav_progress(
     to_dest = haversine(you[0], you[1], dest_pt[0], dest_pt[1])
     limit = off_route_limit(mode)
     on_line = best_d <= limit
-    arrived = to_dest < LIVE_NAV_ARRIVE or (on_line and remaining_m < LIVE_NAV_ARRIVE)
+    arrived = to_dest < arrive_limit(mode) or (on_line and remaining_m < arrive_limit(mode))
     off_route = (not arrived) and best_d > limit
     meters_to_turn = remaining_m
     for i in range(1, len(remaining) - 1):
@@ -368,7 +378,7 @@ def live_nav_progress(
     speak_turn = ""
     if not arrived and not off_route:
         spoken = steps(remaining, mode, sliced)
-        if meters_to_turn <= LIVE_NAV_TURN:
+        if meters_to_turn <= turn_cue_limit(mode):
             for line in spoken:
                 if line.startswith("Turn"):
                     speak_turn = line
@@ -505,10 +515,13 @@ class VoiceNavTests(unittest.TestCase):
             ],
         )
         self.assertEqual(next_turn_hud(coords, streets), "LEFT · PIEDRAS STREET")
+        long = next_turn_hud(coords, ["Montana Avenue", "Northwest Mesa Hills Parkway Boulevard"])
+        self.assertEqual(long, "LEFT · NORTHWEST MESA HILLS PARKWAY BOULEVARD")
+        self.assertGreater(len(long), 44)
+        self.assertNotIn("…", long)
         for line in lines:
             self.assertNotIn("Turn left", line)
             self.assertNotIn("feet.", line)
-            self.assertLessEqual(len(line), 44)
 
 
 class LiveNavTests(unittest.TestCase):
@@ -561,6 +574,15 @@ class LiveNavTests(unittest.TestCase):
         self.assertFalse(cue.arrived)
         self.assertEqual(cue.speak_turn, "")
         self.assertGreater(cue.meters_to_line, LIVE_NAV_OFF)
+
+    def test_drive_hears_the_turn_farther_out(self):
+        mid = (0.0, 0.0008983)
+        walk = live_nav_progress(mid, LEFT_TURN_ROUTE[-1], LEFT_TURN_ROUTE, mode="walk")
+        drive = live_nav_progress(mid, LEFT_TURN_ROUTE[-1], LEFT_TURN_ROUTE, mode="drive")
+        self.assertEqual(walk.speak_turn, "Walk 328 feet.")
+        self.assertGreater(walk.meters_to_turn, turn_cue_limit("walk"))
+        self.assertEqual(drive.speak_turn, "Turn left.")
+        self.assertLessEqual(drive.meters_to_turn, turn_cue_limit("drive"))
 
 
 class VoiceNavSourceContracts(unittest.TestCase):
@@ -616,6 +638,8 @@ class VoiceNavSourceContracts(unittest.TestCase):
         self.assertIn("LiveNav.progress", guide)
         self.assertIn("VoiceNav.arrive", guide)
         self.assertIn("SpeakStatus.offRouteLine", guide)
+        self.assertIn('speakNextHUD = ""', guide)
+        self.assertIn("speakHUDTurns = []", guide)
         self.assertIn("navigate(mode: travelMode, speak: false)", guide)
         nav_head = nav.split("Task {", 1)[0]
         from_guard = nav_head.split("guard let from = fieldYou", 1)[1]
@@ -634,7 +658,10 @@ class VoiceNavSourceContracts(unittest.TestCase):
         self.assertIn("enum LiveNav", live_text)
         self.assertIn("func progress(", live_text)
         self.assertIn("arriveMeters", live_text)
+        self.assertIn("arriveDriveMeters", live_text)
         self.assertIn("turnCueMeters", live_text)
+        self.assertIn("turnCueDriveMeters", live_text)
+        self.assertIn("func turnCueLimit(", live_text)
         self.assertIn("offRouteMeters", live_text)
         for slogan in ("best in class", "Waze", "Google Maps", "Apple Maps", "Google"):
             self.assertNotIn(slogan, live_text)

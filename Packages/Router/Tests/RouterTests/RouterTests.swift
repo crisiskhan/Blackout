@@ -476,6 +476,13 @@ final class RouterTests: XCTestCase {
             ]
         )
         XCTAssertEqual(VoiceNav.nextTurnHUD(coords, streets: streets), "LEFT · PIEDRAS STREET")
+        let long = VoiceNav.nextTurnHUD(
+            coords,
+            streets: ["Montana Avenue", "Northwest Mesa Hills Parkway Boulevard"]
+        )
+        XCTAssertEqual(long, "LEFT · NORTHWEST MESA HILLS PARKWAY BOULEVARD")
+        XCTAssertFalse(long.contains("…"))
+        XCTAssertGreaterThan(long.count, 44)
     }
 
     func testLiveNavSpeaksTheUpcomingTurnOnceYouAreClose() {
@@ -528,6 +535,22 @@ final class RouterTests: XCTestCase {
             travelMode: .drive
         )
         XCTAssertFalse(driveSide.offRoute)
+        XCTAssertEqual(LiveNav.turnCueLimit(.walk), LiveNav.turnCueMeters)
+        XCTAssertEqual(LiveNav.turnCueLimit(.drive), LiveNav.turnCueDriveMeters)
+        XCTAssertEqual(LiveNav.arriveLimit(.walk), LiveNav.arriveMeters)
+        XCTAssertEqual(LiveNav.arriveLimit(.drive), LiveNav.arriveDriveMeters)
+        let mid = (lat: 0.0, lon: 0.0008983)
+        let walkMid = LiveNav.progress(you: mid, dest: dest, coords: coords)
+        XCTAssertEqual(walkMid.speakTurn, "Walk 328 feet.")
+        XCTAssertGreaterThan(walkMid.metersToTurn, LiveNav.turnCueLimit(.walk))
+        let driveMid = LiveNav.progress(
+            you: mid,
+            dest: dest,
+            coords: coords,
+            travelMode: .drive
+        )
+        XCTAssertEqual(driveMid.speakTurn, "Turn left.")
+        XCTAssertLessThanOrEqual(driveMid.metersToTurn, LiveNav.turnCueLimit(.drive))
         XCTAssertTrue(LiveNav.shouldReplan(now: 1000, lastReplanAt: 0, metersToLine: 50, mode: .walk))
         XCTAssertFalse(LiveNav.shouldReplan(now: 1004, lastReplanAt: 1000, metersToLine: 50, mode: .walk))
         XCTAssertTrue(LiveNav.shouldReplan(now: 1004, lastReplanAt: 1000, metersToLine: 100, mode: .walk))

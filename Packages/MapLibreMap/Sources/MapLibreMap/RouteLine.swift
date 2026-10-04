@@ -474,13 +474,14 @@ public enum MapFieldChrome: Sendable {
     ) -> String {
         guard coords.count >= 2 else { return "" }
         guard let you else { return VoiceNav.remainingHUD(coords) }
-        let remaining = LiveNav.progress(
+        let cue = LiveNav.progress(
             you: you,
             dest: dest,
             coords: coords,
             travelMode: travelMode
-        ).remainingCoords
-        return VoiceNav.remainingHUD(remaining)
+        )
+        if cue.offRoute { return "" }
+        return VoiceNav.remainingHUD(cue.remainingCoords)
     }
 
     /// Coordinate pair formatter. MAP COORDINATES rail passes dest or YOU.

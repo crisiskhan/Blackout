@@ -203,13 +203,7 @@ public enum VoiceNav: Sendable {
     }
 
     private static func hudFit(_ parts: [String]) -> String {
-        var parts = parts.filter { !$0.isEmpty }
-        var line = parts.joined(separator: " · ")
-        while line.count > 44, parts.count > 1 {
-            parts.removeLast()
-            line = parts.joined(separator: " · ")
-        }
-        return line
+        parts.filter { !$0.isEmpty }.joined(separator: " · ")
     }
 
     public static func turn(from: Double, to: Double) -> VoiceTurn {

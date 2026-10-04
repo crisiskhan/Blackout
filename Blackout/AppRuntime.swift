@@ -2842,6 +2842,8 @@ final class AppRuntime {
         }
         if cue.offRoute {
             speechChrome = SpeakStatus.offRouteLine()
+            speakHUDTurns = []
+            speakNextHUD = ""
             if live {
                 let now = Date().timeIntervalSince1970
                 if LiveNav.shouldReplan(
@@ -2874,6 +2876,12 @@ final class AppRuntime {
             destination: destination(),
             you: you
         )
+        if RouteLine.shouldDraw(cue.remainingCoords) {
+            routeChrome = RouteSummary.chrome(
+                mode: travelMode,
+                coords: cue.remainingCoords
+            )
+        }
         speakHUDTurns = VoiceNav.hudTurns(
             cue.remainingCoords,
             travelMode: travelMode,
