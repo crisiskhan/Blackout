@@ -89,7 +89,6 @@ public final class SpeechEngine: @unchecked Sendable {
         lastFailed = false
         let voiceBit = tone?.identifier ?? lang
         lastUtterance = "\(locale):\(voiceBit):\(trimmed)"
-        box.log("speech", lastUtterance)
         return true
         #else
         lastFailed = true
@@ -250,7 +249,9 @@ public final class SpeechEngine: @unchecked Sendable {
         heard = ""
         stopListenHardware()
         let spoken = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        box.log("say", spoken.isEmpty ? "SAY FAILED" : spoken)
+        if spoken.isEmpty {
+            box.log("say", "SAY FAILED")
+        }
         DispatchQueue.main.async {
             cb?(spoken)
         }

@@ -31,4 +31,25 @@ final class CryptoPartyTests: XCTestCase {
         XCTAssertEqual(PartySeal.openBody(plain, key: nil), plain)
         XCTAssertNil(PartySeal.openBody(Data([0x42, 0x4F, 0x31, 0x00]), key: nil))
     }
+
+    func testDeviceSealRoundtripAndWrongKeyFails() throws {
+        let key = SymmetricKey(size: .bits256)
+        let other = SymmetricKey(size: .bits256)
+        let plain = Data("JOIN-CODE".utf8)
+        let wire = try DeviceSeal.wrap(plain, key: key)
+        XCTAssertTrue(DeviceSeal.isSealed(wire))
+        XCTAssertFalse(PartySeal.isSealed(wire))
+        XCTAssertEqual(try DeviceSeal.unwrap(wire, key: key), plain)
+        XCTAssertNil(DeviceSeal.openBody(wire, key: other))
+        XCTAssertThrowsError(try DeviceSeal.unwrap(plain, key: key))
+    }
+
+    func testDeviceOpenBodyKeepsPlaintext() {
+        let key = SymmetricKey(size: .bits256)
+        let plain = Data("morning ridge".utf8)
+        XCTAssertFalse(DeviceSeal.isSealed(plain))
+        XCTAssertEqual(DeviceSeal.openBody(plain, key: key), plain)
+        XCTAssertEqual(DeviceSeal.openBody(plain, key: nil), plain)
+        XCTAssertNil(DeviceSeal.openBody(Data([0x42, 0x4F, 0x32, 0x00]), key: nil))
+    }
 }

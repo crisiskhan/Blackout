@@ -16,6 +16,10 @@ jobs:
     runs-on: macos-14
     timeout-minutes: 90
     steps:
+      # 37241886342: HTTP/2 CANCEL / bad pack header on the merge fetch.
+      # HTTP/1.1 before checkout@v4 — the action's own retries then use it.
+      - name: Prefer HTTP/1.1 for the pack fetch
+        run: git config --global http.version HTTP/1.1
       - uses: actions/checkout@v4
 
       - name: Fail closed on CI opt / CPV gates
@@ -92,6 +96,8 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 90
     steps:
+      - name: Prefer HTTP/1.1 for the pack fetch
+        run: git config --global http.version HTTP/1.1
       - uses: actions/checkout@v4
 
       - name: Select Xcode 16

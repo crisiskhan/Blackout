@@ -40,6 +40,42 @@ class PartySealTests(unittest.TestCase):
         self.assertIn("AES.GCM.seal", crypto)
         self.assertIn("testWrapRoundtripAndWrongKeyFails", tests)
         self.assertIn("testOpenBodyKeepsPlaintext", tests)
+        self.assertIn("enum DeviceSeal", crypto)
+        self.assertIn("0x42, 0x4F, 0x32", crypto)
+        device = crypto.split("enum DeviceSeal")[1]
+        self.assertIn("AES.GCM.open(box, using:", device)
+        self.assertNotIn("AES.GCM.open(box, key:", device)
+        self.assertNotEqual(
+            crypto.split("0x42, 0x4F, 0x31")[0],
+            crypto.split("0x42, 0x4F, 0x32")[0],
+            "device vault magic BO2 must stay distinct from mesh BO1",
+        )
+        self.assertIn("testDeviceSealRoundtripAndWrongKeyFails", tests)
+        self.assertIn("testDeviceOpenBodyKeepsPlaintext", tests)
+
+    def test_typed_party_code_rests_sealed_on_this_phone(self):
+        """PARTY CODE leaves the typewriter into AES-GCM, never plaintext UserDefaults."""
+        vault = read("Blackout", "DeviceVault.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        self.assertIn("import CryptoParty", vault)
+        self.assertIn("enum DeviceVault", vault)
+        self.assertIn("DeviceSeal.wrap", vault)
+        self.assertIn("kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly", vault)
+        self.assertIn("kSecAttrSynchronizable", vault)
+        self.assertIn("false", vault)
+        self.assertNotIn("kSecAttrSynchronizableAny", vault)
+        self.assertNotIn("kSecAttrAccessibleAlways", vault)
+        self.assertIn("party.code.sealed", vault)
+        self.assertIn('partyPlainKey = "party.code"', vault)
+        self.assertIn("removeObject(forKey: partyPlainKey)", vault)
+        persist = app.split("func persistPartyCode()")[1].split("var diaryAttend")[0]
+        self.assertIn("DeviceVault.savePartyCode", persist)
+        self.assertNotIn('UserDefaults.standard.set(roster.code, forKey: "party.code")', persist)
+        boot = app.split("if let saved = UserDefaults.standard.string(forKey: \"hud.locale\")")[1].split(
+            "mesh.partyCode = roster.code"
+        )[0]
+        self.assertIn("DeviceVault.loadPartyCode", boot)
+        self.assertNotIn('string(forKey: "party.code")', boot)
 
     def test_mesh_seals_outbound_and_opens_inbound(self):
         mesh = read("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift")
