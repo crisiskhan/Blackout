@@ -302,6 +302,22 @@ class SearchAliasTests(unittest.TestCase):
         self.assertIn("func addressAsk(", house)
         self.assertIn("func peelZip(", house)
         self.assertIn("func withPackedStreets(", search)
+        boot = search.split("private init(")[1].split("private static func poi(fromFeature")[0]
+        self.assertIn("let merged = Self.withPackedStreets", boot)
+        self.assertIn("self.docs = merged", boot)
+        self.assertIn("for (i, d) in merged.enumerated()", boot)
+        self.assertNotIn(
+            "var order = Array(docs.indices)",
+            boot,
+            "packed TIGER streets must enter foldedOrder and tokenIndex, not sit on self.docs unread",
+        )
+        packed = search.split("func withPackedStreets(")[1].split("func matchingStreets")[0]
+        self.assertIn("guard counts[i] > 0", packed)
+        self.assertNotIn(
+            "Double(max(1, counts[i]))",
+            packed,
+            "a street with no valid range must not land at 0,0",
+        )
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("10th", qa)
         self.assertIn("21st", qa)
