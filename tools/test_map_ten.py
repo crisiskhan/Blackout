@@ -176,9 +176,10 @@ class LiveGuideTests(unittest.TestCase):
     def test_silver_line_trims_to_remaining_while_you_are_on_it(self):
         route = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift")
         tab = read("Blackout", "MapTab.swift")
-        self.assertIn("func paintCoords(", route)
-        self.assertIn("cue.offRoute", route)
-        self.assertIn("remainingCoords", route)
+        route_enum = route.split("public enum RouteLine")[1].split("public enum HoldPin")[0]
+        self.assertIn("func paintCoords(", route_enum)
+        self.assertIn("cue.offRoute", route_enum)
+        self.assertIn("remainingCoords", route_enum)
         self.assertIn("RouteLine.paintCoords(", tab)
         self.assertIn("runtime.fieldYou", tab.split("OfflineMapView(")[1].split("destination:")[0])
 

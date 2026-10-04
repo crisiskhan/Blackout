@@ -620,6 +620,22 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(PackCamera.packSidePaddingPoints, 72)
         XCTAssertEqual(RouteLine.offGraph, "OFF GRAPH")
         XCTAssertTrue(RouteLine.shouldDraw([(lat: 31.76, lon: -106.49), (lat: 31.80, lon: -106.50)]))
+        let line: [(lat: Double, lon: Double)] = [(0, 0), (0, 0.0017966), (0.0008993, 0.0017966)]
+        let painted = RouteLine.paintCoords(
+            you: (0, 0.0008983),
+            dest: line.last,
+            coords: line,
+            travelMode: .walk
+        )
+        XCTAssertGreaterThanOrEqual(painted.count, 2)
+        XCTAssertLessThan(painted.count, line.count + 1)
+        let off = RouteLine.paintCoords(
+            you: (0, -0.01),
+            dest: line.last,
+            coords: line,
+            travelMode: .walk
+        )
+        XCTAssertEqual(off.count, line.count)
         XCTAssertFalse(RouteLine.shouldDraw([]))
         XCTAssertFalse(RouteLine.shouldDraw([(lat: 31.76, lon: -106.49)]))
         XCTAssertFalse(RouteLine.shouldDraw([(lat: .nan, lon: -106.49), (lat: 31.80, lon: -106.50)]))

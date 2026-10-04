@@ -46,6 +46,26 @@ public enum RouteLine {
         }
         return false
     }
+
+    /// Silver paint follows YOU while you are on the line. Off-route keeps
+    /// the last full plot up until the replan lands.
+    public static func paintCoords(
+        you: (lat: Double, lon: Double)?,
+        dest: (lat: Double, lon: Double)?,
+        coords: [(lat: Double, lon: Double)],
+        travelMode: TravelMode
+    ) -> [(lat: Double, lon: Double)] {
+        guard coords.count >= 2 else { return coords }
+        guard let you else { return coords }
+        let cue = LiveNav.progress(
+            you: you,
+            dest: dest,
+            coords: coords,
+            travelMode: travelMode
+        )
+        if cue.offRoute { return coords }
+        return cue.remainingCoords
+    }
 }
 
 /// The chosen destination, drawn on the canvas so the map does not need to
@@ -461,26 +481,6 @@ public enum MapFieldChrome: Sendable {
             travelMode: travelMode
         ).remainingCoords
         return VoiceNav.remainingHUD(remaining)
-    }
-
-    /// Silver paint follows YOU while you are on the line. Off-route keeps
-    /// the last full plot up until the replan lands.
-    public static func paintCoords(
-        you: (lat: Double, lon: Double)?,
-        dest: (lat: Double, lon: Double)?,
-        coords: [(lat: Double, lon: Double)],
-        travelMode: TravelMode
-    ) -> [(lat: Double, lon: Double)] {
-        guard coords.count >= 2 else { return coords }
-        guard let you else { return coords }
-        let cue = LiveNav.progress(
-            you: you,
-            dest: dest,
-            coords: coords,
-            travelMode: travelMode
-        )
-        if cue.offRoute { return coords }
-        return cue.remainingCoords
     }
 
     /// Coordinate pair formatter. MAP COORDINATES rail passes dest or YOU.
