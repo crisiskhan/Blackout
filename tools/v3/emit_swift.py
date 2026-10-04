@@ -661,6 +661,39 @@ public enum PartySeal {
         return data
     }
 }
+
+public enum DeviceSeal {
+    public static let magic = Data([0x42, 0x4F, 0x32])
+
+    public enum SealError: Error {
+        case combined
+        case plain
+    }
+
+    public static func isSealed(_ data: Data) -> Bool {
+        data.starts(with: magic)
+    }
+
+    public static func wrap(_ plain: Data, key: SymmetricKey) throws -> Data {
+        let box = try AES.GCM.seal(plain, using: key)
+        guard let combined = box.combined else { throw SealError.combined }
+        return magic + combined
+    }
+
+    public static func unwrap(_ data: Data, key: SymmetricKey) throws -> Data {
+        guard isSealed(data) else { throw SealError.plain }
+        let box = try AES.GCM.SealedBox(combined: Data(data.dropFirst(magic.count)))
+        return try AES.GCM.open(box, key: key)
+    }
+
+    public static func openBody(_ data: Data, key: SymmetricKey?) -> Data? {
+        if isSealed(data) {
+            guard let key else { return nil }
+            return try? unwrap(data, key: key)
+        }
+        return data
+    }
+}
 ''',
     )
     w(
@@ -697,6 +730,27 @@ final class CryptoPartyTests: XCTestCase {
         XCTAssertEqual(PartySeal.openBody(plain, key: key), plain)
         XCTAssertEqual(PartySeal.openBody(plain, key: nil), plain)
         XCTAssertNil(PartySeal.openBody(Data([0x42, 0x4F, 0x31, 0x00]), key: nil))
+    }
+
+    func testDeviceSealRoundtripAndWrongKeyFails() throws {
+        let key = SymmetricKey(size: .bits256)
+        let other = SymmetricKey(size: .bits256)
+        let plain = Data("JOIN-CODE".utf8)
+        let wire = try DeviceSeal.wrap(plain, key: key)
+        XCTAssertTrue(DeviceSeal.isSealed(wire))
+        XCTAssertFalse(PartySeal.isSealed(wire))
+        XCTAssertEqual(try DeviceSeal.unwrap(wire, key: key), plain)
+        XCTAssertNil(DeviceSeal.openBody(wire, key: other))
+        XCTAssertThrowsError(try DeviceSeal.unwrap(plain, key: key))
+    }
+
+    func testDeviceOpenBodyKeepsPlaintext() {
+        let key = SymmetricKey(size: .bits256)
+        let plain = Data("morning ridge".utf8)
+        XCTAssertFalse(DeviceSeal.isSealed(plain))
+        XCTAssertEqual(DeviceSeal.openBody(plain, key: key), plain)
+        XCTAssertEqual(DeviceSeal.openBody(plain, key: nil), plain)
+        XCTAssertNil(DeviceSeal.openBody(Data([0x42, 0x4F, 0x32, 0x00]), key: nil))
     }
 }
 ''',

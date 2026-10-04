@@ -5192,7 +5192,9 @@ class HUDKeyboardTests(unittest.TestCase):
         self.assertIn("case shift", tokens)
         self.assertIn("case letters", tokens)
         self.assertIn("case digits", tokens)
+        self.assertIn("case paste", tokens)
         self.assertIn("case done", tokens)
+        self.assertIn('public static let degree = "°"', tokens)
         self.assertIn("mutating func tap(", tokens)
         self.assertIn("keyHeight: Double = 44", tokens)
         self.assertIn('["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"]', tokens)
@@ -5293,6 +5295,11 @@ class HUDKeyboardTests(unittest.TestCase):
         self.assertIn("home indicator", qa.lower())
         self.assertIn("field title", qa.lower())
         self.assertIn("hold back", qa.lower())
+        self.assertIn("PASTE sits on the board", qa)
+        self.assertIn("NO PASTE", qa)
+        self.assertIn("°", qa)
+        self.assertIn("wipes the typewriter", qa.lower())
+        self.assertIn("no keystroke log", qa.lower())
         self.assertNotIn("best in class", qa.lower())
 
     def test_engine_types_coordinates_and_respects_lock(self):
@@ -5326,6 +5333,18 @@ class HUDKeyboardTests(unittest.TestCase):
         for ch in "O'BRIEN":
             hud_tap(name, ("glyph", ch))
         self.assertEqual(name["text"], "O'BRIEN")
+        coords = {"text": "", "shift": False, "locked": False, "face": "digits"}
+        for ch in "31.7":
+            hud_tap(coords, ("glyph", ch))
+        hud_tap(coords, ("glyph", "°"))
+        self.assertEqual(coords["text"], "31.7°")
+        hud_tap(coords, ("paste", "31.76190°, -106.49000"))
+        self.assertEqual(coords["text"], "31.76190°, -106.49000")
+        locked_paste = {"text": "old", "shift": True, "locked": True, "face": "letters"}
+        hud_tap(locked_paste, ("paste", "abc-12"))
+        self.assertEqual(locked_paste["text"], "ABC-12")
+        hud_tap(locked_paste, ("paste", "   "))
+        self.assertEqual(locked_paste["text"], "ABC-12")
 
     def test_word_keys_title_and_empty_submit_stay_open(self):
         """SHIFT stays a whole word. Empty SEND keeps the board. Left-hand clears home."""
@@ -5375,6 +5394,9 @@ class HUDKeyboardTests(unittest.TestCase):
         letter_actions = board.split("private var actionRow")[1].split("private func shown")[0]
         self.assertIn("HUDKeyboardLayout.apostrophe", letter_actions)
         self.assertIn('tap(.glyph(HUDKeyboardLayout.hyphen))', letter_actions)
+        self.assertIn('Button("PASTE")', letter_actions)
+        self.assertIn("HUDKeyboardLayout.degree", letter_actions)
+        self.assertIn('tap(.paste)', letter_actions)
         self.assertIn("expand: false", board)
         self.assertIn("liftHome", board)
         self.assertIn("safeAreaPadding", board)
@@ -5411,6 +5433,40 @@ class HUDKeyboardTests(unittest.TestCase):
             "Xcode 16/26 reject Color vs LinearGradient in one ternary: " + ", ".join(hits),
         )
 
+    def test_close_wipes_the_board_and_never_logs_the_line(self):
+        """Close must forget the typewriter. Keystrokes never hit the box."""
+        board = read("Blackout", "HUDKeyboard.swift")
+        gate = board.split("final class HUDKeyboardGate")[1].split("struct HUDField")[0]
+        close = gate.split("func close()")[1].split("func sync")[0]
+        self.assertIn("HUDKeyboardState()", close)
+        self.assertIn("pasteChrome", close)
+        self.assertNotIn("print(", board)
+        self.assertNotIn("NSLog", board)
+        self.assertNotIn("Logger(", board)
+        self.assertNotIn("os.log", board)
+        self.assertNotIn("box.log", board)
+        speech = read(
+            "Packages", "OfflineSpeech", "Sources", "OfflineSpeech", "OfflineSpeech.swift"
+        )
+        self.assertNotIn('box.log("speech", lastUtterance)', speech)
+        self.assertIn('box.log("speech", "SPEECH FAILED")', speech)
+        self.assertNotIn('box.log("say", spoken', speech)
+        self.assertIn('box.log("say", "SAY FAILED")', speech)
+        vault = read("Blackout", "DeviceVault.swift")
+        self.assertNotIn("print(", vault)
+        self.assertNotIn("NSLog", vault)
+        app = read("Blackout", "AppRuntime.swift")
+        persist = app.split("func persistPartyCode()")[1].split("var diaryAttend")[0]
+        self.assertIn("DeviceVault.savePartyCode", persist)
+        self.assertNotIn('UserDefaults.standard.set(roster.code, forKey: "party.code")', persist)
+
+    def test_board_ticks_light_and_does_not_steal_pulse(self):
+        board = read("Blackout", "HUDKeyboard.swift")
+        gate = board.split("final class HUDKeyboardGate")[1].split("struct HUDField")[0]
+        self.assertIn("UIImpactFeedbackGenerator(style: .light)", gate)
+        self.assertNotIn("pulse()", board)
+        self.assertNotIn("style: .rigid", gate)
+
 
 def hud_tap(state: dict, key) -> None:
     """Mirror of HUDKeyboardState.tap. Keep in lockstep with Tokens."""
@@ -5433,7 +5489,15 @@ def hud_tap(state: dict, key) -> None:
         return
     if key == "done":
         return
+    if key == "paste":
+        return
     kind, glyph = key
+    if kind == "paste":
+        clip = glyph.strip()
+        if not clip:
+            return
+        state["text"] = clip.upper() if state["locked"] else clip
+        return
     if kind != "glyph":
         raise AssertionError(key)
     letter = len(glyph) == 1 and glyph.isalpha()

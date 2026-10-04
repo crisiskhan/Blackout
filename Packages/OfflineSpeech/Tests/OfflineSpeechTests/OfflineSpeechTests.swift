@@ -47,6 +47,14 @@ final class SpeechEngineTests: XCTestCase {
         )
     }
 
+    func testSpeakDoesNotLogTheLine() {
+        let box = EventLog()
+        let s = SpeechEngine(box: box)
+        _ = s.speak("SECRET CODE", locale: "en")
+        XCTAssertFalse(box.all().contains { $0.detail.contains("SECRET CODE") })
+        XCTAssertFalse(box.all().contains { $0.kind == "speech" && $0.detail != "SPEECH FAILED" })
+    }
+
     func testListenFailsClosedWithoutOnDeviceSpeech() {
         #if !canImport(Speech) || !os(iOS)
         let s = SpeechEngine(box: EventLog())

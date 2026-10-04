@@ -1,5 +1,6 @@
 import SwiftUI
 import Observation
+import UIKit
 import Tokens
 
 @MainActor
@@ -9,9 +10,11 @@ final class HUDKeyboardGate {
     var fieldTitle: String = ""
     var submitTitle: String = "DONE"
     var state = HUDKeyboardState()
+    var pasteChrome: String = ""
     var onSubmit: (() -> Bool)?
     var onOpen: (() -> Void)?
     private var write: ((String) -> Void)?
+    @ObservationIgnored private var lastBackTick = Date.distantPast
 
     var isOpen: Bool { activeID != nil }
 
@@ -42,12 +45,26 @@ final class HUDKeyboardGate {
     }
 
     func tap(_ key: HUDKeyboardState.Key) {
+        if case .back = key {
+            let now = Date()
+            if now.timeIntervalSince(lastBackTick) > 0.28 {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                lastBackTick = now
+            }
+        } else {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        }
         if case .done = key {
             if onSubmit?() ?? true {
                 close()
             }
             return
         }
+        if case .paste = key {
+            applyPaste()
+            return
+        }
+        pasteChrome = ""
         state.tap(key)
         write?(state.text)
     }
@@ -55,9 +72,24 @@ final class HUDKeyboardGate {
     func close() {
         activeID = nil
         fieldTitle = ""
+        submitTitle = "DONE"
         write = nil
         onOpen = nil
         onSubmit = nil
+        pasteChrome = ""
+        state = HUDKeyboardState()
+    }
+
+    private func applyPaste() {
+        let clip = (UIPasteboard.general.string ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !clip.isEmpty else {
+            pasteChrome = "NO PASTE"
+            return
+        }
+        pasteChrome = ""
+        state.paste(clip)
+        write?(state.text)
     }
 
     func sync(id: String, text: String) {
@@ -273,29 +305,38 @@ struct HUDKeyboard: View {
     }
 
     private var readout: some View {
-        HStack(spacing: 6) {
-            Text(keys.state.text.isEmpty ? keys.fieldTitle : keys.state.text)
-                .font(.system(size: 18, weight: .heavy))
-                .foregroundStyle(keys.state.text.isEmpty ? Theme.silver.opacity(0.45) : Color.white)
-                .lineLimit(2)
-                .minimumScaleFactor(1)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            TimelineView(.animation(minimumInterval: 0.5, paused: false)) { context in
-                Rectangle()
-                    .fill(Theme.accent)
-                    .frame(width: 2, height: 22)
-                    .opacity(Int(context.date.timeIntervalSinceReferenceDate * 2) % 2 == 0 ? 1 : 0.15)
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Text(keys.state.text.isEmpty ? keys.fieldTitle : keys.state.text)
+                    .font(.system(size: 18, weight: .heavy))
+                    .foregroundStyle(keys.state.text.isEmpty ? Theme.silver.opacity(0.45) : Color.white)
+                    .lineLimit(2)
+                    .minimumScaleFactor(1)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                TimelineView(.animation(minimumInterval: 0.5, paused: false)) { context in
+                    Rectangle()
+                        .fill(Theme.accent)
+                        .frame(width: 2, height: 22)
+                        .opacity(Int(context.date.timeIntervalSinceReferenceDate * 2) % 2 == 0 ? 1 : 0.15)
+                }
+            }
+            .padding(.horizontal, 12)
+            .frame(minHeight: CGFloat(HUDKeyboardLayout.keyHeight))
+            .background(Theme.glass())
+            .clipShape(Theme.plateRect())
+            .overlay(
+                Theme.plateRect()
+                    .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1))
+            )
+            if !keys.pasteChrome.isEmpty {
+                Text(keys.pasteChrome)
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.warn)
+                    .lineLimit(1)
+                    .minimumScaleFactor(1)
             }
         }
-        .padding(.horizontal, 12)
-        .frame(minHeight: CGFloat(HUDKeyboardLayout.keyHeight))
-        .background(Theme.glass())
-        .clipShape(Theme.plateRect())
-        .overlay(
-            Theme.plateRect()
-                .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1))
-        )
     }
 
     private var letterPad: some View {
@@ -333,33 +374,41 @@ struct HUDKeyboard: View {
     }
 
     private var actionRow: some View {
-        HStack(spacing: 6) {
-            if keys.state.face == .letters {
-                Button("123") { keys.tap(.digits) }
-                    .buttonStyle(HUDKeyCapStyle(expand: false))
-                Button(HUDKeyboardLayout.apostrophe) {
-                    keys.tap(.glyph(HUDKeyboardLayout.apostrophe))
+        VStack(spacing: 6) {
+            HStack(spacing: 6) {
+                if keys.state.face == .letters {
+                    Button("123") { keys.tap(.digits) }
+                        .buttonStyle(HUDKeyCapStyle(expand: false))
+                    Button(HUDKeyboardLayout.apostrophe) {
+                        keys.tap(.glyph(HUDKeyboardLayout.apostrophe))
+                    }
+                    .buttonStyle(HUDKeyCapStyle(expand: false, minWidth: CGFloat(HUDKeyboardLayout.keyHeight)))
+                    Button(HUDKeyboardLayout.hyphen) {
+                        keys.tap(.glyph(HUDKeyboardLayout.hyphen))
+                    }
+                    .buttonStyle(HUDKeyCapStyle(expand: false, minWidth: CGFloat(HUDKeyboardLayout.keyHeight)))
+                } else {
+                    Button("ABC") { keys.tap(.letters) }
+                        .buttonStyle(HUDKeyCapStyle(expand: false))
+                    Button(HUDKeyboardLayout.comma) { keys.tap(.glyph(HUDKeyboardLayout.comma)) }
+                        .buttonStyle(HUDKeyCapStyle(expand: false))
+                    Button(HUDKeyboardLayout.degree) {
+                        keys.tap(.glyph(HUDKeyboardLayout.degree))
+                    }
+                    .buttonStyle(HUDKeyCapStyle(expand: false, minWidth: CGFloat(HUDKeyboardLayout.keyHeight)))
+                    HUDRepeatKey("BACK") { keys.tap(.back) }
                 }
-                .buttonStyle(HUDKeyCapStyle(expand: false, minWidth: CGFloat(HUDKeyboardLayout.keyHeight)))
-                Button(HUDKeyboardLayout.hyphen) {
-                    keys.tap(.glyph(HUDKeyboardLayout.hyphen))
-                }
-                .buttonStyle(HUDKeyCapStyle(expand: false, minWidth: CGFloat(HUDKeyboardLayout.keyHeight)))
-            } else {
-                Button("ABC") { keys.tap(.letters) }
-                    .buttonStyle(HUDKeyCapStyle(expand: false))
-                Button(HUDKeyboardLayout.comma) { keys.tap(.glyph(HUDKeyboardLayout.comma)) }
+                Button("PASTE") { keys.tap(.paste) }
                     .buttonStyle(HUDKeyCapStyle(expand: false))
             }
-            Button("SPACE") { keys.tap(.space) }
-                .buttonStyle(HUDKeyCapStyle())
-                .frame(maxWidth: .infinity)
-            if keys.state.face == .digits {
-                HUDRepeatKey("BACK") { keys.tap(.back) }
+            HStack(spacing: 6) {
+                Button("SPACE") { keys.tap(.space) }
+                    .buttonStyle(HUDKeyCapStyle())
+                    .frame(maxWidth: .infinity)
+                Button(keys.submitTitle) { keys.tap(.done) }
+                    .buttonStyle(HUDKeyCapStyle(fill: Theme.accent, expand: false))
+                    .frame(minWidth: CGFloat(HUDKeyboardLayout.submitKeyMinWidth))
             }
-            Button(keys.submitTitle) { keys.tap(.done) }
-                .buttonStyle(HUDKeyCapStyle(fill: Theme.accent, expand: false))
-                .frame(minWidth: CGFloat(HUDKeyboardLayout.submitKeyMinWidth))
         }
     }
 

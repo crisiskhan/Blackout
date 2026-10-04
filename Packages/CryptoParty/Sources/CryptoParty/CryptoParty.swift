@@ -68,3 +68,38 @@ public enum PartySeal {
         return data
     }
 }
+
+/// AES-GCM wrap for device-local secrets the typewriter persists
+/// (party code, diary). Magic BO2 so a mesh BO1 body is never a vault blob.
+public enum DeviceSeal {
+    public static let magic = Data([0x42, 0x4F, 0x32])
+
+    public enum SealError: Error {
+        case combined
+        case plain
+    }
+
+    public static func isSealed(_ data: Data) -> Bool {
+        data.starts(with: magic)
+    }
+
+    public static func wrap(_ plain: Data, key: SymmetricKey) throws -> Data {
+        let box = try AES.GCM.seal(plain, using: key)
+        guard let combined = box.combined else { throw SealError.combined }
+        return magic + combined
+    }
+
+    public static func unwrap(_ data: Data, key: SymmetricKey) throws -> Data {
+        guard isSealed(data) else { throw SealError.plain }
+        let box = try AES.GCM.SealedBox(combined: Data(data.dropFirst(magic.count)))
+        return try AES.GCM.open(box, key: key)
+    }
+
+    public static func openBody(_ data: Data, key: SymmetricKey?) -> Data? {
+        if isSealed(data) {
+            guard let key else { return nil }
+            return try? unwrap(data, key: key)
+        }
+        return data
+    }
+}

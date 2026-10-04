@@ -172,6 +172,7 @@ final class TokensTests: XCTestCase {
         XCTAssertEqual(HUDKeyboardLayout.comma, ",")
         XCTAssertEqual(HUDKeyboardLayout.apostrophe, "'")
         XCTAssertEqual(HUDKeyboardLayout.hyphen, "-")
+        XCTAssertEqual(HUDKeyboardLayout.degree, "°")
         XCTAssertEqual(HUDKeyboardLayout.wordKeyMinWidth, 72)
         XCTAssertEqual(HUDKeyboardLayout.submitKeyMinWidth, 88)
         XCTAssertEqual(HUDKeyboardLayout.digitRows.last, ["-", "0", "."])
@@ -207,5 +208,18 @@ final class TokensTests: XCTestCase {
             name.tap(.glyph(ch))
         }
         XCTAssertEqual(name.text, "O'BRIEN")
+        var coords = HUDKeyboardState(face: .digits)
+        for ch in ["3", "1", ".", "7"] {
+            coords.tap(.glyph(ch))
+        }
+        coords.tap(.glyph(HUDKeyboardLayout.degree))
+        XCTAssertEqual(coords.text, "31.7°")
+        coords.paste("31.76190°, -106.49000")
+        XCTAssertEqual(coords.text, "31.76190°, -106.49000")
+        var lockedPaste = HUDKeyboardState(text: "old", shift: true, locked: true)
+        lockedPaste.paste("abc-12")
+        XCTAssertEqual(lockedPaste.text, "ABC-12")
+        lockedPaste.paste("   ")
+        XCTAssertEqual(lockedPaste.text, "ABC-12")
     }
 }

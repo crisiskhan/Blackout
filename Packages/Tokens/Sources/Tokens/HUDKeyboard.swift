@@ -16,6 +16,7 @@ public enum HUDKeyboardLayout: Sendable {
     public static let comma = ","
     public static let apostrophe = "'"
     public static let hyphen = "-"
+    public static let degree = "°"
     public static let wordKeyMinWidth: Double = 72
     public static let submitKeyMinWidth: Double = 88
 }
@@ -37,6 +38,7 @@ public struct HUDKeyboardState: Equatable, Sendable {
         case shift
         case letters
         case digits
+        case paste
         case done
     }
 
@@ -71,9 +73,15 @@ public struct HUDKeyboardState: Equatable, Sendable {
             face = .letters
         case .digits:
             face = .digits
-        case .done:
+        case .paste, .done:
             break
         }
+    }
+
+    public mutating func paste(_ clip: String) {
+        let trimmed = clip.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        text = locked ? trimmed.uppercased() : trimmed
     }
 
     private mutating func insert(_ raw: String) {

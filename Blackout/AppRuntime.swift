@@ -230,7 +230,7 @@ final class AppRuntime {
         {
             locale = saved
         }
-        if let saved = UserDefaults.standard.string(forKey: "party.code"), !saved.isEmpty {
+        if let saved = DeviceVault.loadPartyCode(), !saved.isEmpty {
             roster = roster.setting(code: saved)
         }
         mesh.partyCode = roster.code
@@ -371,7 +371,7 @@ final class AppRuntime {
     }
 
     func persistPartyCode() {
-        UserDefaults.standard.set(roster.code, forKey: "party.code")
+        DeviceVault.savePartyCode(roster.code)
         loadDiary()
     }
 
@@ -394,15 +394,20 @@ final class AppRuntime {
     func persistDiary() {
         let code = roster.code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         guard !code.isEmpty, let data = try? JSONEncoder().encode(diary) else { return }
-        UserDefaults.standard.set(data, forKey: "diary.v1.\(code)")
+        guard let sealed = DeviceVault.seal(data) else { return }
+        UserDefaults.standard.set(sealed, forKey: "diary.v1.\(code)")
     }
 
     private func loadDiary() {
         let code = roster.code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         if let data = UserDefaults.standard.data(forKey: "diary.v1.\(code)"),
-           let log = try? JSONDecoder().decode(DiaryLog.self, from: data)
+           let plain = DeviceVault.open(data),
+           let log = try? JSONDecoder().decode(DiaryLog.self, from: plain)
         {
             diary = log
+            if !DeviceVault.isSealed(data) {
+                persistDiary()
+            }
         } else {
             diary = DiaryLog()
         }
