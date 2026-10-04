@@ -294,14 +294,23 @@ class SearchAliasTests(unittest.TestCase):
         self.assertIn('"calle"', aliases)
         self.assertIn('"camino"', aliases)
         self.assertIn('"northwest"', aliases)
+        self.assertIn('"interstate"', aliases)
         self.assertIn("func ordinalSet(", search)
         house = search.split("func houseQuery(")[1].split("func packedAddr(")[0]
         self.assertIn("streetTypeTokens", house)
         self.assertIn("21 street", house)
+        self.assertIn("func addressAsk(", house)
+        self.assertIn("func peelZip(", house)
+        self.assertIn("func withPackedStreets(", search)
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("10th", qa)
         self.assertIn("21st", qa)
         self.assertIn("northwest", qa)
+        self.assertIn("221 Montana Avenue, El Paso, TX 79902", qa)
+        self.assertIn("I-10", qa)
+        device = read("docs", "DEVICE.md")
+        self.assertIn("221 Montana Avenue, El Paso, TX 79902", device)
+        self.assertIn("I-10", device)
 
 
 class DeviceScriptTests(unittest.TestCase):

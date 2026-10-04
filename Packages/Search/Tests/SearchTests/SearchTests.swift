@@ -130,6 +130,78 @@ final class SearchTests: XCTestCase {
         XCTAssertEqual(idx.lookup("21 street").first?.name, "21st Street")
         XCTAssertEqual(idx.lookup("1st st nw").first?.name, "1st Street Northwest")
         XCTAssertEqual(idx.lookup("first street northwest").first?.name, "1st Street Northwest")
+        XCTAssertEqual(idx.lookup("calle 21").first?.name, "21st Street")
+    }
+
+    func testHouseQueryPeelsCityStateZipAndTrailingNumber() {
+        XCTAssertEqual(SearchIndex.houseQuery("221 Montana Avenue, El Paso, TX 79902")?.0, 221)
+        XCTAssertEqual(
+            SearchIndex.houseQuery("221 Montana Avenue, El Paso, TX 79902")?.1,
+            ["montana", "avenue"]
+        )
+        XCTAssertEqual(SearchIndex.houseQuery("Montana Avenue 221")?.0, 221)
+        XCTAssertEqual(SearchIndex.houseQuery("Montana Avenue 221")?.1, ["montana", "avenue"])
+        XCTAssertEqual(SearchIndex.houseQuery("221 montana ave apt 4")?.1, ["montana", "ave"])
+        XCTAssertEqual(SearchIndex.houseQuery("221 A Montana Avenue")?.1, ["montana", "avenue"])
+        XCTAssertEqual(SearchIndex.houseQuery("221 montana #4")?.1, ["montana"])
+        XCTAssertEqual(SearchIndex.houseQuery("221 N Kansas St")?.1, ["n", "kansas", "st"])
+        XCTAssertNil(SearchIndex.houseQuery("21 street"))
+    }
+
+    func testFullAddressStaysAddressAndNotTheStreet() {
+        let packed: [String: Any] = [
+            "docs": [[
+                "Montana Avenue", "street", 31.78, -106.45,
+            ]],
+            "addr": [
+                "streets": ["Montana Avenue"],
+                "zips": ["79902"],
+                "ranges": [[0, 201, 299, 0, 3_176_000, -10_650_000, 3_178_000, -10_640_000]],
+            ],
+        ]
+        let data = try! JSONSerialization.data(withJSONObject: packed)
+        let book = SearchIndex.load(data: data)
+        let paste = book.lookup("221 Montana Avenue, El Paso, TX 79902").first
+        XCTAssertEqual(paste?.kind, "address")
+        XCTAssertEqual(paste?.name, "221 Montana Avenue")
+        XCTAssertEqual(book.lookup("Montana Avenue 221").first?.kind, "address")
+        XCTAssertEqual(book.lookup("221 Montana Avenue").first?.kind, "address")
+        XCTAssertEqual(book.lookup("221 N Montana").first?.kind, "address")
+        XCTAssertEqual(book.lookup("221 montana #4").first?.kind, "address")
+    }
+
+    func testPackedHighwayAndApostropheStreetAreHits() {
+        let packed: [String: Any] = [
+            "docs": [
+                ["East O'Hara Road", "street", 31.80, -106.50],
+                ["10th Street", "street", 31.77, -106.48],
+            ],
+            "addr": [
+                "streets": ["I- 10", "O'Hara Rd"],
+                "zips": ["79902"],
+                "ranges": [
+                    [0, 1301, 1399, 0, 3_176_000, -10_650_000, 3_176_200, -10_650_200],
+                    [1, 201, 299, 0, 3_180_000, -10_650_000, 3_180_100, -10_649_900],
+                ],
+            ],
+        ]
+        let data = try! JSONSerialization.data(withJSONObject: packed)
+        let book = SearchIndex.load(data: data)
+        XCTAssertEqual(book.lookup("i-10").first?.name, "I- 10")
+        XCTAssertEqual(book.lookup("interstate 10").first?.name, "I- 10")
+        XCTAssertEqual(book.lookup("ohara").first?.name, "East O'Hara Road")
+        XCTAssertEqual(book.lookup("o'hara").first?.name, "East O'Hara Road")
+        XCTAssertEqual(book.lookup("221 o'hara").first?.kind, "address")
+        XCTAssertEqual(book.lookup("221 o'hara").first?.name, "221 O'Hara Rd")
+    }
+
+    func testStateOnAPlaceIsOptional() {
+        let idx = SearchIndex(pois: [
+            ["name": "El Paso", "kind": "place", "lat": 31.76, "lon": -106.49],
+            ["name": "Austin", "kind": "place", "lat": 30.27, "lon": -97.74],
+        ])
+        XCTAssertEqual(idx.lookup("El Paso TX").first?.name, "El Paso")
+        XCTAssertEqual(idx.lookup("Austin Texas").first?.name, "Austin")
     }
 
     func testTypoFindsGardner() {
