@@ -427,8 +427,18 @@ ADULT_NICOLE = (
     "nicoleee 1329",
 )
 ADULT_EUNICE = (
+    "eunicegarciaaa",
+    "eunice garcia",
+    "euniceg6_",
+    "euniceg6",
     "euniceg",
     "euniceg___",
+)
+ADULT_RINA = (
+    "rinarinacupid",
+    "rinacupid",
+    "rina cupid",
+    "rina.cupid",
 )
 ADULT_SANDRA = (
     "strawberrysandra20",
@@ -503,6 +513,7 @@ ADULT_FACES = (
     ("LIL BUSSY GIRL", ADULT_LILBUSSY),
     ("ITISASHLEY", ADULT_ASHLEY),
     ("GIULIANA CABRAZIA", ADULT_GIULIANA),
+    ("RINA CUPID", ADULT_RINA),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_KEEP_CHIP = "KEEP"
@@ -1498,7 +1509,8 @@ ADULT_FACE_POSTS = (
     ("PAMELA YAMZ", ("pamelayamz",)),
     ("ANNABELLE RIOS", ("annabellrio", "annabelleriossss")),
     ("NICOLEEE 1329", ("_nicoleee_1329",)),
-    ("EUNICEG", ("euniceg___",)),
+    ("EUNICEG", ("euniceg6_", "euniceg___")),
+    ("RINA CUPID", ("rinarinacupid",)),
     ("STRAWBERRY SANDRA", ("strawberrysandra20",)),
     ("ITOCHIANATA", ("itochianata",)),
     ("ELVANA VITAA", ("elvanavitaa",)),
@@ -1561,7 +1573,8 @@ ADULT_FACE_GIFTS = (
     ("PAMELA YAMZ", ("pamelayamz",)),
     ("ANNABELLE RIOS", ("annabellrio", "annabelleriossss", "annabellerios")),
     ("NICOLEEE 1329", ("nicoleee1329",)),
-    ("EUNICEG", ("euniceg",)),
+    ("EUNICEG", ("eunicegarciaaa", "euniceg6", "euniceg")),
+    ("RINA CUPID", ("rinarinacupid", "rinacupid")),
     ("STRAWBERRY SANDRA", ("strawberrysandra20", "strawberrysandra")),
     ("ITOCHIANATA", ("itochianata",)),
     ("ELVANA VITAA", ("elvanavitaa",)),
@@ -3435,6 +3448,7 @@ class AdultDeskTests(unittest.TestCase):
                 "LIL BUSSY GIRL",
                 "ITISASHLEY",
                 "GIULIANA CABRAZIA",
+                "RINA CUPID",
             ],
         )
         fat_kinds = [f"KIND{index:02d}" for index in range(40)]
@@ -4160,6 +4174,8 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("debvarela", adult_face_queries("DEBVARELA"))
         self.assertIn("pamelayamz", adult_face_queries("PAMELA YAMZ"))
         self.assertIn("euniceg", adult_face_queries("EUNICEG"))
+        self.assertIn("eunicegarciaaa", adult_face_queries("EUNICEG"))
+        self.assertIn("rinacupid", adult_face_queries("RINA CUPID"))
         self.assertIn("strawberrysandra20", adult_face_queries("STRAWBERRY SANDRA"))
         self.assertIn("itochianata", adult_face_queries("ITOCHIANATA"))
         self.assertNotIn("itochi", adult_face_needles("ITOCHIANATA") or [])
@@ -4535,6 +4551,9 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("LIL BUSSY GIRL", desk)
         self.assertIn("ITISASHLEY", desk)
         self.assertIn("GIULIANA CABRAZIA", desk)
+        self.assertIn("RINA CUPID", desk)
+        self.assertIn("rinarinacupid", desk)
+        self.assertIn("eunicegarciaaa", desk)
         self.assertIn("giulianacabrazia", desk)
         self.assertIn("gcabrazia", desk)
         self.assertIn("elvanavitaa", desk)
@@ -5039,6 +5058,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("ELVANA VITAA", adult_rail([]))
         self.assertIn("ITISASHLEY", adult_rail([]))
         self.assertIn("GIULIANA CABRAZIA", adult_rail([]))
+        self.assertIn("RINA CUPID", adult_rail([]))
         self.assertGreaterEqual(len(adult_face_hold_rooms("ITISASHLEY")), 3)
         self.assertEqual(adult_face_hold_rooms("ITISASHLEY")[0]["seconds"], 696)
         self.assertGreaterEqual(len(adult_face_hold_rooms("GIULIANA CABRAZIA")), 3)
@@ -5148,6 +5168,60 @@ class AdultDeskTests(unittest.TestCase):
                 "GIULIANA CABRAZIA",
             )],
             ["adult-face-star-giuliana-cabrazia-takes-cumshot-on-her-big-ass"],
+        )
+        self.assertEqual(adult_face_hold_rooms("RINA CUPID"), [])
+        self.assertEqual(adult_face_hold_rooms("EUNICEG"), [])
+        self.assertEqual(adult_hunt_needles("rinarinacupid"), list(ADULT_RINA))
+        self.assertEqual(adult_hunt_needles("https://x.com/rinarinacupid"), list(ADULT_RINA))
+        self.assertEqual(
+            adult_hunt_needles("https://www.example.com/RinaCupid/posts"),
+            list(ADULT_RINA),
+        )
+        self.assertEqual(adult_page_name("https://www.instagram.com/rina.cupid"), "rina.cupid")
+        self.assertEqual(adult_page_name("https://x.com/rinarinacupid"), "rinarinacupid")
+        self.assertEqual(adult_page_name("https://www.example.com/eunicegarciaaa"), "eunicegarciaaa")
+        self.assertEqual(adult_page_name("https://x.com/euniceg6_"), "euniceg6_")
+        self.assertEqual(adult_hunt_needles("eunicegarciaaa"), list(ADULT_EUNICE))
+        self.assertEqual(adult_hunt_needles("https://x.com/euniceg6_"), list(ADULT_EUNICE))
+        self.assertNotIn("rina", adult_face_needles("RINA CUPID") or [])
+        self.assertNotIn("cupid", adult_face_needles("RINA CUPID") or [])
+        self.assertNotIn("eunice", adult_face_needles("EUNICEG") or [])
+        self.assertNotIn("garcia", adult_face_needles("EUNICEG") or [])
+        self.assertTrue(any("users/rinarinacupid/search" in path for path in adult_face_hunt("RINA CUPID")))
+        self.assertTrue(any("users/eunicegarciaaa/search" in path for path in adult_face_hunt("EUNICEG")))
+        self.assertTrue(any("screen-name/rinarinacupid" in path for path in adult_face_hunt("RINA CUPID")))
+        self.assertTrue(any("screen-name/euniceg6_" in path for path in adult_face_hunt("EUNICEG")))
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "umeko-j-poses-seductively-in-her-furina-cosplay",
+                            "title": "Umeko J Poses Seductively In Her Furina Cosplay",
+                            "creator": "Umeko J",
+                            "durationSeconds": 561,
+                        }
+                    ]
+                },
+                "RINA CUPID",
+            )],
+            [],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "ambar-prada-gets-pounded-by-maximo-garcia",
+                            "title": "Ambar Prada Gets Pounded By Maximo Garcia",
+                            "creator": "Ambar Prada",
+                            "durationSeconds": 1817,
+                        }
+                    ]
+                },
+                "EUNICEG",
+            )],
+            [],
         )
         self.assertIn("Genre chips stay off", tv)
         self.assertIn("longest first", tv.lower())
@@ -5530,6 +5604,7 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("LIL BUSSY GIRL", tv)
         self.assertIn("ITISASHLEY", tv)
         self.assertIn("GIULIANA CABRAZIA", tv)
+        self.assertIn("RINA CUPID", tv)
         self.assertIn("PASTE", tv)
         self.assertIn("NO PASTE", tv)
         self.assertIn("public video search", tv.lower())

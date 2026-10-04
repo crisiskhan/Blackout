@@ -326,6 +326,10 @@ enum AdultDesk {
         "nicoleee 1329",
     ]
     static let euniceNeedles = [
+        "eunicegarciaaa",
+        "eunice garcia",
+        "euniceg6_",
+        "euniceg6",
         "euniceg",
         "euniceg___",
     ]
@@ -362,6 +366,12 @@ enum AdultDesk {
         "giulianacabrazia_",
         "giulianacabrazia2",
         "gcabrazia",
+    ]
+    static let rinaNeedles = [
+        "rinarinacupid",
+        "rinacupid",
+        "rina cupid",
+        "rina.cupid",
     ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
@@ -402,6 +412,7 @@ enum AdultDesk {
         ("LIL BUSSY GIRL", lilbussyNeedles),
         ("ITISASHLEY", ashleyNeedles),
         ("GIULIANA CABRAZIA", giulianaNeedles),
+        ("RINA CUPID", rinaNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -452,7 +463,8 @@ enum AdultDesk {
         ("PAMELA YAMZ", ["pamelayamz"]),
         ("ANNABELLE RIOS", ["annabellrio", "annabelleriossss", "annabellerios"]),
         ("NICOLEEE 1329", ["nicoleee1329"]),
-        ("EUNICEG", ["euniceg"]),
+        ("EUNICEG", ["eunicegarciaaa", "euniceg6", "euniceg"]),
+        ("RINA CUPID", ["rinarinacupid", "rinacupid"]),
         ("STRAWBERRY SANDRA", ["strawberrysandra20", "strawberrysandra"]),
         ("ITOCHIANATA", ["itochianata"]),
         ("ELVANA VITAA", ["elvanavitaa"]),
@@ -546,7 +558,8 @@ enum AdultDesk {
         ("PAMELA YAMZ", ["pamelayamz"]),
         ("ANNABELLE RIOS", ["annabellrio", "annabelleriossss"]),
         ("NICOLEEE 1329", ["_nicoleee_1329"]),
-        ("EUNICEG", ["euniceg___"]),
+        ("EUNICEG", ["euniceg6_", "euniceg___"]),
+        ("RINA CUPID", ["rinarinacupid"]),
         ("STRAWBERRY SANDRA", ["strawberrysandra20"]),
         ("ITOCHIANATA", ["itochianata"]),
         ("ELVANA VITAA", ["elvanavitaa"]),
