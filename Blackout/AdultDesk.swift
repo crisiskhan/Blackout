@@ -356,6 +356,13 @@ enum AdultDesk {
         "itisashley",
         "itis ashley",
     ]
+    static let giulianaNeedles = [
+        "giulianacabrazia",
+        "giuliana cabrazia",
+        "giulianacabrazia_",
+        "giulianacabrazia2",
+        "gcabrazia",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
@@ -394,6 +401,7 @@ enum AdultDesk {
         ("SLAVIC CARAMEL", slavicNeedles),
         ("LIL BUSSY GIRL", lilbussyNeedles),
         ("ITISASHLEY", ashleyNeedles),
+        ("GIULIANA CABRAZIA", giulianaNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -411,6 +419,7 @@ enum AdultDesk {
         ("SARIIXO", ["sariixo"]),
         ("KIRAWWRRRA", ["kirawrrra2-0"]),
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
+        ("GIULIANA CABRAZIA", ["giuliana-cabrazia"]),
     ]
     static let faceGifts: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip"]),
@@ -450,6 +459,7 @@ enum AdultDesk {
         ("SLAVIC CARAMEL", ["slaviccaramel"]),
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
         ("ITISASHLEY", ["itisashley"]),
+        ("GIULIANA CABRAZIA", ["giulianacabrazia", "giulianacabrazia2", "gcabrazia"]),
     ]
     /// Proven guest albums. Hunt these first so a JSON desk cannot blank the chip.
     static let faceDesks: [(String, [String])] = [
@@ -543,6 +553,7 @@ enum AdultDesk {
         ("SLAVIC CARAMEL", ["slaviccaramel"]),
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
         ("ITISASHLEY", ["itisashley"]),
+        ("GIULIANA CABRAZIA", ["gcabrazia", "giulianacabrazia_", "giulianacabrazia2"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
@@ -795,6 +806,11 @@ enum AdultDesk {
             ("file", "https://v4.erome.com/9070/tNRwgjor/xvjyRiKx_720p.mp4", 696, "Itisashley oily"),
             ("file", "https://v83.erome.com/9070/kcGtCmxt/w2jpmOZy_720p.mp4", 202, "Itisashley shower"),
             ("file", "https://v16.erome.com/9070/PoAT0le0/yrGKoVla_720p.mp4", 136, "Itisashley shower cut"),
+        ]),
+        ("GIULIANA CABRAZIA", [
+            ("star", "giuliana-cabrazia-takes-cumshot-on-her-big-ass", 1270, "Giuliana Cabrazia Takes Cumshot On Her Big Ass"),
+            ("star", "giuliana-cabrazia-gets-fucked-by-troy-francisco-s-bbc", 1049, "Giuliana Cabrazia Gets Fucked By Troy Francisco's BBC"),
+            ("star", "emma-magnolia-and-giuliana-cabrazia-s-outdoor-pleasure", 398, "Emma Magnolia And Giuliana Cabrazia's Outdoor Pleasure"),
         ]),
     ]
     /// Guest stills for baked pin tokens. Star stills are `preview-batch/{slug}/thumb.webp`.

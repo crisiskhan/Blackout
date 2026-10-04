@@ -457,6 +457,13 @@ ADULT_ASHLEY = (
     "itisashley",
     "itis ashley",
 )
+ADULT_GIULIANA = (
+    "giulianacabrazia",
+    "giuliana cabrazia",
+    "giulianacabrazia_",
+    "giulianacabrazia2",
+    "gcabrazia",
+)
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
     ("ITSSTEPHHONEYXO21", ADULT_STEPH),
@@ -495,6 +502,7 @@ ADULT_FACES = (
     ("SLAVIC CARAMEL", ADULT_SLAVIC),
     ("LIL BUSSY GIRL", ADULT_LILBUSSY),
     ("ITISASHLEY", ADULT_ASHLEY),
+    ("GIULIANA CABRAZIA", ADULT_GIULIANA),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_KEEP_CHIP = "KEEP"
@@ -1259,6 +1267,7 @@ ADULT_FACE_STARS = (
     ("SARIIXO", ("sariixo",)),
     ("KIRAWWRRRA", ("kirawrrra2-0",)),
     ("LIL BUSSY GIRL", ("lilbussygirl",)),
+    ("GIULIANA CABRAZIA", ("giuliana-cabrazia",)),
 )
 ADULT_FACE_HOLDS = (
     ("ITSSTEPHHONEY21", (
@@ -1371,6 +1380,11 @@ ADULT_FACE_HOLDS = (
         ("file", "https://v4.erome.com/9070/tNRwgjor/xvjyRiKx_720p.mp4", 696, "Itisashley oily"),
         ("file", "https://v83.erome.com/9070/kcGtCmxt/w2jpmOZy_720p.mp4", 202, "Itisashley shower"),
         ("file", "https://v16.erome.com/9070/PoAT0le0/yrGKoVla_720p.mp4", 136, "Itisashley shower cut"),
+    )),
+    ("GIULIANA CABRAZIA", (
+        ("star", "giuliana-cabrazia-takes-cumshot-on-her-big-ass", 1270, "Giuliana Cabrazia Takes Cumshot On Her Big Ass"),
+        ("star", "giuliana-cabrazia-gets-fucked-by-troy-francisco-s-bbc", 1049, "Giuliana Cabrazia Gets Fucked By Troy Francisco's BBC"),
+        ("star", "emma-magnolia-and-giuliana-cabrazia-s-outdoor-pleasure", 398, "Emma Magnolia And Giuliana Cabrazia's Outdoor Pleasure"),
     )),
 )
 ADULT_FACE_DESKS = (
@@ -1491,6 +1505,7 @@ ADULT_FACE_POSTS = (
     ("SLAVIC CARAMEL", ("slaviccaramel",)),
     ("LIL BUSSY GIRL", ("lilbussygirl",)),
     ("ITISASHLEY", ("itisashley",)),
+    ("GIULIANA CABRAZIA", ("gcabrazia", "giulianacabrazia_", "giulianacabrazia2")),
 )
 ADULT_FACE_STILLS = (
     ("P283XrKRjsV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"),
@@ -1553,6 +1568,7 @@ ADULT_FACE_GIFTS = (
     ("SLAVIC CARAMEL", ("slaviccaramel",)),
     ("LIL BUSSY GIRL", ("lilbussygirl",)),
     ("ITISASHLEY", ("itisashley",)),
+    ("GIULIANA CABRAZIA", ("giulianacabrazia", "giulianacabrazia2", "gcabrazia")),
 )
 ADULT_FACE_KILL = (
     "loli",
@@ -3418,6 +3434,7 @@ class AdultDeskTests(unittest.TestCase):
                 "SLAVIC CARAMEL",
                 "LIL BUSSY GIRL",
                 "ITISASHLEY",
+                "GIULIANA CABRAZIA",
             ],
         )
         fat_kinds = [f"KIND{index:02d}" for index in range(40)]
@@ -4517,6 +4534,9 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("SLAVIC CARAMEL", desk)
         self.assertIn("LIL BUSSY GIRL", desk)
         self.assertIn("ITISASHLEY", desk)
+        self.assertIn("GIULIANA CABRAZIA", desk)
+        self.assertIn("giulianacabrazia", desk)
+        self.assertIn("gcabrazia", desk)
         self.assertIn("elvanavitaa", desk)
         self.assertIn("slaviccaramel", desk)
         self.assertIn("lilbussygirl", desk)
@@ -5018,8 +5038,22 @@ class AdultDeskTests(unittest.TestCase):
         self.assertEqual(adult_rail([])[0:3], ["ALL", "KEEP", "LOVESCAPE"])
         self.assertIn("ELVANA VITAA", adult_rail([]))
         self.assertIn("ITISASHLEY", adult_rail([]))
+        self.assertIn("GIULIANA CABRAZIA", adult_rail([]))
         self.assertGreaterEqual(len(adult_face_hold_rooms("ITISASHLEY")), 3)
         self.assertEqual(adult_face_hold_rooms("ITISASHLEY")[0]["seconds"], 696)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("GIULIANA CABRAZIA")), 3)
+        self.assertEqual(adult_face_hold_rooms("GIULIANA CABRAZIA")[0]["seconds"], 1270)
+        self.assertTrue(any("giuliana-cabrazia-takes-cumshot-on-her-big-ass" in row["id"] for row in adult_face_hold_rooms("GIULIANA CABRAZIA")))
+        self.assertTrue(any("bornstar.co/api/search?q=giuliana-cabrazia" in path for path in adult_face_hunt("GIULIANA CABRAZIA")))
+        self.assertTrue(any("users/gcabrazia/search" in path or "users/giulianacabrazia/search" in path for path in adult_face_hunt("GIULIANA CABRAZIA")))
+        self.assertEqual(adult_hunt_needles("giulianacabrazia_"), list(ADULT_GIULIANA))
+        self.assertNotIn("giuliana", adult_face_needles("GIULIANA CABRAZIA") or [])
+        self.assertNotIn("cabrazia", adult_face_needles("GIULIANA CABRAZIA") or [])
+        self.assertNotIn("liana", adult_face_needles("GIULIANA CABRAZIA") or [])
+        for row in adult_face_hold_rooms("GIULIANA CABRAZIA"):
+            self.assertNotIn("onlyfans", row["name"].lower())
+            self.assertNotIn("onlyfans", row["url"].lower())
+            self.assertTrue("giuliana cabrazia" in row["seek"] or "giulianacabrazia" in row["seek"])
         self.assertTrue(any("tNRwgjor" in path for path in adult_face_hunt("ITISASHLEY")))
         self.assertTrue(any("erome.com/a/kcGtCmxt" in path for path in adult_face_hunt("ITISASHLEY")))
         self.assertTrue(any("erome.com/a/PoAT0le0" in path for path in adult_face_hunt("ITISASHLEY")))
@@ -5093,6 +5127,28 @@ class AdultDeskTests(unittest.TestCase):
             )],
             [],
         )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "liana-love-gets-pounded-by-jmac-s-bwc",
+                            "title": "Liana Love Gets Pounded By Jmac's BWC",
+                            "creator": "Liana Love",
+                            "durationSeconds": 2116,
+                        },
+                        {
+                            "slug": "giuliana-cabrazia-takes-cumshot-on-her-big-ass",
+                            "title": "Giuliana Cabrazia Takes Cumshot On Her Big Ass",
+                            "creator": "Giuliana Cabrazia",
+                            "durationSeconds": 1270,
+                        },
+                    ]
+                },
+                "GIULIANA CABRAZIA",
+            )],
+            ["adult-face-star-giuliana-cabrazia-takes-cumshot-on-her-big-ass"],
+        )
         self.assertIn("Genre chips stay off", tv)
         self.assertIn("longest first", tv.lower())
         self.assertIn("static func pageName(", desk)
@@ -5136,6 +5192,10 @@ class AdultDeskTests(unittest.TestCase):
                 "https://www.example.com/itisashley?fbclid=PAZXh0bgNhZW0CMTEAcGRvZgJmZGlkFlD5I2iqiK0s9M8j"
             ),
             "itisashley",
+        )
+        self.assertEqual(
+            adult_page_name("https://www.example.com/giulianacabrazia_"),
+            "giulianacabrazia_",
         )
         self.assertEqual(adult_page_name("https://www.example.com/elvanavitaa/media"), "elvanavitaa")
         self.assertEqual(adult_page_name("https://www.example.com/u/slaviccaramel"), "slaviccaramel")
@@ -5469,6 +5529,7 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("SLAVIC CARAMEL", tv)
         self.assertIn("LIL BUSSY GIRL", tv)
         self.assertIn("ITISASHLEY", tv)
+        self.assertIn("GIULIANA CABRAZIA", tv)
         self.assertIn("PASTE", tv)
         self.assertIn("NO PASTE", tv)
         self.assertIn("public video search", tv.lower())
