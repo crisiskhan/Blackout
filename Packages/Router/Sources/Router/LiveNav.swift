@@ -4,13 +4,18 @@ import Foundation
 /// The full script still belongs to SPEAK. This only names the next move as YOU move.
 public enum LiveNav: Sendable {
     public static let arriveMeters: Double = 25
+    public static let arriveDriveMeters: Double = 40
     public static let turnCueMeters: Double = 50
+    public static let turnCueDriveMeters: Double = 160
     public static let offRouteMeters: Double = 80
-    public static let replanSeconds: TimeInterval = 15
+    public static let offRouteWalkMeters: Double = 45
+    public static let replanSeconds: TimeInterval = 8
+    public static let farOffFactor: Double = 2
 
     public struct Cue: Sendable {
         public var remainingMeters: Double
         public var remainingCoords: [(lat: Double, lon: Double)]
+        public var remainingStreets: [String?]
         public var nearestIndex: Int
         public var metersToLine: Double
         public var metersToTurn: Double
@@ -18,6 +23,38 @@ public enum LiveNav: Sendable {
         public var offRoute: Bool
         public var speakTurn: String
         public var nextHUD: String
+    }
+
+    public static func offRouteLimit(_ mode: TravelMode) -> Double {
+        switch mode {
+        case .walk: return offRouteWalkMeters
+        case .drive: return offRouteMeters
+        }
+    }
+
+    public static func turnCueLimit(_ mode: TravelMode) -> Double {
+        switch mode {
+        case .walk: return turnCueMeters
+        case .drive: return turnCueDriveMeters
+        }
+    }
+
+    public static func arriveLimit(_ mode: TravelMode) -> Double {
+        switch mode {
+        case .walk: return arriveMeters
+        case .drive: return arriveDriveMeters
+        }
+    }
+
+    public static func shouldReplan(
+        now: TimeInterval,
+        lastReplanAt: TimeInterval,
+        metersToLine: Double,
+        mode: TravelMode
+    ) -> Bool {
+        if lastReplanAt == 0 { return true }
+        if metersToLine > offRouteLimit(mode) * farOffFactor { return true }
+        return now - lastReplanAt >= replanSeconds
     }
 
     public static func progress(
@@ -33,10 +70,11 @@ public enum LiveNav: Sendable {
             return Cue(
                 remainingMeters: 0,
                 remainingCoords: coords,
+                remainingStreets: streets,
                 nearestIndex: 0,
                 metersToLine: 0,
                 metersToTurn: 0,
-                arrived: span < arriveMeters,
+                arrived: span < arriveLimit(travelMode),
                 offRoute: false,
                 speakTurn: "",
                 nextHUD: ""
@@ -46,12 +84,18 @@ public enum LiveNav: Sendable {
         var bestIndex = 0
         var bestPoint = coords[0]
         for i in 0..<(coords.count - 1) {
-            let point = project(you, onto: coords[i], coords[i + 1])
-            let distance = GraphRouter.haversine(you.lat, you.lon, point.lat, point.lon)
-            if distance < bestDistance {
-                bestDistance = distance
+            let hit = GraphRouter.projectOnSegment(
+                lat: you.lat,
+                lon: you.lon,
+                aLat: coords[i].lat,
+                aLon: coords[i].lon,
+                bLat: coords[i + 1].lat,
+                bLon: coords[i + 1].lon
+            )
+            if hit.metres < bestDistance {
+                bestDistance = hit.metres
                 bestIndex = i
-                bestPoint = point
+                bestPoint = (hit.lat, hit.lon)
             }
         }
         var remaining = [bestPoint] + Array(coords.dropFirst(bestIndex + 1))
@@ -73,9 +117,11 @@ public enum LiveNav: Sendable {
         }
         let remainingMeters = meters(remaining)
         let toDest = GraphRouter.haversine(you.lat, you.lon, destPt.lat, destPt.lon)
-        let onLine = bestDistance <= offRouteMeters
-        let arrived = toDest < arriveMeters || (onLine && remainingMeters < arriveMeters)
-        let offRoute = !arrived && bestDistance > offRouteMeters
+        let limit = offRouteLimit(travelMode)
+        let arrive = arriveLimit(travelMode)
+        let onLine = bestDistance <= limit
+        let arrived = toDest < arrive || (onLine && remainingMeters < arrive)
+        let offRoute = !arrived && bestDistance > limit
         var metersToTurn = remainingMeters
         if remaining.count >= 3 {
             for i in 1..<(remaining.count - 1) where isTurn(remaining, at: i) {
@@ -84,13 +130,19 @@ public enum LiveNav: Sendable {
             }
         }
         var speakTurn = ""
-        if !arrived, !offRoute, metersToTurn <= turnCueMeters {
-            speakTurn = VoiceNav.steps(remaining, travelMode: travelMode, streets: sliced)
-                .first { $0.hasPrefix("Turn") } ?? ""
+        if !arrived, !offRoute {
+            let spoken = VoiceNav.steps(remaining, travelMode: travelMode, streets: sliced)
+            if metersToTurn <= turnCueLimit(travelMode) {
+                speakTurn = spoken.first { $0.hasPrefix("Turn") } ?? ""
+            }
+            if speakTurn.isEmpty {
+                speakTurn = spoken.first { $0.hasPrefix("Walk") || $0.hasPrefix("Drive") } ?? ""
+            }
         }
         return Cue(
             remainingMeters: remainingMeters,
             remainingCoords: remaining,
+            remainingStreets: sliced,
             nearestIndex: bestIndex,
             metersToLine: bestDistance,
             metersToTurn: metersToTurn,
@@ -99,19 +151,6 @@ public enum LiveNav: Sendable {
             speakTurn: speakTurn,
             nextHUD: VoiceNav.nextTurnHUD(remaining, streets: sliced)
         )
-    }
-
-    private static func project(
-        _ point: (lat: Double, lon: Double),
-        onto a: (lat: Double, lon: Double),
-        _ b: (lat: Double, lon: Double)
-    ) -> (lat: Double, lon: Double) {
-        let dx = b.lat - a.lat
-        let dy = b.lon - a.lon
-        let length2 = dx * dx + dy * dy
-        if length2 < 1e-18 { return a }
-        let t = max(0, min(1, ((point.lat - a.lat) * dx + (point.lon - a.lon) * dy) / length2))
-        return (a.lat + t * dx, a.lon + t * dy)
     }
 
     private static func isTurn(

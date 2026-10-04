@@ -620,6 +620,29 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(PackCamera.packSidePaddingPoints, 72)
         XCTAssertEqual(RouteLine.offGraph, "OFF GRAPH")
         XCTAssertTrue(RouteLine.shouldDraw([(lat: 31.76, lon: -106.49), (lat: 31.80, lon: -106.50)]))
+        let line: [(lat: Double, lon: Double)] = [(0, 0), (0, 0.0017966), (0.0008993, 0.0017966)]
+        let painted = RouteLine.paintCoords(
+            you: (0, 0.0008983),
+            dest: line.last,
+            coords: line,
+            travelMode: .walk
+        )
+        XCTAssertGreaterThanOrEqual(painted.count, 2)
+        XCTAssertLessThan(painted.count, line.count + 1)
+        let off = RouteLine.paintCoords(
+            you: (0, -0.01),
+            dest: line.last,
+            coords: line,
+            travelMode: .walk
+        )
+        XCTAssertEqual(off.count, line.count)
+        let atEnd = RouteLine.paintCoords(
+            you: line.last,
+            dest: line.last,
+            coords: line,
+            travelMode: .walk
+        )
+        XCTAssertGreaterThanOrEqual(atEnd.count, 2)
         XCTAssertFalse(RouteLine.shouldDraw([]))
         XCTAssertFalse(RouteLine.shouldDraw([(lat: 31.76, lon: -106.49)]))
         XCTAssertFalse(RouteLine.shouldDraw([(lat: .nan, lon: -106.49), (lat: 31.80, lon: -106.50)]))
@@ -808,6 +831,24 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(
             MapFieldChrome.liveRemainingHUD(you: nil, dest: line.last, coords: line, travelMode: .walk),
             VoiceNav.remainingHUD(line)
+        )
+        XCTAssertEqual(
+            MapFieldChrome.liveRemainingHUD(
+                you: (0, -0.01),
+                dest: line.last,
+                coords: line,
+                travelMode: .walk
+            ),
+            ""
+        )
+        XCTAssertEqual(
+            MapFieldChrome.liveRemainingHUD(
+                you: line.last,
+                dest: line.last,
+                coords: line,
+                travelMode: .walk
+            ),
+            ""
         )
         XCTAssertLessThan(cue.remainingMeters, VoiceNav.remainingMeters(line))
     }
@@ -1397,7 +1438,7 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(EyeDesk.hudLine(tag: "PHONE", text: "NO FIX"), "PHONE NO FIX")
         XCTAssertEqual(EyeDesk.compassChrome(headingDeg: 12, accuracy: 5), "12°")
         XCTAssertEqual(EyeDesk.compassChrome(headingDeg: 12, accuracy: -1), "CAL BAD")
-        XCTAssertEqual(EyeDesk.fixChrome(ageSeconds: 12, hasFix: false), "—")
+        XCTAssertEqual(EyeDesk.fixChrome(ageSeconds: 12, hasFix: false), "LAST FIX")
         XCTAssertEqual(EyeDesk.fixChrome(ageSeconds: 90, hasFix: false), "NO FIX")
         XCTAssertEqual(EyeDesk.condition(status: "good"), .green)
         XCTAssertEqual(EyeDesk.condition(status: "okay"), .yellow)

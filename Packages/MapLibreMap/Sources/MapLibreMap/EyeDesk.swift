@@ -13,6 +13,7 @@ public enum EyeDesk {
     public static let lostAfterSeconds: Double = 120
     public static let trailSeconds: Double = 20 * 60
     public static let deadReckonSeconds: Double = 60
+    public static let lastFix = "LAST FIX"
     public static let bleRingMaxMeters: Double = 200
     public static let khanShadeOpacity: Double = 0.94
     public static let khanShadeContrast: Double = 0.48
@@ -397,7 +398,7 @@ public enum EyeDesk {
     public static func fixChrome(ageSeconds: Double?, hasFix: Bool) -> String {
         if hasFix { return "" }
         guard let ageSeconds, ageSeconds.isFinite, ageSeconds >= 0 else { return noFix }
-        if ageSeconds <= deadReckonSeconds { return "—" }
+        if ageSeconds <= deadReckonSeconds { return lastFix }
         return noFix
     }
 

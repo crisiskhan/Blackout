@@ -330,6 +330,8 @@ class SpeakChromeSourceContracts(unittest.TestCase):
         self.assertNotIn("speakBannerHeight", self.tokens)
         status = self.voice.split("enum SpeakStatus")[1]
         self.assertIn('noFix = "NO FIX"', status)
+        self.assertIn('arrive = "ARRIVE"', status)
+        self.assertIn("func arriveLine(", status)
         for phrase in ("Turn left.", "Arrive at destination.", "Total "):
             self.assertNotIn(phrase, status)
 

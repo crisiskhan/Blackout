@@ -4306,6 +4306,9 @@ class LiveStreetGuideTests(unittest.TestCase):
         self.assertIn("LiveNav.progress", guide)
         self.assertIn("VoiceNav.arrive", guide)
         self.assertIn("SpeakStatus.offRouteLine", guide)
+        self.assertIn("SpeakStatus.arriveLine", guide)
+        self.assertIn('routeChrome = ""', guide)
+        self.assertIn("remainingStreets", guide)
         self.assertIn("SpeakStatus.chrome(", guide)
         self.assertIn("remainingCoords", guide)
         self.assertIn("navigate(mode: travelMode, speak: false)", guide)
@@ -4328,7 +4331,9 @@ class LiveStreetGuideTests(unittest.TestCase):
         self.assertIn("YOU move", device)
         self.assertIn("OFF ROUTE", device)
         self.assertIn("static let offRoute = \"OFF ROUTE\"", voice)
+        self.assertIn("static let arrive = \"ARRIVE\"", voice)
         self.assertLessEqual(len("SPEAK · OFF ROUTE"), 32)
+        self.assertLessEqual(len("SPEAK · ARRIVE"), 32)
         for slogan in ("best in class", "Waze", "Google Maps", "Apple Maps"):
             self.assertNotIn(slogan, live_text)
             self.assertNotIn(slogan, app)
@@ -4521,6 +4526,7 @@ class YouIdentitySyncTests(unittest.TestCase):
         status = voice.split("enum SpeakStatus", 1)[1]
         self.assertIn('noFix = "NO FIX"', status)
         self.assertIn("SPEAK · NO FIX", read("docs", "SOLO_QA.md"))
+        self.assertIn("SPEAK · ARRIVE", read("docs", "SOLO_QA.md"))
         tests = read(
             "Packages",
             "MapLibreMap",

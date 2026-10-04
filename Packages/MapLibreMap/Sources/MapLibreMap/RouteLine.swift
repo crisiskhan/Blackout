@@ -46,6 +46,27 @@ public enum RouteLine {
         }
         return false
     }
+
+    /// Silver paint follows YOU while you are on the line. Off-route keeps
+    /// the last full plot up until the replan lands.
+    public static func paintCoords(
+        you: (lat: Double, lon: Double)?,
+        dest: (lat: Double, lon: Double)?,
+        coords: [(lat: Double, lon: Double)],
+        travelMode: TravelMode
+    ) -> [(lat: Double, lon: Double)] {
+        guard coords.count >= 2 else { return coords }
+        guard let you else { return coords }
+        let cue = LiveNav.progress(
+            you: you,
+            dest: dest,
+            coords: coords,
+            travelMode: travelMode
+        )
+        if cue.offRoute { return coords }
+        if cue.remainingCoords.count >= 2 { return cue.remainingCoords }
+        return Array(coords.suffix(2))
+    }
 }
 
 /// The chosen destination, drawn on the canvas so the map does not need to
@@ -454,13 +475,14 @@ public enum MapFieldChrome: Sendable {
     ) -> String {
         guard coords.count >= 2 else { return "" }
         guard let you else { return VoiceNav.remainingHUD(coords) }
-        let remaining = LiveNav.progress(
+        let cue = LiveNav.progress(
             you: you,
             dest: dest,
             coords: coords,
             travelMode: travelMode
-        ).remainingCoords
-        return VoiceNav.remainingHUD(remaining)
+        )
+        if cue.offRoute || cue.arrived { return "" }
+        return VoiceNav.remainingHUD(cue.remainingCoords)
     }
 
     /// Coordinate pair formatter. MAP COORDINATES rail passes dest or YOU.

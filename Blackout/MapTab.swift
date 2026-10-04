@@ -72,7 +72,12 @@ struct MapTab: View {
                     packWest: pack.bbox.west,
                     packNorth: pack.bbox.north,
                     packEast: pack.bbox.east,
-                    route: runtime.routeCoords,
+                    route: RouteLine.paintCoords(
+                        you: runtime.fieldYou,
+                        dest: runtime.routeTarget,
+                        coords: runtime.routeCoords,
+                        travelMode: runtime.travelMode
+                    ),
                     destination: runtime.routeTarget,
                     held: runtime.held.map { (lat: $0.lat, lon: $0.lon) }
                         ?? runtime.heldAddress.map { (lat: $0.lat, lon: $0.lon) }
@@ -459,7 +464,8 @@ struct MapTab: View {
     /// COORDINATES numbers sit on void — no word in a box, no grey plate.
     private var fieldChrome: some View {
         let dest = runtime.routeTarget
-        let you = runtime.gnssYou
+        let live = runtime.gnssYou
+        let you = runtime.fieldYou
         let destActive = MapFieldChrome.destRailVisible(
             hasDestination: dest != nil,
             lockOn: runtime.lockOn,
@@ -473,11 +479,13 @@ struct MapTab: View {
         let point = destActive
             ? MapFieldChrome.destField(dest: dest, you: you, navigating: navigating)
             : nil
+        let lastFix = live == nil && you != nil ? EyeDesk.lastFix : ""
         let lines = MapFieldChrome.lines(
             lock: runtime.lockChrome,
             route: runtime.routeChrome,
             tool: MapFieldChrome.joined([
                 runtime.toolChrome,
+                lastFix,
                 runtime.mesh.chromeNear,
                 runtime.mesh.chromeSignal,
             ]),
@@ -509,6 +517,7 @@ struct MapTab: View {
                                     travelMode: runtime.travelMode
                                 ),
                                 navigating: navigating,
+                                liveFix: live != nil,
                                 onTurns: { runtime.toggleSpeakTurns() }
                             )
                         }
@@ -525,12 +534,14 @@ struct MapTab: View {
         var nextTurn: String
         var remaining: String
         var navigating: Bool
+        var liveFix: Bool
         var onTurns: () -> Void
         @State private var beat: Double = 0.28
 
         var body: some View {
             let field = MapFieldChrome.destValue(point: dest)
             let fieldInk = destInk(MapFieldDestMode.coordinates)
+            let pulse = liveFix ? beat : 0
             let turn = nextTurn.trimmingCharacters(in: .whitespacesAndNewlines)
             let remain = remaining.trimmingCharacters(in: .whitespacesAndNewlines)
             return VStack(alignment: .leading, spacing: 6) {
@@ -542,8 +553,6 @@ struct MapTab: View {
                         Text(turn)
                             .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
                             .foregroundStyle(destInk(MapFieldDestMode.turns))
-                            .lineLimit(1)
-                            .minimumScaleFactor(1)
                             .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .shadow(color: Theme.void.opacity(0.95), radius: 3)
@@ -554,12 +563,10 @@ struct MapTab: View {
                         Text(remain)
                             .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
                             .foregroundStyle(fieldInk)
-                            .lineLimit(1)
-                            .minimumScaleFactor(1)
                             .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .shadow(color: Theme.void.opacity(0.95), radius: 3)
-                            .shadow(color: fieldInk.opacity(0.28 + 0.42 * beat), radius: 5 + 5 * beat)
+                            .shadow(color: fieldInk.opacity(0.28 + 0.42 * pulse), radius: 5 + 5 * pulse)
                             .accessibilityLabel("REMAINING")
                             .accessibilityValue(remain)
                     }
@@ -582,7 +589,7 @@ struct MapTab: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .shadow(color: Theme.void.opacity(0.95), radius: 3)
-                        .shadow(color: fieldInk.opacity(0.28 + 0.42 * beat), radius: 5 + 5 * beat)
+                        .shadow(color: fieldInk.opacity(0.28 + 0.42 * pulse), radius: 5 + 5 * pulse)
                         .accessibilityLabel(MapFieldDestMode.coordinates.title)
                         .accessibilityValue(field)
                 }
@@ -598,7 +605,7 @@ struct MapTab: View {
         private func destInk(_ destMode: MapFieldDestMode) -> Color {
             switch destMode {
             case .coordinates:
-                return Theme.fix
+                return liveFix ? Theme.fix : Theme.silver
             case .turns:
                 return Theme.silver
             }

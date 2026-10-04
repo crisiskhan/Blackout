@@ -203,13 +203,7 @@ public enum VoiceNav: Sendable {
     }
 
     private static func hudFit(_ parts: [String]) -> String {
-        var parts = parts.filter { !$0.isEmpty }
-        var line = parts.joined(separator: " · ")
-        while line.count > 44, parts.count > 1 {
-            parts.removeLast()
-            line = parts.joined(separator: " · ")
-        }
-        return line
+        parts.filter { !$0.isEmpty }.joined(separator: " · ")
     }
 
     public static func turn(from: Double, to: Double) -> VoiceTurn {
@@ -245,6 +239,7 @@ public enum SpeakStatus: Sendable {
     public static let failed = "SPEECH FAILED"
     public static let offGraph = GraphPlan.offGraph
     public static let offRoute = "OFF ROUTE"
+    public static let arrive = "ARRIVE"
     public static let setDest = "SET DEST"
     public static let noFix = "NO FIX"
     public static let ellipsis = "…"
@@ -281,6 +276,10 @@ public enum SpeakStatus: Sendable {
 
     public static func offRouteLine() -> String {
         line([offRoute])
+    }
+
+    public static func arriveLine() -> String {
+        line([arrive])
     }
 
     public static func turns(_ coords: [(lat: Double, lon: Double)]) -> Int {

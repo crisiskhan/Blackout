@@ -604,15 +604,22 @@ public struct SearchIndex: Sendable {
     }
 
     private static func aliases(of token: String) -> Set<String> {
+        if let ordinal = ordinalAliases(token) {
+            return ordinal
+        }
         switch token {
         case "ave", "avenue", "av":
             return ["ave", "avenue", "av", "avenida"]
         case "avenida":
             return ["avenida", "av", "ave", "avenue"]
         case "st", "street":
-            return ["st", "street"]
+            return ["st", "street", "calle"]
+        case "calle":
+            return ["calle", "st", "street"]
         case "rd", "road":
-            return ["rd", "road"]
+            return ["rd", "road", "camino"]
+        case "camino":
+            return ["camino", "rd", "road"]
         case "blvd", "boulevard":
             return ["blvd", "boulevard"]
         case "dr", "drive":
@@ -637,6 +644,14 @@ public struct SearchIndex: Sendable {
             return ["e", "east"]
         case "w", "west":
             return ["w", "west"]
+        case "nw", "northwest":
+            return ["nw", "northwest"]
+        case "ne", "northeast":
+            return ["ne", "northeast"]
+        case "sw", "southwest":
+            return ["sw", "southwest"]
+        case "se", "southeast":
+            return ["se", "southeast"]
         case "mt", "mtn", "mount", "mountain":
             return ["mt", "mtn", "mount", "mountain"]
         case "pk", "peak", "summit":
@@ -644,6 +659,86 @@ public struct SearchIndex: Sendable {
         default:
             return [token]
         }
+    }
+
+    private static let ordinalPairs: [(String, String)] = [
+        ("1st", "first"),
+        ("2nd", "second"),
+        ("3rd", "third"),
+        ("4th", "fourth"),
+        ("5th", "fifth"),
+        ("6th", "sixth"),
+        ("7th", "seventh"),
+        ("8th", "eighth"),
+        ("9th", "ninth"),
+        ("10th", "tenth"),
+        ("11th", "eleventh"),
+        ("12th", "twelfth"),
+        ("13th", "thirteenth"),
+        ("14th", "fourteenth"),
+        ("15th", "fifteenth"),
+        ("16th", "sixteenth"),
+        ("17th", "seventeenth"),
+        ("18th", "eighteenth"),
+        ("19th", "nineteenth"),
+        ("20th", "twentieth"),
+    ]
+
+    private static func ordinalAliases(_ token: String) -> Set<String>? {
+        if let n = Int(token), (1...99).contains(n) {
+            return ordinalSet(n)
+        }
+        if let n = parseNth(token) {
+            return ordinalSet(n)
+        }
+        for pair in ordinalPairs {
+            if token == pair.0 || token == pair.1, let n = parseNth(pair.0) {
+                return ordinalSet(n)
+            }
+        }
+        return nil
+    }
+
+    private static func ordinalSet(_ n: Int) -> Set<String> {
+        guard (1...99).contains(n) else { return [] }
+        var out: Set<String> = ["\(n)", nth(n)]
+        for pair in ordinalPairs where ordinalNumber(pair.0) == n {
+            out.insert(pair.0)
+            out.insert(pair.1)
+        }
+        return out
+    }
+
+    private static func nth(_ n: Int) -> String {
+        let teen = n % 100
+        if (11...13).contains(teen) { return "\(n)th" }
+        switch n % 10 {
+        case 1: return "\(n)st"
+        case 2: return "\(n)nd"
+        case 3: return "\(n)rd"
+        default: return "\(n)th"
+        }
+    }
+
+    private static func parseNth(_ token: String) -> Int? {
+        for suffix in ["st", "nd", "rd", "th"] {
+            guard token.hasSuffix(suffix), token.count > suffix.count else { continue }
+            let body = String(token.dropLast(suffix.count))
+            guard let n = Int(body), (1...99).contains(n), nth(n) == token else { continue }
+            return n
+        }
+        return nil
+    }
+
+    private static func ordinalNumber(_ token: String) -> Int? {
+        if let n = Int(token), (1...99).contains(n) { return n }
+        if let n = parseNth(token) { return n }
+        for (nthForm, word) in ordinalPairs {
+            if token == nthForm || token == word {
+                return parseNth(nthForm)
+            }
+        }
+        return nil
     }
 
     private static func exactOrAlias(_ q: String, in docTokens: [String]) -> Bool {
@@ -917,8 +1012,26 @@ public struct SearchIndex: Sendable {
         }
         let street = Array(toks.dropFirst())
         guard !street.isEmpty else { return nil }
+        // "21 street" is 21st Street, not house 21 on every packed street.
+        if street.allSatisfy({ streetTypeTokens.contains($0) }) {
+            return nil
+        }
         return (hn, street)
     }
+
+    private static let streetTypeTokens: Set<String> = [
+        "st", "street", "calle",
+        "rd", "road", "camino",
+        "ave", "avenue", "av", "avenida",
+        "blvd", "boulevard",
+        "dr", "drive",
+        "ln", "lane",
+        "hwy", "highway",
+        "pkwy", "parkway",
+        "ct", "court",
+        "cir", "circle",
+        "pl", "place",
+    ]
 
     private static func packedAddr(_ any: Any?) -> (streets: [String], zips: [String], ranges: [AddrRange]) {
         guard let obj = any as? [String: Any] else { return ([], [], []) }
@@ -1013,8 +1126,8 @@ public struct SearchIndex: Sendable {
 
     private static let typeTokens: Set<String> = [
         "ave", "avenue", "av", "avenida",
-        "st", "street",
-        "rd", "road",
+        "st", "street", "calle",
+        "rd", "road", "camino",
         "blvd", "boulevard",
         "dr", "drive",
         "ln", "lane",

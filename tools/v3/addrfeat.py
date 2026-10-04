@@ -27,6 +27,34 @@ CACHE = Path("/tmp/cursor/tiger-addrfeat")
 SCALE = 100_000
 
 ORDINAL_SUFFIXES = {"th", "st", "nd", "rd"}
+STREET_TYPE_TOKENS = {
+    "st",
+    "street",
+    "calle",
+    "rd",
+    "road",
+    "camino",
+    "ave",
+    "avenue",
+    "av",
+    "avenida",
+    "blvd",
+    "boulevard",
+    "dr",
+    "drive",
+    "ln",
+    "lane",
+    "hwy",
+    "highway",
+    "pkwy",
+    "parkway",
+    "ct",
+    "court",
+    "cir",
+    "circle",
+    "pl",
+    "place",
+}
 
 ALIASES: dict[str, set[str]] = {
     "ave": {"ave", "avenue", "av", "avenida"},
@@ -147,6 +175,9 @@ def house_query(raw: str) -> tuple[int, list[str]] | None:
         return None
     street = toks[1:]
     if not street:
+        return None
+    # "21 street" is 21st Street, not house 21 on every packed street.
+    if street and all(word in STREET_TYPE_TOKENS for word in street):
         return None
     return int(first[:i]), street
 
