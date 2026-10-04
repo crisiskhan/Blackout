@@ -92,7 +92,7 @@ public enum DeviceSeal {
     public static func unwrap(_ data: Data, key: SymmetricKey) throws -> Data {
         guard isSealed(data) else { throw SealError.plain }
         let box = try AES.GCM.SealedBox(combined: Data(data.dropFirst(magic.count)))
-        return try AES.GCM.open(box, key: key)
+        return try AES.GCM.open(box, using: key)
     }
 
     public static func openBody(_ data: Data, key: SymmetricKey?) -> Data? {

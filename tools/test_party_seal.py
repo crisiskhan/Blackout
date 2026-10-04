@@ -42,6 +42,9 @@ class PartySealTests(unittest.TestCase):
         self.assertIn("testOpenBodyKeepsPlaintext", tests)
         self.assertIn("enum DeviceSeal", crypto)
         self.assertIn("0x42, 0x4F, 0x32", crypto)
+        device = crypto.split("enum DeviceSeal")[1]
+        self.assertIn("AES.GCM.open(box, using:", device)
+        self.assertNotIn("AES.GCM.open(box, key:", device)
         self.assertNotEqual(
             crypto.split("0x42, 0x4F, 0x31")[0],
             crypto.split("0x42, 0x4F, 0x32")[0],
