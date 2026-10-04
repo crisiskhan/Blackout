@@ -72,6 +72,12 @@ def test_compile_workflow_invokes_gate() -> None:
         fail("unsigned xcodebuild.yml must stay macos-14")
     if "Xcode_26" in text or "26.*" in text:
         fail("unsigned compile must stay Xcode 16 — do not move xcodebuild.yml to 26")
+    # 37241886342 device job 111552084269 died in checkout@v4 fetching
+    # pull/91/merge — curl 92 HTTP/2 CANCEL, then reset, then timeout.
+    # Simulator on the same SHA compiled. Prefer HTTP/1.1 before both
+    # checkouts so the pack fetch does not ride HTTP/2.
+    if text.count("http.version HTTP/1.1") < 2:
+        fail("37241886342: both unsigned checkouts must set http.version HTTP/1.1")
     ok("xcodebuild.yml runs test_ci_opt.py before xcodebuild")
 
 
