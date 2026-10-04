@@ -638,10 +638,14 @@ class VoiceNavSourceContracts(unittest.TestCase):
         self.assertIn("LiveNav.progress", guide)
         self.assertIn("VoiceNav.arrive", guide)
         self.assertIn("SpeakStatus.offRouteLine", guide)
-        self.assertIn('speakNextHUD = ""', guide)
-        self.assertIn("speakHUDTurns = []", guide)
+        self.assertIn("SpeakStatus.arriveLine", guide)
+        self.assertIn('routeChrome = ""', guide)
+        self.assertIn("cue.remainingStreets", guide)
+        self.assertIn("clearSpeakTurns()", guide)
         self.assertIn("navigate(mode: travelMode, speak: false)", guide)
         nav_head = nav.split("Task {", 1)[0]
+        self.assertIn('liveSpokenTurn = ""', nav_head.split("if speak")[0])
+        self.assertIn("liveArrived = false", nav_head.split("if speak")[0])
         from_guard = nav_head.split("guard let from = fieldYou", 1)[1]
         self.assertNotIn(
             "routeCoords = []",
@@ -719,6 +723,8 @@ class VoiceNavSourceContracts(unittest.TestCase):
         self.assertIn("func nextTurnHUD(", voice)
         self.assertIn("static let offRoute = \"OFF ROUTE\"", voice)
         self.assertIn("func offRouteLine(", voice)
+        self.assertIn("static let arrive = \"ARRIVE\"", voice)
+        self.assertIn("func arriveLine(", voice)
         self.assertIn("func streetName(near", search)
         self.assertIn("streets:", app.split("func speakMap()")[1].split("func beginPTTSolo")[0])
         self.assertIn("enum NavVoice", inst)

@@ -181,15 +181,23 @@ class LiveGuideTests(unittest.TestCase):
         live = read("Packages", "Router", "Sources", "Router", "LiveNav.swift")
         self.assertIn("func shouldReplan(", live)
         self.assertIn("farOffFactor", live)
+        self.assertIn("remainingStreets", live)
         guide = read("Blackout", "AppRuntime.swift").split("func applyLiveGuide()")[1].split(
             "static func resourceRoot"
         )[0]
         self.assertIn("LiveNav.shouldReplan(", guide)
         self.assertIn("fieldYou", guide)
         self.assertIn("gnssYou", guide)
-        self.assertIn('speakNextHUD = ""', guide)
-        self.assertIn("speakHUDTurns = []", guide)
+        self.assertIn("clearSpeakTurns()", guide)
         self.assertIn("RouteSummary.chrome(", guide)
+        self.assertIn("SpeakStatus.arriveLine", guide)
+        self.assertIn('routeChrome = ""', guide)
+        self.assertIn("cue.remainingStreets", guide)
+        nav = read("Blackout", "AppRuntime.swift").split("func navigate(mode:")[1].split(
+            "Task {", 1
+        )[0]
+        self.assertIn('liveSpokenTurn = ""', nav.split("if speak")[0])
+        self.assertIn("liveArrived = false", nav.split("if speak")[0])
 
     def test_first_leg_is_the_next_move_until_the_turn_is_close(self):
         live = read("Packages", "Router", "Sources", "Router", "LiveNav.swift")
@@ -200,6 +208,9 @@ class LiveGuideTests(unittest.TestCase):
             "func closeSpeakTurns"
         )[0]
         self.assertIn("liveSpokenTurn = cue.speakTurn", speak)
+        self.assertIn("cue.remainingStreets", speak)
+        self.assertIn("SpeakStatus.arriveLine", speak)
+        self.assertIn("SpeakStatus.offRouteLine", speak)
 
     def test_silver_line_trims_to_remaining_while_you_are_on_it(self):
         route = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift")
@@ -208,10 +219,12 @@ class LiveGuideTests(unittest.TestCase):
         self.assertIn("func paintCoords(", route_enum)
         self.assertIn("cue.offRoute", route_enum)
         self.assertIn("remainingCoords", route_enum)
+        self.assertIn("suffix(2)", route_enum)
         self.assertIn("RouteLine.paintCoords(", tab)
         self.assertIn("runtime.fieldYou", tab.split("OfflineMapView(")[1].split("destination:")[0])
         remaining = route.split("func liveRemainingHUD(")[1].split("func destValue(")[0]
         self.assertIn("cue.offRoute", remaining)
+        self.assertIn("cue.arrived", remaining)
         self.assertIn('return ""', remaining)
         rail = tab.split("struct MapFieldDestRail")[1].split("private var hudReserve")[0]
         self.assertNotIn(".lineLimit(1)", rail.split("if !turn.isEmpty")[1].split("if !remain.isEmpty")[0])
@@ -302,6 +315,7 @@ class DeviceScriptTests(unittest.TestCase):
             self.assertIn("45 m", blob)
             self.assertIn("160 m", blob)
             self.assertIn("no ghost progress", blob)
+            self.assertIn("SPEAK · ARRIVE", blob)
             self.assertNotIn("best in class", blob.lower())
             self.assertNotIn("Waze", blob)
             self.assertNotIn("Google Maps", blob)

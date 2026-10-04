@@ -636,6 +636,13 @@ final class MapLibreMapTests: XCTestCase {
             travelMode: .walk
         )
         XCTAssertEqual(off.count, line.count)
+        let atEnd = RouteLine.paintCoords(
+            you: line.last,
+            dest: line.last,
+            coords: line,
+            travelMode: .walk
+        )
+        XCTAssertGreaterThanOrEqual(atEnd.count, 2)
         XCTAssertFalse(RouteLine.shouldDraw([]))
         XCTAssertFalse(RouteLine.shouldDraw([(lat: 31.76, lon: -106.49)]))
         XCTAssertFalse(RouteLine.shouldDraw([(lat: .nan, lon: -106.49), (lat: 31.80, lon: -106.50)]))
@@ -828,6 +835,15 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(
             MapFieldChrome.liveRemainingHUD(
                 you: (0, -0.01),
+                dest: line.last,
+                coords: line,
+                travelMode: .walk
+            ),
+            ""
+        )
+        XCTAssertEqual(
+            MapFieldChrome.liveRemainingHUD(
+                you: line.last,
                 dest: line.last,
                 coords: line,
                 travelMode: .walk

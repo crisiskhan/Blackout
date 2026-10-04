@@ -64,7 +64,8 @@ public enum RouteLine {
             travelMode: travelMode
         )
         if cue.offRoute { return coords }
-        return cue.remainingCoords
+        if cue.remainingCoords.count >= 2 { return cue.remainingCoords }
+        return Array(coords.suffix(2))
     }
 }
 
@@ -480,7 +481,7 @@ public enum MapFieldChrome: Sendable {
             coords: coords,
             travelMode: travelMode
         )
-        if cue.offRoute { return "" }
+        if cue.offRoute || cue.arrived { return "" }
         return VoiceNav.remainingHUD(cue.remainingCoords)
     }
 

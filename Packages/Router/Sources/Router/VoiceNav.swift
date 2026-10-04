@@ -239,6 +239,7 @@ public enum SpeakStatus: Sendable {
     public static let failed = "SPEECH FAILED"
     public static let offGraph = GraphPlan.offGraph
     public static let offRoute = "OFF ROUTE"
+    public static let arrive = "ARRIVE"
     public static let setDest = "SET DEST"
     public static let noFix = "NO FIX"
     public static let ellipsis = "…"
@@ -275,6 +276,10 @@ public enum SpeakStatus: Sendable {
 
     public static func offRouteLine() -> String {
         line([offRoute])
+    }
+
+    public static func arriveLine() -> String {
+        line([arrive])
     }
 
     public static func turns(_ coords: [(lat: Double, lon: Double)]) -> Int {

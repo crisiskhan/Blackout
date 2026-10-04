@@ -15,6 +15,7 @@ public enum LiveNav: Sendable {
     public struct Cue: Sendable {
         public var remainingMeters: Double
         public var remainingCoords: [(lat: Double, lon: Double)]
+        public var remainingStreets: [String?]
         public var nearestIndex: Int
         public var metersToLine: Double
         public var metersToTurn: Double
@@ -69,6 +70,7 @@ public enum LiveNav: Sendable {
             return Cue(
                 remainingMeters: 0,
                 remainingCoords: coords,
+                remainingStreets: streets,
                 nearestIndex: 0,
                 metersToLine: 0,
                 metersToTurn: 0,
@@ -140,6 +142,7 @@ public enum LiveNav: Sendable {
         return Cue(
             remainingMeters: remainingMeters,
             remainingCoords: remaining,
+            remainingStreets: sliced,
             nearestIndex: bestIndex,
             metersToLine: bestDistance,
             metersToTurn: metersToTurn,

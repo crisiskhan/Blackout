@@ -514,6 +514,7 @@ final class RouterTests: XCTestCase {
         )
         XCTAssertEqual(named.speakTurn, "Turn left onto Piedras Street.")
         XCTAssertEqual(named.nextHUD, "LEFT · PIEDRAS STREET")
+        XCTAssertEqual(named.remainingStreets.compactMap { $0 }, ["Montana Avenue", "Piedras Street"])
 
         let atDest = LiveNav.progress(you: dest, dest: dest, coords: coords)
         XCTAssertTrue(atDest.arrived)
@@ -558,6 +559,9 @@ final class RouterTests: XCTestCase {
         XCTAssertEqual(SpeakStatus.offRouteLine(), "SPEAK · OFF ROUTE")
         XCTAssertLessThanOrEqual(SpeakStatus.offRouteLine().count, SpeakStatus.maxCharacters)
         XCTAssertFalse(SpeakStatus.isClipped(SpeakStatus.offRouteLine()))
+        XCTAssertEqual(SpeakStatus.arriveLine(), "SPEAK · ARRIVE")
+        XCTAssertLessThanOrEqual(SpeakStatus.arriveLine().count, SpeakStatus.maxCharacters)
+        XCTAssertFalse(SpeakStatus.isClipped(SpeakStatus.arriveLine()))
     }
 
     func testVoiceNavDriveTurnByTurnUsesDriveNotWalk() {
@@ -744,7 +748,8 @@ final class RouterTests: XCTestCase {
         XCTAssertTrue(outcomes[2].hasPrefix("SPEAK · DEST "))
         XCTAssertEqual(outcomes[3], "SPEAK · SET DEST")
         XCTAssertEqual(outcomes[4], "SPEAK · NO FIX")
-        for outcome in outcomes {
+        XCTAssertEqual(SpeakStatus.arriveLine(), "SPEAK · ARRIVE")
+        for outcome in outcomes + [SpeakStatus.arriveLine()] {
             XCTAssertFalse(outcome.isEmpty)
             XCTAssertFalse(SpeakStatus.isClipped(outcome))
             XCTAssertLessThanOrEqual(outcome.count, SpeakStatus.maxCharacters)
