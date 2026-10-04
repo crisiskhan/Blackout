@@ -19,6 +19,14 @@ class HouseQueryTests(unittest.TestCase):
         self.assertEqual(addrfeat.house_query("221 montana"), (221, ["montana"]))
         self.assertEqual(addrfeat.house_query("221 N Kansas St"), (221, ["n", "kansas", "st"]))
         self.assertEqual(addrfeat.house_query("221A Montana Avenue"), (221, ["montana", "avenue"]))
+        self.assertEqual(
+            addrfeat.house_query("221 Montana Avenue, El Paso, TX 79902"),
+            (221, ["montana", "avenue"]),
+        )
+        self.assertEqual(addrfeat.house_query("Montana Avenue 221"), (221, ["montana", "avenue"]))
+        self.assertEqual(addrfeat.house_query("221 montana ave apt 4"), (221, ["montana", "ave"]))
+        self.assertEqual(addrfeat.house_query("221 A Montana Avenue"), (221, ["montana", "avenue"]))
+        self.assertEqual(addrfeat.house_query("221 montana #4"), (221, ["montana"]))
 
     def test_ordinal_street_is_not_a_house_number(self):
         self.assertIsNone(addrfeat.house_query("10th Street"))
@@ -66,6 +74,33 @@ class GeocodeTests(unittest.TestCase):
         self.assertEqual(hit["city"], "El Paso")
         self.assertGreaterEqual(hit["sure"], 70)
         self.assertIn("census", hit["why"].lower())
+
+    def test_pasted_and_trailing_house_still_land(self):
+        book = addrfeat.AddressBook.from_ranges(
+            [
+                {
+                    "street": "Montana Avenue",
+                    "from_hn": 201,
+                    "to_hn": 299,
+                    "zipcode": "79902",
+                    "lat0": 31.777,
+                    "lon0": -106.475,
+                    "lat1": 31.779,
+                    "lon1": -106.455,
+                }
+            ]
+        )
+        for query in (
+            "221 Montana Avenue, El Paso, TX 79902",
+            "Montana Avenue 221",
+            "221 N Montana",
+            "221 montana #4",
+            "221 A Montana Avenue",
+        ):
+            hit = book.geocode(query)
+            self.assertIsNotNone(hit, query)
+            self.assertEqual(hit["kind"], "address")
+            self.assertTrue(hit["name"].startswith("221 "))
 
     def test_wrong_street_is_not_invented(self):
         book = addrfeat.AddressBook.from_ranges(
@@ -135,6 +170,17 @@ class PackedSearchTests(unittest.TestCase):
         self.assertEqual(hit["kind"], "address")
         self.assertTrue(31.70 <= hit["lat"] <= 31.90)
         self.assertTrue(-106.62 <= hit["lon"] <= -106.35)
+        paste = book.geocode("221 Montana Avenue, El Paso, TX 79902")
+        self.assertIsNotNone(paste)
+        self.assertEqual(paste["kind"], "address")
+        self.assertTrue(paste["name"].startswith("221 "))
+        trailing = book.geocode("Montana Avenue 221")
+        self.assertIsNotNone(trailing)
+        extra_dir = book.geocode("221 N Montana")
+        self.assertIsNotNone(extra_dir)
+        interstate = book.geocode("1301 I-10")
+        self.assertIsNotNone(interstate)
+        self.assertIn("I-", interstate["name"])
 
     def test_each_pack_ships_address_ranges(self):
         for pack_id in ("tx-west", "tx-east", "nm"):

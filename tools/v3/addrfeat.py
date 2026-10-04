@@ -61,10 +61,12 @@ ALIASES: dict[str, set[str]] = {
     "avenue": {"ave", "avenue", "av", "avenida"},
     "av": {"ave", "avenue", "av", "avenida"},
     "avenida": {"ave", "avenue", "av", "avenida"},
-    "st": {"st", "street"},
-    "street": {"st", "street"},
-    "rd": {"rd", "road"},
-    "road": {"rd", "road"},
+    "st": {"st", "street", "calle"},
+    "street": {"st", "street", "calle"},
+    "calle": {"calle", "st", "street"},
+    "rd": {"rd", "road", "camino"},
+    "road": {"rd", "road", "camino"},
+    "camino": {"camino", "rd", "road"},
     "blvd": {"blvd", "boulevard"},
     "boulevard": {"blvd", "boulevard"},
     "dr": {"dr", "drive"},
@@ -89,6 +91,17 @@ ALIASES: dict[str, set[str]] = {
     "east": {"e", "east"},
     "w": {"w", "west"},
     "west": {"w", "west"},
+    "nw": {"nw", "northwest"},
+    "northwest": {"nw", "northwest"},
+    "ne": {"ne", "northeast"},
+    "northeast": {"ne", "northeast"},
+    "sw": {"sw", "southwest"},
+    "southwest": {"sw", "southwest"},
+    "se": {"se", "southeast"},
+    "southeast": {"se", "southeast"},
+    "i": {"i", "ih", "interstate"},
+    "ih": {"i", "ih", "interstate"},
+    "interstate": {"i", "ih", "interstate"},
 }
 
 ZIP3_CITY = {
@@ -143,7 +156,81 @@ PACK_FIPS: dict[str, tuple[str, ...]] = {
 }
 
 
-def tokens(raw: str) -> list[str]:
+STATE_TOKENS = {"tx", "texas", "nm"}
+UNIT_TOKENS = {
+    "apt",
+    "apartment",
+    "unit",
+    "ste",
+    "suite",
+    "fl",
+    "floor",
+    "rm",
+    "room",
+    "bldg",
+    "building",
+    "lot",
+    "spc",
+    "space",
+    "trlr",
+    "trailer",
+    "dept",
+    "stop",
+    "box",
+}
+COMPASS_TOKENS = {
+    "n",
+    "north",
+    "s",
+    "south",
+    "e",
+    "east",
+    "w",
+    "west",
+    "nw",
+    "northwest",
+    "ne",
+    "northeast",
+    "sw",
+    "southwest",
+    "se",
+    "southeast",
+}
+CITY_SUFFIXES: list[tuple[tuple[str, ...], str]] = [
+    (("truth", "or", "consequences"), "Truth or Consequences"),
+    (("corpus", "christi"), "Corpus Christi"),
+    (("san", "antonio"), "San Antonio"),
+    (("fort", "worth"), "Fort Worth"),
+    (("el", "paso"), "El Paso"),
+    (("las", "cruces"), "Las Cruces"),
+    (("santa", "fe"), "Santa Fe"),
+    (("sierra", "blanca"), "Sierra Blanca"),
+    (("las", "vegas"), "Las Vegas"),
+    (("albuquerque",), "Albuquerque"),
+    (("farmington",), "Farmington"),
+    (("roswell",), "Roswell"),
+    (("austin",), "Austin"),
+    (("houston",), "Houston"),
+    (("dallas",), "Dallas"),
+    (("amarillo",), "Amarillo"),
+    (("lubbock",), "Lubbock"),
+    (("midland",), "Midland"),
+    (("brownsville",), "Brownsville"),
+    (("laredo",), "Laredo"),
+    (("temple",), "Temple"),
+    (("giddings",), "Giddings"),
+    (("bernalillo",), "Bernalillo"),
+    (("gallup",), "Gallup"),
+    (("socorro",), "Socorro"),
+    (("clovis",), "Clovis"),
+    (("alamogordo",), "Alamogordo"),
+    (("canutillo",), "Canutillo"),
+    (("vinton",), "Vinton"),
+    (("anthony",), "Anthony"),
+]
+
+
+def raw_tokens(raw: str) -> list[str]:
     folded = raw.casefold()
     words: list[str] = []
     current: list[str] = []
@@ -158,28 +245,151 @@ def tokens(raw: str) -> list[str]:
     return words
 
 
-def house_query(raw: str) -> tuple[int, list[str]] | None:
-    toks = tokens(raw)
-    if not toks:
-        return None
-    first = toks[0]
+def tokens(raw: str) -> list[str]:
+    split = raw_tokens(raw)
+    squeezed = raw.replace("'", "").replace("\u2019", "").replace("`", "")
+    joined = raw_tokens(squeezed)
+    out: list[str] = []
+    seen: set[str] = set()
+    for word in split + joined:
+        if word not in seen:
+            seen.add(word)
+            out.append(word)
+    return out
+
+
+def is_zip5(token: str) -> bool:
+    return len(token) == 5 and token.isdigit()
+
+
+def is_zip4(token: str) -> bool:
+    return len(token) == 4 and token.isdigit()
+
+
+def house_number(token: str) -> int | None:
     i = 0
-    while i < len(first) and first[i].isdigit():
+    while i < len(token) and token[i].isdigit():
         i += 1
     if i == 0:
         return None
-    rest = first[i:]
+    rest = token[i:]
     if rest in ORDINAL_SUFFIXES:
         return None
     if rest and not rest.isalpha():
         return None
-    street = toks[1:]
+    return int(token[:i])
+
+
+def peel_zip(toks: list[str]) -> tuple[list[str], str]:
+    if len(toks) < 2:
+        return toks, ""
+    if (
+        len(toks) >= 3
+        and is_zip5(toks[-2])
+        and is_zip4(toks[-1])
+        and any(house_number(t) is not None for t in toks[:-2])
+    ):
+        return toks[:-2], toks[-2]
+    if is_zip5(toks[-1]) and any(house_number(t) is not None for t in toks[:-1]):
+        return toks[:-1], toks[-1]
+    return toks, ""
+
+
+def peel_state(toks: list[str]) -> list[str]:
+    if len(toks) < 2:
+        return toks
+    if len(toks) >= 3 and toks[-2] == "new" and toks[-1] == "mexico":
+        rest = toks[:-2]
+        if any(house_number(t) is not None for t in rest) or len(rest) >= 2:
+            return rest
+    if toks[-1] in STATE_TOKENS:
+        rest = toks[:-1]
+        if any(house_number(t) is not None for t in rest) or rest:
+            return rest
+    return toks
+
+
+def peel_city(toks: list[str]) -> tuple[list[str], str]:
+    for suffix, name in sorted(CITY_SUFFIXES, key=lambda row: len(row[0]), reverse=True):
+        n = len(suffix)
+        if len(toks) <= n:
+            continue
+        if tuple(toks[-n:]) == suffix:
+            rest = toks[:-n]
+            if any(house_number(t) is not None for t in rest) and any(
+                house_number(t) is None for t in rest
+            ):
+                return rest, name
+    return toks, ""
+
+
+def peel_unit(toks: list[str]) -> list[str]:
+    out = list(toks)
+    while len(out) >= 2:
+        if out[-1] in UNIT_TOKENS:
+            out.pop()
+            continue
+        if out[-2] in UNIT_TOKENS:
+            out.pop()
+            out.pop()
+            continue
+        break
+    return out
+
+
+def drop_unit_letter(street: list[str]) -> list[str]:
+    if (
+        not street
+        or len(street[0]) != 1
+        or not street[0].isalpha()
+        or street[0] in COMPASS_TOKENS
+    ):
+        return street
+    rest = street[1:]
+    if any(tok not in STREET_TYPE_TOKENS and tok not in COMPASS_TOKENS for tok in rest):
+        return rest
+    return street
+
+
+def house_query(raw: str) -> tuple[int, list[str]] | None:
+    asked = address_ask(raw)
+    if asked is None:
+        return None
+    return asked[0], asked[1]
+
+
+def address_ask(raw: str) -> tuple[int, list[str], str, str] | None:
+    toks = tokens(raw)
+    if not toks:
+        return None
+    toks, zipcode = peel_zip(toks)
+    toks = peel_state(toks)
+    toks, city = peel_city(toks)
+    toks = peel_unit(toks)
+    if not toks:
+        return None
+    if house_number(toks[0]) is not None:
+        hn = house_number(toks[0])
+        street = toks[1:]
+    elif house_number(toks[-1]) is not None:
+        hn = house_number(toks[-1])
+        street = toks[:-1]
+    else:
+        return None
+    assert hn is not None
+    street = drop_unit_letter(street)
+    if (
+        len(street) >= 2
+        and house_number(street[-1]) is not None
+        and required_street_tokens(street[:-1])
+    ):
+        street = street[:-1]
     if not street:
         return None
     # "21 street" is 21st Street, not house 21 on every packed street.
-    if street and all(word in STREET_TYPE_TOKENS for word in street):
+    if all(word in STREET_TYPE_TOKENS for word in street):
         return None
-    return int(first[:i]), street
+    return hn, street, zipcode, city
 
 
 def hn_on_range(hn: int, from_hn: int, to_hn: int) -> bool:
@@ -230,9 +440,19 @@ def token_hits(query: str, street_tokens: list[str]) -> bool:
     return False
 
 
+def required_street_tokens(query_tokens: list[str]) -> list[str]:
+    name = [t for t in query_tokens if t not in STREET_TYPE_TOKENS and t not in COMPASS_TOKENS]
+    if name:
+        return name
+    return [t for t in query_tokens if t not in STREET_TYPE_TOKENS]
+
+
 def street_matches(query_tokens: list[str], street: str) -> bool:
     street_tokens = tokens(street)
-    return all(token_hits(q, street_tokens) for q in query_tokens)
+    required = required_street_tokens(query_tokens)
+    if not required:
+        return False
+    return all(token_hits(q, street_tokens) for q in required)
 
 
 def _e5(value: float) -> int:
@@ -328,11 +548,11 @@ class AddressBook:
         query: str,
         you: tuple[float, float] | None = None,
     ) -> dict[str, Any] | None:
-        asked = house_query(query)
+        asked = address_ask(query)
         if asked is None:
             return None
-        hn, street_tokens = asked
-        if street_tokens and all(tok in _TYPE_TOKENS for tok in street_tokens):
+        hn, street_tokens, zipcode, city = asked
+        if not required_street_tokens(street_tokens):
             return None
         hits: list[dict[str, Any]] = []
         for row in self.rows:
@@ -354,27 +574,33 @@ class AddressBook:
             )
             if not isfinite(lat) or not isfinite(lon):
                 continue
-            zipcode = str(row.get("zipcode") or "")
+            packed_zip = str(row.get("zipcode") or "")
+            packed_city = city_for_zip(packed_zip)
             span = abs(to_hn - from_hn)
             meters = 0.0
             if you is not None:
                 meters = _haversine(you[0], you[1], lat, lon)
             center = self.center.get(street, (lat, lon))
             center_m = _haversine(center[0], center[1], lat, lon)
+            penalty = content_penalty(street, street_tokens)
+            if zipcode and packed_zip != zipcode:
+                penalty += 2
+            if city and packed_city.casefold() != city.casefold():
+                penalty += 1
             hits.append(
                 {
                     "name": f"{hn} {street}",
                     "kind": "address",
                     "lat": lat,
                     "lon": lon,
-                    "post": zipcode,
-                    "city": city_for_zip(zipcode),
+                    "post": packed_zip,
+                    "city": packed_city,
                     "sure": 72,
                     "why": f"census range {from_hn}–{to_hn}",
                     "what": f"door on {street}",
                     "span": span,
                     "meters": meters,
-                    "penalty": content_penalty(street, street_tokens),
+                    "penalty": penalty,
                     "freq": -self.freq.get(street, 0),
                     "center_m": center_m,
                 }
