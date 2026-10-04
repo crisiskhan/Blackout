@@ -5682,7 +5682,7 @@ class NaTheaterPlayTests(unittest.TestCase):
         self.assertIn("NaWatch.drop(", zoom)
         self.assertIn("dismantleUIView", live)
         self.assertIn("dismantleUIView", zoom)
-        self.assertIn(".id(row.id)", na)
+        self.assertNotIn(".id(row.id)", na)
         self.assertIn("NaWatch.still(", na)
         self.assertNotIn("UIImage(contentsOfFile", na)
         self.assertIn("func hushNa(", app)
@@ -5691,9 +5691,45 @@ class NaTheaterPlayTests(unittest.TestCase):
         self.assertIn("PTTMic.shared.stop()", hush)
         self.assertIn("NaWatch.hear()", hush)
         self.assertIn("hushNa()", app.split("func presentLive(")[1].split("func closeLive(")[0])
-        self.assertIn("NaWatch.drop()", app.split("func closeLive()")[1].split("func holdCam(")[0])
+        close = app.split("func closeLive()")[1].split("func holdCam(")[0]
+        self.assertIn("NaWatch.drop", close)
+        self.assertLess(close.find("zoomLive = nil"), close.find("NaWatch.drop"))
         self.assertIn("movie playback", qa.lower())
         self.assertIn("sound", qa.lower())
+
+
+class NaTheaterStayUpTests(unittest.TestCase):
+    def test_na_hunt_cannot_tear_the_well_or_drop_a_live_layer(self):
+        live = read("Blackout", "NaLive.swift")
+        zoom = read("Blackout", "LiveZoom.swift")
+        na = read("Blackout", "NaPlate.swift")
+        sock = read("Blackout", "UpdateSocket.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        qa = read("docs", "SOLO_QA.md")
+        watch = live.split("enum NaWatch")[1].split("struct NaLiveWell")[0]
+        well = live.split("struct NaLiveWell")[1]
+        self.assertNotIn(".id(row.id)", na)
+        appear = na.split(".onAppear")[1].split(".onChange")[0]
+        self.assertIn("Task { @MainActor in", appear)
+        sync = appear.split("Task { @MainActor in", 1)[0]
+        self.assertNotIn("adultRooms =", sync)
+        self.assertNotIn("pullNaHunt", sync)
+        self.assertIn("0xFF", watch)
+        self.assertIn("0xD8", watch)
+        self.assertIn("replaceCurrentItem", watch)
+        self.assertIn("Task { @MainActor in", watch)
+        self.assertIn("drop(_ victim", watch)
+        held = app.split("func heldNa(")[1].split("func toggleNa(")[0]
+        self.assertIn("naKeep.contains", held)
+        self.assertNotIn("AdultKeep.has", held)
+        self.assertIn("armed ? 1.0 : 60", well)
+        self.assertIn("zoomLive == nil", well)
+        face = sock.split("func fetchFacePages")[1].split("func fetchAdultPages")[0]
+        self.assertIn("adultPublish", face)
+        self.assertIn("stays mounted", qa.lower())
+        close = app.split("func closeLive()")[1].split("func holdCam(")[0]
+        self.assertLess(close.find("zoomLive = nil"), close.find("NaWatch.drop"))
+        self.assertNotIn("replaceCurrentItem(with: nil)", zoom.split("private func stop()")[1].split("private func jump")[0])
 
 
 def desk_text() -> str:

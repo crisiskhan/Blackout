@@ -765,8 +765,7 @@ final class AppRuntime {
     func heldNa(_ id: String) -> Bool {
         let token = id.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !token.isEmpty else { return false }
-        if naKeep.contains(where: { $0.id == token }) { return true }
-        return AdultKeep.has(token)
+        return naKeep.contains(where: { $0.id == token })
     }
 
     @discardableResult
@@ -879,10 +878,12 @@ final class AppRuntime {
 
     func closeLive() {
         naLiveSeq &+= 1
-        NaWatch.drop()
         zoomLive = nil
         naQueue = []
         naIndex = 0
+        Task { @MainActor in
+            NaWatch.drop()
+        }
     }
 
     func holdCam(id: String, lat: Double, lon: Double) {

@@ -15,6 +15,7 @@ struct NaPlate: View {
     @State private var naPick: String?
     @State private var naChrome: String?
     @State private var naStillCache: [String: UIImage] = [:]
+    @State private var naStillTask: Task<Void, Never>?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -46,6 +47,7 @@ struct NaPlate: View {
                             canPrev: naHasPrev,
                             canNext: naHasNext,
                             onPlay: {
+                                naPick = $0.id
                                 runtime.hushNa()
                                 return await runtime.updateSocket.liveAdult($0)
                             },
@@ -53,9 +55,10 @@ struct NaPlate: View {
                             onKeep: { keepTapped($0) },
                             onPrev: { stepStage(-1) },
                             onNext: { stepStage(1) },
-                            onWhy: { naChrome = $0 }
+                            onWhy: { naChrome = $0 },
+                            holdPipe: runtime.zoomLive != nil,
+                            zoomLive: runtime.zoomLive
                         )
-                        .id(row.id)
                     } else if runtime.updateSocket.adultReady {
                         Text(naEmptyChrome)
                             .font(.system(size: 13, weight: .heavy))
@@ -91,11 +94,19 @@ struct NaPlate: View {
             }
         }
         .onAppear {
-            runtime.updateSocket.adultRooms = AdultDesk.merge([
-                AdultKeep.load(),
-                runtime.updateSocket.adultRooms,
-            ])
-            pullNaHunt(now: true)
+            clampNaPick()
+            Task { @MainActor in
+                if runtime.updateSocket.adultRooms.isEmpty {
+                    runtime.updateSocket.adultRooms = AdultDesk.merge([
+                        AdultKeep.load(),
+                        runtime.updateSocket.adultRooms,
+                    ])
+                    pullNaHunt(now: true)
+                }
+                clampNaOffset()
+                clampNaPick()
+                refreshNaStills()
+            }
         }
         .onChange(of: runtime.updateSocket.adultRooms.count) { _, _ in
             clampNaOffset()
@@ -429,20 +440,23 @@ struct NaPlate: View {
     }
 
     private func refreshNaStills() {
-        var next: [String: UIImage] = [:]
-        for row in naPageRows {
-            if let image = NaWatch.still(id: row.id, maxEdge: NaWatch.wellStill) {
-                next[row.id] = image
+        naStillTask?.cancel()
+        naStillTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            guard !Task.isCancelled else { return }
+            var next: [String: UIImage] = [:]
+            for row in naPageRows {
+                if let image = NaWatch.still(id: row.id, maxEdge: NaWatch.wellStill) {
+                    next[row.id] = image
+                }
             }
+            naStillCache = next
         }
-        naStillCache = next
     }
 
     private func still(id: String) -> UIImage? {
-        if let hit = naStillCache[id] { return hit }
         _ = runtime.updateSocket.updatedAt
-        _ = runtime.updateSocket.busy
-        return NaWatch.still(id: id, maxEdge: NaWatch.wellStill)
+        return naStillCache[id]
     }
 
     private func sectionLabel(_ title: String) -> some View {

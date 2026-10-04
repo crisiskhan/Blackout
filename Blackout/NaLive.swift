@@ -68,14 +68,16 @@ enum NaWatch {
     @MainActor
     static func hear() {
         let session = AVAudioSession.sharedInstance()
-        try? session.setCategory(.playback, mode: .moviePlayback)
+        if session.category != .playback {
+            try? session.setCategory(.playback, mode: .moviePlayback)
+        }
         try? session.setActive(true)
     }
 
     @MainActor
     static func play(url: URL, headers: [String: String]) -> AVPlayer {
         hear()
-        drop()
+        let old = pipe
         let item = AVPlayerItem(
             asset: AVURLAsset(
                 url: url,
@@ -90,14 +92,23 @@ enum NaWatch {
         next.volume = 1
         next.play()
         pipe = next
+        if let old, old !== next {
+            drop(old)
+        }
         return next
     }
 
+    /// Detach first, then drop the item on the next turn so the layer
+    /// is not sitting on a niled item (ASC 72 class).
     @MainActor
-    static func drop() {
-        pipe?.pause()
-        pipe?.replaceCurrentItem(with: nil)
-        pipe = nil
+    static func drop(_ victim: AVPlayer? = nil) {
+        let old = victim ?? pipe
+        guard let old else { return }
+        if pipe === old { pipe = nil }
+        old.pause()
+        Task { @MainActor in
+            old.replaceCurrentItem(with: nil)
+        }
     }
 
     static func still(id: String, maxEdge: Int) -> UIImage? {
@@ -105,9 +116,12 @@ enum NaWatch {
         guard !token.isEmpty, !token.contains("/"), !token.contains("\\"), !token.contains("..")
         else { return nil }
         let url = SnapManifest.folder().appendingPathComponent("cam-\(token).jpg")
-        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        guard let data = try? Data(contentsOf: url),
+              data.count > 32, data.count < 3_000_000,
+              data[0] == 0xFF, data[1] == 0xD8
+        else { return nil }
         let srcOpts: [CFString: Any] = [kCGImageSourceShouldCache: false]
-        guard let src = CGImageSourceCreateWithURL(url as CFURL, srcOpts as CFDictionary) else {
+        guard let src = CGImageSourceCreateWithData(data as CFData, srcOpts as CFDictionary) else {
             return nil
         }
         let thumb: [CFString: Any] = [
@@ -168,6 +182,8 @@ struct NaLiveWell: View {
     var onPrev: (() -> Void)?
     var onNext: (() -> Void)?
     var onWhy: ((String?) -> Void)?
+    var holdPipe: Bool = false
+    var zoomLive: NaLive.Row? = nil
     @State private var player: AVPlayer?
     @State private var dead = false
     @State private var paused = false
@@ -182,7 +198,7 @@ struct NaLiveWell: View {
                 .lineLimit(2)
                 .minimumScaleFactor(0.7)
                 .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
-            TimelineView(.periodic(from: .now, by: 0.25)) { _ in
+            TimelineView(.periodic(from: .now, by: armed ? 1.0 : 60)) { _ in
                 HStack {
                     Text(NaWatch.clock(player, seconds: row.seconds, armed: armed))
                         .font(.system(size: 13, weight: .heavy))
@@ -227,8 +243,10 @@ struct NaLiveWell: View {
             }
         }
         .onDisappear {
-            stop()
-            if playingID == row.id { playingID = nil }
+            if zoomLive == nil, !holdPipe {
+                stop()
+                if playingID == row.id { playingID = nil }
+            }
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(row.name)
@@ -376,12 +394,13 @@ struct NaLiveWell: View {
 
     private func stop() {
         playSeq += 1
-        if player != nil {
-            NaWatch.drop()
-        }
+        let old = player
         player = nil
         playURL = ""
         paused = false
+        if let old {
+            NaWatch.drop(old)
+        }
     }
 
     private func jump(_ by: Double) {

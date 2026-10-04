@@ -37,7 +37,7 @@ struct LiveZoom: View {
                         .lineLimit(2)
                         .minimumScaleFactor(0.7)
                     Spacer(minLength: 8)
-                    TimelineView(.periodic(from: .now, by: 0.25)) { _ in
+                    TimelineView(.periodic(from: .now, by: player == nil ? 60 : 1.0)) { _ in
                         Text(NaWatch.clock(player, seconds: row.seconds, armed: player != nil))
                             .font(.system(size: 13, weight: .heavy))
                             .foregroundStyle(Theme.silver)
@@ -105,10 +105,11 @@ struct LiveZoom: View {
     }
 
     private func stop() {
-        if player != nil {
-            NaWatch.drop()
-        }
+        let old = player
         player = nil
+        if let old {
+            NaWatch.drop(old)
+        }
     }
 
     private func jump(_ by: Double) {
