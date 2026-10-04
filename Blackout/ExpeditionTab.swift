@@ -15,7 +15,7 @@ private struct KitAssignPerson: Identifiable {
 }
 
 private enum ExpeditionPlate: String, CaseIterable {
-    case condition, roster, timers, inventory, tv
+    case condition, roster, timers, inventory, tv, na
 
     var title: String {
         switch self {
@@ -24,6 +24,7 @@ private enum ExpeditionPlate: String, CaseIterable {
         case .timers: return "TIMERS"
         case .inventory: return "INVENTORY"
         case .tv: return "TV"
+        case .na: return "N/A"
         }
     }
 }
@@ -61,15 +62,31 @@ struct ExpeditionTab: View {
                 .scrollBounceBehavior(.basedOnSize)
             }
         }
+        .onChange(of: runtime.naOpen) { _, ok in
+            if ok {
+                // HOLD 10 still owns TvPlate. Switching plate here tore that
+                // row down on the same turn (ASC 72 class).
+                Task { @MainActor in
+                    plate = .na
+                }
+            }
+        }
+    }
+
+    private var plateCases: [ExpeditionPlate] {
+        ExpeditionPlate.allCases.filter { $0 != .na || runtime.naOpen }
     }
 
     private var plateRail: some View {
         HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-            ForEach(ExpeditionPlate.allCases, id: \.self) { item in
+            ForEach(plateCases, id: \.self) { item in
                 Button(item.title) {
                     plate = item
                     if item == .tv {
                         runtime.pullMapSnap()
+                    }
+                    if item == .na {
+                        runtime.updateSocket.pullAdult(topic: "ALL")
                     }
                 }
                 .buttonStyle(HUDOverlayChipStyle(filled: plate == item))
@@ -90,6 +107,8 @@ struct ExpeditionTab: View {
             inventoryPlate
         case .tv:
             TvPlate(runtime: runtime)
+        case .na:
+            NaPlate(runtime: runtime)
         }
     }
 
@@ -308,6 +327,14 @@ struct ExpeditionTab: View {
             if tvFeeds.isEmpty { return "NO CAMERAS" }
             if !runtime.updateSocket.pipe { return "NO PIPE" }
             return "TV · \(tvFeeds.count)"
+        }
+        if plate == .na {
+            if !runtime.updateSocket.pipe { return "NO PIPE" }
+            let count = runtime.updateSocket.adultRooms.count
+            if count == 0 {
+                return runtime.updateSocket.adultReady ? "NO MATCH" : "N/A"
+            }
+            return "N/A · \(count)"
         }
         return "CONDITION \(runtime.vitals.band.rawValue.uppercased())"
     }

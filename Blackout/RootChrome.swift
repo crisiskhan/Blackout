@@ -40,7 +40,19 @@ struct RootChrome: View {
         }
         .overlay {
             if let row = runtime.zoomLive {
-                LiveZoom(row: row, pipe: runtime.updateSocket.pipe, onClose: runtime.closeLive)
+                LiveZoom(
+                    row: row,
+                    pipe: runtime.updateSocket.pipe,
+                    kept: runtime.heldNa(row.id),
+                    canPrev: runtime.naIndex > 0,
+                    canNext: runtime.naIndex + 1 < runtime.naQueue.count,
+                    onClose: runtime.closeLive,
+                    onKeep: { item in
+                        Task { _ = await runtime.toggleNa(item) }
+                    },
+                    onPrev: { runtime.stepLive(-1) },
+                    onNext: { runtime.stepLive(1) }
+                )
                     .transition(.opacity)
             }
         }

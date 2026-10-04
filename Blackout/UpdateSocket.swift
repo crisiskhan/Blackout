@@ -23,6 +23,8 @@ final class UpdateSocket {
     private var adultStillBusy = false
     private var adultStillQueued: [NaLive.Row] = []
     private var adultPlay: [String: String] = [:]
+    private var adultPublishTask: Task<Void, Never>?
+    private var adultPending: [[AdultDesk.Room]] = []
 
     private let monitor = NWPathMonitor()
     private let monitorQueue = DispatchQueue(label: "blackout.update.path")
@@ -205,9 +207,13 @@ final class UpdateSocket {
 
     private func loadAdult(topic: String = "") async {
         adultReady = false
+        adultPublishTask?.cancel()
+        adultPublishTask = nil
+        adultPending = []
         let held = AdultDesk.faceHoldRooms("ALL")
-        if !held.isEmpty {
-            adultRooms = AdultDesk.merge([held, adultRooms])
+        let kept = AdultKeep.load()
+        if !held.isEmpty || !kept.isEmpty {
+            adultRooms = AdultDesk.merge([held, kept, adultRooms])
         }
         defer {
             let again = adultWanted
@@ -218,6 +224,10 @@ final class UpdateSocket {
             }
         }
         guard pipe else { return }
+        if AdultDesk.keepNeedles(topic) {
+            adultRooms = AdultDesk.merge([held, kept, adultRooms])
+            return
+        }
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 8
         config.timeoutIntervalForResource = AdultDesk.huntNeedles(topic) != nil ? 180 : 40
@@ -229,25 +239,25 @@ final class UpdateSocket {
         var batches: [[AdultDesk.Room]] = []
         if AdultDesk.loveNeedles(topic) {
             batches = await fetchLovePages(session)
-            adultRooms = AdultDesk.merge(batches)
+            adultRooms = AdultDesk.merge([held, kept] + batches)
         } else if AdultDesk.huntNeedles(topic) != nil {
             batches = await fetchFacePages(session, topic)
-            adultRooms = AdultDesk.merge([held] + batches)
+            adultRooms = AdultDesk.merge([held, kept] + batches)
         } else {
             batches = await fetchAdultPages(session, from: 0, count: 1)
-            adultRooms = AdultDesk.merge([held] + batches)
+            adultRooms = AdultDesk.merge([held, kept] + batches)
             if AdultDesk.pages > 1 {
                 let rest = await fetchAdultPages(session, from: 1, count: AdultDesk.pages - 1)
                 if !rest.isEmpty {
                     batches.append(contentsOf: rest)
-                    adultRooms = AdultDesk.merge([held] + batches)
+                    adultRooms = AdultDesk.merge([held, kept] + batches)
                 }
             }
             for hashtag in AdultDesk.topics(topic) {
                 let extra = await fetchAdultPages(session, from: 0, count: 2, topic: hashtag)
                 if !extra.isEmpty {
                     batches.append(contentsOf: extra)
-                    adultRooms = AdultDesk.merge([held] + batches)
+                    adultRooms = AdultDesk.merge([held, kept] + batches)
                 }
             }
         }
@@ -268,9 +278,15 @@ final class UpdateSocket {
     private func fetchFacePages(_ session: URLSession, _ kind: String) async -> [[AdultDesk.Room]] {
         var batches: [[AdultDesk.Room]] = []
         let held = AdultDesk.faceHoldRooms("ALL")
+        let kept = AdultKeep.load()
         if !held.isEmpty {
             batches.append(held)
-            adultRooms = AdultDesk.merge(batches)
+        }
+        if !kept.isEmpty {
+            batches.append(kept)
+        }
+        if !batches.isEmpty {
+            adultPublish(batches)
         }
         let paths = AdultDesk.faceHunt(kind)
         let gift = await fetchGiftAuth(session)
@@ -307,7 +323,7 @@ final class UpdateSocket {
             for await batch in group {
                 if !batch.isEmpty {
                     batches.append(batch)
-                    adultRooms = AdultDesk.merge(batches)
+                    adultPublish(batches)
                 }
                 inflight -= 1
                 enqueue()
@@ -324,9 +340,23 @@ final class UpdateSocket {
                 return next
             }
             batches.append(tagged)
-            adultRooms = AdultDesk.merge(batches)
+            adultPublish(batches)
         }
         return batches
+    }
+
+    private func adultPublish(_ batches: [[AdultDesk.Room]]) {
+        adultPending = batches
+        guard adultPublishTask == nil else { return }
+        adultPublishTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 350_000_000)
+            defer { adultPublishTask = nil }
+            guard !Task.isCancelled else { return }
+            let next = adultPending
+            adultPending = []
+            guard !next.isEmpty else { return }
+            adultRooms = AdultDesk.merge(next)
+        }
     }
 
     private func fetchAdultPages(
@@ -474,11 +504,13 @@ final class UpdateSocket {
     }
 
     func liveAdult(_ row: NaLive.Row) async -> String? {
-        if let cached = adultPlay[row.id], AdultDesk.playlist(cached) != nil {
+        let id = row.id.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !id.isEmpty else { return AdultDesk.playlist(row.url) }
+        if let cached = adultPlay[id], AdultDesk.playlist(cached) != nil {
             return cached
         }
         if let ready = AdultDesk.playlist(row.url), AdultDesk.filePlay(ready) {
-            adultPlay[row.id] = ready
+            adultPlay[id] = ready
             return ready
         }
         guard pipe else { return nil }
@@ -508,7 +540,7 @@ final class UpdateSocket {
         }
         session.invalidateAndCancel()
         guard let url else { return nil }
-        adultPlay[row.id] = url
+        adultPlay[id] = url
         return url
     }
 
@@ -938,9 +970,17 @@ final class UpdateSocket {
     }
 
     private func write(_ name: String, _ data: Data) {
+        let token = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !token.isEmpty,
+              !token.contains("/"),
+              !token.contains("\\"),
+              !token.contains(".."),
+              data.count > 32,
+              data.count < 3_000_000
+        else { return }
         let dir = SnapManifest.folder()
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        try? data.write(to: dir.appendingPathComponent(name), options: .atomic)
+        try? data.write(to: dir.appendingPathComponent(token), options: .atomic)
     }
 }
 

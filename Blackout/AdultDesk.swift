@@ -356,6 +356,13 @@ enum AdultDesk {
         "itisashley",
         "itis ashley",
     ]
+    static let giulianaNeedles = [
+        "giulianacabrazia",
+        "giuliana cabrazia",
+        "giulianacabrazia_",
+        "giulianacabrazia2",
+        "gcabrazia",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
@@ -394,6 +401,7 @@ enum AdultDesk {
         ("SLAVIC CARAMEL", slavicNeedles),
         ("LIL BUSSY GIRL", lilbussyNeedles),
         ("ITISASHLEY", ashleyNeedles),
+        ("GIULIANA CABRAZIA", giulianaNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -411,6 +419,7 @@ enum AdultDesk {
         ("SARIIXO", ["sariixo"]),
         ("KIRAWWRRRA", ["kirawrrra2-0"]),
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
+        ("GIULIANA CABRAZIA", ["giuliana-cabrazia"]),
     ]
     static let faceGifts: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip"]),
@@ -450,6 +459,7 @@ enum AdultDesk {
         ("SLAVIC CARAMEL", ["slaviccaramel"]),
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
         ("ITISASHLEY", ["itisashley"]),
+        ("GIULIANA CABRAZIA", ["giulianacabrazia", "giulianacabrazia2", "gcabrazia"]),
     ]
     /// Proven guest albums. Hunt these first so a JSON desk cannot blank the chip.
     static let faceDesks: [(String, [String])] = [
@@ -543,6 +553,7 @@ enum AdultDesk {
         ("SLAVIC CARAMEL", ["slaviccaramel"]),
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
         ("ITISASHLEY", ["itisashley"]),
+        ("GIULIANA CABRAZIA", ["gcabrazia", "giulianacabrazia_", "giulianacabrazia2"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
@@ -560,6 +571,7 @@ enum AdultDesk {
         "little girl",
     ]
     static let loveChip = "LOVESCAPE"
+    static let keepChip = "KEEP"
     static let loveOrigin = "https://lovescape.cam"
     static let loveTags = ["girls", "couples"]
     static let railExtra = 8
@@ -794,6 +806,11 @@ enum AdultDesk {
             ("file", "https://v4.erome.com/9070/tNRwgjor/xvjyRiKx_720p.mp4", 696, "Itisashley oily"),
             ("file", "https://v83.erome.com/9070/kcGtCmxt/w2jpmOZy_720p.mp4", 202, "Itisashley shower"),
             ("file", "https://v16.erome.com/9070/PoAT0le0/yrGKoVla_720p.mp4", 136, "Itisashley shower cut"),
+        ]),
+        ("GIULIANA CABRAZIA", [
+            ("star", "giuliana-cabrazia-takes-cumshot-on-her-big-ass", 1270, "Giuliana Cabrazia Takes Cumshot On Her Big Ass"),
+            ("star", "giuliana-cabrazia-gets-fucked-by-troy-francisco-s-bbc", 1049, "Giuliana Cabrazia Gets Fucked By Troy Francisco's BBC"),
+            ("star", "emma-magnolia-and-giuliana-cabrazia-s-outdoor-pleasure", 398, "Emma Magnolia And Giuliana Cabrazia's Outdoor Pleasure"),
         ]),
     ]
     /// Guest stills for baked pin tokens. Star stills are `preview-batch/{slug}/thumb.webp`.
@@ -1077,7 +1094,7 @@ enum AdultDesk {
         let text = incoming
         if text.isEmpty { return nil }
         let chip = text.uppercased()
-        if chip == "ALL" || loveNeedles(chip) { return nil }
+        if chip == "ALL" || loveNeedles(chip) || keepNeedles(chip) { return nil }
         if let faces = faceNeedles(chip) { return faces }
         let compact = facePlain(text).replacingOccurrences(of: " ", with: "")
         guard !compact.isEmpty else { return nil }
@@ -1117,6 +1134,10 @@ enum AdultDesk {
 
     static func loveNeedles(_ kind: String) -> Bool {
         kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() == loveChip
+    }
+
+    static func keepNeedles(_ kind: String) -> Bool {
+        kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() == keepChip
     }
 
     static func loveDirectory(tag: String, offset: Int = 0) -> String {
@@ -1807,6 +1828,10 @@ enum AdultDesk {
         id.hasPrefix("adult-face-")
     }
 
+    static func shelfKeep(_ room: Room) -> Bool {
+        faceKeep(room.id) || room.kinds.contains(keepChip)
+    }
+
     static func faceStill(_ desk: String, _ token: String) -> String? {
         if desk == "star" {
             let id = token.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -2156,7 +2181,9 @@ enum AdultDesk {
             } else {
                 score = 1
             }
-            if best == nil || score > best!.0 {
+            if let hit = best {
+                if score > hit.0 { best = (score, play) }
+            } else {
                 best = (score, play)
             }
         }
@@ -2430,25 +2457,28 @@ enum AdultDesk {
     static func merge(_ batches: [[Room]]) -> [Room] {
         var byID: [String: Room] = [:]
         for room in batches.joined() {
-            if var old = byID[room.id] {
-                if room.viewers > old.viewers {
-                    var next = room
-                    if next.image.isEmpty { next.image = old.image }
-                    byID[room.id] = next
-                } else if old.image.isEmpty, !room.image.isEmpty {
-                    old.image = room.image
-                    byID[room.id] = old
+            let rid = room.id.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !rid.isEmpty else { continue }
+            var incoming = room
+            incoming.id = rid
+            if var old = byID[rid] {
+                if incoming.viewers > old.viewers {
+                    if incoming.image.isEmpty { incoming.image = old.image }
+                    byID[rid] = incoming
+                } else if old.image.isEmpty, !incoming.image.isEmpty {
+                    old.image = incoming.image
+                    byID[rid] = old
                 }
                 continue
             }
-            byID[room.id] = room
+            byID[rid] = incoming
         }
         let all = Array(byID.values)
-        let files = all.filter { faceKeep($0.id) }.sorted { lhs, rhs in
+        let files = all.filter { shelfKeep($0) }.sorted { lhs, rhs in
             if lhs.seconds != rhs.seconds { return lhs.seconds > rhs.seconds }
             return lhs.name < rhs.name
         }
-        let rest = all.filter { !faceKeep($0.id) }.sorted { lhs, rhs in
+        let rest = all.filter { !shelfKeep($0) }.sorted { lhs, rhs in
             if lhs.viewers != rhs.viewers { return lhs.viewers > rhs.viewers }
             return lhs.name < rhs.name
         }
@@ -2558,6 +2588,9 @@ enum AdultDesk {
     static func pick(_ rooms: [Room], kind: String, query: String) -> [Room] {
         let chip = kind.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if needle.isEmpty && keepNeedles(chip) {
+            return rooms.filter { $0.kinds.contains(keepChip) }
+        }
         let ask = needle.isEmpty ? nil : huntNeedles(needle)
         let faces = needle.isEmpty ? huntNeedles(chip) : ask
         let love = needle.isEmpty && loveNeedles(chip)
@@ -2605,7 +2638,7 @@ enum AdultDesk {
     static func rail(_ rooms: [Room]) -> [String] {
         var out: [String] = []
         var seen: Set<String> = []
-        for chip in ["ALL", loveChip] + faces.map(\.0) {
+        for chip in ["ALL", keepChip, loveChip] + faces.map(\.0) {
             if seen.insert(chip).inserted {
                 out.append(chip)
             }
