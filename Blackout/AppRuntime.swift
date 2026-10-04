@@ -1707,6 +1707,14 @@ final class AppRuntime {
         if spoke, routeCoords.count >= 2 {
             speakHUDTurns = VoiceNav.hudTurns(routeCoords, travelMode: travelMode, streets: streets)
             speakNextHUD = VoiceNav.nextTurnHUD(routeCoords, streets: streets)
+            let cue = LiveNav.progress(
+                you: fieldYou ?? routeCoords[0],
+                dest: destination(),
+                coords: routeCoords,
+                streets: streets,
+                travelMode: travelMode
+            )
+            liveSpokenTurn = cue.speakTurn
         } else {
             clearSpeakTurns()
         }
@@ -2813,7 +2821,8 @@ final class AppRuntime {
 
     private func applyLiveGuide() {
         guard routeCoords.count >= 2 else { return }
-        guard let you = gnssYou else { return }
+        guard let you = fieldYou else { return }
+        let live = gnssYou != nil
         let streets = searchIndex?.streetNames(along: routeCoords) ?? []
         let cue = LiveNav.progress(
             you: you,
@@ -2824,7 +2833,7 @@ final class AppRuntime {
         )
         if cue.arrived {
             applyRemainingChrome(cue, you: you)
-            if !liveArrived {
+            if live, !liveArrived {
                 liveArrived = true
                 applySpeechTone()
                 _ = speech.speak(VoiceNav.arrive, locale: locale)
@@ -2833,16 +2842,23 @@ final class AppRuntime {
         }
         if cue.offRoute {
             speechChrome = SpeakStatus.offRouteLine()
-            let now = Date().timeIntervalSince1970
-            if now - lastLiveRerouteAt >= LiveNav.replanSeconds {
-                lastLiveRerouteAt = now
-                navigate(mode: travelMode, speak: false)
+            if live {
+                let now = Date().timeIntervalSince1970
+                if LiveNav.shouldReplan(
+                    now: now,
+                    lastReplanAt: lastLiveRerouteAt,
+                    metersToLine: cue.metersToLine,
+                    mode: travelMode
+                ) {
+                    lastLiveRerouteAt = now
+                    navigate(mode: travelMode, speak: false)
+                }
             }
             return
         }
         lastLiveRerouteAt = 0
         applyRemainingChrome(cue, you: you)
-        if !cue.speakTurn.isEmpty, cue.speakTurn != liveSpokenTurn {
+        if live, !cue.speakTurn.isEmpty, cue.speakTurn != liveSpokenTurn {
             liveSpokenTurn = cue.speakTurn
             applySpeechTone()
             _ = speech.speak(cue.speakTurn, locale: locale)

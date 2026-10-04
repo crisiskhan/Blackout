@@ -1226,7 +1226,8 @@ def tip62_nav() -> None:
     walk_ok = (
         "runtime.navigate(mode: .walk)" in map_tab
         and "runtime.navigate(mode: .drive)" in map_tab
-        and "route: runtime.routeCoords" in map_tab
+        and "RouteLine.paintCoords(" in map_tab
+        and "runtime.routeCoords" in map_tab
         and "pickDestination" in map_tab
         and "routeChrome" in map_tab
         # A dead chip tells the field nothing: WALK/DRIVE always tap and always answer.
@@ -1378,6 +1379,7 @@ def main() -> None:
     else:
         ok("TX WEST walking-zoom streets and names use Blackout ink")
     tip65_speak()
+    map_ten()
     tip68_speak_field()
     address_search()
     cesium_globe()
@@ -1398,6 +1400,20 @@ def main() -> None:
     hud_instrument()
     vision_glass()
     sys.exit(fail)
+
+
+def map_ten() -> None:
+    """Night-walk map/nav: metre snap, remaining silver, LAST FIX, honest SEARCH."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_map_ten.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"map-ten live guide contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: map-ten — metre snap, remaining silver, LAST FIX, photo water, SEARCH aliases")
 
 
 def tip65_speak() -> None:

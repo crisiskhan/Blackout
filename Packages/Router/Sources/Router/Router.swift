@@ -470,7 +470,7 @@ public enum GraphRouter {
                     guard index.mode[i] & want != 0 else { continue }
                     let other = Int(index.target[i])
                     guard let to = graph.point(other) else { continue }
-                    let hit = project(
+                    let hit = projectOnSegment(
                         lat: lat,
                         lon: lon,
                         aLat: graph.lat[id],
@@ -527,7 +527,7 @@ public enum GraphRouter {
         return best
     }
 
-    private static func project(
+    public static func projectOnSegment(
         lat: Double,
         lon: Double,
         aLat: Double,

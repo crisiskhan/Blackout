@@ -1397,7 +1397,7 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(EyeDesk.hudLine(tag: "PHONE", text: "NO FIX"), "PHONE NO FIX")
         XCTAssertEqual(EyeDesk.compassChrome(headingDeg: 12, accuracy: 5), "12°")
         XCTAssertEqual(EyeDesk.compassChrome(headingDeg: 12, accuracy: -1), "CAL BAD")
-        XCTAssertEqual(EyeDesk.fixChrome(ageSeconds: 12, hasFix: false), "—")
+        XCTAssertEqual(EyeDesk.fixChrome(ageSeconds: 12, hasFix: false), "LAST FIX")
         XCTAssertEqual(EyeDesk.fixChrome(ageSeconds: 90, hasFix: false), "NO FIX")
         XCTAssertEqual(EyeDesk.condition(status: "good"), .green)
         XCTAssertEqual(EyeDesk.condition(status: "okay"), .yellow)

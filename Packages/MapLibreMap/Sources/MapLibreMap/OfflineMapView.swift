@@ -2742,7 +2742,7 @@ extension PackStyle {
     private static func coversPhoto(_ id: String) -> Bool {
         if id == landFillLayerID { return true }
         if id == khanTreesLayerID || id == khanBuildingsLayerID { return true }
-        if id == "water-fill" { return true }
+        if id == "water-fill" || id == "water" || id == "water-ephemeral" { return true }
         if id == groundWorkedFillLayerID || id == groundWorkedLineLayerID { return true }
         if id == "tracks" || id == "wild-roads" || id == "contours" { return true }
         if id == "public-land-fill" || id == "public-land-line" || id == "flood-fill" {

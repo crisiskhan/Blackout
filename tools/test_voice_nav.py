@@ -245,6 +245,12 @@ def prompt(
 LIVE_NAV_ARRIVE = 25.0
 LIVE_NAV_TURN = 50.0
 LIVE_NAV_OFF = 80.0
+LIVE_NAV_OFF_WALK = 45.0
+LIVE_NAV_REPLAN = 8.0
+
+
+def off_route_limit(mode: str) -> float:
+    return LIVE_NAV_OFF_WALK if mode == "walk" else LIVE_NAV_OFF
 
 
 @dataclass(frozen=True)
@@ -265,14 +271,18 @@ def _project_on_segment(
     start: tuple[float, float],
     end: tuple[float, float],
 ) -> tuple[tuple[float, float], float]:
-    dx = end[0] - start[0]
-    dy = end[1] - start[1]
+    metres_lon = 111_320.0 * math.cos(math.radians(point[0]))
+    ax = (start[1] - point[1]) * metres_lon
+    ay = (start[0] - point[0]) * 110_540.0
+    bx = (end[1] - point[1]) * metres_lon
+    by = (end[0] - point[0]) * 110_540.0
+    dx = bx - ax
+    dy = by - ay
     length2 = dx * dx + dy * dy
-    if length2 < 1e-18:
+    if length2 < 1:
         return start, 0.0
-    t = ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / length2
-    t = max(0.0, min(1.0, t))
-    return (start[0] + t * dx, start[1] + t * dy), t
+    t = min(1.0, max(0.0, (-ax * dx - ay * dy) / length2))
+    return (start[0] + t * (end[0] - start[0]), start[1] + t * (end[1] - start[1])), t
 
 
 def vertex_kind(coords: list[tuple[float, float]], index: int) -> str:
@@ -318,7 +328,16 @@ def live_nav_progress(
     best_pt = coords[0]
     for i in range(len(coords) - 1):
         pt, _ = _project_on_segment(you, coords[i], coords[i + 1])
-        d = haversine(you[0], you[1], pt[0], pt[1])
+        metres_lon = 111_320.0 * math.cos(math.radians(you[0]))
+        ax = (coords[i][1] - you[1]) * metres_lon
+        ay = (coords[i][0] - you[0]) * 110_540.0
+        bx = (coords[i + 1][1] - you[1]) * metres_lon
+        by = (coords[i + 1][0] - you[0]) * 110_540.0
+        dx = bx - ax
+        dy = by - ay
+        length2 = dx * dx + dy * dy
+        t = 0.0 if length2 < 1 else min(1.0, max(0.0, (-ax * dx - ay * dy) / length2))
+        d = math.hypot(ax + t * dx, ay + t * dy)
         if d < best_d:
             best_d = d
             best_i = i
@@ -337,20 +356,28 @@ def live_nav_progress(
     remaining_m = _polyline_meters(remaining)
     dest_pt = dest or coords[-1]
     to_dest = haversine(you[0], you[1], dest_pt[0], dest_pt[1])
-    on_line = best_d <= LIVE_NAV_OFF
+    limit = off_route_limit(mode)
+    on_line = best_d <= limit
     arrived = to_dest < LIVE_NAV_ARRIVE or (on_line and remaining_m < LIVE_NAV_ARRIVE)
-    off_route = (not arrived) and best_d > LIVE_NAV_OFF
+    off_route = (not arrived) and best_d > limit
     meters_to_turn = remaining_m
     for i in range(1, len(remaining) - 1):
         if vertex_kind(remaining, i):
             meters_to_turn = _polyline_meters(remaining[: i + 1])
             break
     speak_turn = ""
-    if not arrived and not off_route and meters_to_turn <= LIVE_NAV_TURN:
-        for line in steps(remaining, mode, sliced):
-            if line.startswith("Turn"):
-                speak_turn = line
-                break
+    if not arrived and not off_route:
+        spoken = steps(remaining, mode, sliced)
+        if meters_to_turn <= LIVE_NAV_TURN:
+            for line in spoken:
+                if line.startswith("Turn"):
+                    speak_turn = line
+                    break
+        if not speak_turn:
+            for line in spoken:
+                if line.startswith("Walk") or line.startswith("Drive"):
+                    speak_turn = line
+                    break
     return LiveCue(
         remaining_meters=remaining_m,
         remaining_coords=remaining,
@@ -489,7 +516,7 @@ class LiveNavTests(unittest.TestCase):
         cue = live_nav_progress(LEFT_TURN_ROUTE[0], LEFT_TURN_ROUTE[-1], LEFT_TURN_ROUTE)
         self.assertFalse(cue.arrived)
         self.assertFalse(cue.off_route)
-        self.assertEqual(cue.speak_turn, "")
+        self.assertEqual(cue.speak_turn, "Walk 656 feet.")
         self.assertEqual(cue.next_hud, "LEFT")
         self.assertAlmostEqual(cue.remaining_meters, 300, delta=5)
         self.assertGreater(cue.meters_to_turn, LIVE_NAV_TURN)
@@ -520,7 +547,7 @@ class LiveNavTests(unittest.TestCase):
         mid = live_nav_progress((0.0, 0.0008983), LEFT_TURN_ROUTE[-1], LEFT_TURN_ROUTE)
         self.assertLess(mid.remaining_meters, start.remaining_meters)
         self.assertAlmostEqual(mid.remaining_meters, 200, delta=8)
-        self.assertEqual(mid.speak_turn, "")
+        self.assertEqual(mid.speak_turn, "Walk 328 feet.")
 
     def test_arrival_is_when_you_are_there(self):
         cue = live_nav_progress(LEFT_TURN_ROUTE[-1], LEFT_TURN_ROUTE[-1], LEFT_TURN_ROUTE)

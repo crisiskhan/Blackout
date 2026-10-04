@@ -604,15 +604,22 @@ public struct SearchIndex: Sendable {
     }
 
     private static func aliases(of token: String) -> Set<String> {
+        if let ordinal = ordinalAliases(token) {
+            return ordinal
+        }
         switch token {
         case "ave", "avenue", "av":
             return ["ave", "avenue", "av", "avenida"]
         case "avenida":
             return ["avenida", "av", "ave", "avenue"]
         case "st", "street":
-            return ["st", "street"]
+            return ["st", "street", "calle"]
+        case "calle":
+            return ["calle", "st", "street"]
         case "rd", "road":
-            return ["rd", "road"]
+            return ["rd", "road", "camino"]
+        case "camino":
+            return ["camino", "rd", "road"]
         case "blvd", "boulevard":
             return ["blvd", "boulevard"]
         case "dr", "drive":
@@ -644,6 +651,38 @@ public struct SearchIndex: Sendable {
         default:
             return [token]
         }
+    }
+
+    private static let ordinalPairs: [(String, String)] = [
+        ("1st", "first"),
+        ("2nd", "second"),
+        ("3rd", "third"),
+        ("4th", "fourth"),
+        ("5th", "fifth"),
+        ("6th", "sixth"),
+        ("7th", "seventh"),
+        ("8th", "eighth"),
+        ("9th", "ninth"),
+        ("10th", "tenth"),
+        ("11th", "eleventh"),
+        ("12th", "twelfth"),
+        ("13th", "thirteenth"),
+        ("14th", "fourteenth"),
+        ("15th", "fifteenth"),
+        ("16th", "sixteenth"),
+        ("17th", "seventeenth"),
+        ("18th", "eighteenth"),
+        ("19th", "nineteenth"),
+        ("20th", "twentieth"),
+    ]
+
+    private static func ordinalAliases(_ token: String) -> Set<String>? {
+        for pair in ordinalPairs {
+            if token == pair.0 || token == pair.1 {
+                return [pair.0, pair.1]
+            }
+        }
+        return nil
     }
 
     private static func exactOrAlias(_ q: String, in docTokens: [String]) -> Bool {
@@ -1013,8 +1052,8 @@ public struct SearchIndex: Sendable {
 
     private static let typeTokens: Set<String> = [
         "ave", "avenue", "av", "avenida",
-        "st", "street",
-        "rd", "road",
+        "st", "street", "calle",
+        "rd", "road", "camino",
         "blvd", "boulevard",
         "dr", "drive",
         "ln", "lane",

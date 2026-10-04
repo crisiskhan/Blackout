@@ -488,7 +488,7 @@ final class RouterTests: XCTestCase {
         let start = LiveNav.progress(you: coords[0], dest: dest, coords: coords)
         XCTAssertFalse(start.arrived)
         XCTAssertFalse(start.offRoute)
-        XCTAssertEqual(start.speakTurn, "")
+        XCTAssertEqual(start.speakTurn, "Walk 656 feet.")
         XCTAssertEqual(start.nextHUD, "LEFT")
         XCTAssertGreaterThan(start.remainingMeters, 250)
         XCTAssertGreaterThan(start.metersToTurn, LiveNav.turnCueMeters)
@@ -517,6 +517,20 @@ final class RouterTests: XCTestCase {
         XCTAssertFalse(off.arrived)
         XCTAssertEqual(off.speakTurn, "")
         XCTAssertGreaterThan(off.metersToLine, LiveNav.offRouteMeters)
+        XCTAssertEqual(LiveNav.offRouteLimit(.walk), LiveNav.offRouteWalkMeters)
+        XCTAssertEqual(LiveNav.offRouteLimit(.drive), LiveNav.offRouteMeters)
+        let walkSide = LiveNav.progress(you: (0.000452, 0.0), dest: dest, coords: coords)
+        XCTAssertTrue(walkSide.offRoute)
+        let driveSide = LiveNav.progress(
+            you: (0.000452, 0.0),
+            dest: dest,
+            coords: coords,
+            travelMode: .drive
+        )
+        XCTAssertFalse(driveSide.offRoute)
+        XCTAssertTrue(LiveNav.shouldReplan(now: 1000, lastReplanAt: 0, metersToLine: 50, mode: .walk))
+        XCTAssertFalse(LiveNav.shouldReplan(now: 1004, lastReplanAt: 1000, metersToLine: 50, mode: .walk))
+        XCTAssertTrue(LiveNav.shouldReplan(now: 1004, lastReplanAt: 1000, metersToLine: 100, mode: .walk))
 
         XCTAssertEqual(SpeakStatus.offRouteLine(), "SPEAK · OFF ROUTE")
         XCTAssertLessThanOrEqual(SpeakStatus.offRouteLine().count, SpeakStatus.maxCharacters)
