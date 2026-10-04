@@ -820,6 +820,12 @@ final class AppRuntime {
         }
     }
 
+    func hushNa() {
+        haltFieldListen()
+        _ = PTTMic.shared.stop()
+        NaWatch.hear()
+    }
+
     func openLive(_ row: NaLive.Row, queue: [NaLive.Row] = []) {
         let token = row.id.trimmingCharacters(in: .whitespacesAndNewlines)
         var incoming = row
@@ -858,6 +864,7 @@ final class AppRuntime {
     }
 
     private func presentLive(_ row: NaLive.Row, seq: UInt) async {
+        hushNa()
         var next = row
         if let raw = await updateSocket.liveAdult(row), AdultDesk.playlist(raw) != nil {
             next.url = raw
@@ -865,12 +872,14 @@ final class AppRuntime {
             next.url = ""
         }
         guard seq == naLiveSeq else { return }
+        hushNa()
         zoomStillName = nil
         zoomLive = next
     }
 
     func closeLive() {
         naLiveSeq &+= 1
+        NaWatch.drop()
         zoomLive = nil
         naQueue = []
         naIndex = 0

@@ -101,23 +101,13 @@ struct LiveZoom: View {
         guard pipe, let play = AdultDesk.playlist(row.url),
               let url = URL(string: play), url.scheme == "https"
         else { return }
-        let item = AVPlayerItem(
-            asset: AVURLAsset(
-                url: url,
-                options: ["AVURLAssetHTTPHeaderFieldsKey": AdultDesk.playHeaders(play)]
-            )
-        )
-        item.preferredForwardBufferDuration = 6
-        item.preferredPeakBitRate = 0
-        let next = AVPlayer(playerItem: item)
-        next.automaticallyWaitsToMinimizeStalling = true
-        next.play()
-        player = next
+        player = NaWatch.play(url: url, headers: AdultDesk.playHeaders(play))
     }
 
     private func stop() {
-        player?.pause()
-        player?.replaceCurrentItem(with: nil)
+        if player != nil {
+            NaWatch.drop()
+        }
         player = nil
     }
 
@@ -158,6 +148,10 @@ private struct LiveZoomScroll: UIViewRepresentable {
         uiView.apply(player)
     }
 
+    static func dismantleUIView(_ uiView: ZoomView, coordinator: ()) {
+        uiView.apply(nil)
+    }
+
     final class ZoomView: UIScrollView, UIScrollViewDelegate {
         let host = PlayerHost()
         private var lastSize: CGSize = .zero
@@ -182,7 +176,7 @@ private struct LiveZoomScroll: UIViewRepresentable {
 
         required init?(coder: NSCoder) { nil }
 
-        func apply(_ player: AVPlayer) {
+        func apply(_ player: AVPlayer?) {
             host.player = player
         }
 

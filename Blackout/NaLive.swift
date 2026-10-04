@@ -1,5 +1,6 @@
 import AVFoundation
 import CoreMedia
+import ImageIO
 import SwiftUI
 import Tokens
 import UIKit
@@ -55,6 +56,71 @@ enum NaLive {
 
 enum NaWatch {
     static let jump = 15
+    static let peak: Double = 2_500_000
+    static let wellStill = 640
+    static let tileStill = 264
+
+    @MainActor
+    private static var pipe: AVPlayer?
+
+    /// Movie playback. FIELD SAY / PTT leave the session in record —
+    /// AVPlayer is then silent, or the audio unit crashes the phone.
+    @MainActor
+    static func hear() {
+        let session = AVAudioSession.sharedInstance()
+        try? session.setCategory(.playback, mode: .moviePlayback)
+        try? session.setActive(true)
+    }
+
+    @MainActor
+    static func play(url: URL, headers: [String: String]) -> AVPlayer {
+        hear()
+        drop()
+        let item = AVPlayerItem(
+            asset: AVURLAsset(
+                url: url,
+                options: ["AVURLAssetHTTPHeaderFieldsKey": headers]
+            )
+        )
+        item.preferredForwardBufferDuration = 4
+        item.preferredPeakBitRate = peak
+        let next = AVPlayer(playerItem: item)
+        next.automaticallyWaitsToMinimizeStalling = true
+        next.isMuted = false
+        next.volume = 1
+        next.play()
+        pipe = next
+        return next
+    }
+
+    @MainActor
+    static func drop() {
+        pipe?.pause()
+        pipe?.replaceCurrentItem(with: nil)
+        pipe = nil
+    }
+
+    static func still(id: String, maxEdge: Int) -> UIImage? {
+        let token = id.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !token.isEmpty, !token.contains("/"), !token.contains("\\"), !token.contains("..")
+        else { return nil }
+        let url = SnapManifest.folder().appendingPathComponent("cam-\(token).jpg")
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        let srcOpts: [CFString: Any] = [kCGImageSourceShouldCache: false]
+        guard let src = CGImageSourceCreateWithURL(url as CFURL, srcOpts as CFDictionary) else {
+            return nil
+        }
+        let thumb: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceShouldCacheImmediately: true,
+            kCGImageSourceThumbnailMaxPixelSize: max(64, maxEdge),
+        ]
+        guard let cg = CGImageSourceCreateThumbnailAtIndex(src, 0, thumb as CFDictionary) else {
+            return nil
+        }
+        return UIImage(cgImage: cg)
+    }
 
     static func seek(_ player: AVPlayer?, url: String, by: Double) -> String? {
         guard let player, player.currentItem != nil else { return "NO STREAM" }
@@ -304,27 +370,15 @@ struct NaLiveWell: View {
         }
         guard playingID == row.id, seq == playSeq else { return }
         playURL = play
-        let item = AVPlayerItem(
-            asset: AVURLAsset(
-                url: url,
-                options: ["AVURLAssetHTTPHeaderFieldsKey": AdultDesk.playHeaders(play)]
-            )
-        )
-        item.preferredForwardBufferDuration = 6
-        item.preferredPeakBitRate = 0
-        let next = AVPlayer(playerItem: item)
-        next.automaticallyWaitsToMinimizeStalling = true
-        next.play()
-        player?.pause()
-        player?.replaceCurrentItem(with: nil)
-        player = next
+        player = NaWatch.play(url: url, headers: AdultDesk.playHeaders(play))
         paused = false
     }
 
     private func stop() {
         playSeq += 1
-        player?.pause()
-        player?.replaceCurrentItem(with: nil)
+        if player != nil {
+            NaWatch.drop()
+        }
         player = nil
         playURL = ""
         paused = false
@@ -366,6 +420,10 @@ private struct NaLiveLayer: UIViewRepresentable {
 
     func updateUIView(_ uiView: PlayerView, context: Context) {
         uiView.player = player
+    }
+
+    static func dismantleUIView(_ uiView: PlayerView, coordinator: ()) {
+        uiView.player = nil
     }
 
     final class PlayerView: UIView {

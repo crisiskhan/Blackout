@@ -5339,8 +5339,9 @@ class LiveZoomTests(unittest.TestCase):
         app = read("Blackout", "AppRuntime.swift")
         self.assertIn("struct LiveZoom", zoom)
         self.assertIn("AVPlayer", zoom)
-        self.assertIn("AVURLAssetHTTPHeaderFieldsKey", zoom)
+        self.assertIn("AVURLAssetHTTPHeaderFieldsKey", live)
         self.assertIn("AdultDesk.playHeaders", zoom)
+        self.assertIn("NaWatch.play(", zoom)
         self.assertIn("UIScrollView", zoom)
         self.assertIn("maximumZoomScale", zoom)
         self.assertIn("CLOSE", zoom)
@@ -5651,6 +5652,48 @@ class NaTheaterCrashTests(unittest.TestCase):
             ],
             ["adult-ok"],
         )
+
+
+class NaTheaterPlayTests(unittest.TestCase):
+    def test_na_play_arms_movie_audio_and_one_capped_player(self):
+        live = read("Blackout", "NaLive.swift")
+        zoom = read("Blackout", "LiveZoom.swift")
+        na = read("Blackout", "NaPlate.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        qa = read("docs", "SOLO_QA.md")
+        watch = live.split("enum NaWatch")[1].split("struct NaLiveWell")[0]
+        self.assertIn("moviePlayback", watch)
+        self.assertIn(".playback", watch)
+        self.assertIn("func hear(", watch)
+        self.assertIn("func play(", watch)
+        self.assertIn("func drop(", watch)
+        self.assertNotIn("defaultToSpeaker", watch)
+        self.assertIn("preferredPeakBitRate = peak", watch)
+        self.assertIn("static let peak", watch)
+        self.assertNotIn("preferredPeakBitRate = 0", live)
+        self.assertNotIn("preferredPeakBitRate = 0", zoom)
+        self.assertIn("isMuted = false", watch)
+        self.assertIn("volume = 1", watch)
+        self.assertIn("func still(", watch)
+        self.assertIn("kCGImageSourceThumbnailMaxPixelSize", watch)
+        self.assertIn("NaWatch.play(", live)
+        self.assertIn("NaWatch.play(", zoom)
+        self.assertIn("NaWatch.drop(", live)
+        self.assertIn("NaWatch.drop(", zoom)
+        self.assertIn("dismantleUIView", live)
+        self.assertIn("dismantleUIView", zoom)
+        self.assertIn(".id(row.id)", na)
+        self.assertIn("NaWatch.still(", na)
+        self.assertNotIn("UIImage(contentsOfFile", na)
+        self.assertIn("func hushNa(", app)
+        hush = app.split("func hushNa(")[1].split("func openLive(")[0]
+        self.assertIn("haltFieldListen()", hush)
+        self.assertIn("PTTMic.shared.stop()", hush)
+        self.assertIn("NaWatch.hear()", hush)
+        self.assertIn("hushNa()", app.split("func presentLive(")[1].split("func closeLive(")[0])
+        self.assertIn("NaWatch.drop()", app.split("func closeLive()")[1].split("func holdCam(")[0])
+        self.assertIn("movie playback", qa.lower())
+        self.assertIn("sound", qa.lower())
 
 
 def desk_text() -> str:

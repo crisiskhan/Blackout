@@ -45,13 +45,17 @@ struct NaPlate: View {
                             kept: runtime.heldNa(row.id),
                             canPrev: naHasPrev,
                             canNext: naHasNext,
-                            onPlay: { await runtime.updateSocket.liveAdult($0) },
+                            onPlay: {
+                                runtime.hushNa()
+                                return await runtime.updateSocket.liveAdult($0)
+                            },
                             onFull: { runtime.openLive($0, queue: naLiveRows) },
                             onKeep: { keepTapped($0) },
                             onPrev: { stepStage(-1) },
                             onNext: { stepStage(1) },
                             onWhy: { naChrome = $0 }
                         )
+                        .id(row.id)
                     } else if runtime.updateSocket.adultReady {
                         Text(naEmptyChrome)
                             .font(.system(size: 13, weight: .heavy))
@@ -426,14 +430,8 @@ struct NaPlate: View {
 
     private func refreshNaStills() {
         var next: [String: UIImage] = [:]
-        let folder = SnapManifest.folder()
         for row in naPageRows {
-            if let hit = naStillCache[row.id] {
-                next[row.id] = hit
-                continue
-            }
-            let url = folder.appendingPathComponent("cam-\(row.id).jpg")
-            if let image = UIImage(contentsOfFile: url.path) {
+            if let image = NaWatch.still(id: row.id, maxEdge: NaWatch.wellStill) {
                 next[row.id] = image
             }
         }
@@ -444,8 +442,7 @@ struct NaPlate: View {
         if let hit = naStillCache[id] { return hit }
         _ = runtime.updateSocket.updatedAt
         _ = runtime.updateSocket.busy
-        let url = SnapManifest.folder().appendingPathComponent("cam-\(id).jpg")
-        return UIImage(contentsOfFile: url.path)
+        return NaWatch.still(id: id, maxEdge: NaWatch.wellStill)
     }
 
     private func sectionLabel(_ title: String) -> some View {
