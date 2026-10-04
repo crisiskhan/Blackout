@@ -437,16 +437,17 @@ public struct SearchIndex: Sendable {
         addrZips: [String] = [],
         addrRanges: [AddrRange] = []
     ) {
-        self.docs = Self.withPackedStreets(docs, streets: addrStreets, ranges: addrRanges)
+        let merged = Self.withPackedStreets(docs, streets: addrStreets, ranges: addrRanges)
+        self.docs = merged
         self.addrStreets = addrStreets
         self.addrZips = addrZips
         self.addrRanges = addrRanges
-        var order = Array(docs.indices)
-        order.sort { docs[$0].folded < docs[$1].folded }
+        var order = Array(merged.indices)
+        order.sort { merged[$0].folded < merged[$1].folded }
         foldedOrder = order
         var tokens: [String: [Int]] = [:]
         var kinds: [String: [Int]] = [:]
-        for (i, d) in docs.enumerated() {
+        for (i, d) in merged.enumerated() {
             var seen = Set<String>()
             for t in d.tokens where seen.insert(t).inserted {
                 tokens[t, default: []].append(i)
@@ -491,7 +492,7 @@ public struct SearchIndex: Sendable {
         streetCenters = centers
         streetFreq = counts
         var streetCell: [Int64: [Int]] = [:]
-        for (i, d) in docs.enumerated() where SearchHUDWord.from(packed: d.kind) == .street {
+        for (i, d) in merged.enumerated() where SearchHUDWord.from(packed: d.kind) == .street {
             guard d.lat.isFinite, d.lon.isFinite else { continue }
             streetCell[Self.nameCell(lat: d.lat, lon: d.lon), default: []].append(i)
         }
@@ -1536,7 +1537,8 @@ public struct SearchIndex: Sendable {
         for i in streets.indices {
             let key = contentKey(streets[i]).joined(separator: "\u{1e}")
             guard !key.isEmpty, !seen.contains(key) else { continue }
-            let n = Double(max(1, counts[i]))
+            guard counts[i] > 0 else { continue }
+            let n = Double(counts[i])
             let lat = latSum[i] / n
             let lon = lonSum[i] / n
             guard lat.isFinite, lon.isFinite else { continue }
