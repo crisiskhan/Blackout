@@ -23,6 +23,8 @@ class HouseQueryTests(unittest.TestCase):
     def test_ordinal_street_is_not_a_house_number(self):
         self.assertIsNone(addrfeat.house_query("10th Street"))
         self.assertIsNone(addrfeat.house_query("21st"))
+        self.assertIsNone(addrfeat.house_query("21 street"))
+        self.assertIsNone(addrfeat.house_query("221 st"))
         self.assertIsNone(addrfeat.house_query("montana"))
         self.assertIsNone(addrfeat.house_query("221"))
 

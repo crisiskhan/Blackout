@@ -1012,8 +1012,26 @@ public struct SearchIndex: Sendable {
         }
         let street = Array(toks.dropFirst())
         guard !street.isEmpty else { return nil }
+        // "21 street" is 21st Street, not house 21 on every packed street.
+        if street.allSatisfy({ streetTypeTokens.contains($0) }) {
+            return nil
+        }
         return (hn, street)
     }
+
+    private static let streetTypeTokens: Set<String> = [
+        "st", "street", "calle",
+        "rd", "road", "camino",
+        "ave", "avenue", "av", "avenida",
+        "blvd", "boulevard",
+        "dr", "drive",
+        "ln", "lane",
+        "hwy", "highway",
+        "pkwy", "parkway",
+        "ct", "court",
+        "cir", "circle",
+        "pl", "place",
+    ]
 
     private static func packedAddr(_ any: Any?) -> (streets: [String], zips: [String], ranges: [AddrRange]) {
         guard let obj = any as? [String: Any] else { return ([], [], []) }

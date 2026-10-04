@@ -121,6 +121,9 @@ final class SearchTests: XCTestCase {
             ["name": "21st Street", "kind": "street", "lat": 31.78, "lon": -106.47],
             ["name": "1st Street Northwest", "kind": "street", "lat": 31.79, "lon": -106.46],
         ])
+        XCTAssertNil(SearchIndex.houseQuery("21 street"))
+        XCTAssertNil(SearchIndex.houseQuery("221 st"))
+        XCTAssertNotNil(SearchIndex.houseQuery("221 montana"))
         XCTAssertEqual(idx.lookup("tenth").first?.name, "10th Street")
         XCTAssertEqual(idx.lookup("10").first?.name, "10th Street")
         XCTAssertEqual(idx.lookup("21st").first?.name, "21st Street")

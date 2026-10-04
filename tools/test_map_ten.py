@@ -282,6 +282,9 @@ class SearchAliasTests(unittest.TestCase):
         self.assertIn('"camino"', aliases)
         self.assertIn('"northwest"', aliases)
         self.assertIn("func ordinalSet(", search)
+        house = search.split("func houseQuery(")[1].split("func packedAddr(")[0]
+        self.assertIn("streetTypeTokens", house)
+        self.assertIn("21 street", house)
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("10th", qa)
         self.assertIn("21st", qa)
