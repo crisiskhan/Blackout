@@ -15,12 +15,13 @@ let package = Package(
         .package(path: "../DeadReckoning"),
         .package(path: "../Almanac"),
         .package(path: "../BlackBox"),
+        .package(path: "../CryptoParty"),
         .package(path: "../../Vendor/MapLibre"),
     ],
     targets: [
         .target(
             name: "MapLibreMap",
-            dependencies: ["PackIO", "Tokens", "Search", "Router", "DeadReckoning", "Almanac", "BlackBox", "MapLibre"],
+            dependencies: ["PackIO", "Tokens", "Search", "Router", "DeadReckoning", "Almanac", "BlackBox", "CryptoParty", "MapLibre"],
             resources: [.process("Emblems")]
         ),
         .testTarget(name: "MapLibreMapTests", dependencies: ["MapLibreMap", "Router"]),

@@ -54,6 +54,10 @@ enum DeviceVault {
         DeviceSeal.isSealed(data)
     }
 
+    static func attach() {
+        DeviceKey.resolve = { key() }
+    }
+
     private static func key() -> SymmetricKey? {
         if let existing = readKey() { return existing }
         let fresh = SymmetricKey(size: .bits256)

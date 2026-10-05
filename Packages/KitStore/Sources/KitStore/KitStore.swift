@@ -1,4 +1,5 @@
 import Foundation
+import CryptoParty
 
 public struct GearItem: Equatable, Sendable, Identifiable, Codable {
     public var id: String
@@ -89,14 +90,14 @@ public struct KitBag: Equatable, Sendable {
 
     public static func save(_ bag: KitBag, defaults: UserDefaults = .standard) {
         if let data = try? JSONEncoder().encode(bag.items), !bag.items.isEmpty {
-            defaults.set(data, forKey: persistKey)
+            SealedPersist.put(data, forKey: persistKey, defaults: defaults)
         } else {
-            defaults.removeObject(forKey: persistKey)
+            SealedPersist.remove(forKey: persistKey, defaults: defaults)
         }
     }
 
     public static func load(defaults: UserDefaults = .standard) -> KitBag {
-        guard let data = defaults.data(forKey: persistKey),
+        guard let data = SealedPersist.get(forKey: persistKey, defaults: defaults),
               let items = try? JSONDecoder().decode([GearItem].self, from: data),
               !items.isEmpty
         else { return emptyWater() }

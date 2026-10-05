@@ -24,6 +24,7 @@ import Search
 import Tokens
 import VisionCoreML
 import FieldCorpus
+import CryptoParty
 
 @MainActor
 @Observable
@@ -193,6 +194,7 @@ final class AppRuntime {
     private let fix = MeshFix()
 
     init() {
+        DeviceVault.attach()
         mesh = MeshNet(box: box)
         red = RedPlate(box: box)
         timers = TimerBoard(box: box)
@@ -235,8 +237,8 @@ final class AppRuntime {
         }
         mesh.partyCode = roster.code
         youEmblem = PersonEmblem.load()
-        youName = MeshPOS.nameToken(UserDefaults.standard.string(forKey: "you.name") ?? "")
-        youStatus = PartyStatus.parse(UserDefaults.standard.string(forKey: "you.status"))
+        youName = MeshPOS.nameToken(SealedPersist.getText(forKey: "you.name") ?? "")
+        youStatus = PartyStatus.parse(SealedPersist.getText(forKey: "you.status"))
         loadDiary()
         eyeLayers = EyeDesk.loadLayers()
         eyePalette = EyeDesk.loadPalette()
@@ -259,7 +261,7 @@ final class AppRuntime {
             }
         }
         roster = roster.rebindingLead(to: mesh.localID, name: displayYouName)
-        if let raw = UserDefaults.standard.string(forKey: "you.role"),
+        if let raw = SealedPersist.getText(forKey: "you.role"),
            let role = PartyRole.parse(raw)
         {
             roster = roster.seating(id: mesh.localID, name: displayYouName, role: role)
@@ -269,7 +271,7 @@ final class AppRuntime {
         }
         if let root = Self.resourceRoot() {
             packs = try? PackStore(root: root.appendingPathComponent("Packs"), box: box)
-            if let id = UserDefaults.standard.string(forKey: "pack.id") {
+            if let id = SealedPersist.getText(forKey: "pack.id") {
                 try? packs?.switchTo(id)
             }
         }
@@ -394,20 +396,15 @@ final class AppRuntime {
     func persistDiary() {
         let code = roster.code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         guard !code.isEmpty, let data = try? JSONEncoder().encode(diary) else { return }
-        guard let sealed = DeviceVault.seal(data) else { return }
-        UserDefaults.standard.set(sealed, forKey: "diary.v1.\(code)")
+        SealedPersist.put(data, forKey: "diary.v1.\(code)")
     }
 
     private func loadDiary() {
         let code = roster.code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        if let data = UserDefaults.standard.data(forKey: "diary.v1.\(code)"),
-           let plain = DeviceVault.open(data),
+        if let plain = SealedPersist.get(forKey: "diary.v1.\(code)"),
            let log = try? JSONDecoder().decode(DiaryLog.self, from: plain)
         {
             diary = log
-            if !DeviceVault.isSealed(data) {
-                persistDiary()
-            }
         } else {
             diary = DiaryLog()
         }
@@ -452,7 +449,7 @@ final class AppRuntime {
         }
         let role = roster.members.first(where: { $0.id == id })?.role ?? .lead
         if id == mesh.localID {
-            UserDefaults.standard.set(role.rawValue, forKey: "you.role")
+            SealedPersist.putText(role.rawValue, forKey: "you.role")
         }
         sendRosterSeat(id: id, name: name, role: role)
         return nil
@@ -465,7 +462,7 @@ final class AppRuntime {
             return "\(role.title) · SEATED"
         }
         if id == mesh.localID {
-            UserDefaults.standard.set(role.rawValue, forKey: "you.role")
+            SealedPersist.putText(role.rawValue, forKey: "you.role")
         }
         sendRosterSeat(id: id, name: name, role: role)
         return nil
@@ -1184,7 +1181,7 @@ final class AppRuntime {
 
     func setYouName(_ raw: String) {
         youName = MeshPOS.nameToken(raw)
-        UserDefaults.standard.set(youName, forKey: "you.name")
+        SealedPersist.putText(youName, forKey: "you.name")
         if heldParty?.isYou == true {
             heldParty?.name = youName
         }
@@ -1195,7 +1192,7 @@ final class AppRuntime {
 
     func setYouStatus(_ status: PartyStatus) {
         youStatus = status
-        UserDefaults.standard.set(status.rawValue, forKey: "you.status")
+        SealedPersist.putText(status.rawValue, forKey: "you.status")
         if heldParty?.isYou == true {
             heldParty?.status = status
         }
@@ -2178,7 +2175,7 @@ final class AppRuntime {
                 let beforeYou = roster.members.first(where: { $0.id == mesh.localID })?.role
                 roster = roster.upserting(id: parsed.id, name: parsed.name, role: role)
                 if let youRole = roster.members.first(where: { $0.id == mesh.localID })?.role {
-                    UserDefaults.standard.set(youRole.rawValue, forKey: "you.role")
+                    SealedPersist.putText(youRole.rawValue, forKey: "you.role")
                 }
                 if parsed.id != mesh.localID, beforeYou != roster.members.first(where: { $0.id == mesh.localID })?.role {
                     sendRosterSeat()
@@ -2324,7 +2321,7 @@ final class AppRuntime {
 
     func switchPack(_ id: String) {
         try? packs?.switchTo(id)
-        UserDefaults.standard.set(id, forKey: "pack.id")
+        SealedPersist.putText(id, forKey: "pack.id")
         showInstruments = false
         lockOn = false
         routeTarget = nil

@@ -881,6 +881,20 @@ def party_seal() -> None:
     ok("Done: party seal — AES-GCM bodies, HTTPS SNAP, no new chrome")
 
 
+def device_vault() -> None:
+    """User-written and location persist is AES-GCM on this phone."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_device_vault.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"device vault contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: device vault — AES-GCM user persist, file-protected SNAP, no iCloud")
+
+
 def diary() -> None:
     """DIARY is the party day feed. Current time, same group, newest first."""
     contracts = subprocess.run(
@@ -1340,6 +1354,7 @@ def main() -> None:
     mesh_presence()
     party_seal()
     diary()
+    device_vault()
     vessel()
     archive_bundle_id()
     l10n()

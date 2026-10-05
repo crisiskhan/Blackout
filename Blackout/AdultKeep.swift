@@ -1,3 +1,4 @@
+import CryptoParty
 import Foundation
 
 /// Local N/A shelf. Playable HTTPS only. Airplane keeps the last list.
@@ -28,7 +29,7 @@ enum AdultKeep {
     }
 
     static func load() -> [AdultDesk.Room] {
-        guard let data = UserDefaults.standard.data(forKey: key),
+        guard let data = SealedPersist.get(forKey: key),
               data.count <= byteCap,
               let items = try? JSONDecoder().decode([Item].self, from: data)
         else { return [] }
@@ -122,7 +123,7 @@ enum AdultKeep {
             )
         }
         if let data = try? JSONEncoder().encode(items) {
-            UserDefaults.standard.set(data, forKey: key)
+            SealedPersist.put(data, forKey: key)
         }
     }
 }

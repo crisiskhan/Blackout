@@ -752,11 +752,42 @@ final class CryptoPartyTests: XCTestCase {
         XCTAssertEqual(DeviceSeal.openBody(plain, key: nil), plain)
         XCTAssertNil(DeviceSeal.openBody(Data([0x42, 0x4F, 0x32, 0x00]), key: nil))
     }
+
+    func testSealedPersistRoundtripAndFailClosed() {
+        let name = "seal.test.\(UUID().uuidString)"
+        let suite = UserDefaults(suiteName: name)!
+        let key = SymmetricKey(size: .bits256)
+        DeviceKey.resolve = { key }
+        defer {
+            DeviceKey.resolve = nil
+            suite.removePersistentDomain(forName: name)
+        }
+        SealedPersist.put(Data("ridge".utf8), forKey: "note", defaults: suite)
+        XCTAssertTrue(DeviceSeal.isSealed(suite.data(forKey: "note")!))
+        XCTAssertEqual(SealedPersist.get(forKey: "note", defaults: suite), Data("ridge".utf8))
+        DeviceKey.resolve = { nil }
+        SealedPersist.put(Data("plain".utf8), forKey: "closed", defaults: suite)
+        XCTAssertNil(suite.object(forKey: "closed"))
+    }
+
+    func testSealedPersistReadsLeftoverPlaintext() {
+        let name = "seal.plain.\(UUID().uuidString)"
+        let suite = UserDefaults(suiteName: name)!
+        let key = SymmetricKey(size: .bits256)
+        DeviceKey.resolve = { key }
+        defer {
+            DeviceKey.resolve = nil
+            suite.removePersistentDomain(forName: name)
+        }
+        suite.set(Data("old".utf8), forKey: "note")
+        XCTAssertEqual(SealedPersist.get(forKey: "note", defaults: suite), Data("old".utf8))
+        XCTAssertTrue(DeviceSeal.isSealed(suite.data(forKey: "note")!))
+    }
 }
 ''',
     )
 
-    w(PKG / "Vitals" / "Package.swift", package_swift("Vitals", []))
+    w(PKG / "Vitals" / "Package.swift", package_swift("Vitals", ["CryptoParty"]))
     w(
         PKG / "Vitals" / "Sources" / "Vitals" / "Vitals.swift",
         r'''import Foundation
@@ -1098,7 +1129,7 @@ final class RedAlertTests: XCTestCase {
 ''',
     )
 
-    w(PKG / "TimerSync" / "Package.swift", package_swift("TimerSync", ["BlackBox"]))
+    w(PKG / "TimerSync" / "Package.swift", package_swift("TimerSync", ["BlackBox", "CryptoParty"]))
     w(
         PKG / "TimerSync" / "Sources" / "TimerSync" / "TimerSync.swift",
         r'''import Foundation
@@ -1795,7 +1826,7 @@ final class VisionCoreMLTests: XCTestCase {
 ''',
     )
 
-    w(PKG / "KitStore" / "Package.swift", package_swift("KitStore", []))
+    w(PKG / "KitStore" / "Package.swift", package_swift("KitStore", ["CryptoParty"]))
     w(
         PKG / "KitStore" / "Sources" / "KitStore" / "KitStore.swift",
         r'''import Foundation
@@ -2021,10 +2052,11 @@ let package = Package(
         .package(path: "../DeadReckoning"),
         .package(path: "../Almanac"),
         .package(path: "../BlackBox"),
+        .package(path: "../CryptoParty"),
         .package(path: "../../Vendor/MapLibre"),
     ],
     targets: [
-        .target(name: "MapLibreMap", dependencies: ["PackIO", "Search", "Router", "DeadReckoning", "Almanac", "BlackBox", "MapLibre"]),
+        .target(name: "MapLibreMap", dependencies: ["PackIO", "Search", "Router", "DeadReckoning", "Almanac", "BlackBox", "CryptoParty", "MapLibre"]),
         .testTarget(name: "MapLibreMapTests", dependencies: ["MapLibreMap"]),
     ]
 )

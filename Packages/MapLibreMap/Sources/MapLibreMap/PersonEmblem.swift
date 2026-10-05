@@ -1,5 +1,6 @@
 import Foundation
 import UIKit
+import CryptoParty
 
 /// The chosen face on YOU and on party bodies. These are person marks,
 /// not overlay wildlife GPS.
@@ -84,11 +85,11 @@ public enum PersonEmblem: String, CaseIterable, Sendable, Equatable {
     }
 
     public static func load(defaults: UserDefaults = .standard) -> PersonEmblem {
-        resolved(defaults.string(forKey: key))
+        resolved(SealedPersist.getText(forKey: key, defaults: defaults))
     }
 
     public static func save(_ emblem: PersonEmblem, defaults: UserDefaults = .standard) {
-        defaults.set(emblem.rawValue, forKey: key)
+        SealedPersist.putText(emblem.rawValue, forKey: key, defaults: defaults)
         defaults.synchronize()
     }
 

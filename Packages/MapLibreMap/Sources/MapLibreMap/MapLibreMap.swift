@@ -6,6 +6,7 @@ import DeadReckoning
 import Almanac
 import BlackBox
 import Tokens
+import CryptoParty
 
 public struct MapMark: Equatable, Sendable, Identifiable {
     public var id: String
@@ -184,15 +185,15 @@ public enum MarkStore {
 
     public static func save(_ marks: [MapMark], defaults: UserDefaults = .standard) {
         if let data = try? JSONEncoder().encode(marks) {
-            defaults.set(data, forKey: key)
+            SealedPersist.put(data, forKey: key, defaults: defaults)
         } else {
-            defaults.removeObject(forKey: key)
+            SealedPersist.remove(forKey: key, defaults: defaults)
         }
         defaults.synchronize()
     }
 
     public static func load(defaults: UserDefaults = .standard) -> [MapMark] {
-        guard let data = defaults.data(forKey: key) else { return [] }
+        guard let data = SealedPersist.get(forKey: key, defaults: defaults) else { return [] }
         let loaded = (try? JSONDecoder().decode([MapMark].self, from: data)) ?? []
         return uniqued(loaded).map { mark in
             MapMark(
@@ -307,7 +308,7 @@ public enum MarkGone {
         if ids.count > cap {
             ids = Array(ids.prefix(cap))
         }
-        defaults.set(ids, forKey: key)
+        SealedPersist.putStrings(ids, forKey: key, defaults: defaults)
         defaults.synchronize()
     }
 
@@ -318,7 +319,7 @@ public enum MarkGone {
     }
 
     public static func load(defaults: UserDefaults = .standard) -> [String] {
-        defaults.stringArray(forKey: key) ?? []
+        SealedPersist.getStrings(forKey: key, defaults: defaults) ?? []
     }
 }
 
@@ -575,14 +576,14 @@ public enum UserPuck {
         defaults: UserDefaults = .standard
     ) {
         guard shouldPaint(lat: lat, lon: lon) else { return }
-        defaults.set([lat, lon], forKey: fixKey)
+        SealedPersist.putPair(lat: lat, lon: lon, forKey: fixKey, defaults: defaults)
     }
 
     public static func loadFix(defaults: UserDefaults = .standard) -> (lat: Double, lon: Double)? {
-        guard let pair = defaults.array(forKey: fixKey) as? [Double], pair.count == 2,
-              shouldPaint(lat: pair[0], lon: pair[1])
+        guard let pair = SealedPersist.getPair(forKey: fixKey, defaults: defaults),
+              shouldPaint(lat: pair.0, lon: pair.1)
         else { return nil }
-        return (pair[0], pair[1])
+        return (pair.0, pair.1)
     }
 
     public static func coordinate(
