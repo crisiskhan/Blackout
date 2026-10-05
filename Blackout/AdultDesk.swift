@@ -354,6 +354,10 @@ enum AdultDesk {
     ]
     static let ashleyNeedles = [
         "itisashley",
+        "luvashxx",
+        "itisashleyy",
+        "ofcourseashley",
+        "ofcourseashley_",
         "itis ashley",
     ]
     static let giulianaNeedles = [
@@ -465,7 +469,7 @@ enum AdultDesk {
         ("ELVANA VITAA", ["elvanavitaa"]),
         ("SLAVIC CARAMEL", ["slaviccaramel"]),
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
-        ("ITISASHLEY", ["itisashley"]),
+        ("ITISASHLEY", ["itisashley", "luvashxx", "itisashleyy", "ofcourseashley"]),
         ("GIULIANA CABRAZIA", ["giulianacabrazia", "giulianacabrazia2", "gcabrazia"]),
     ]
     /// Proven guest albums. Hunt these first so a JSON desk cannot blank the chip.
@@ -519,7 +523,15 @@ enum AdultDesk {
         ("IMHIZBAEEXX", ["CZ4UXKiP", "5Ap1AVt9"]),
         ("YESS ENIA69", ["QuJsjzdM"]),
         ("ANNABELLE RIOS", ["uto61E9C", "HTwoGgwW", "FDZSNMht", "ZCXHIMZ5"]),
-        ("ITISASHLEY", ["tNRwgjor", "kcGtCmxt", "PoAT0le0"]),
+        ("ITISASHLEY", [
+            "tNRwgjor",
+            "kcGtCmxt",
+            "PoAT0le0",
+            "9e8OKgPA",
+            "ogqEfuYU",
+            "t3MTaJMC",
+            "6svu4cRT",
+        ]),
         ("ALEJAMIEL18", [
             "y01IMarw",
             "22xZVJW7",
@@ -567,7 +579,7 @@ enum AdultDesk {
         ("ELVANA VITAA", ["elvanavitaa"]),
         ("SLAVIC CARAMEL", ["slaviccaramel"]),
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
-        ("ITISASHLEY", ["itisashley"]),
+        ("ITISASHLEY", ["itisashley", "luvashxx"]),
         ("GIULIANA CABRAZIA", ["gcabrazia", "giulianacabrazia_", "giulianacabrazia2"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
@@ -849,7 +861,24 @@ enum AdultDesk {
         ("ITISASHLEY", [
             ("file", "https://v4.erome.com/9070/tNRwgjor/xvjyRiKx_720p.mp4", 696, "Itisashley oily"),
             ("file", "https://v83.erome.com/9070/kcGtCmxt/w2jpmOZy_720p.mp4", 202, "Itisashley shower"),
+            ("file", "https://v53.erome.com/9061/9e8OKgPA/rEOaTeJG_720p.mp4", 137, "Luvashxx"),
             ("file", "https://v16.erome.com/9070/PoAT0le0/yrGKoVla_720p.mp4", 136, "Itisashley shower cut"),
+            ("file", "https://v53.erome.com/9061/9e8OKgPA/FwpKa0jk_720p.mp4", 119, "Luvashxx"),
+            ("file", "https://v49.erome.com/9060/ogqEfuYU/HwxVrF6i_720p.mp4", 116, "Luvashxx"),
+            ("file", "https://v11.erome.com/9061/t3MTaJMC/W9ORi69a_720p.mp4", 72, "Luvashxx"),
+            ("file", "https://v11.erome.com/9061/t3MTaJMC/xn2yaRlZ_720p.mp4", 70, "Luvashxx"),
+            ("file", "https://v44.erome.com/9061/6svu4cRT/DdGVZWKS_720p.mp4", 67, "Luvashxx"),
+            ("file", "https://v11.erome.com/9061/t3MTaJMC/bKosvdRt_720p.mp4", 39, "Luvashxx"),
+            ("file", "https://v44.erome.com/9061/6svu4cRT/8Le5ywE1_720p.mp4", 31, "Luvashxx"),
+            ("file", "https://v11.erome.com/9061/t3MTaJMC/4XFIUKGV_720p.mp4", 26, "Luvashxx"),
+            ("file", "https://v11.erome.com/9061/t3MTaJMC/IkMP1pjt_720p.mp4", 25, "Luvashxx"),
+            ("file", "https://v44.erome.com/9061/6svu4cRT/uvjwfHPM_720p.mp4", 17, "Luvashxx"),
+            ("file", "https://v53.erome.com/9061/9e8OKgPA/xPwIKvg4_720p.mp4", 14, "Luvashxx"),
+            ("file", "https://v53.erome.com/9061/9e8OKgPA/gBnoxSag_720p.mp4", 13, "Luvashxx"),
+            ("file", "https://v53.erome.com/9061/9e8OKgPA/XMFFZyCb_720p.mp4", 9, "Luvashxx"),
+            ("file", "https://v53.erome.com/9061/9e8OKgPA/oBBJQOIV_720p.mp4", 7, "Luvashxx"),
+            ("file", "https://v44.erome.com/9061/6svu4cRT/XCdgvE5Y_720p.mp4", 3, "Luvashxx"),
+            ("file", "https://v44.erome.com/9061/6svu4cRT/scJV8Hsf_720p.mp4", 2, "Luvashxx"),
         ]),
         ("GIULIANA CABRAZIA", [
             ("star", "giuliana-cabrazia-takes-cumshot-on-her-big-ass", 1270, "Giuliana Cabrazia Takes Cumshot On Her Big Ass"),
