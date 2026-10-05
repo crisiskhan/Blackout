@@ -66,7 +66,7 @@ final class CryptoPartyTests: XCTestCase {
         let stored = suite.data(forKey: "note")
         XCTAssertNotNil(stored)
         XCTAssertTrue(DeviceSeal.isSealed(stored!))
-        XCTAssertFalse(String(data: stored!, encoding: .utf8)?.contains("ridge") ?? true)
+        XCTAssertFalse((String(data: stored!, encoding: .utf8) ?? "").contains("ridge"))
         XCTAssertEqual(SealedPersist.get(forKey: "note", defaults: suite), Data("ridge".utf8))
         DeviceKey.resolve = { nil }
         SealedPersist.put(Data("plain".utf8), forKey: "closed", defaults: suite)

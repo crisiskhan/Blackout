@@ -72,7 +72,6 @@ struct LiveZoom: View {
         }
         .onChange(of: row.id) { _, _ in
             chrome = nil
-            stop()
             start()
         }
         .onDisappear { stop() }
@@ -100,7 +99,10 @@ struct LiveZoom: View {
     private func start() {
         guard pipe, let play = AdultDesk.playlist(row.url),
               let url = URL(string: play), url.scheme == "https"
-        else { return }
+        else {
+            stop()
+            return
+        }
         player = NaWatch.play(url: url, headers: AdultDesk.playHeaders(play))
     }
 

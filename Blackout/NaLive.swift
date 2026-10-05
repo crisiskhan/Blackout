@@ -77,7 +77,17 @@ enum NaWatch {
     @MainActor
     static func play(url: URL, headers: [String: String]) -> AVPlayer {
         hear()
-        let old = pipe
+        if let current = pipe,
+           let asset = current.currentItem?.asset as? AVURLAsset,
+           asset.url.absoluteString == url.absoluteString
+        {
+            current.isMuted = false
+            current.volume = 1
+            if current.rate == 0 {
+                current.play()
+            }
+            return current
+        }
         let item = AVPlayerItem(
             asset: AVURLAsset(
                 url: url,
@@ -86,15 +96,20 @@ enum NaWatch {
         )
         item.preferredForwardBufferDuration = 4
         item.preferredPeakBitRate = peak
+        if let current = pipe {
+            current.replaceCurrentItem(with: item)
+            current.automaticallyWaitsToMinimizeStalling = true
+            current.isMuted = false
+            current.volume = 1
+            current.play()
+            return current
+        }
         let next = AVPlayer(playerItem: item)
         next.automaticallyWaitsToMinimizeStalling = true
         next.isMuted = false
         next.volume = 1
         next.play()
         pipe = next
-        if let old, old !== next {
-            drop(old)
-        }
         return next
     }
 
@@ -107,6 +122,7 @@ enum NaWatch {
         if pipe === old { pipe = nil }
         old.pause()
         Task { @MainActor in
+            await Task.yield()
             old.replaceCurrentItem(with: nil)
         }
     }
@@ -344,7 +360,8 @@ struct NaLiveWell: View {
 
     private func goFull() {
         let keep = playURL
-        stop()
+        playSeq += 1
+        player = nil
         if playingID == row.id { playingID = nil }
         var next = row
         if AdultDesk.playlist(keep) != nil {

@@ -455,6 +455,10 @@ ADULT_LILBUSSY = (
 )
 ADULT_ASHLEY = (
     "itisashley",
+    "luvashxx",
+    "itisashleyy",
+    "ofcourseashley",
+    "ofcourseashley_",
     "itis ashley",
 )
 ADULT_GIULIANA = (
@@ -463,6 +467,17 @@ ADULT_GIULIANA = (
     "giulianacabrazia_",
     "giulianacabrazia2",
     "gcabrazia",
+)
+ADULT_ALEJA = (
+    "alejamiel18",
+    "alejamieles",
+    "aleja mieles",
+    "aleja miel",
+)
+ADULT_LIZZY = (
+    "lust4lizzy",
+    "lust4lizzie",
+    "lust 4 lizzy",
 )
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
@@ -503,6 +518,8 @@ ADULT_FACES = (
     ("LIL BUSSY GIRL", ADULT_LILBUSSY),
     ("ITISASHLEY", ADULT_ASHLEY),
     ("GIULIANA CABRAZIA", ADULT_GIULIANA),
+    ("ALEJAMIEL18", ADULT_ALEJA),
+    ("LUST4LIZZY", ADULT_LIZZY),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_KEEP_CHIP = "KEEP"
@@ -577,6 +594,17 @@ def adult_playlist(raw: str) -> str | None:
 def adult_file_play(raw: str) -> bool:
     low = str(raw or "").strip().lower()
     return ".mp4" in low and ".m3u8" not in low
+
+
+def adult_ready_play(row: dict) -> str | None:
+    """Held guest files play as stored. Live rooms still resolve."""
+    play = adult_playlist(str(row.get("url") or ""))
+    if not play:
+        return None
+    rid = str(row.get("id") or "")
+    if adult_file_play(play) or adult_face_keep(rid):
+        return play
+    return None
 
 
 def adult_live_play(source: str, text: str) -> str | None:
@@ -1309,6 +1337,13 @@ ADULT_FACE_HOLDS = (
         ("file", "https://v203.erome.com/237/WENqgh3u/fGMjYVty_480p.mp4", 387, "Mikeila J solo 2"),
         ("file", "https://v15.erome.com/959/iLRhKOjv/h91kkrYB_720p.mp4", 380, "MikeilaJ"),
         ("file", "https://v15.erome.com/959/iLRhKOjv/oRWzrIjH_720p.mp4", 379, "MikeilaJ"),
+        ("file", "https://v203.erome.com/325/TqelxrBL/Iy9KYgpy_720p.mp4", 238, "Mikeilaj"),
+        ("file", "https://v203.erome.com/325/TqelxrBL/896AhTNO_720p.mp4", 227, "Mikeilaj"),
+        ("file", "https://v3.erome.com/1052/WKXrg3je/sluCcNwB_720p.mp4", 227, "Mikeila J"),
+        ("file", "https://v55.erome.com/2314/ZcfWNKPT/d9S2ePdK_720p.mp4", 227, "3-14-24 Mikeilaj"),
+        ("file", "https://v326.erome.com/2110/nhPSw6n0/XQBlUN5Q_720p.mp4", 226, "Mikeila J"),
+        ("file", "https://v3.erome.com/1052/WKXrg3je/25Bojyw9_720p.mp4", 224, "Mikeila J"),
+        ("file", "https://v201.erome.com/331/edMkQtmB/OlOrfssY_480p.mp4", 163, "MikeilaJ"),
     )),
     ("JUICYJAS TV", (
         ("file", "https://v13.erome.com/1454/OWRwt8jD/gOUvm3em_720p.mp4", 567, "Juicyjass"),
@@ -1317,28 +1352,45 @@ ADULT_FACE_HOLDS = (
         ("file", "https://v105.erome.com/7729/p5AlhPzA/shXMd6w8_720p.mp4", 445, "JJUICYJASS AKA BABYFACEJASS"),
         ("file", "https://v78.erome.com/7455/KmjJcLJT/NNAdFmNN_720p.mp4", 445, "jjuicyjass"),
         ("file", "https://v102.erome.com/1968/bYEwXbLM/3nwkSE2f_720p.mp4", 406, "Juicyjass"),
+        ("file", "https://v108.erome.com/7136/58Uaa6Ig/8feiQ8cD_720p.mp4", 375, "jjuicyjass"),
         ("file", "https://v102.erome.com/1968/bYEwXbLM/2AyuHVzF_720p.mp4", 354, "Juicyjass"),
         ("file", "https://v54.erome.com/1475/30gEMEg3/4yCGE1s8_720p.mp4", 354, "Juicyjass"),
         ("file", "https://v105.erome.com/7729/p5AlhPzA/ZPEnIqip_720p.mp4", 291, "JJUICYJASS AKA BABYFACEJASS"),
         ("file", "https://v3.erome.com/7455/yz4tK6d5/g9QnFotZ_720p.mp4", 281, "jjuicyjass"),
+        ("file", "https://v68.erome.com/2617/xAyhB4PW/Y7200Yvr_720p.mp4", 176, "Jjuicyjass"),
+        ("file", "https://v6.erome.com/1335/2Moj4ufr/5r7vPWbo_720p.mp4", 171, "Juicyjass"),
+        ("file", "https://v102.erome.com/1968/bYEwXbLM/tRFPI2Sz_720p.mp4", 137, "Juicyjass"),
+        ("file", "https://v68.erome.com/2617/xAyhB4PW/7GL5f7fQ_720p.mp4", 115, "Jjuicyjass"),
+        ("file", "https://v107.erome.com/3946/wHFqflcw/ToKRnmXv_720p.mp4", 63, "juicyjass solo"),
     )),
     ("HONEYTEASSEE", (
         ("file", "https://v103.erome.com/8076/4WuSM4Do/NLPXJlNS_720p.mp4", 45, "kittylunaxx luna dream"),
         ("file", "https://v103.erome.com/8076/4WuSM4Do/yNuCC5LF_720p.mp4", 37, "kittylunaxx luna dream"),
         ("file", "https://v103.erome.com/8076/4WuSM4Do/pHopCf6A_720p.mp4", 35, "kittylunaxx luna dream"),
+        ("file", "https://v103.erome.com/8076/4WuSM4Do/6Q48h1XA_720p.mp4", 26, "kittylunaxx luna dream"),
         ("file", "https://v90.erome.com/8216/wFCSXuwr/FDo2iIPI_720p.mp4", 23, "kittylunaxx fine ass fully nude"),
+        ("file", "https://v90.erome.com/8216/wFCSXuwr/NHzI3h93_720p.mp4", 20, "kittylunaxx fine ass fully nude"),
+        ("file", "https://v57.erome.com/8076/SRXW0yJF/DeQa1HoA_720p.mp4", 18, "kittylunaxx luna dream"),
+        ("file", "https://v57.erome.com/8076/SRXW0yJF/eEXSHb3M_720p.mp4", 17, "kittylunaxx luna dream"),
     )),
     ("TANIA RAMOS", (
         ("file", "https://v46.erome.com/8279/rRy8eW9u/ziltWEbq_720p.mp4", 3591, "Tania Ramos guest cut"),
         ("file", "https://v103.erome.com/2665/WJD2aTMn/SQLCCerD_720p.mp4", 648, "Tania Ramos AKA Waifutania"),
         ("file", "https://v46.erome.com/8279/rRy8eW9u/9HX9umpO_720p.mp4", 577, "Tania Ramos guest cut"),
         ("file", "https://v53.erome.com/7949/yYXjVfnM/UJ7h7VQw_720p.mp4", 577, "Tania Ramos"),
+        ("file", "https://v46.erome.com/8279/rRy8eW9u/DSZk86BN_720p.mp4", 570, "Tania Ramos guest cut"),
+        ("file", "https://v53.erome.com/7949/yYXjVfnM/UucGwesY_720p.mp4", 393, "Tania Ramos"),
+        ("file", "https://v53.erome.com/7949/yYXjVfnM/ZsCCG00I_720p.mp4", 372, "Tania Ramos"),
+        ("file", "https://v12.erome.com/8934/bu2E10vq/G05cjjqE_720p.mp4", 240, "Tetona Tania Ramos"),
         ("file", "https://v42.erome.com/8197/DoEO25fA/IQke7CWi_720p.mp4", 231, "Waifutania"),
+        ("file", "https://v103.erome.com/2665/WJD2aTMn/hrKnNA1p_720p.mp4", 138, "Tania Ramos AKA Waifutania"),
     )),
     ("LILI VICTORIA", (
         ("file", "https://v2.erome.com/8917/i3ukXKfK/tYUWdkYx_720p.mp4", 63, "lilivictoria32"),
         ("file", "https://v2.erome.com/8917/i3ukXKfK/C4q2YdX7_720p.mp4", 32, "lilivictoria32"),
         ("file", "https://v93.erome.com/9093/c6S6qfYl/Pbi2woWQ_720p.mp4", 15, "lilivictoria32"),
+        ("file", "https://v2.erome.com/8917/i3ukXKfK/jhOvs8WT_720p.mp4", 11, "lilivictoria32"),
+        ("file", "https://v40.erome.com/9071/1mwYGAtU/KW6OUvlg_720p.mp4", 9, "lilivictoria32"),
     )),
     ("IMHIZBAEEXX", (
         ("file", "https://v320.erome.com/5241/CZ4UXKiP/cmAruVHG_720p.mp4", 33, "Imhizbae"),
@@ -1369,8 +1421,16 @@ ADULT_FACE_HOLDS = (
         ("file", "https://v55.erome.com/7870/uto61E9C/FgIowfpJ_720p.mp4", 479, "Annabellrio"),
         ("file", "https://v55.erome.com/7870/uto61E9C/e9OPZFlG_720p.mp4", 434, "Annabellrio"),
         ("file", "https://v85.erome.com/3799/FDZSNMht/P3a9KZOZ_720p.mp4", 43, "Annabellrio"),
+        ("file", "https://v201.erome.com/340/ZCXHIMZ5/32KKTE8z_480p.mp4", 28, "Annabellrio mega"),
     )),
-    ("VAL2YUMMI", (("file", "https://v58.erome.com/8970/DMAsDEDH/3HYKACJR_720p.mp4", 152, "val2yummi"),)),
+    ("VAL2YUMMI", (
+        ("file", "https://v58.erome.com/8970/DMAsDEDH/3HYKACJR_720p.mp4", 152, "val2yummi"),
+        ("file", "https://v68.erome.com/7860/6pKwUvNE/F4IiNqu8_720p.mp4", 117, "Val2yummi"),
+        ("file", "https://v68.erome.com/7860/6pKwUvNE/YIm7RrE1_720p.mp4", 53, "Val2yummi"),
+        ("file", "https://v68.erome.com/7860/6pKwUvNE/JLTullnj_720p.mp4", 43, "Val2yummi"),
+        ("file", "https://v22.erome.com/8418/AN9ubyyI/FfpooftV_720p.mp4", 37, "val2yummy"),
+        ("file", "https://v58.erome.com/8970/DMAsDEDH/ItUsMGpm_720p.mp4", 36, "val2yummi"),
+    )),
     ("FREAKYYSTACKSS", (("file", "https://v10.erome.com/8815/f17CQGFk/BvuzWQDY_720p.mp4", 668, "FreakyStackss x Slobhouse"),)),
     ("ASAIA HERNANDEZ", (("file", "https://v11.erome.com/5822/AvtUf9Tm/A5lnqNUK_720p.mp4", 29, "Asaia fine ass"),)),
     ("JASMINEGTV", (("file", "https://v62.erome.com/1768/5jd5lhgS/PDzcXq2Z_720p.mp4", 1434, "Jasminegtv"),)),
@@ -1379,12 +1439,44 @@ ADULT_FACE_HOLDS = (
     ("ITISASHLEY", (
         ("file", "https://v4.erome.com/9070/tNRwgjor/xvjyRiKx_720p.mp4", 696, "Itisashley oily"),
         ("file", "https://v83.erome.com/9070/kcGtCmxt/w2jpmOZy_720p.mp4", 202, "Itisashley shower"),
+        ("file", "https://v53.erome.com/9061/9e8OKgPA/rEOaTeJG_720p.mp4", 137, "Luvashxx"),
         ("file", "https://v16.erome.com/9070/PoAT0le0/yrGKoVla_720p.mp4", 136, "Itisashley shower cut"),
+        ("file", "https://v53.erome.com/9061/9e8OKgPA/FwpKa0jk_720p.mp4", 119, "Luvashxx"),
+        ("file", "https://v49.erome.com/9060/ogqEfuYU/HwxVrF6i_720p.mp4", 116, "Luvashxx"),
+        ("file", "https://v11.erome.com/9061/t3MTaJMC/W9ORi69a_720p.mp4", 72, "Luvashxx"),
+        ("file", "https://v11.erome.com/9061/t3MTaJMC/xn2yaRlZ_720p.mp4", 70, "Luvashxx"),
+        ("file", "https://v44.erome.com/9061/6svu4cRT/DdGVZWKS_720p.mp4", 67, "Luvashxx"),
+        ("file", "https://v11.erome.com/9061/t3MTaJMC/bKosvdRt_720p.mp4", 39, "Luvashxx"),
+        ("file", "https://v44.erome.com/9061/6svu4cRT/8Le5ywE1_720p.mp4", 31, "Luvashxx"),
+        ("file", "https://v11.erome.com/9061/t3MTaJMC/4XFIUKGV_720p.mp4", 26, "Luvashxx"),
+        ("file", "https://v11.erome.com/9061/t3MTaJMC/IkMP1pjt_720p.mp4", 25, "Luvashxx"),
+        ("file", "https://v44.erome.com/9061/6svu4cRT/uvjwfHPM_720p.mp4", 17, "Luvashxx"),
+        ("file", "https://v53.erome.com/9061/9e8OKgPA/xPwIKvg4_720p.mp4", 14, "Luvashxx"),
+        ("file", "https://v53.erome.com/9061/9e8OKgPA/gBnoxSag_720p.mp4", 13, "Luvashxx"),
+        ("file", "https://v53.erome.com/9061/9e8OKgPA/XMFFZyCb_720p.mp4", 9, "Luvashxx"),
+        ("file", "https://v53.erome.com/9061/9e8OKgPA/oBBJQOIV_720p.mp4", 7, "Luvashxx"),
+        ("file", "https://v44.erome.com/9061/6svu4cRT/XCdgvE5Y_720p.mp4", 3, "Luvashxx"),
+        ("file", "https://v44.erome.com/9061/6svu4cRT/scJV8Hsf_720p.mp4", 2, "Luvashxx"),
     )),
     ("GIULIANA CABRAZIA", (
         ("star", "giuliana-cabrazia-takes-cumshot-on-her-big-ass", 1270, "Giuliana Cabrazia Takes Cumshot On Her Big Ass"),
         ("star", "giuliana-cabrazia-gets-fucked-by-troy-francisco-s-bbc", 1049, "Giuliana Cabrazia Gets Fucked By Troy Francisco's BBC"),
         ("star", "emma-magnolia-and-giuliana-cabrazia-s-outdoor-pleasure", 398, "Emma Magnolia And Giuliana Cabrazia's Outdoor Pleasure"),
+    )),
+    ("ALEJAMIEL18", (
+        ("file", "https://v60.erome.com/2335/y01IMarw/2dOePIgB_720p.mp4", 123, "Alejamiel18"),
+        ("file", "https://v62.erome.com/6229/z3OqMDEp/Wvuc442K_720p.mp4", 91, "Alejamieles"),
+        ("file", "https://v101.erome.com/4732/GCq1t8hI/N0Mi7YDi_720p.mp4", 30, "Aleja mieles 18"),
+        ("file", "https://v84.erome.com/3506/wBFdLsw0/aS3h9xeC_720p.mp4", 21, "Aleja Mieles"),
+        ("file", "https://v84.erome.com/3506/wBFdLsw0/eoZVA6P9_720p.mp4", 20, "Aleja Mieles"),
+        ("file", "https://v5.erome.com/1052/lgNTnZw1/DtZ3I4ql_720p.mp4", 19, "Aleja miel"),
+        ("file", "https://v90.erome.com/7069/22xZVJW7/No8ICVcu_720p.mp4", 17, "Aleja Miel"),
+        ("file", "https://v101.erome.com/4732/GCq1t8hI/43bX0kwd_720p.mp4", 16, "Aleja mieles 18"),
+        ("file", "https://v90.erome.com/7069/22xZVJW7/84QuWv1D_720p.mp4", 15, "Aleja Miel"),
+        ("file", "https://v5.erome.com/1052/lgNTnZw1/gQCNHSEx_720p.mp4", 15, "Aleja miel"),
+    )),
+    ("LUST4LIZZY", (
+        ("file", "https://v51.erome.com/8277/7YfN2Aly/JbdRKMkf_720p.mp4", 14, "Lust4lizzy"),
     )),
 )
 ADULT_FACE_DESKS = (
@@ -1392,7 +1484,7 @@ ADULT_FACE_DESKS = (
     ("ITSSTEPHHONEYXO21", ("RUX8bZH5",)),
     ("MIKEILA J", ("edMkQtmB", "iLRhKOjv", "TqelxrBL", "RLcyK3T5")),
     ("JUICYJAS TV", ("bYEwXbLM", "OWRwt8jD", "p5AlhPzA", "58Uaa6Ig", "KmjJcLJT", "yz4tK6d5")),
-    ("HONEYTEASSEE", ("4WuSM4Do", "wFCSXuwr")),
+    ("HONEYTEASSEE", ("4WuSM4Do", "wFCSXuwr", "SRXW0yJF")),
     ("TANIA RAMOS", ("WJD2aTMn", "rRy8eW9u", "yYXjVfnM")),
     ("LILI VICTORIA", ("i3ukXKfK", "c6S6qfYl")),
     ("IMHIZBAEEXX", ("CZ4UXKiP", "5Ap1AVt9")),
@@ -1402,8 +1494,10 @@ ADULT_FACE_DESKS = (
     ("JASMINEGTV", ("5jd5lhgS",)),
     ("IMANGELJESSYY", ("hhyYdQUz",)),
     ("YESS ENIA69", ("QuJsjzdM",)),
-    ("ANNABELLE RIOS", ("uto61E9C", "HTwoGgwW", "FDZSNMht")),
-    ("ITISASHLEY", ("tNRwgjor", "kcGtCmxt", "PoAT0le0")),
+    ("ANNABELLE RIOS", ("uto61E9C", "HTwoGgwW", "FDZSNMht", "ZCXHIMZ5")),
+    ("ITISASHLEY", ("tNRwgjor", "kcGtCmxt", "PoAT0le0", "9e8OKgPA", "ogqEfuYU", "t3MTaJMC", "6svu4cRT")),
+    ("ALEJAMIEL18", ("y01IMarw", "22xZVJW7", "z3OqMDEp", "GCq1t8hI", "wBFdLsw0", "lgNTnZw1")),
+    ("LUST4LIZZY", ("7YfN2Aly",)),
 )
 ADULT_DESK_ORIGIN = "https://www.erome.com"
 ADULT_DESK_FOLLOW = 12
@@ -1504,8 +1598,9 @@ ADULT_FACE_POSTS = (
     ("ELVANA VITAA", ("elvanavitaa",)),
     ("SLAVIC CARAMEL", ("slaviccaramel",)),
     ("LIL BUSSY GIRL", ("lilbussygirl",)),
-    ("ITISASHLEY", ("itisashley",)),
+    ("ITISASHLEY", ("itisashley", "luvashxx")),
     ("GIULIANA CABRAZIA", ("gcabrazia", "giulianacabrazia_", "giulianacabrazia2")),
+    ("LUST4LIZZY", ("lust4lizzy",)),
 )
 ADULT_FACE_STILLS = (
     ("P283XrKRjsV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"),
@@ -1567,8 +1662,9 @@ ADULT_FACE_GIFTS = (
     ("ELVANA VITAA", ("elvanavitaa",)),
     ("SLAVIC CARAMEL", ("slaviccaramel",)),
     ("LIL BUSSY GIRL", ("lilbussygirl",)),
-    ("ITISASHLEY", ("itisashley",)),
+    ("ITISASHLEY", ("itisashley", "luvashxx", "itisashleyy", "ofcourseashley")),
     ("GIULIANA CABRAZIA", ("giulianacabrazia", "giulianacabrazia2", "gcabrazia")),
+    ("LUST4LIZZY", ("lust4lizzy",)),
 )
 ADULT_FACE_KILL = (
     "loli",
@@ -3435,6 +3531,8 @@ class AdultDeskTests(unittest.TestCase):
                 "LIL BUSSY GIRL",
                 "ITISASHLEY",
                 "GIULIANA CABRAZIA",
+                "ALEJAMIEL18",
+                "LUST4LIZZY",
             ],
         )
         fat_kinds = [f"KIND{index:02d}" for index in range(40)]
@@ -4534,7 +4632,33 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("SLAVIC CARAMEL", desk)
         self.assertIn("LIL BUSSY GIRL", desk)
         self.assertIn("ITISASHLEY", desk)
+        self.assertIn("luvashxx", desk)
+        self.assertIn("itisashleyy", desk)
+        self.assertIn("ofcourseashley", desk)
+        self.assertIn("9e8OKgPA", desk)
+        self.assertIn("ogqEfuYU", desk)
+        self.assertIn("t3MTaJMC", desk)
+        self.assertIn("6svu4cRT", desk)
+        self.assertNotIn("itsashley.917", desk)
         self.assertIn("GIULIANA CABRAZIA", desk)
+        self.assertIn("ALEJAMIEL18", desk)
+        self.assertIn("LUST4LIZZY", desk)
+        self.assertIn("lust4lizzy", desk)
+        self.assertIn("7YfN2Aly", desk)
+        self.assertNotIn("sXkXlr2e", desk)
+        self.assertIn("alejamiel18", desk)
+        self.assertIn("alejamieles", desk)
+        self.assertIn("y01IMarw", desk)
+        self.assertIn("22xZVJW7", desk)
+        self.assertIn("z3OqMDEp", desk)
+        self.assertIn("SRXW0yJF", desk)
+        self.assertIn("ZCXHIMZ5", desk)
+        self.assertIn("WKXrg3je", desk)
+        self.assertIn("bu2E10vq", desk)
+        self.assertNotIn("alejamil", desk)
+        self.assertNotIn("ameli18", desk)
+        self.assertNotIn("LNVkV8aJ", desk)
+        self.assertNotIn("juicyjazz", desk.lower())
         self.assertIn("giulianacabrazia", desk)
         self.assertIn("gcabrazia", desk)
         self.assertIn("elvanavitaa", desk)
@@ -5039,8 +5163,14 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("ELVANA VITAA", adult_rail([]))
         self.assertIn("ITISASHLEY", adult_rail([]))
         self.assertIn("GIULIANA CABRAZIA", adult_rail([]))
-        self.assertGreaterEqual(len(adult_face_hold_rooms("ITISASHLEY")), 3)
+        self.assertIn("ALEJAMIEL18", adult_rail([]))
+        self.assertIn("LUST4LIZZY", adult_rail([]))
+        self.assertGreaterEqual(len(adult_face_hold_rooms("ITISASHLEY")), 20)
         self.assertEqual(adult_face_hold_rooms("ITISASHLEY")[0]["seconds"], 696)
+        self.assertEqual(
+            [row["seconds"] for row in adult_face_hold_rooms("ITISASHLEY")[:5]],
+            [696, 202, 137, 136, 119],
+        )
         self.assertGreaterEqual(len(adult_face_hold_rooms("GIULIANA CABRAZIA")), 3)
         self.assertEqual(adult_face_hold_rooms("GIULIANA CABRAZIA")[0]["seconds"], 1270)
         self.assertTrue(any("giuliana-cabrazia-takes-cumshot-on-her-big-ass" in row["id"] for row in adult_face_hold_rooms("GIULIANA CABRAZIA")))
@@ -5057,12 +5187,62 @@ class AdultDeskTests(unittest.TestCase):
         self.assertTrue(any("tNRwgjor" in path for path in adult_face_hunt("ITISASHLEY")))
         self.assertTrue(any("erome.com/a/kcGtCmxt" in path for path in adult_face_hunt("ITISASHLEY")))
         self.assertTrue(any("erome.com/a/PoAT0le0" in path for path in adult_face_hunt("ITISASHLEY")))
+        self.assertTrue(any("erome.com/a/9e8OKgPA" in path for path in adult_face_hunt("ITISASHLEY")))
+        self.assertTrue(any("erome.com/a/ogqEfuYU" in path for path in adult_face_hunt("ITISASHLEY")))
+        self.assertTrue(any("erome.com/a/t3MTaJMC" in path for path in adult_face_hunt("ITISASHLEY")))
+        self.assertTrue(any("erome.com/a/6svu4cRT" in path for path in adult_face_hunt("ITISASHLEY")))
         self.assertEqual(adult_hunt_needles("itisashley"), list(ADULT_ASHLEY))
+        self.assertEqual(adult_hunt_needles("luvashxx"), list(ADULT_ASHLEY))
+        self.assertEqual(adult_hunt_needles("itisashleyy"), list(ADULT_ASHLEY))
+        self.assertEqual(adult_hunt_needles("ofcourseashley"), list(ADULT_ASHLEY))
         self.assertNotIn("ashley", adult_face_needles("ITISASHLEY") or [])
+        self.assertNotIn("itsashley.917", adult_face_needles("ITISASHLEY") or [])
         for row in adult_face_hold_rooms("ITISASHLEY"):
             self.assertNotIn("onlyfans", row["name"].lower())
             self.assertNotIn("onlyfans", row["url"].lower())
-            self.assertIn("itisashley", row["seek"])
+            self.assertNotIn("aoky", row["name"].lower())
+            self.assertTrue(
+                "itisashley" in row["seek"] or "luvashxx" in row["seek"],
+                row["seek"],
+            )
+        self.assertGreaterEqual(len(adult_face_hold_rooms("ALEJAMIEL18")), 10)
+        self.assertEqual(adult_face_hold_rooms("ALEJAMIEL18")[0]["seconds"], 123)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("HONEYTEASSEE")), 8)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("VAL2YUMMI")), 6)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("LILI VICTORIA")), 5)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("MIKEILA J")), 14)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("JUICYJAS TV")), 15)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("TANIA RAMOS")), 10)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("ANNABELLE RIOS")), 8)
+        self.assertTrue(any("y01IMarw" in path for path in adult_face_hunt("ALEJAMIEL18")))
+        self.assertTrue(any("erome.com/a/22xZVJW7" in path for path in adult_face_hunt("ALEJAMIEL18")))
+        self.assertTrue(any("erome.com/a/z3OqMDEp" in path for path in adult_face_hunt("ALEJAMIEL18")))
+        self.assertTrue(any("erome.com/a/GCq1t8hI" in path for path in adult_face_hunt("ALEJAMIEL18")))
+        self.assertEqual(adult_hunt_needles("alejamiel18"), list(ADULT_ALEJA))
+        self.assertEqual(adult_hunt_needles("alejamieles"), list(ADULT_ALEJA))
+        self.assertNotIn("aleja", adult_face_needles("ALEJAMIEL18") or [])
+        self.assertNotIn("miel", adult_face_needles("ALEJAMIEL18") or [])
+        self.assertNotIn("mieles", adult_face_needles("ALEJAMIEL18") or [])
+        self.assertNotIn("alejamil", adult_face_needles("ALEJAMIEL18") or [])
+        self.assertNotIn("ameli18", adult_face_needles("ALEJAMIEL18") or [])
+        for row in adult_face_hold_rooms("ALEJAMIEL18"):
+            self.assertNotIn("onlyfans", row["name"].lower())
+            self.assertNotIn("onlyfans", row["url"].lower())
+            self.assertTrue(
+                "alejamiel18" in row["seek"] or "alejamieles" in row["seek"] or "aleja miel" in row["seek"]
+            )
+        self.assertGreaterEqual(len(adult_face_hold_rooms("LUST4LIZZY")), 1)
+        self.assertEqual(adult_face_hold_rooms("LUST4LIZZY")[0]["seconds"], 14)
+        self.assertTrue(any("7YfN2Aly" in path for path in adult_face_hunt("LUST4LIZZY")))
+        self.assertEqual(adult_hunt_needles("lust4lizzy"), list(ADULT_LIZZY))
+        self.assertEqual(adult_hunt_needles("lust4lizzie"), list(ADULT_LIZZY))
+        self.assertNotIn("lizzy", adult_face_needles("LUST4LIZZY") or [])
+        self.assertNotIn("liz", adult_face_needles("LUST4LIZZY") or [])
+        for row in adult_face_hold_rooms("LUST4LIZZY"):
+            self.assertNotIn("onlyfans", row["name"].lower())
+            self.assertNotIn("onlyfans", row["url"].lower())
+            self.assertNotIn("lizzy b", row["name"].lower())
+            self.assertIn("lust4lizzy", row["seek"])
         self.assertEqual(
             [row["id"] for row in adult_parse_face(
                 {
@@ -5124,6 +5304,22 @@ class AdultDeskTests(unittest.TestCase):
                     ]
                 },
                 "ITISASHLEY",
+            )],
+            [],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "lizzy-b-s-thick-bathroom-tease",
+                            "title": "She's so thick! Lizzy B",
+                            "creator": "Lizzy B",
+                            "durationSeconds": 180,
+                        }
+                    ]
+                },
+                "LUST4LIZZY",
             )],
             [],
         )
@@ -5197,6 +5393,18 @@ class AdultDeskTests(unittest.TestCase):
             adult_page_name("https://www.example.com/giulianacabrazia_"),
             "giulianacabrazia_",
         )
+        self.assertEqual(
+            adult_page_name(
+                "https://www.example.com/alejamiel18?fbclid=PAVERFWAUwychleHRuA2FlbQIxMQBwZG9mAmZkaWQWUPtTqaVYX2jeGc8gn-F8sIbgaf0sGHNydGMGYXBwX2lkDzEyNDAyNDU3NDI4NzQxNAABp9_ZQBqriecwNr_zkYNvrZS1gjBR-5z8IuWCRcZJCGmqwm1h9gdVvAJgtvHX_aem_9zgWBPJrQV9k6ZzBDwcraw"
+            ),
+            "alejamiel18",
+        )
+        self.assertEqual(
+            adult_hunt_needles(
+                "https://www.example.com/alejamiel18?fbclid=PAVERFWAUwychleHRuA2FlbQIxMQBwZG9mAmZkaWQWUPtTqaVYX2jeGc8gn-F8sIbgaf0sGHNydGMGYXBwX2lkDzEyNDAyNDU3NDI4NzQxNAABp9_ZQBqriecwNr_zkYNvrZS1gjBR-5z8IuWCRcZJCGmqwm1h9gdVvAJgtvHX_aem_9zgWBPJrQV9k6ZzBDwcraw"
+            ),
+            list(ADULT_ALEJA),
+        )
         self.assertEqual(adult_page_name("https://www.example.com/elvanavitaa/media"), "elvanavitaa")
         self.assertEqual(adult_page_name("https://www.example.com/u/slaviccaramel"), "slaviccaramel")
         self.assertEqual(
@@ -5208,6 +5416,18 @@ class AdultDeskTests(unittest.TestCase):
                 "https://www.example.com/itisashley?fbclid=PAZXh0bgNhZW0CMTEAcGRvZgJmZGlkFlD5I2iqiK0s9M8j"
             ),
             list(ADULT_ASHLEY),
+        )
+        self.assertEqual(
+            adult_page_name(
+                "https://www.example.com/lust4lizzy?utm_source=instagram&fbclid=PAdGRleAUxExRleHRuA2FlbQIxMQ"
+            ),
+            "lust4lizzy",
+        )
+        self.assertEqual(
+            adult_hunt_needles(
+                "https://www.example.com/lust4lizzy?utm_source=instagram&fbclid=PAdGRleAUxExRleHRuA2FlbQIxMQ"
+            ),
+            list(ADULT_LIZZY),
         )
         self.assertIsNone(adult_page_name("roleplay"))
         self.assertIsNone(adult_page_name("elvanavitaa"))
@@ -5530,6 +5750,8 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("LIL BUSSY GIRL", tv)
         self.assertIn("ITISASHLEY", tv)
         self.assertIn("GIULIANA CABRAZIA", tv)
+        self.assertIn("ALEJAMIEL18", tv)
+        self.assertIn("LUST4LIZZY", tv)
         self.assertIn("PASTE", tv)
         self.assertIn("NO PASTE", tv)
         self.assertIn("public video search", tv.lower())
@@ -5757,6 +5979,42 @@ class NaTheaterPlayTests(unittest.TestCase):
         self.assertLess(close.find("zoomLive = nil"), close.find("NaWatch.drop"))
         self.assertIn("movie playback", qa.lower())
         self.assertIn("sound", qa.lower())
+        self.assertIn("AdultDesk.faceKeep", sock if (sock := read("Blackout", "UpdateSocket.swift")) else "")
+        live_adult = read("Blackout", "UpdateSocket.swift").split("func liveAdult(")[1].split("func applyHopStills(")[0]
+        self.assertIn("AdultDesk.faceKeep(id)", live_adult)
+        self.assertIn("AdultDesk.filePlay(ready)", live_adult)
+        self.assertIn("replaceCurrentItem(with: item)", watch)
+        self.assertIn("await Task.yield()", watch)
+        go_full = live.split("private func goFull()")[1].split("private func toggle()")[0]
+        self.assertNotIn("NaWatch.drop", go_full)
+        self.assertNotIn("stop()", go_full)
+        self.assertIn("onFull(next)", go_full)
+        self.assertEqual(
+            adult_ready_play(
+                {
+                    "id": "adult-face-star-giuliana-cabrazia-takes-cumshot-on-her-big-ass",
+                    "url": "https://cdn.bornstar.co/videos/giuliana-cabrazia-takes-cumshot-on-her-big-ass/master.m3u8",
+                }
+            ),
+            "https://cdn.bornstar.co/videos/giuliana-cabrazia-takes-cumshot-on-her-big-ass/master.m3u8",
+        )
+        self.assertEqual(
+            adult_ready_play(
+                {
+                    "id": "adult-face-desk-y01imarw-2doepigb",
+                    "url": "https://v60.erome.com/2335/y01IMarw/2dOePIgB_720p.mp4",
+                }
+            ),
+            "https://v60.erome.com/2335/y01IMarw/2dOePIgB_720p.mp4",
+        )
+        self.assertIsNone(
+            adult_ready_play(
+                {
+                    "id": "adult-live-room",
+                    "url": "https://edge.example/live-hls/amlst:alpha/playlist.m3u8",
+                }
+            )
+        )
 
 
 class NaTheaterStayUpTests(unittest.TestCase):
@@ -5791,6 +6049,18 @@ class NaTheaterStayUpTests(unittest.TestCase):
         close = app.split("func closeLive()")[1].split("func holdCam(")[0]
         self.assertLess(close.find("zoomLive = nil"), close.find("NaWatch.drop"))
         self.assertNotIn("replaceCurrentItem(with: nil)", zoom.split("private func stop()")[1].split("private func jump")[0])
+        chip = na.split("ForEach(naKindChips")[1].split("private var naBrowseStrip")[0]
+        self.assertIn("clampNaPick()", chip)
+        self.assertIn("naPlayingID", na.split("private var naStageRow")[1].split("private var naHasPrev")[0])
+        open_live = app.split("func openLive(")[1].split("func stepLive(")[0]
+        self.assertIn("AdultDesk.faceKeep", open_live)
+        self.assertIn("AdultDesk.filePlay(ready)", open_live)
+        self.assertIn("zoomLive =", open_live)
+        self.assertLess(open_live.find("zoomLive ="), open_live.find("presentLive"))
+        step = app.split("func stepLive(")[1].split("private func presentLive(")[0]
+        self.assertIn("AdultDesk.faceKeep", step)
+        self.assertIn("AdultDesk.filePlay(ready)", step)
+        self.assertLess(step.find("zoomLive ="), step.find("presentLive"))
 
 
 def desk_text() -> str:

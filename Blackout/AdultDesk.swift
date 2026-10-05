@@ -354,6 +354,10 @@ enum AdultDesk {
     ]
     static let ashleyNeedles = [
         "itisashley",
+        "luvashxx",
+        "itisashleyy",
+        "ofcourseashley",
+        "ofcourseashley_",
         "itis ashley",
     ]
     static let giulianaNeedles = [
@@ -362,6 +366,17 @@ enum AdultDesk {
         "giulianacabrazia_",
         "giulianacabrazia2",
         "gcabrazia",
+    ]
+    static let alejaNeedles = [
+        "alejamiel18",
+        "alejamieles",
+        "aleja mieles",
+        "aleja miel",
+    ]
+    static let lizzyNeedles = [
+        "lust4lizzy",
+        "lust4lizzie",
+        "lust 4 lizzy",
     ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
@@ -402,6 +417,8 @@ enum AdultDesk {
         ("LIL BUSSY GIRL", lilbussyNeedles),
         ("ITISASHLEY", ashleyNeedles),
         ("GIULIANA CABRAZIA", giulianaNeedles),
+        ("ALEJAMIEL18", alejaNeedles),
+        ("LUST4LIZZY", lizzyNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -458,8 +475,9 @@ enum AdultDesk {
         ("ELVANA VITAA", ["elvanavitaa"]),
         ("SLAVIC CARAMEL", ["slaviccaramel"]),
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
-        ("ITISASHLEY", ["itisashley"]),
+        ("ITISASHLEY", ["itisashley", "luvashxx", "itisashleyy", "ofcourseashley"]),
         ("GIULIANA CABRAZIA", ["giulianacabrazia", "giulianacabrazia2", "gcabrazia"]),
+        ("LUST4LIZZY", ["lust4lizzy"]),
     ]
     /// Proven guest albums. Hunt these first so a JSON desk cannot blank the chip.
     static let faceDesks: [(String, [String])] = [
@@ -490,7 +508,7 @@ enum AdultDesk {
             "yz4tK6d5",
             "wHFqflcw",
         ]),
-        ("HONEYTEASSEE", ["4WuSM4Do", "wFCSXuwr"]),
+        ("HONEYTEASSEE", ["4WuSM4Do", "wFCSXuwr", "SRXW0yJF"]),
         ("TANIA RAMOS", [
             "WJD2aTMn",
             "wNIDWrYp",
@@ -511,8 +529,25 @@ enum AdultDesk {
         ("ITSSTEPHHONEYXO21", ["RUX8bZH5"]),
         ("IMHIZBAEEXX", ["CZ4UXKiP", "5Ap1AVt9"]),
         ("YESS ENIA69", ["QuJsjzdM"]),
-        ("ANNABELLE RIOS", ["uto61E9C", "HTwoGgwW", "FDZSNMht"]),
-        ("ITISASHLEY", ["tNRwgjor", "kcGtCmxt", "PoAT0le0"]),
+        ("ANNABELLE RIOS", ["uto61E9C", "HTwoGgwW", "FDZSNMht", "ZCXHIMZ5"]),
+        ("ITISASHLEY", [
+            "tNRwgjor",
+            "kcGtCmxt",
+            "PoAT0le0",
+            "9e8OKgPA",
+            "ogqEfuYU",
+            "t3MTaJMC",
+            "6svu4cRT",
+        ]),
+        ("ALEJAMIEL18", [
+            "y01IMarw",
+            "22xZVJW7",
+            "z3OqMDEp",
+            "GCq1t8hI",
+            "wBFdLsw0",
+            "lgNTnZw1",
+        ]),
+        ("LUST4LIZZY", ["7YfN2Aly"]),
     ]
     /// Public X handles. Hunt the guest timeline, not a paywalled store.
     static let facePosts: [(String, [String])] = [
@@ -552,8 +587,9 @@ enum AdultDesk {
         ("ELVANA VITAA", ["elvanavitaa"]),
         ("SLAVIC CARAMEL", ["slaviccaramel"]),
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
-        ("ITISASHLEY", ["itisashley"]),
+        ("ITISASHLEY", ["itisashley", "luvashxx"]),
         ("GIULIANA CABRAZIA", ["gcabrazia", "giulianacabrazia_", "giulianacabrazia2"]),
+        ("LUST4LIZZY", ["lust4lizzy"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
@@ -721,6 +757,13 @@ enum AdultDesk {
             ("file", "https://v203.erome.com/237/WENqgh3u/fGMjYVty_480p.mp4", 387, "Mikeila J solo 2"),
             ("file", "https://v15.erome.com/959/iLRhKOjv/h91kkrYB_720p.mp4", 380, "MikeilaJ"),
             ("file", "https://v15.erome.com/959/iLRhKOjv/oRWzrIjH_720p.mp4", 379, "MikeilaJ"),
+            ("file", "https://v203.erome.com/325/TqelxrBL/Iy9KYgpy_720p.mp4", 238, "Mikeilaj"),
+            ("file", "https://v203.erome.com/325/TqelxrBL/896AhTNO_720p.mp4", 227, "Mikeilaj"),
+            ("file", "https://v3.erome.com/1052/WKXrg3je/sluCcNwB_720p.mp4", 227, "Mikeila J"),
+            ("file", "https://v55.erome.com/2314/ZcfWNKPT/d9S2ePdK_720p.mp4", 227, "3-14-24 Mikeilaj"),
+            ("file", "https://v326.erome.com/2110/nhPSw6n0/XQBlUN5Q_720p.mp4", 226, "Mikeila J"),
+            ("file", "https://v3.erome.com/1052/WKXrg3je/25Bojyw9_720p.mp4", 224, "Mikeila J"),
+            ("file", "https://v201.erome.com/331/edMkQtmB/OlOrfssY_480p.mp4", 163, "MikeilaJ"),
         ]),
         ("JUICYJAS TV", [
             ("file", "https://v13.erome.com/1454/OWRwt8jD/gOUvm3em_720p.mp4", 567, "Juicyjass"),
@@ -729,28 +772,45 @@ enum AdultDesk {
             ("file", "https://v105.erome.com/7729/p5AlhPzA/shXMd6w8_720p.mp4", 445, "JJUICYJASS AKA BABYFACEJASS"),
             ("file", "https://v78.erome.com/7455/KmjJcLJT/NNAdFmNN_720p.mp4", 445, "jjuicyjass"),
             ("file", "https://v102.erome.com/1968/bYEwXbLM/3nwkSE2f_720p.mp4", 406, "Juicyjass"),
+            ("file", "https://v108.erome.com/7136/58Uaa6Ig/8feiQ8cD_720p.mp4", 375, "jjuicyjass"),
             ("file", "https://v102.erome.com/1968/bYEwXbLM/2AyuHVzF_720p.mp4", 354, "Juicyjass"),
             ("file", "https://v54.erome.com/1475/30gEMEg3/4yCGE1s8_720p.mp4", 354, "Juicyjass"),
             ("file", "https://v105.erome.com/7729/p5AlhPzA/ZPEnIqip_720p.mp4", 291, "JJUICYJASS AKA BABYFACEJASS"),
             ("file", "https://v3.erome.com/7455/yz4tK6d5/g9QnFotZ_720p.mp4", 281, "jjuicyjass"),
+            ("file", "https://v68.erome.com/2617/xAyhB4PW/Y7200Yvr_720p.mp4", 176, "Jjuicyjass"),
+            ("file", "https://v6.erome.com/1335/2Moj4ufr/5r7vPWbo_720p.mp4", 171, "Juicyjass"),
+            ("file", "https://v102.erome.com/1968/bYEwXbLM/tRFPI2Sz_720p.mp4", 137, "Juicyjass"),
+            ("file", "https://v68.erome.com/2617/xAyhB4PW/7GL5f7fQ_720p.mp4", 115, "Jjuicyjass"),
+            ("file", "https://v107.erome.com/3946/wHFqflcw/ToKRnmXv_720p.mp4", 63, "juicyjass solo"),
         ]),
         ("HONEYTEASSEE", [
             ("file", "https://v103.erome.com/8076/4WuSM4Do/NLPXJlNS_720p.mp4", 45, "kittylunaxx luna dream"),
             ("file", "https://v103.erome.com/8076/4WuSM4Do/yNuCC5LF_720p.mp4", 37, "kittylunaxx luna dream"),
             ("file", "https://v103.erome.com/8076/4WuSM4Do/pHopCf6A_720p.mp4", 35, "kittylunaxx luna dream"),
+            ("file", "https://v103.erome.com/8076/4WuSM4Do/6Q48h1XA_720p.mp4", 26, "kittylunaxx luna dream"),
             ("file", "https://v90.erome.com/8216/wFCSXuwr/FDo2iIPI_720p.mp4", 23, "kittylunaxx fine ass fully nude"),
+            ("file", "https://v90.erome.com/8216/wFCSXuwr/NHzI3h93_720p.mp4", 20, "kittylunaxx fine ass fully nude"),
+            ("file", "https://v57.erome.com/8076/SRXW0yJF/DeQa1HoA_720p.mp4", 18, "kittylunaxx luna dream"),
+            ("file", "https://v57.erome.com/8076/SRXW0yJF/eEXSHb3M_720p.mp4", 17, "kittylunaxx luna dream"),
         ]),
         ("TANIA RAMOS", [
             ("file", "https://v46.erome.com/8279/rRy8eW9u/ziltWEbq_720p.mp4", 3591, "Tania Ramos guest cut"),
             ("file", "https://v103.erome.com/2665/WJD2aTMn/SQLCCerD_720p.mp4", 648, "Tania Ramos AKA Waifutania"),
             ("file", "https://v46.erome.com/8279/rRy8eW9u/9HX9umpO_720p.mp4", 577, "Tania Ramos guest cut"),
             ("file", "https://v53.erome.com/7949/yYXjVfnM/UJ7h7VQw_720p.mp4", 577, "Tania Ramos"),
+            ("file", "https://v46.erome.com/8279/rRy8eW9u/DSZk86BN_720p.mp4", 570, "Tania Ramos guest cut"),
+            ("file", "https://v53.erome.com/7949/yYXjVfnM/UucGwesY_720p.mp4", 393, "Tania Ramos"),
+            ("file", "https://v53.erome.com/7949/yYXjVfnM/ZsCCG00I_720p.mp4", 372, "Tania Ramos"),
+            ("file", "https://v12.erome.com/8934/bu2E10vq/G05cjjqE_720p.mp4", 240, "Tetona Tania Ramos"),
             ("file", "https://v42.erome.com/8197/DoEO25fA/IQke7CWi_720p.mp4", 231, "Waifutania"),
+            ("file", "https://v103.erome.com/2665/WJD2aTMn/hrKnNA1p_720p.mp4", 138, "Tania Ramos AKA Waifutania"),
         ]),
         ("LILI VICTORIA", [
             ("file", "https://v2.erome.com/8917/i3ukXKfK/tYUWdkYx_720p.mp4", 63, "lilivictoria32"),
             ("file", "https://v2.erome.com/8917/i3ukXKfK/C4q2YdX7_720p.mp4", 32, "lilivictoria32"),
             ("file", "https://v93.erome.com/9093/c6S6qfYl/Pbi2woWQ_720p.mp4", 15, "lilivictoria32"),
+            ("file", "https://v2.erome.com/8917/i3ukXKfK/jhOvs8WT_720p.mp4", 11, "lilivictoria32"),
+            ("file", "https://v40.erome.com/9071/1mwYGAtU/KW6OUvlg_720p.mp4", 9, "lilivictoria32"),
         ]),
         ("IMHIZBAEEXX", [
             ("file", "https://v320.erome.com/5241/CZ4UXKiP/cmAruVHG_720p.mp4", 33, "Imhizbae"),
@@ -781,10 +841,15 @@ enum AdultDesk {
             ("file", "https://v55.erome.com/7870/uto61E9C/FgIowfpJ_720p.mp4", 479, "Annabellrio"),
             ("file", "https://v55.erome.com/7870/uto61E9C/e9OPZFlG_720p.mp4", 434, "Annabellrio"),
             ("file", "https://v85.erome.com/3799/FDZSNMht/P3a9KZOZ_720p.mp4", 43, "Annabellrio"),
+            ("file", "https://v201.erome.com/340/ZCXHIMZ5/32KKTE8z_480p.mp4", 28, "Annabellrio mega"),
         ]),
         ("VAL2YUMMI", [
             ("file", "https://v58.erome.com/8970/DMAsDEDH/3HYKACJR_720p.mp4", 152, "val2yummi"),
             ("file", "https://v68.erome.com/7860/6pKwUvNE/F4IiNqu8_720p.mp4", 117, "Val2yummi"),
+            ("file", "https://v68.erome.com/7860/6pKwUvNE/YIm7RrE1_720p.mp4", 53, "Val2yummi"),
+            ("file", "https://v68.erome.com/7860/6pKwUvNE/JLTullnj_720p.mp4", 43, "Val2yummi"),
+            ("file", "https://v22.erome.com/8418/AN9ubyyI/FfpooftV_720p.mp4", 37, "val2yummy"),
+            ("file", "https://v58.erome.com/8970/DMAsDEDH/ItUsMGpm_720p.mp4", 36, "val2yummi"),
         ]),
         ("FREAKYYSTACKSS", [
             ("file", "https://v10.erome.com/8815/f17CQGFk/BvuzWQDY_720p.mp4", 668, "FreakyStackss x Slobhouse"),
@@ -805,12 +870,44 @@ enum AdultDesk {
         ("ITISASHLEY", [
             ("file", "https://v4.erome.com/9070/tNRwgjor/xvjyRiKx_720p.mp4", 696, "Itisashley oily"),
             ("file", "https://v83.erome.com/9070/kcGtCmxt/w2jpmOZy_720p.mp4", 202, "Itisashley shower"),
+            ("file", "https://v53.erome.com/9061/9e8OKgPA/rEOaTeJG_720p.mp4", 137, "Luvashxx"),
             ("file", "https://v16.erome.com/9070/PoAT0le0/yrGKoVla_720p.mp4", 136, "Itisashley shower cut"),
+            ("file", "https://v53.erome.com/9061/9e8OKgPA/FwpKa0jk_720p.mp4", 119, "Luvashxx"),
+            ("file", "https://v49.erome.com/9060/ogqEfuYU/HwxVrF6i_720p.mp4", 116, "Luvashxx"),
+            ("file", "https://v11.erome.com/9061/t3MTaJMC/W9ORi69a_720p.mp4", 72, "Luvashxx"),
+            ("file", "https://v11.erome.com/9061/t3MTaJMC/xn2yaRlZ_720p.mp4", 70, "Luvashxx"),
+            ("file", "https://v44.erome.com/9061/6svu4cRT/DdGVZWKS_720p.mp4", 67, "Luvashxx"),
+            ("file", "https://v11.erome.com/9061/t3MTaJMC/bKosvdRt_720p.mp4", 39, "Luvashxx"),
+            ("file", "https://v44.erome.com/9061/6svu4cRT/8Le5ywE1_720p.mp4", 31, "Luvashxx"),
+            ("file", "https://v11.erome.com/9061/t3MTaJMC/4XFIUKGV_720p.mp4", 26, "Luvashxx"),
+            ("file", "https://v11.erome.com/9061/t3MTaJMC/IkMP1pjt_720p.mp4", 25, "Luvashxx"),
+            ("file", "https://v44.erome.com/9061/6svu4cRT/uvjwfHPM_720p.mp4", 17, "Luvashxx"),
+            ("file", "https://v53.erome.com/9061/9e8OKgPA/xPwIKvg4_720p.mp4", 14, "Luvashxx"),
+            ("file", "https://v53.erome.com/9061/9e8OKgPA/gBnoxSag_720p.mp4", 13, "Luvashxx"),
+            ("file", "https://v53.erome.com/9061/9e8OKgPA/XMFFZyCb_720p.mp4", 9, "Luvashxx"),
+            ("file", "https://v53.erome.com/9061/9e8OKgPA/oBBJQOIV_720p.mp4", 7, "Luvashxx"),
+            ("file", "https://v44.erome.com/9061/6svu4cRT/XCdgvE5Y_720p.mp4", 3, "Luvashxx"),
+            ("file", "https://v44.erome.com/9061/6svu4cRT/scJV8Hsf_720p.mp4", 2, "Luvashxx"),
         ]),
         ("GIULIANA CABRAZIA", [
             ("star", "giuliana-cabrazia-takes-cumshot-on-her-big-ass", 1270, "Giuliana Cabrazia Takes Cumshot On Her Big Ass"),
             ("star", "giuliana-cabrazia-gets-fucked-by-troy-francisco-s-bbc", 1049, "Giuliana Cabrazia Gets Fucked By Troy Francisco's BBC"),
             ("star", "emma-magnolia-and-giuliana-cabrazia-s-outdoor-pleasure", 398, "Emma Magnolia And Giuliana Cabrazia's Outdoor Pleasure"),
+        ]),
+        ("ALEJAMIEL18", [
+            ("file", "https://v60.erome.com/2335/y01IMarw/2dOePIgB_720p.mp4", 123, "Alejamiel18"),
+            ("file", "https://v62.erome.com/6229/z3OqMDEp/Wvuc442K_720p.mp4", 91, "Alejamieles"),
+            ("file", "https://v101.erome.com/4732/GCq1t8hI/N0Mi7YDi_720p.mp4", 30, "Aleja mieles 18"),
+            ("file", "https://v84.erome.com/3506/wBFdLsw0/aS3h9xeC_720p.mp4", 21, "Aleja Mieles"),
+            ("file", "https://v84.erome.com/3506/wBFdLsw0/eoZVA6P9_720p.mp4", 20, "Aleja Mieles"),
+            ("file", "https://v5.erome.com/1052/lgNTnZw1/DtZ3I4ql_720p.mp4", 19, "Aleja miel"),
+            ("file", "https://v90.erome.com/7069/22xZVJW7/No8ICVcu_720p.mp4", 17, "Aleja Miel"),
+            ("file", "https://v101.erome.com/4732/GCq1t8hI/43bX0kwd_720p.mp4", 16, "Aleja mieles 18"),
+            ("file", "https://v90.erome.com/7069/22xZVJW7/84QuWv1D_720p.mp4", 15, "Aleja Miel"),
+            ("file", "https://v5.erome.com/1052/lgNTnZw1/gQCNHSEx_720p.mp4", 15, "Aleja miel"),
+        ]),
+        ("LUST4LIZZY", [
+            ("file", "https://v51.erome.com/8277/7YfN2Aly/JbdRKMkf_720p.mp4", 14, "Lust4lizzy"),
         ]),
     ]
     /// Guest stills for baked pin tokens. Star stills are `preview-batch/{slug}/thumb.webp`.
