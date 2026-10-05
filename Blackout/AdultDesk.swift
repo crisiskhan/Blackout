@@ -373,6 +373,11 @@ enum AdultDesk {
         "aleja mieles",
         "aleja miel",
     ]
+    static let lizzyNeedles = [
+        "lust4lizzy",
+        "lust4lizzie",
+        "lust 4 lizzy",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
@@ -413,6 +418,7 @@ enum AdultDesk {
         ("ITISASHLEY", ashleyNeedles),
         ("GIULIANA CABRAZIA", giulianaNeedles),
         ("ALEJAMIEL18", alejaNeedles),
+        ("LUST4LIZZY", lizzyNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -471,6 +477,7 @@ enum AdultDesk {
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
         ("ITISASHLEY", ["itisashley", "luvashxx", "itisashleyy", "ofcourseashley"]),
         ("GIULIANA CABRAZIA", ["giulianacabrazia", "giulianacabrazia2", "gcabrazia"]),
+        ("LUST4LIZZY", ["lust4lizzy"]),
     ]
     /// Proven guest albums. Hunt these first so a JSON desk cannot blank the chip.
     static let faceDesks: [(String, [String])] = [
@@ -540,6 +547,7 @@ enum AdultDesk {
             "wBFdLsw0",
             "lgNTnZw1",
         ]),
+        ("LUST4LIZZY", ["7YfN2Aly"]),
     ]
     /// Public X handles. Hunt the guest timeline, not a paywalled store.
     static let facePosts: [(String, [String])] = [
@@ -581,6 +589,7 @@ enum AdultDesk {
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
         ("ITISASHLEY", ["itisashley", "luvashxx"]),
         ("GIULIANA CABRAZIA", ["gcabrazia", "giulianacabrazia_", "giulianacabrazia2"]),
+        ("LUST4LIZZY", ["lust4lizzy"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
@@ -896,6 +905,9 @@ enum AdultDesk {
             ("file", "https://v101.erome.com/4732/GCq1t8hI/43bX0kwd_720p.mp4", 16, "Aleja mieles 18"),
             ("file", "https://v90.erome.com/7069/22xZVJW7/84QuWv1D_720p.mp4", 15, "Aleja Miel"),
             ("file", "https://v5.erome.com/1052/lgNTnZw1/gQCNHSEx_720p.mp4", 15, "Aleja miel"),
+        ]),
+        ("LUST4LIZZY", [
+            ("file", "https://v51.erome.com/8277/7YfN2Aly/JbdRKMkf_720p.mp4", 14, "Lust4lizzy"),
         ]),
     ]
     /// Guest stills for baked pin tokens. Star stills are `preview-batch/{slug}/thumb.webp`.
