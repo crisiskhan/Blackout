@@ -176,6 +176,9 @@ struct NaPlate: View {
     }
 
     private var naStageRow: NaLive.Row? {
+        if let id = naPlayingID, let hit = naLiveRows.first(where: { $0.id == id }) {
+            return hit
+        }
         if let id = naPick, let hit = naLiveRows.first(where: { $0.id == id }) {
             return hit
         }
@@ -226,6 +229,7 @@ struct NaPlate: View {
                         naKind = kind
                         naChrome = nil
                         resetNaPage()
+                        clampNaPick()
                         runtime.updateSocket.pullAdult(topic: kind)
                     }
                     .buttonStyle(HUDOverlayChipStyle(filled: naKind == kind))
@@ -236,6 +240,7 @@ struct NaPlate: View {
             naPasteFailed = false
             if naOffset != 0 || naPlayingID != nil {
                 resetNaPage()
+                clampNaPick()
             }
             if naHuntNow {
                 naHuntNow = false

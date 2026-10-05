@@ -586,6 +586,17 @@ def adult_file_play(raw: str) -> bool:
     return ".mp4" in low and ".m3u8" not in low
 
 
+def adult_ready_play(row: dict) -> str | None:
+    """Held guest files play as stored. Live rooms still resolve."""
+    play = adult_playlist(str(row.get("url") or ""))
+    if not play:
+        return None
+    rid = str(row.get("id") or "")
+    if adult_file_play(play) or adult_face_keep(rid):
+        return play
+    return None
+
+
 def adult_live_play(source: str, text: str) -> str | None:
     """Guest live media playlist only. Refuse advert VOD and dummy media.mp4."""
     play = adult_playlist(source)
@@ -1316,6 +1327,13 @@ ADULT_FACE_HOLDS = (
         ("file", "https://v203.erome.com/237/WENqgh3u/fGMjYVty_480p.mp4", 387, "Mikeila J solo 2"),
         ("file", "https://v15.erome.com/959/iLRhKOjv/h91kkrYB_720p.mp4", 380, "MikeilaJ"),
         ("file", "https://v15.erome.com/959/iLRhKOjv/oRWzrIjH_720p.mp4", 379, "MikeilaJ"),
+        ("file", "https://v203.erome.com/325/TqelxrBL/Iy9KYgpy_720p.mp4", 238, "Mikeilaj"),
+        ("file", "https://v203.erome.com/325/TqelxrBL/896AhTNO_720p.mp4", 227, "Mikeilaj"),
+        ("file", "https://v3.erome.com/1052/WKXrg3je/sluCcNwB_720p.mp4", 227, "Mikeila J"),
+        ("file", "https://v55.erome.com/2314/ZcfWNKPT/d9S2ePdK_720p.mp4", 227, "3-14-24 Mikeilaj"),
+        ("file", "https://v326.erome.com/2110/nhPSw6n0/XQBlUN5Q_720p.mp4", 226, "Mikeila J"),
+        ("file", "https://v3.erome.com/1052/WKXrg3je/25Bojyw9_720p.mp4", 224, "Mikeila J"),
+        ("file", "https://v201.erome.com/331/edMkQtmB/OlOrfssY_480p.mp4", 163, "MikeilaJ"),
     )),
     ("JUICYJAS TV", (
         ("file", "https://v13.erome.com/1454/OWRwt8jD/gOUvm3em_720p.mp4", 567, "Juicyjass"),
@@ -1324,28 +1342,45 @@ ADULT_FACE_HOLDS = (
         ("file", "https://v105.erome.com/7729/p5AlhPzA/shXMd6w8_720p.mp4", 445, "JJUICYJASS AKA BABYFACEJASS"),
         ("file", "https://v78.erome.com/7455/KmjJcLJT/NNAdFmNN_720p.mp4", 445, "jjuicyjass"),
         ("file", "https://v102.erome.com/1968/bYEwXbLM/3nwkSE2f_720p.mp4", 406, "Juicyjass"),
+        ("file", "https://v108.erome.com/7136/58Uaa6Ig/8feiQ8cD_720p.mp4", 375, "jjuicyjass"),
         ("file", "https://v102.erome.com/1968/bYEwXbLM/2AyuHVzF_720p.mp4", 354, "Juicyjass"),
         ("file", "https://v54.erome.com/1475/30gEMEg3/4yCGE1s8_720p.mp4", 354, "Juicyjass"),
         ("file", "https://v105.erome.com/7729/p5AlhPzA/ZPEnIqip_720p.mp4", 291, "JJUICYJASS AKA BABYFACEJASS"),
         ("file", "https://v3.erome.com/7455/yz4tK6d5/g9QnFotZ_720p.mp4", 281, "jjuicyjass"),
+        ("file", "https://v68.erome.com/2617/xAyhB4PW/Y7200Yvr_720p.mp4", 176, "Jjuicyjass"),
+        ("file", "https://v6.erome.com/1335/2Moj4ufr/5r7vPWbo_720p.mp4", 171, "Juicyjass"),
+        ("file", "https://v102.erome.com/1968/bYEwXbLM/tRFPI2Sz_720p.mp4", 137, "Juicyjass"),
+        ("file", "https://v68.erome.com/2617/xAyhB4PW/7GL5f7fQ_720p.mp4", 115, "Jjuicyjass"),
+        ("file", "https://v107.erome.com/3946/wHFqflcw/ToKRnmXv_720p.mp4", 63, "juicyjass solo"),
     )),
     ("HONEYTEASSEE", (
         ("file", "https://v103.erome.com/8076/4WuSM4Do/NLPXJlNS_720p.mp4", 45, "kittylunaxx luna dream"),
         ("file", "https://v103.erome.com/8076/4WuSM4Do/yNuCC5LF_720p.mp4", 37, "kittylunaxx luna dream"),
         ("file", "https://v103.erome.com/8076/4WuSM4Do/pHopCf6A_720p.mp4", 35, "kittylunaxx luna dream"),
+        ("file", "https://v103.erome.com/8076/4WuSM4Do/6Q48h1XA_720p.mp4", 26, "kittylunaxx luna dream"),
         ("file", "https://v90.erome.com/8216/wFCSXuwr/FDo2iIPI_720p.mp4", 23, "kittylunaxx fine ass fully nude"),
+        ("file", "https://v90.erome.com/8216/wFCSXuwr/NHzI3h93_720p.mp4", 20, "kittylunaxx fine ass fully nude"),
+        ("file", "https://v57.erome.com/8076/SRXW0yJF/DeQa1HoA_720p.mp4", 18, "kittylunaxx luna dream"),
+        ("file", "https://v57.erome.com/8076/SRXW0yJF/eEXSHb3M_720p.mp4", 17, "kittylunaxx luna dream"),
     )),
     ("TANIA RAMOS", (
         ("file", "https://v46.erome.com/8279/rRy8eW9u/ziltWEbq_720p.mp4", 3591, "Tania Ramos guest cut"),
         ("file", "https://v103.erome.com/2665/WJD2aTMn/SQLCCerD_720p.mp4", 648, "Tania Ramos AKA Waifutania"),
         ("file", "https://v46.erome.com/8279/rRy8eW9u/9HX9umpO_720p.mp4", 577, "Tania Ramos guest cut"),
         ("file", "https://v53.erome.com/7949/yYXjVfnM/UJ7h7VQw_720p.mp4", 577, "Tania Ramos"),
+        ("file", "https://v46.erome.com/8279/rRy8eW9u/DSZk86BN_720p.mp4", 570, "Tania Ramos guest cut"),
+        ("file", "https://v53.erome.com/7949/yYXjVfnM/UucGwesY_720p.mp4", 393, "Tania Ramos"),
+        ("file", "https://v53.erome.com/7949/yYXjVfnM/ZsCCG00I_720p.mp4", 372, "Tania Ramos"),
+        ("file", "https://v12.erome.com/8934/bu2E10vq/G05cjjqE_720p.mp4", 240, "Tetona Tania Ramos"),
         ("file", "https://v42.erome.com/8197/DoEO25fA/IQke7CWi_720p.mp4", 231, "Waifutania"),
+        ("file", "https://v103.erome.com/2665/WJD2aTMn/hrKnNA1p_720p.mp4", 138, "Tania Ramos AKA Waifutania"),
     )),
     ("LILI VICTORIA", (
         ("file", "https://v2.erome.com/8917/i3ukXKfK/tYUWdkYx_720p.mp4", 63, "lilivictoria32"),
         ("file", "https://v2.erome.com/8917/i3ukXKfK/C4q2YdX7_720p.mp4", 32, "lilivictoria32"),
         ("file", "https://v93.erome.com/9093/c6S6qfYl/Pbi2woWQ_720p.mp4", 15, "lilivictoria32"),
+        ("file", "https://v2.erome.com/8917/i3ukXKfK/jhOvs8WT_720p.mp4", 11, "lilivictoria32"),
+        ("file", "https://v40.erome.com/9071/1mwYGAtU/KW6OUvlg_720p.mp4", 9, "lilivictoria32"),
     )),
     ("IMHIZBAEEXX", (
         ("file", "https://v320.erome.com/5241/CZ4UXKiP/cmAruVHG_720p.mp4", 33, "Imhizbae"),
@@ -1376,8 +1411,16 @@ ADULT_FACE_HOLDS = (
         ("file", "https://v55.erome.com/7870/uto61E9C/FgIowfpJ_720p.mp4", 479, "Annabellrio"),
         ("file", "https://v55.erome.com/7870/uto61E9C/e9OPZFlG_720p.mp4", 434, "Annabellrio"),
         ("file", "https://v85.erome.com/3799/FDZSNMht/P3a9KZOZ_720p.mp4", 43, "Annabellrio"),
+        ("file", "https://v201.erome.com/340/ZCXHIMZ5/32KKTE8z_480p.mp4", 28, "Annabellrio mega"),
     )),
-    ("VAL2YUMMI", (("file", "https://v58.erome.com/8970/DMAsDEDH/3HYKACJR_720p.mp4", 152, "val2yummi"),)),
+    ("VAL2YUMMI", (
+        ("file", "https://v58.erome.com/8970/DMAsDEDH/3HYKACJR_720p.mp4", 152, "val2yummi"),
+        ("file", "https://v68.erome.com/7860/6pKwUvNE/F4IiNqu8_720p.mp4", 117, "Val2yummi"),
+        ("file", "https://v68.erome.com/7860/6pKwUvNE/YIm7RrE1_720p.mp4", 53, "Val2yummi"),
+        ("file", "https://v68.erome.com/7860/6pKwUvNE/JLTullnj_720p.mp4", 43, "Val2yummi"),
+        ("file", "https://v22.erome.com/8418/AN9ubyyI/FfpooftV_720p.mp4", 37, "val2yummy"),
+        ("file", "https://v58.erome.com/8970/DMAsDEDH/ItUsMGpm_720p.mp4", 36, "val2yummi"),
+    )),
     ("FREAKYYSTACKSS", (("file", "https://v10.erome.com/8815/f17CQGFk/BvuzWQDY_720p.mp4", 668, "FreakyStackss x Slobhouse"),)),
     ("ASAIA HERNANDEZ", (("file", "https://v11.erome.com/5822/AvtUf9Tm/A5lnqNUK_720p.mp4", 29, "Asaia fine ass"),)),
     ("JASMINEGTV", (("file", "https://v62.erome.com/1768/5jd5lhgS/PDzcXq2Z_720p.mp4", 1434, "Jasminegtv"),)),
@@ -1398,8 +1441,12 @@ ADULT_FACE_HOLDS = (
         ("file", "https://v62.erome.com/6229/z3OqMDEp/Wvuc442K_720p.mp4", 91, "Alejamieles"),
         ("file", "https://v101.erome.com/4732/GCq1t8hI/N0Mi7YDi_720p.mp4", 30, "Aleja mieles 18"),
         ("file", "https://v84.erome.com/3506/wBFdLsw0/aS3h9xeC_720p.mp4", 21, "Aleja Mieles"),
+        ("file", "https://v84.erome.com/3506/wBFdLsw0/eoZVA6P9_720p.mp4", 20, "Aleja Mieles"),
         ("file", "https://v5.erome.com/1052/lgNTnZw1/DtZ3I4ql_720p.mp4", 19, "Aleja miel"),
         ("file", "https://v90.erome.com/7069/22xZVJW7/No8ICVcu_720p.mp4", 17, "Aleja Miel"),
+        ("file", "https://v101.erome.com/4732/GCq1t8hI/43bX0kwd_720p.mp4", 16, "Aleja mieles 18"),
+        ("file", "https://v90.erome.com/7069/22xZVJW7/84QuWv1D_720p.mp4", 15, "Aleja Miel"),
+        ("file", "https://v5.erome.com/1052/lgNTnZw1/gQCNHSEx_720p.mp4", 15, "Aleja miel"),
     )),
 )
 ADULT_FACE_DESKS = (
@@ -1407,7 +1454,7 @@ ADULT_FACE_DESKS = (
     ("ITSSTEPHHONEYXO21", ("RUX8bZH5",)),
     ("MIKEILA J", ("edMkQtmB", "iLRhKOjv", "TqelxrBL", "RLcyK3T5")),
     ("JUICYJAS TV", ("bYEwXbLM", "OWRwt8jD", "p5AlhPzA", "58Uaa6Ig", "KmjJcLJT", "yz4tK6d5")),
-    ("HONEYTEASSEE", ("4WuSM4Do", "wFCSXuwr")),
+    ("HONEYTEASSEE", ("4WuSM4Do", "wFCSXuwr", "SRXW0yJF")),
     ("TANIA RAMOS", ("WJD2aTMn", "rRy8eW9u", "yYXjVfnM")),
     ("LILI VICTORIA", ("i3ukXKfK", "c6S6qfYl")),
     ("IMHIZBAEEXX", ("CZ4UXKiP", "5Ap1AVt9")),
@@ -1417,7 +1464,7 @@ ADULT_FACE_DESKS = (
     ("JASMINEGTV", ("5jd5lhgS",)),
     ("IMANGELJESSYY", ("hhyYdQUz",)),
     ("YESS ENIA69", ("QuJsjzdM",)),
-    ("ANNABELLE RIOS", ("uto61E9C", "HTwoGgwW", "FDZSNMht")),
+    ("ANNABELLE RIOS", ("uto61E9C", "HTwoGgwW", "FDZSNMht", "ZCXHIMZ5")),
     ("ITISASHLEY", ("tNRwgjor", "kcGtCmxt", "PoAT0le0")),
     ("ALEJAMIEL18", ("y01IMarw", "22xZVJW7", "z3OqMDEp", "GCq1t8hI", "wBFdLsw0", "lgNTnZw1")),
 )
@@ -4558,8 +4605,14 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("y01IMarw", desk)
         self.assertIn("22xZVJW7", desk)
         self.assertIn("z3OqMDEp", desk)
+        self.assertIn("SRXW0yJF", desk)
+        self.assertIn("ZCXHIMZ5", desk)
+        self.assertIn("WKXrg3je", desk)
+        self.assertIn("bu2E10vq", desk)
         self.assertNotIn("alejamil", desk)
         self.assertNotIn("ameli18", desk)
+        self.assertNotIn("LNVkV8aJ", desk)
+        self.assertNotIn("juicyjazz", desk.lower())
         self.assertIn("giulianacabrazia", desk)
         self.assertIn("gcabrazia", desk)
         self.assertIn("elvanavitaa", desk)
@@ -5089,8 +5142,15 @@ class AdultDeskTests(unittest.TestCase):
             self.assertNotIn("onlyfans", row["name"].lower())
             self.assertNotIn("onlyfans", row["url"].lower())
             self.assertIn("itisashley", row["seek"])
-        self.assertGreaterEqual(len(adult_face_hold_rooms("ALEJAMIEL18")), 6)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("ALEJAMIEL18")), 10)
         self.assertEqual(adult_face_hold_rooms("ALEJAMIEL18")[0]["seconds"], 123)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("HONEYTEASSEE")), 8)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("VAL2YUMMI")), 6)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("LILI VICTORIA")), 5)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("MIKEILA J")), 14)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("JUICYJAS TV")), 15)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("TANIA RAMOS")), 10)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("ANNABELLE RIOS")), 8)
         self.assertTrue(any("y01IMarw" in path for path in adult_face_hunt("ALEJAMIEL18")))
         self.assertTrue(any("erome.com/a/22xZVJW7" in path for path in adult_face_hunt("ALEJAMIEL18")))
         self.assertTrue(any("erome.com/a/z3OqMDEp" in path for path in adult_face_hunt("ALEJAMIEL18")))
@@ -5815,6 +5875,42 @@ class NaTheaterPlayTests(unittest.TestCase):
         self.assertLess(close.find("zoomLive = nil"), close.find("NaWatch.drop"))
         self.assertIn("movie playback", qa.lower())
         self.assertIn("sound", qa.lower())
+        self.assertIn("AdultDesk.faceKeep", sock if (sock := read("Blackout", "UpdateSocket.swift")) else "")
+        live_adult = read("Blackout", "UpdateSocket.swift").split("func liveAdult(")[1].split("func applyHopStills(")[0]
+        self.assertIn("AdultDesk.faceKeep(id)", live_adult)
+        self.assertIn("AdultDesk.filePlay(ready)", live_adult)
+        self.assertIn("replaceCurrentItem(with: item)", watch)
+        self.assertIn("await Task.yield()", watch)
+        go_full = live.split("private func goFull()")[1].split("private func toggle()")[0]
+        self.assertNotIn("NaWatch.drop", go_full)
+        self.assertNotIn("stop()", go_full)
+        self.assertIn("onFull(next)", go_full)
+        self.assertEqual(
+            adult_ready_play(
+                {
+                    "id": "adult-face-star-giuliana-cabrazia-takes-cumshot-on-her-big-ass",
+                    "url": "https://cdn.bornstar.co/videos/giuliana-cabrazia-takes-cumshot-on-her-big-ass/master.m3u8",
+                }
+            ),
+            "https://cdn.bornstar.co/videos/giuliana-cabrazia-takes-cumshot-on-her-big-ass/master.m3u8",
+        )
+        self.assertEqual(
+            adult_ready_play(
+                {
+                    "id": "adult-face-desk-y01imarw-2doepigb",
+                    "url": "https://v60.erome.com/2335/y01IMarw/2dOePIgB_720p.mp4",
+                }
+            ),
+            "https://v60.erome.com/2335/y01IMarw/2dOePIgB_720p.mp4",
+        )
+        self.assertIsNone(
+            adult_ready_play(
+                {
+                    "id": "adult-live-room",
+                    "url": "https://edge.example/live-hls/amlst:alpha/playlist.m3u8",
+                }
+            )
+        )
 
 
 class NaTheaterStayUpTests(unittest.TestCase):
@@ -5849,6 +5945,18 @@ class NaTheaterStayUpTests(unittest.TestCase):
         close = app.split("func closeLive()")[1].split("func holdCam(")[0]
         self.assertLess(close.find("zoomLive = nil"), close.find("NaWatch.drop"))
         self.assertNotIn("replaceCurrentItem(with: nil)", zoom.split("private func stop()")[1].split("private func jump")[0])
+        chip = na.split("ForEach(naKindChips")[1].split("private var naBrowseStrip")[0]
+        self.assertIn("clampNaPick()", chip)
+        self.assertIn("naPlayingID", na.split("private var naStageRow")[1].split("private var naHasPrev")[0])
+        open_live = app.split("func openLive(")[1].split("func stepLive(")[0]
+        self.assertIn("AdultDesk.faceKeep", open_live)
+        self.assertIn("AdultDesk.filePlay(ready)", open_live)
+        self.assertIn("zoomLive =", open_live)
+        self.assertLess(open_live.find("zoomLive ="), open_live.find("presentLive"))
+        step = app.split("func stepLive(")[1].split("private func presentLive(")[0]
+        self.assertIn("AdultDesk.faceKeep", step)
+        self.assertIn("AdultDesk.filePlay(ready)", step)
+        self.assertLess(step.find("zoomLive ="), step.find("presentLive"))
 
 
 def desk_text() -> str:

@@ -509,7 +509,9 @@ final class UpdateSocket {
         if let cached = adultPlay[id], AdultDesk.playlist(cached) != nil {
             return cached
         }
-        if let ready = AdultDesk.playlist(row.url), AdultDesk.filePlay(ready) {
+        if let ready = AdultDesk.playlist(row.url),
+           AdultDesk.filePlay(ready) || AdultDesk.faceKeep(id)
+        {
             adultPlay[id] = ready
             return ready
         }
