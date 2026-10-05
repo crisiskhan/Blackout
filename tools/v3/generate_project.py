@@ -42,7 +42,6 @@ PACKAGES = [
     ("NightRed", "NightRed"),
     ("BatteryAuction", "BatteryAuction"),
     ("Instruments", "Instruments"),
-    ("RegionalPacks", "RegionalPacks"),
     ("MapLibreMap", "MapLibreMap"),
 ]
 

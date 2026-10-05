@@ -320,5 +320,54 @@ class WatchStaysOmittedTests(unittest.TestCase):
         self.assertNotIn("BlackoutWatch.app in Embed Watch Content", pbx)
 
 
+class UnusedPhoneCargoTests(unittest.TestCase):
+    def test_unread_sidecars_stay_off_the_phone(self):
+        copy = read("tools", "copy_resources.sh")
+        self.assertIn("--exclude 'Localizable'", copy)
+        self.assertIn("--exclude 'Vision/lookalikes.json'", copy)
+        self.assertIn('test ! -f "${DST}/Vision/lookalikes.json"', copy)
+        self.assertIn('test ! -d "${DST}/Localizable"', copy)
+        self.assertFalse((ROOT / "Resources" / "Localizable").exists())
+        self.assertFalse((ROOT / "Resources" / "Vision" / "lookalikes.json").exists())
+        vision = read("tools", "v3", "vision.py")
+        self.assertNotIn("lookalikes.json", vision)
+        emit = read("tools", "v3", "emit_app.py")
+        self.assertNotIn("Localizable", emit)
+        self.assertNotIn("es.json", emit)
+        for path in (ROOT / "Blackout").rglob("*.swift"):
+            blob = path.read_text()
+            self.assertNotIn("lookalikes.json", blob, path.name)
+            self.assertNotIn("Localizable/es.json", blob, path.name)
+        for path in (ROOT / "Packages").rglob("*.swift"):
+            blob = path.read_text()
+            self.assertNotIn("lookalikes.json", blob, str(path.relative_to(ROOT)))
+            self.assertNotIn("Localizable/es.json", blob, str(path.relative_to(ROOT)))
+
+
+class RegionalPacksUnlinkedTests(unittest.TestCase):
+    def test_banner_module_stays_in_tree_and_off_the_app(self):
+        self.assertTrue(
+            (
+                ROOT
+                / "Packages"
+                / "RegionalPacks"
+                / "Sources"
+                / "RegionalPacks"
+                / "RegionalPacks.swift"
+            ).is_file()
+        )
+        gen = read("tools", "v3", "generate_project.py")
+        self.assertNotIn('("RegionalPacks", "RegionalPacks")', gen)
+        pbx = read("Blackout.xcodeproj", "project.pbxproj")
+        self.assertNotIn("RegionalPacks", pbx)
+        emit = read("tools", "v3", "emit_app.py")
+        self.assertNotIn("import RegionalPacks", emit)
+        self.assertNotIn("RegionalPacks.visible", emit)
+        for path in (ROOT / "Blackout").rglob("*.swift"):
+            blob = path.read_text()
+            self.assertNotIn("import RegionalPacks", blob, path.name)
+            self.assertNotIn("RegionalPacks.", blob, path.name)
+
+
 if __name__ == "__main__":
     unittest.main()

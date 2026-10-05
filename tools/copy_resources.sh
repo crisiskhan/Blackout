@@ -34,6 +34,8 @@ rsync -a \
   --exclude 'Packs/*/layers/ground.geojson' \
   --exclude 'Packs/*/layers/water.geojson' \
   --exclude 'Packs/nm/aerial*.pmtiles' \
+  --exclude 'Localizable' \
+  --exclude 'Vision/lookalikes.json' \
   "${SRC}/" "${DST}/"
 rm -rf "${DST}/Resources"
 rm -rf "${DST}/Globe"
@@ -53,3 +55,6 @@ test -f "${DST}/Packs/tx-east/overlay.pmtiles"
 test ! -f "${DST}/Packs/nm/aerial-1.pmtiles"
 test ! -f "${DST}/Packs/nm/aerial.pmtiles"
 test ! -f "${DST}/Packs/tx-east/aerial-1.pmtiles"
+test ! -f "${DST}/Vision/lookalikes.json"
+test ! -d "${DST}/Localizable"
+test ! -f "${DST}/Localizable/es.json"
