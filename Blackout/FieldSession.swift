@@ -1,3 +1,4 @@
+import CryptoParty
 import FieldAsk
 import FieldCorpus
 import FieldSpeech
@@ -54,11 +55,11 @@ enum FieldWalkStore {
             defaults.removeObject(forKey: key)
             return
         }
-        defaults.set(data, forKey: key)
+        SealedPersist.put(data, forKey: key, defaults: defaults)
     }
 
     static func load(defaults: UserDefaults = .standard) -> Snapshot? {
-        guard let data = defaults.data(forKey: key) else { return nil }
+        guard let data = SealedPersist.get(forKey: key, defaults: defaults) else { return nil }
         return try? JSONDecoder().decode(Snapshot.self, from: data)
     }
 }

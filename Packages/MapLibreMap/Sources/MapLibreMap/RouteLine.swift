@@ -1,6 +1,7 @@
 import Foundation
 import Router
 import Tokens
+import CryptoParty
 
 public enum RouteLine {
     public static let sourceID = "route-line-src"
@@ -103,18 +104,18 @@ public enum DestinationPin {
         defaults: UserDefaults = .standard
     ) {
         guard UserPuck.shouldPaint(lat: lat, lon: lon) else { return }
-        defaults.set([lat, lon], forKey: persistKey)
+        SealedPersist.putPair(lat: lat, lon: lon, forKey: persistKey, defaults: defaults)
     }
 
     public static func load(defaults: UserDefaults = .standard) -> (lat: Double, lon: Double)? {
-        guard let pair = defaults.array(forKey: persistKey) as? [Double], pair.count == 2,
-              UserPuck.shouldPaint(lat: pair[0], lon: pair[1])
+        guard let pair = SealedPersist.getPair(forKey: persistKey, defaults: defaults),
+              UserPuck.shouldPaint(lat: pair.0, lon: pair.1)
         else { return nil }
-        return (pair[0], pair[1])
+        return (pair.0, pair.1)
     }
 
     public static func clear(defaults: UserDefaults = .standard) {
-        defaults.removeObject(forKey: persistKey)
+        SealedPersist.remove(forKey: persistKey, defaults: defaults)
     }
 
     public static func needsReapply(

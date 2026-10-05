@@ -1,5 +1,6 @@
 import Foundation
 import Router
+import CryptoParty
 
 /// MAP camera + layer desk. Not a tab. Pack and phone only.
 public enum EyeDesk {
@@ -501,7 +502,7 @@ public enum EyeDesk {
     }
 
     public static func loadScenes(defaults: UserDefaults = .standard) -> [Scene] {
-        guard let data = defaults.data(forKey: sceneKey),
+        guard let data = SealedPersist.get(forKey: sceneKey, defaults: defaults),
               let loaded = try? JSONDecoder().decode([Scene].self, from: data)
         else { return [] }
         return loaded
@@ -509,7 +510,7 @@ public enum EyeDesk {
 
     public static func saveScenes(_ scenes: [Scene], defaults: UserDefaults = .standard) {
         if let data = try? JSONEncoder().encode(scenes) {
-            defaults.set(data, forKey: sceneKey)
+            SealedPersist.put(data, forKey: sceneKey, defaults: defaults)
         }
     }
 

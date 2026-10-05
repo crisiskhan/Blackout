@@ -119,10 +119,10 @@ class DiaryGlassTests(unittest.TestCase):
         self.assertIn("func logDiary(", app)
         self.assertIn("func persistDiary(", app)
         persist = app.split("func persistDiary()")[1].split("private func loadDiary")[0]
-        self.assertIn("DeviceVault.seal", persist)
+        self.assertIn("SealedPersist.put", persist)
         self.assertNotIn("UserDefaults.standard.set(data, forKey:", persist)
         load = app.split("private func loadDiary()")[1].split("var displayYouName")[0]
-        self.assertIn("DeviceVault.open", load)
+        self.assertIn("SealedPersist.get", load)
         self.assertNotIn("var trip", app)
         self.assertNotIn("TripFactory", app)
         self.assertIn("testFeedIsNewestFirst", tests)

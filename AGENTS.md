@@ -84,8 +84,9 @@ python3 tools/test_hud_quality.py
 `test_hud_instrument.py`,
 `test_vision_glass.py`,
 `test_khan_eye.py`,
-`test_mesh_presence.py` and
-`test_diary.py`. That chain is the
+`test_mesh_presence.py`,
+`test_diary.py` and
+`test_device_vault.py`. That chain is the
 executable form of the "Locked (do not regress)" list every tip PR restates by hand.
 
 A new invariant ships as a new check in that chain, in the same commit as the behavior it

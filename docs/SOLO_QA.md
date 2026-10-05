@@ -14,6 +14,10 @@ Score every row `[ ] PASS` / FAIL / N/A. Write the exact chrome string or behavi
 
 - [ ] PASS / FAIL / N/A — Tap SEARCH, NOTE, NAME, TIME, ITEM, TODAY, or PARTY CODE. The HUD keyboard rises on glass, 44pt keys. SPACE, BACK, SHIFT, 123 / ABC are whole words (they never clip). Apostrophe and hyphen sit on the letter face so `O'BRIEN` is one line. Digit pad is 3-wide (`-` `0` `.` and comma) so `31.76190, -106.49000` is one line. Digit face has `°` so `31.76190°` types. PASTE sits on the board. Empty PASTE is `NO PASTE` and keeps the board. Red submit plate (`DONE` / `SEARCH` / `SEND` / `LOG` / `SET` / `ADD`). Empty SEND / LOG / ADD / SET chromes why not and keeps the board. NAME / ITEM / PARTY CODE stay caps. SEARCH / NOTE / TODAY mix case. TIME opens the digit pad. Readout prints the field title when empty. Hold BACK repeats. Each key is a light tick. Left-hand sits above the home indicator. MAP SEARCH ends with the mic, not a SAY chip. FIELD SAY is still a chip. Tap the dim field, successful submit, change tab, or DISARM to close. Close wipes the typewriter. PARTY CODE and TODAY rest AES-GCM on this phone (Keychain, no iCloud). No keystroke log. No iPhone keyboard.
 
+## DEVICE SEAL
+
+- [ ] PASS / FAIL / N/A — NAME, status, role, marks, dest pin, last fix, vitals, kit, timers, field walk, KEEP, and pack id rest AES-GCM on this phone (Keychain `ThisDeviceOnly`, no iCloud). Kill and relaunch — the same NAME / marks / dest come back. Voice, lamp, hand, pocket, and locale stay plaintext chrome. Packed tiles stay public OSM. SNAP stills stay public cameras under file protection. If Keychain cannot mint the key, the secret stays in RAM — it is not written plaintext.
+
 ## MAP STILL — tip 60 score bar (five only)
 
 Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.

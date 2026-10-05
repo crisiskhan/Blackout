@@ -979,8 +979,15 @@ final class UpdateSocket {
               data.count < 3_000_000
         else { return }
         let dir = SnapManifest.folder()
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        try? data.write(to: dir.appendingPathComponent(token), options: .atomic)
+        try? FileManager.default.createDirectory(
+            at: dir,
+            withIntermediateDirectories: true,
+            attributes: [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication]
+        )
+        try? data.write(
+            to: dir.appendingPathComponent(token),
+            options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication]
+        )
     }
 }
 
@@ -1105,9 +1112,16 @@ struct SnapManifest: Codable, Sendable {
 
     func save() {
         let dir = Self.folder()
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(
+            at: dir,
+            withIntermediateDirectories: true,
+            attributes: [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication]
+        )
         if let data = try? JSONEncoder().encode(self) {
-            try? data.write(to: dir.appendingPathComponent("manifest.json"), options: .atomic)
+            try? data.write(
+                to: dir.appendingPathComponent("manifest.json"),
+                options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication]
+            )
         }
     }
 

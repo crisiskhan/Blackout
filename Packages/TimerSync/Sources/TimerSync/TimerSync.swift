@@ -1,5 +1,6 @@
 import Foundation
 import BlackBox
+import CryptoParty
 
 /// Typed TIME on EXPEDITION. Minutes unless the field ends in H / HR / HRS.
 public enum TimerDuration {
@@ -174,12 +175,12 @@ public final class TimerBoard: @unchecked Sendable {
     public func save(defaults: UserDefaults = .standard) {
         let blob = TimerBlob(timers: timers, completed: completed)
         if let data = try? JSONEncoder().encode(blob) {
-            defaults.set(data, forKey: Self.persistKey)
+            SealedPersist.put(data, forKey: Self.persistKey, defaults: defaults)
         }
     }
 
     public func load(defaults: UserDefaults = .standard) {
-        guard let data = defaults.data(forKey: Self.persistKey),
+        guard let data = SealedPersist.get(forKey: Self.persistKey, defaults: defaults),
               let blob = try? JSONDecoder().decode(TimerBlob.self, from: data)
         else { return }
         restore(timers: blob.timers, completed: blob.completed)

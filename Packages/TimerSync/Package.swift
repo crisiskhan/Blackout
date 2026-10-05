@@ -9,9 +9,10 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../BlackBox"),
+        .package(path: "../CryptoParty"),
     ],
     targets: [
-        .target(name: "TimerSync", dependencies: ["BlackBox"]),
+        .target(name: "TimerSync", dependencies: ["BlackBox", "CryptoParty"]),
         .testTarget(name: "TimerSyncTests", dependencies: ["TimerSync"]),
 
     ]

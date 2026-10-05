@@ -8,10 +8,10 @@ let package = Package(
         .library(name: "KitStore", targets: ["KitStore"]),
     ],
     dependencies: [
-
+        .package(path: "../CryptoParty"),
     ],
     targets: [
-        .target(name: "KitStore", dependencies: []),
+        .target(name: "KitStore", dependencies: ["CryptoParty"]),
         .testTarget(name: "KitStoreTests", dependencies: ["KitStore"]),
 
     ]

@@ -1,4 +1,5 @@
 import Foundation
+import CryptoParty
 
 public enum ConditionBand: String, CaseIterable, Sendable {
     case green, yellow, orange, red, black
@@ -176,10 +177,10 @@ public struct PartyVitals: Equatable, Sendable {
     public static let persistKey = "you.vitals"
 
     public static func save(_ vitals: PartyVitals, defaults: UserDefaults = .standard) {
-        defaults.set(vitals.posRails, forKey: persistKey)
+        SealedPersist.putDoubles(vitals.posRails, forKey: persistKey, defaults: defaults)
     }
 
     public static func load(defaults: UserDefaults = .standard) -> PartyVitals? {
-        fromPOS(defaults.array(forKey: persistKey) as? [Double])
+        fromPOS(SealedPersist.getDoubles(forKey: persistKey, defaults: defaults))
     }
 }
