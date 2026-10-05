@@ -47,6 +47,12 @@ class SealedPersistTests(unittest.TestCase):
         self.assertIn("DeviceKey.resolve", persist)
         self.assertIn("testSealedPersistRoundtripAndFailClosed", tests)
         self.assertIn("testSealedPersistReadsLeftoverPlaintext", tests)
+        fail_closed = tests.split("func testSealedPersistRoundtripAndFailClosed")[1].split("func test")[0]
+        self.assertIn(
+            '(String(data: stored!, encoding: .utf8) ?? "").contains("ridge")',
+            fail_closed,
+        )
+        self.assertNotIn("?? true", fail_closed)
 
     def test_boot_attaches_the_device_key_before_any_load(self):
         app = read("Blackout", "AppRuntime.swift")
