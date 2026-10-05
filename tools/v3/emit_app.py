@@ -1,4 +1,4 @@
-"""Emit iOS app chrome, Watch, Live Activity, Action Button, localization."""
+"""Emit iOS app chrome, Watch, Live Activity, Action Button."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -70,7 +70,6 @@ import Instruments
 import CommsUI
 import PTTAudio
 import OfflineSpeech
-import RegionalPacks
 
 @MainActor
 @Observable
@@ -169,7 +168,6 @@ enum BlackoutTab: String, CaseIterable, Identifiable {
         app / "RootChrome.swift",
         '''import SwiftUI
 import Tokens
-import RegionalPacks
 
 struct RootChrome: View {
     @Bindable var runtime: AppRuntime
@@ -425,7 +423,6 @@ enum L10n {
         '''import SwiftUI
 import MapLibreMap
 import Search
-import RegionalPacks
 
 struct MapTab: View {
     @Bindable var runtime: AppRuntime
@@ -447,9 +444,6 @@ struct MapTab: View {
             if let pack = runtime.packs?.active {
                 Text("\\(pack.name) · \\(pack.bytes / 1024) KB · \\(pack.state)")
                     .foregroundStyle(Color(white: 0.6))
-                ForEach(RegionalPacks.visible(state: pack.state)) { b in
-                    Text(b.title[runtime.locale] ?? b.id).font(.caption).foregroundStyle(Color(white: 0.7))
-                }
                 Text("Style \\(pack.id)/style.json · MapLibre Metal offline · no MapKit engine")
                     .font(.caption2).foregroundStyle(Color(white: 0.45))
             }
@@ -777,18 +771,6 @@ struct ActionButtonSOS: AppIntent {
 struct ActionButtonOK: AppIntent {
     static var title: LocalizedStringResource = "I AM OK"
     func perform() async throws -> some IntentResult { .result() }
-}
-''',
-    )
-
-    w(
-        ROOT / "Resources" / "Localizable" / "es.json",
-        '''{
-  "sos.call": "LLAMAR SOS",
-  "red.plate": "ROJO",
-  "stop.if": "PARA-SI",
-  "overdue": "VENCIDO",
-  "ok.chip": "ESTOY BIEN"
 }
 ''',
     )

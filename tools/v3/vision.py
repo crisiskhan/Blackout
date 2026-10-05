@@ -1,4 +1,4 @@
-"""Vision labels per state + lookalikes. NEVER edible unlock.
+"""Vision labels per state. Lookalikes live on each label. NEVER edible unlock.
 
 Only states we ship a map pack for get a label book: TX and NM. A book for
 ground the phone cannot draw is a promise the vessel cannot keep.
@@ -146,10 +146,4 @@ def write_all() -> None:
                 "labels": labels,
             },
         )
-    write_json(
-        root / "lookalikes.json",
-        {
-            "rule": "Every positive guess lists lookalikes. Percent is not ID. edibleUnlock is always false.",
-        },
-    )
     print("vision labels written")

@@ -33,7 +33,6 @@
 		0F5C7C23FE54CBF3C90B872B /* NightRed in Frameworks */ = {isa = PBXBuildFile; productRef = 2EEC2750DDE6DD942664AD31 /* NightRed */; };
 		E457536BEB1CFFFC7FE9E688 /* BatteryAuction in Frameworks */ = {isa = PBXBuildFile; productRef = FC847D28FFD57BF7EE7E498C /* BatteryAuction */; };
 		A075AC83D2281E4D86F5EA60 /* Instruments in Frameworks */ = {isa = PBXBuildFile; productRef = 77F4E4985DB1424CF0DB1857 /* Instruments */; };
-		DE6DB16FBDD3D05AD74A1A63 /* RegionalPacks in Frameworks */ = {isa = PBXBuildFile; productRef = 04EC158D5DD9027CF710A3A4 /* RegionalPacks */; };
 		B0393E48081BE19742625903 /* MapLibreMap in Frameworks */ = {isa = PBXBuildFile; productRef = E648C806A9EA32B613781C40 /* MapLibreMap */; };
 		48DC310F0F68C6FA33F515C5 /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = B6EAF066226A93016BECDF9F /* Resources */; };
 		A51B0C23E183211AB08F242E /* BlackoutWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1BDDF660CB1709C6EF8D2FD2 /* BlackoutWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -104,7 +103,6 @@
 				0F5C7C23FE54CBF3C90B872B /* NightRed in Frameworks */,
 				E457536BEB1CFFFC7FE9E688 /* BatteryAuction in Frameworks */,
 				A075AC83D2281E4D86F5EA60 /* Instruments in Frameworks */,
-				DE6DB16FBDD3D05AD74A1A63 /* RegionalPacks in Frameworks */,
 				B0393E48081BE19742625903 /* MapLibreMap in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -210,7 +208,6 @@
 				2EEC2750DDE6DD942664AD31 /* NightRed */,
 				FC847D28FFD57BF7EE7E498C /* BatteryAuction */,
 				77F4E4985DB1424CF0DB1857 /* Instruments */,
-				04EC158D5DD9027CF710A3A4 /* RegionalPacks */,
 				E648C806A9EA32B613781C40 /* MapLibreMap */,
 			);
 			productName = Blackout;
@@ -305,7 +302,6 @@
 				1BADFB1C30942929E8CB0088 /* XCLocalSwiftPackageReference "Packages/NightRed" */,
 				491A6E57190CB58B9CC8B69A /* XCLocalSwiftPackageReference "Packages/BatteryAuction" */,
 				F2A0BF08642A60376E9F533F /* XCLocalSwiftPackageReference "Packages/Instruments" */,
-				B63BA5796311D2FEB2E7F801 /* XCLocalSwiftPackageReference "Packages/RegionalPacks" */,
 				E1D0136A857DC3FF56F03E48 /* XCLocalSwiftPackageReference "Packages/MapLibreMap" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -883,10 +879,6 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Instruments;
 		};
-		B63BA5796311D2FEB2E7F801 /* XCLocalSwiftPackageReference "Packages/RegionalPacks" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/RegionalPacks;
-		};
 		E1D0136A857DC3FF56F03E48 /* XCLocalSwiftPackageReference "Packages/MapLibreMap" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/MapLibreMap;
@@ -1023,11 +1015,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F2A0BF08642A60376E9F533F /* XCLocalSwiftPackageReference "Packages/Instruments" */;
 			productName = Instruments;
-		};
-		04EC158D5DD9027CF710A3A4 /* RegionalPacks */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B63BA5796311D2FEB2E7F801 /* XCLocalSwiftPackageReference "Packages/RegionalPacks" */;
-			productName = RegionalPacks;
 		};
 		E648C806A9EA32B613781C40 /* MapLibreMap */ = {
 			isa = XCSwiftPackageProductDependency;
