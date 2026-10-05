@@ -464,6 +464,12 @@ ADULT_GIULIANA = (
     "giulianacabrazia2",
     "gcabrazia",
 )
+ADULT_ALEJA = (
+    "alejamiel18",
+    "alejamieles",
+    "aleja mieles",
+    "aleja miel",
+)
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
     ("ITSSTEPHHONEYXO21", ADULT_STEPH),
@@ -503,6 +509,7 @@ ADULT_FACES = (
     ("LIL BUSSY GIRL", ADULT_LILBUSSY),
     ("ITISASHLEY", ADULT_ASHLEY),
     ("GIULIANA CABRAZIA", ADULT_GIULIANA),
+    ("ALEJAMIEL18", ADULT_ALEJA),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_KEEP_CHIP = "KEEP"
@@ -1386,6 +1393,14 @@ ADULT_FACE_HOLDS = (
         ("star", "giuliana-cabrazia-gets-fucked-by-troy-francisco-s-bbc", 1049, "Giuliana Cabrazia Gets Fucked By Troy Francisco's BBC"),
         ("star", "emma-magnolia-and-giuliana-cabrazia-s-outdoor-pleasure", 398, "Emma Magnolia And Giuliana Cabrazia's Outdoor Pleasure"),
     )),
+    ("ALEJAMIEL18", (
+        ("file", "https://v60.erome.com/2335/y01IMarw/2dOePIgB_720p.mp4", 123, "Alejamiel18"),
+        ("file", "https://v62.erome.com/6229/z3OqMDEp/Wvuc442K_720p.mp4", 91, "Alejamieles"),
+        ("file", "https://v101.erome.com/4732/GCq1t8hI/N0Mi7YDi_720p.mp4", 30, "Aleja mieles 18"),
+        ("file", "https://v84.erome.com/3506/wBFdLsw0/aS3h9xeC_720p.mp4", 21, "Aleja Mieles"),
+        ("file", "https://v5.erome.com/1052/lgNTnZw1/DtZ3I4ql_720p.mp4", 19, "Aleja miel"),
+        ("file", "https://v90.erome.com/7069/22xZVJW7/No8ICVcu_720p.mp4", 17, "Aleja Miel"),
+    )),
 )
 ADULT_FACE_DESKS = (
     ("ITSSTEPHHONEY21", ("RUX8bZH5",)),
@@ -1404,6 +1419,7 @@ ADULT_FACE_DESKS = (
     ("YESS ENIA69", ("QuJsjzdM",)),
     ("ANNABELLE RIOS", ("uto61E9C", "HTwoGgwW", "FDZSNMht")),
     ("ITISASHLEY", ("tNRwgjor", "kcGtCmxt", "PoAT0le0")),
+    ("ALEJAMIEL18", ("y01IMarw", "22xZVJW7", "z3OqMDEp", "GCq1t8hI", "wBFdLsw0", "lgNTnZw1")),
 )
 ADULT_DESK_ORIGIN = "https://www.erome.com"
 ADULT_DESK_FOLLOW = 12
@@ -3435,6 +3451,7 @@ class AdultDeskTests(unittest.TestCase):
                 "LIL BUSSY GIRL",
                 "ITISASHLEY",
                 "GIULIANA CABRAZIA",
+                "ALEJAMIEL18",
             ],
         )
         fat_kinds = [f"KIND{index:02d}" for index in range(40)]
@@ -4535,6 +4552,14 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("LIL BUSSY GIRL", desk)
         self.assertIn("ITISASHLEY", desk)
         self.assertIn("GIULIANA CABRAZIA", desk)
+        self.assertIn("ALEJAMIEL18", desk)
+        self.assertIn("alejamiel18", desk)
+        self.assertIn("alejamieles", desk)
+        self.assertIn("y01IMarw", desk)
+        self.assertIn("22xZVJW7", desk)
+        self.assertIn("z3OqMDEp", desk)
+        self.assertNotIn("alejamil", desk)
+        self.assertNotIn("ameli18", desk)
         self.assertIn("giulianacabrazia", desk)
         self.assertIn("gcabrazia", desk)
         self.assertIn("elvanavitaa", desk)
@@ -5039,6 +5064,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("ELVANA VITAA", adult_rail([]))
         self.assertIn("ITISASHLEY", adult_rail([]))
         self.assertIn("GIULIANA CABRAZIA", adult_rail([]))
+        self.assertIn("ALEJAMIEL18", adult_rail([]))
         self.assertGreaterEqual(len(adult_face_hold_rooms("ITISASHLEY")), 3)
         self.assertEqual(adult_face_hold_rooms("ITISASHLEY")[0]["seconds"], 696)
         self.assertGreaterEqual(len(adult_face_hold_rooms("GIULIANA CABRAZIA")), 3)
@@ -5063,6 +5089,25 @@ class AdultDeskTests(unittest.TestCase):
             self.assertNotIn("onlyfans", row["name"].lower())
             self.assertNotIn("onlyfans", row["url"].lower())
             self.assertIn("itisashley", row["seek"])
+        self.assertGreaterEqual(len(adult_face_hold_rooms("ALEJAMIEL18")), 6)
+        self.assertEqual(adult_face_hold_rooms("ALEJAMIEL18")[0]["seconds"], 123)
+        self.assertTrue(any("y01IMarw" in path for path in adult_face_hunt("ALEJAMIEL18")))
+        self.assertTrue(any("erome.com/a/22xZVJW7" in path for path in adult_face_hunt("ALEJAMIEL18")))
+        self.assertTrue(any("erome.com/a/z3OqMDEp" in path for path in adult_face_hunt("ALEJAMIEL18")))
+        self.assertTrue(any("erome.com/a/GCq1t8hI" in path for path in adult_face_hunt("ALEJAMIEL18")))
+        self.assertEqual(adult_hunt_needles("alejamiel18"), list(ADULT_ALEJA))
+        self.assertEqual(adult_hunt_needles("alejamieles"), list(ADULT_ALEJA))
+        self.assertNotIn("aleja", adult_face_needles("ALEJAMIEL18") or [])
+        self.assertNotIn("miel", adult_face_needles("ALEJAMIEL18") or [])
+        self.assertNotIn("mieles", adult_face_needles("ALEJAMIEL18") or [])
+        self.assertNotIn("alejamil", adult_face_needles("ALEJAMIEL18") or [])
+        self.assertNotIn("ameli18", adult_face_needles("ALEJAMIEL18") or [])
+        for row in adult_face_hold_rooms("ALEJAMIEL18"):
+            self.assertNotIn("onlyfans", row["name"].lower())
+            self.assertNotIn("onlyfans", row["url"].lower())
+            self.assertTrue(
+                "alejamiel18" in row["seek"] or "alejamieles" in row["seek"] or "aleja miel" in row["seek"]
+            )
         self.assertEqual(
             [row["id"] for row in adult_parse_face(
                 {
@@ -5196,6 +5241,18 @@ class AdultDeskTests(unittest.TestCase):
         self.assertEqual(
             adult_page_name("https://www.example.com/giulianacabrazia_"),
             "giulianacabrazia_",
+        )
+        self.assertEqual(
+            adult_page_name(
+                "https://www.example.com/alejamiel18?fbclid=PAVERFWAUwychleHRuA2FlbQIxMQBwZG9mAmZkaWQWUPtTqaVYX2jeGc8gn-F8sIbgaf0sGHNydGMGYXBwX2lkDzEyNDAyNDU3NDI4NzQxNAABp9_ZQBqriecwNr_zkYNvrZS1gjBR-5z8IuWCRcZJCGmqwm1h9gdVvAJgtvHX_aem_9zgWBPJrQV9k6ZzBDwcraw"
+            ),
+            "alejamiel18",
+        )
+        self.assertEqual(
+            adult_hunt_needles(
+                "https://www.example.com/alejamiel18?fbclid=PAVERFWAUwychleHRuA2FlbQIxMQBwZG9mAmZkaWQWUPtTqaVYX2jeGc8gn-F8sIbgaf0sGHNydGMGYXBwX2lkDzEyNDAyNDU3NDI4NzQxNAABp9_ZQBqriecwNr_zkYNvrZS1gjBR-5z8IuWCRcZJCGmqwm1h9gdVvAJgtvHX_aem_9zgWBPJrQV9k6ZzBDwcraw"
+            ),
+            list(ADULT_ALEJA),
         )
         self.assertEqual(adult_page_name("https://www.example.com/elvanavitaa/media"), "elvanavitaa")
         self.assertEqual(adult_page_name("https://www.example.com/u/slaviccaramel"), "slaviccaramel")
@@ -5530,6 +5587,7 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("LIL BUSSY GIRL", tv)
         self.assertIn("ITISASHLEY", tv)
         self.assertIn("GIULIANA CABRAZIA", tv)
+        self.assertIn("ALEJAMIEL18", tv)
         self.assertIn("PASTE", tv)
         self.assertIn("NO PASTE", tv)
         self.assertIn("public video search", tv.lower())

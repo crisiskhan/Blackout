@@ -363,6 +363,12 @@ enum AdultDesk {
         "giulianacabrazia2",
         "gcabrazia",
     ]
+    static let alejaNeedles = [
+        "alejamiel18",
+        "alejamieles",
+        "aleja mieles",
+        "aleja miel",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
@@ -402,6 +408,7 @@ enum AdultDesk {
         ("LIL BUSSY GIRL", lilbussyNeedles),
         ("ITISASHLEY", ashleyNeedles),
         ("GIULIANA CABRAZIA", giulianaNeedles),
+        ("ALEJAMIEL18", alejaNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -513,6 +520,14 @@ enum AdultDesk {
         ("YESS ENIA69", ["QuJsjzdM"]),
         ("ANNABELLE RIOS", ["uto61E9C", "HTwoGgwW", "FDZSNMht"]),
         ("ITISASHLEY", ["tNRwgjor", "kcGtCmxt", "PoAT0le0"]),
+        ("ALEJAMIEL18", [
+            "y01IMarw",
+            "22xZVJW7",
+            "z3OqMDEp",
+            "GCq1t8hI",
+            "wBFdLsw0",
+            "lgNTnZw1",
+        ]),
     ]
     /// Public X handles. Hunt the guest timeline, not a paywalled store.
     static let facePosts: [(String, [String])] = [
@@ -811,6 +826,14 @@ enum AdultDesk {
             ("star", "giuliana-cabrazia-takes-cumshot-on-her-big-ass", 1270, "Giuliana Cabrazia Takes Cumshot On Her Big Ass"),
             ("star", "giuliana-cabrazia-gets-fucked-by-troy-francisco-s-bbc", 1049, "Giuliana Cabrazia Gets Fucked By Troy Francisco's BBC"),
             ("star", "emma-magnolia-and-giuliana-cabrazia-s-outdoor-pleasure", 398, "Emma Magnolia And Giuliana Cabrazia's Outdoor Pleasure"),
+        ]),
+        ("ALEJAMIEL18", [
+            ("file", "https://v60.erome.com/2335/y01IMarw/2dOePIgB_720p.mp4", 123, "Alejamiel18"),
+            ("file", "https://v62.erome.com/6229/z3OqMDEp/Wvuc442K_720p.mp4", 91, "Alejamieles"),
+            ("file", "https://v101.erome.com/4732/GCq1t8hI/N0Mi7YDi_720p.mp4", 30, "Aleja mieles 18"),
+            ("file", "https://v84.erome.com/3506/wBFdLsw0/aS3h9xeC_720p.mp4", 21, "Aleja Mieles"),
+            ("file", "https://v5.erome.com/1052/lgNTnZw1/DtZ3I4ql_720p.mp4", 19, "Aleja miel"),
+            ("file", "https://v90.erome.com/7069/22xZVJW7/No8ICVcu_720p.mp4", 17, "Aleja Miel"),
         ]),
     ]
     /// Guest stills for baked pin tokens. Star stills are `preview-batch/{slug}/thumb.webp`.
