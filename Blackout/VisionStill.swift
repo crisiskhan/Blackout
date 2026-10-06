@@ -557,6 +557,7 @@ struct VisionStill: UIViewControllerRepresentable {
             error: Error?
         ) {
             haltSession()
+            let aim = self.aim
             DispatchQueue.main.async {
                 guard error == nil,
                       let data = photo.fileDataRepresentation(),
@@ -564,7 +565,7 @@ struct VisionStill: UIViewControllerRepresentable {
                     self.failClosed()
                     return
                 }
-                self.finish { [aim] in self.onImage?(image, aim) }
+                self.finish { self.onImage?(image, aim) }
             }
         }
 

@@ -272,6 +272,9 @@ class VisionTenHitTests(unittest.TestCase):
         self.assertIn("crop:", apply)
         self.assertIn("aim", still)
         self.assertIn("onImage?(image, aim)", still)
+        finish = still.split("func photoOutput(")[1].split("func failClosed")[0]
+        self.assertIn("let aim = self.aim", finish)
+        self.assertLess(finish.find("let aim = self.aim"), finish.find("DispatchQueue.main.async"))
 
     def test_desert_needles_and_book_cover_the_yard(self):
         vis = read(
