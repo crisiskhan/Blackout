@@ -132,15 +132,13 @@ extension AppRuntime {
         field.askExpected = query
         field.fieldQuery = query
         field.sayFailed = false
-        let model = FieldAsk.modelURL(in: Self.resourceRoot())
         Task.detached {
             let card = FieldAsk.answer(
                 query: query,
                 chapter: chapter,
                 locale: locale,
                 packName: packName,
-                packId: packId,
-                modelURL: model
+                packId: packId
             )
             await MainActor.run {
                 self.applyFieldAsk(seq: seq, expected: query, card: card)

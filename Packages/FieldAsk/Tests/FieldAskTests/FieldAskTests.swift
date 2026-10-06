@@ -46,8 +46,7 @@ final class FieldAskTests: XCTestCase {
                 chapter: [water],
                 locale: "en",
                 packName: "west",
-                packId: "tx-west",
-                modelURL: nil
+                packId: "tx-west"
             )
         )
         let live = FieldAsk.answer(
@@ -55,8 +54,7 @@ final class FieldAskTests: XCTestCase {
             chapter: [water],
             locale: "en",
             packName: "west",
-            packId: "tx-west",
-            modelURL: nil
+            packId: "tx-west"
         )
         XCTAssertEqual(live?.id, FieldAsk.liveID)
         XCTAssertGreaterThanOrEqual(live?.steps.count ?? 0, 4)

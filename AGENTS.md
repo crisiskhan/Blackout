@@ -101,6 +101,8 @@ those greps: packed MapLibre tiles, no Apple Maps or other live base map,
 no account, no backend except the UPDATE chip's one-shot SNAP. SOS logs before
 it arms and never auto-dials. Dark only. "Unknown" is a valid Vision answer.
 When a capability is unavailable, the UI says so — it never spins.
+No on-device ASK model (a 3B GGUF would drain the phone in an emergency).
+FIELD ASK is the packed book walk. `NO ASK MODEL` / `NO VISION MODEL` stay.
 
 ## This box cannot build iOS
 
