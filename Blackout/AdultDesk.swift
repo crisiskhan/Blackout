@@ -378,6 +378,12 @@ enum AdultDesk {
         "lust4lizzie",
         "lust 4 lizzy",
     ]
+    static let cakezNeedles = [
+        "miss_ladycakez69",
+        "missladycakez69",
+        "miss ladycakez 69",
+        "miss ladycakez69",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
@@ -419,6 +425,7 @@ enum AdultDesk {
         ("GIULIANA CABRAZIA", giulianaNeedles),
         ("ALEJAMIEL18", alejaNeedles),
         ("LUST4LIZZY", lizzyNeedles),
+        ("MISS LADYCAKEZ69", cakezNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -478,6 +485,7 @@ enum AdultDesk {
         ("ITISASHLEY", ["itisashley", "luvashxx", "itisashleyy", "ofcourseashley"]),
         ("GIULIANA CABRAZIA", ["giulianacabrazia", "giulianacabrazia2", "gcabrazia"]),
         ("LUST4LIZZY", ["lust4lizzy"]),
+        ("MISS LADYCAKEZ69", ["missladycakez69", "miss_ladycakez69"]),
     ]
     /// Proven guest albums. Hunt these first so a JSON desk cannot blank the chip.
     static let faceDesks: [(String, [String])] = [
@@ -590,6 +598,7 @@ enum AdultDesk {
         ("ITISASHLEY", ["itisashley", "luvashxx"]),
         ("GIULIANA CABRAZIA", ["gcabrazia", "giulianacabrazia_", "giulianacabrazia2"]),
         ("LUST4LIZZY", ["lust4lizzy"]),
+        ("MISS LADYCAKEZ69", ["miss_ladycakez69", "missladycakez69"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
