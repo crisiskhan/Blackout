@@ -1,5 +1,23 @@
 [
   {
+    "id": "flock-n13585089701",
+    "url": "",
+    "lat": 30.0523893,
+    "lon": -97.6905233,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13972313501",
+    "url": "",
+    "lat": 30.0557655,
+    "lon": -97.61833,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-SUgtMzUgQCBSb2JlcnQgTGlnaHQgQmx2ZA",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-35%20%40%20Robert%20Light%20Blvd&districtCode=AUS",
     "lat": 30.058625,
@@ -7,6 +25,24 @@
     "name": "IH-35 @ Robert Light Blvd",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13545218750",
+    "url": "",
+    "lat": 30.0634366,
+    "lon": -97.6924205,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13665983501",
+    "url": "",
+    "lat": 30.0660003,
+    "lon": -97.6640061,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-SUgtMzUgQCBDb21tZXJjaWFsIERy",
@@ -18,6 +54,42 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14060555201",
+    "url": "",
+    "lat": 30.0721023,
+    "lon": -97.781636,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14195683101",
+    "url": "",
+    "lat": 30.0732227,
+    "lon": -97.7212297,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13971647401",
+    "url": "",
+    "lat": 30.0777104,
+    "lon": -97.820407,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13968513001",
+    "url": "",
+    "lat": 30.0781117,
+    "lon": -97.8483807,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-SUgtMzUgQCBGTS0yMDAxIDQxOQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-35%20%40%20FM-2001%20419&districtCode=AUS",
     "lat": 30.079107999999998,
@@ -25,6 +97,42 @@
     "name": "IH-35 @ FM-2001",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13157368239",
+    "url": "",
+    "lat": 30.0796637,
+    "lon": -97.8247529,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14108647401",
+    "url": "",
+    "lat": 30.0858406,
+    "lon": -97.8634752,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14052603301",
+    "url": "",
+    "lat": 30.0887034,
+    "lon": -97.7286706,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13157368238",
+    "url": "",
+    "lat": 30.0890549,
+    "lon": -97.8200782,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-SUgtMzUgQCBNYWluIFN0",
@@ -36,6 +144,87 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14051947502",
+    "url": "",
+    "lat": 30.0898449,
+    "lon": -97.7288896,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13326994803",
+    "url": "",
+    "lat": 30.0938184,
+    "lon": -97.8483474,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13298831201",
+    "url": "",
+    "lat": 30.0949338,
+    "lon": -97.9171532,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13298830601",
+    "url": "",
+    "lat": 30.0949537,
+    "lon": -97.9169701,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13947860601",
+    "url": "",
+    "lat": 30.0951013,
+    "lon": -97.8558184,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13545218751",
+    "url": "",
+    "lat": 30.0974517,
+    "lon": -97.6939186,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13635252201",
+    "url": "",
+    "lat": 30.0978169,
+    "lon": -97.2724496,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13947858901",
+    "url": "",
+    "lat": 30.0981891,
+    "lon": -97.8560511,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13844966402",
+    "url": "",
+    "lat": 30.0990034,
+    "lon": -97.2746251,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-SUgtMzUgU291dGggb2YgU0gtNDUgNDE3",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-35%20South%20of%20SH-45%20417&districtCode=AUS",
     "lat": 30.099905999999997,
@@ -45,6 +234,240 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13947838404",
+    "url": "",
+    "lat": 30.1003564,
+    "lon": -97.8652046,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13950150601",
+    "url": "",
+    "lat": 30.1003968,
+    "lon": -97.8587783,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13328471801",
+    "url": "",
+    "lat": 30.100445,
+    "lon": -97.8609914,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13244729630",
+    "url": "",
+    "lat": 30.1004472,
+    "lon": -97.3244943,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13947838102",
+    "url": "",
+    "lat": 30.1004793,
+    "lon": -97.8653433,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13427464680",
+    "url": "",
+    "lat": 30.1006445,
+    "lon": -97.284847,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13328438302",
+    "url": "",
+    "lat": 30.1006925,
+    "lon": -97.8609941,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13328465402",
+    "url": "",
+    "lat": 30.1007254,
+    "lon": -97.8589029,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13868650201",
+    "url": "",
+    "lat": 30.1015286,
+    "lon": -97.6077572,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13328623110",
+    "url": "",
+    "lat": 30.1017666,
+    "lon": -97.875105,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13118650685",
+    "url": "",
+    "lat": 30.101924,
+    "lon": -97.3294977,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13244718777",
+    "url": "",
+    "lat": 30.102066,
+    "lon": -97.3393424,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14003516201",
+    "url": "",
+    "lat": 30.1045266,
+    "lon": -97.3132828,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13250777424",
+    "url": "",
+    "lat": 30.1047201,
+    "lon": -97.3349218,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13244853756",
+    "url": "",
+    "lat": 30.1047685,
+    "lon": -97.3292357,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13174706915",
+    "url": "",
+    "lat": 30.107829,
+    "lon": -97.351709,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13946466002",
+    "url": "",
+    "lat": 30.1080301,
+    "lon": -97.8752771,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13250756832",
+    "url": "",
+    "lat": 30.1090114,
+    "lon": -97.3541525,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13525362624",
+    "url": "",
+    "lat": 30.1097378,
+    "lon": -97.3560762,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13272812653",
+    "url": "",
+    "lat": 30.1098698,
+    "lon": -97.3540023,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13272799751",
+    "url": "",
+    "lat": 30.1098873,
+    "lon": -97.3548175,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13272824739",
+    "url": "",
+    "lat": 30.1098873,
+    "lon": -97.3546198,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13599592500",
+    "url": "",
+    "lat": 30.1102116,
+    "lon": -97.4277846,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13171394706",
+    "url": "",
+    "lat": 30.110359,
+    "lon": -97.3322476,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13446817901",
+    "url": "",
+    "lat": 30.1104506,
+    "lon": -97.3207267,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13256459781",
+    "url": "",
+    "lat": 30.1108827,
+    "lon": -97.319946,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-SUgtMzUgQCBGTSAxMzI3",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-35%20%40%20FM%201327&districtCode=AUS",
     "lat": 30.110975,
@@ -52,6 +475,33 @@
     "name": "IH-35 @ FM 1327",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13468633901",
+    "url": "",
+    "lat": 30.1109906,
+    "lon": -97.3425781,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13255791343",
+    "url": "",
+    "lat": 30.1110552,
+    "lon": -97.3424671,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13577700301",
+    "url": "",
+    "lat": 30.1111661,
+    "lon": -97.3680022,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1458",
@@ -72,6 +522,186 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13274657633",
+    "url": "",
+    "lat": 30.113278,
+    "lon": -97.3518298,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13274642992",
+    "url": "",
+    "lat": 30.1132869,
+    "lon": -97.3524255,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13256191691",
+    "url": "",
+    "lat": 30.113301,
+    "lon": -97.3503644,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13306877266",
+    "url": "",
+    "lat": 30.1141577,
+    "lon": -97.3504194,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13468775401",
+    "url": "",
+    "lat": 30.1142937,
+    "lon": -97.3503933,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13456981502",
+    "url": "",
+    "lat": 30.1145072,
+    "lon": -97.3077063,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13665126501",
+    "url": "",
+    "lat": 30.1152002,
+    "lon": -97.8080938,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13988395001",
+    "url": "",
+    "lat": 30.1153459,
+    "lon": -97.8082366,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13628476501",
+    "url": "",
+    "lat": 30.1166054,
+    "lon": -97.4226148,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13591337702",
+    "url": "",
+    "lat": 30.1178027,
+    "lon": -97.4248234,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13577744901",
+    "url": "",
+    "lat": 30.1198842,
+    "lon": -97.4284383,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13988542002",
+    "url": "",
+    "lat": 30.1215786,
+    "lon": -97.3650712,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14069469501",
+    "url": "",
+    "lat": 30.1234414,
+    "lon": -97.8068476,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14071363101",
+    "url": "",
+    "lat": 30.1234983,
+    "lon": -97.807289,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14071370401",
+    "url": "",
+    "lat": 30.1284657,
+    "lon": -97.8097692,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14071403002",
+    "url": "",
+    "lat": 30.1284657,
+    "lon": -97.8097692,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14071369701",
+    "url": "",
+    "lat": 30.1288734,
+    "lon": -97.8097739,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14066913901",
+    "url": "",
+    "lat": 30.1290341,
+    "lon": -97.8094118,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13457018801",
+    "url": "",
+    "lat": 30.1293626,
+    "lon": -97.3146301,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14066912801",
+    "url": "",
+    "lat": 30.1294595,
+    "lon": -97.8093787,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-45",
     "url": "https://cctv.austinmobility.io/image/45.jpg",
     "lat": 30.132037,
@@ -79,6 +709,15 @@
     "name": "CIRCUIT OF THE AMERICAS BLVD / 812 RD (COTA SOUTH  GATE)",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14093470601",
+    "url": "",
+    "lat": 30.1341888,
+    "lon": -97.8530145,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-537",
@@ -106,6 +745,24 @@
     "name": "FM 1626 RD / OLD SAN ANTONIO RD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14076046001",
+    "url": "",
+    "lat": 30.1433625,
+    "lon": -97.8336746,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14076045701",
+    "url": "",
+    "lat": 30.1435014,
+    "lon": -97.8334763,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-536",
@@ -162,6 +819,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13473740401",
+    "url": "",
+    "lat": 30.1518501,
+    "lon": -97.7628492,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13473740901",
+    "url": "",
+    "lat": 30.1519872,
+    "lon": -97.7629753,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-41",
     "url": "https://cctv.austinmobility.io/image/41.jpg",
     "lat": 30.15286,
@@ -171,6 +846,33 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13429290101",
+    "url": "",
+    "lat": 30.1560426,
+    "lon": -97.761246,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13433355301",
+    "url": "",
+    "lat": 30.1563001,
+    "lon": -97.7613664,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13429287202",
+    "url": "",
+    "lat": 30.1564309,
+    "lon": -97.7612449,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-569",
     "url": "https://cctv.austinmobility.io/image/569.jpg",
     "lat": 30.157124,
@@ -178,6 +880,15 @@
     "name": "MENCHACA RD / RAVENSCROFT DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13293880301",
+    "url": "",
+    "lat": 30.1579841,
+    "lon": -97.7798477,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1453",
@@ -205,6 +916,15 @@
     "name": "7200 BLK ELROY RD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13293880001",
+    "url": "",
+    "lat": 30.1620465,
+    "lon": -97.7783568,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-421",
@@ -252,6 +972,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13207979036",
+    "url": "",
+    "lat": 30.1670248,
+    "lon": -97.7821647,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-243",
     "url": "https://cctv.austinmobility.io/image/243.jpg",
     "lat": 30.16707,
@@ -279,6 +1008,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13207979037",
+    "url": "",
+    "lat": 30.1671975,
+    "lon": -97.7838764,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-48",
     "url": "https://cctv.austinmobility.io/image/48.jpg",
     "lat": 30.167316,
@@ -295,6 +1033,42 @@
     "name": "SLAUGHTER LN / ALICE MAE LN",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13207979038",
+    "url": "",
+    "lat": 30.1678063,
+    "lon": -97.7845718,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13815587601",
+    "url": "",
+    "lat": 30.1687985,
+    "lon": -97.93835,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13207979039",
+    "url": "",
+    "lat": 30.1688978,
+    "lon": -97.7841804,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13815589401",
+    "url": "",
+    "lat": 30.1689357,
+    "lon": -97.9385602,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-422",
@@ -324,6 +1098,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14098121102",
+    "url": "",
+    "lat": 30.1694929,
+    "lon": -97.6062782,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14098121101",
+    "url": "",
+    "lat": 30.1695543,
+    "lon": -97.6062172,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-797",
     "url": "https://cctv.austinmobility.io/image/797.jpg",
     "lat": 30.169798,
@@ -333,6 +1125,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14098119701",
+    "url": "",
+    "lat": 30.1706642,
+    "lon": -97.6049276,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14098119501",
+    "url": "",
+    "lat": 30.1707819,
+    "lon": -97.604868,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-616",
     "url": "https://cctv.austinmobility.io/image/616.jpg",
     "lat": 30.171903,
@@ -340,6 +1150,24 @@
     "name": "BURLESON RD / 973 RD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14098119101",
+    "url": "",
+    "lat": 30.1721184,
+    "lon": -97.604046,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14098117101",
+    "url": "",
+    "lat": 30.1721876,
+    "lon": -97.6039116,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-118",
@@ -367,6 +1195,15 @@
     "name": "BURLESON RD / EMMA BROWNING AVE",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13510728001",
+    "url": "",
+    "lat": 30.1733599,
+    "lon": -97.9340875,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-117",
@@ -405,6 +1242,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13475125459",
+    "url": "",
+    "lat": 30.173891,
+    "lon": -97.6899254,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-742",
     "url": "https://cctv.austinmobility.io/image/742.jpg",
     "lat": 30.173962,
@@ -430,6 +1276,15 @@
     "name": "SLAUGHTER LN / SLAUGHTER LN (707 W Slaughter Ln)",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13457364709",
+    "url": "",
+    "lat": 30.1740227,
+    "lon": -97.6903732,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-732",
@@ -475,6 +1330,24 @@
     "name": "SLAUGHTER LN / BRIAR RIDGE DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13591327301",
+    "url": "",
+    "lat": 30.176237,
+    "lon": -97.5295312,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13175241799",
+    "url": "",
+    "lat": 30.1763356,
+    "lon": -97.3156951,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-741",
@@ -529,6 +1402,15 @@
     "name": "PLEASANT VALLEY RD / WILLIAM CANNON DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13510732201",
+    "url": "",
+    "lat": 30.179905,
+    "lon": -97.9295396,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-55",
@@ -684,6 +1566,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13585815702",
+    "url": "",
+    "lat": 30.1886281,
+    "lon": -97.5862563,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13507815756",
+    "url": "",
+    "lat": 30.1889945,
+    "lon": -97.7722398,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-511",
     "url": "https://cctv.austinmobility.io/image/511.jpg",
     "lat": 30.189102,
@@ -702,6 +1602,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13956099701",
+    "url": "",
+    "lat": 30.1893823,
+    "lon": -97.5774119,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13507815757",
+    "url": "",
+    "lat": 30.1898166,
+    "lon": -97.7716875,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-159",
     "url": "https://cctv.austinmobility.io/image/159.jpg",
     "lat": 30.190245,
@@ -718,6 +1636,15 @@
     "name": "MOPAC EXPY / LA CROSSE AVE",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13819603801",
+    "url": "",
+    "lat": 30.1906588,
+    "lon": -97.7725296,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-362",
@@ -846,6 +1773,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13902015781",
+    "url": "",
+    "lat": 30.1964936,
+    "lon": -97.7688498,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13902015780",
+    "url": "",
+    "lat": 30.1965152,
+    "lon": -97.7688173,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-158",
     "url": "https://cctv.austinmobility.io/image/158.jpg",
     "lat": 30.197027,
@@ -945,6 +1890,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13678019201",
+    "url": "",
+    "lat": 30.2008987,
+    "lon": -97.7663777,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-543",
     "url": "https://cctv.austinmobility.io/image/543.jpg",
     "lat": 30.200909,
@@ -952,6 +1906,24 @@
     "name": "SLAUGHTER LN / BECKETT RD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13603527101",
+    "url": "",
+    "lat": 30.2010808,
+    "lon": -97.76573,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13678018101",
+    "url": "",
+    "lat": 30.2011175,
+    "lon": -97.7667709,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-183",
@@ -972,6 +1944,33 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13876737001",
+    "url": "",
+    "lat": 30.2018241,
+    "lon": -97.7212424,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14202599901",
+    "url": "",
+    "lat": 30.2018882,
+    "lon": -97.7672737,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13443893001",
+    "url": "",
+    "lat": 30.2018976,
+    "lon": -97.3123797,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1457",
     "url": "https://cctv.austinmobility.io/image/1457.jpg",
     "lat": 30.202031,
@@ -979,6 +1978,24 @@
     "name": "BURLESON RD / METROPOLIS DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14202599601",
+    "url": "",
+    "lat": 30.2022535,
+    "lon": -97.7674823,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14202595901",
+    "url": "",
+    "lat": 30.2023958,
+    "lon": -97.7677738,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-116",
@@ -1017,6 +2034,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13644012301",
+    "url": "",
+    "lat": 30.2036847,
+    "lon": -97.7342021,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-915",
     "url": "https://cctv.austinmobility.io/image/915.jpg",
     "lat": 30.203835,
@@ -1044,6 +2070,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13635175701",
+    "url": "",
+    "lat": 30.2051536,
+    "lon": -97.7367896,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-194",
     "url": "https://cctv.austinmobility.io/image/194.jpg",
     "lat": 30.205563,
@@ -1051,6 +2086,15 @@
     "name": "BURLESON RD / MONTOPOLIS DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13973254301",
+    "url": "",
+    "lat": 30.2062641,
+    "lon": -97.9115192,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-360",
@@ -1096,6 +2140,15 @@
     "name": "SLAUGHTER LN / BARSTOW AVE",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13876738701",
+    "url": "",
+    "lat": 30.2087306,
+    "lon": -97.7236679,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1387",
@@ -1242,6 +2295,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13443893901",
+    "url": "",
+    "lat": 30.2132423,
+    "lon": -97.3107982,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-163",
     "url": "https://cctv.austinmobility.io/image/163.jpg",
     "lat": 30.213778,
@@ -1260,6 +2322,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13189670831",
+    "url": "",
+    "lat": 30.2150114,
+    "lon": -97.7029903,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-201",
     "url": "https://cctv.austinmobility.io/image/201.jpg",
     "lat": 30.215042,
@@ -1267,6 +2338,15 @@
     "name": "OLTORF ST / MONTOPOLIS DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13189670832",
+    "url": "",
+    "lat": 30.2150654,
+    "lon": -97.7032318,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-U0gtNzEgQCBNb250b3BvbGlzIERyIDY5MDA",
@@ -1294,6 +2374,24 @@
     "name": "IH 35 SVRD / BEN WHITE BLVD SVRD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13189670830",
+    "url": "",
+    "lat": 30.2156187,
+    "lon": -97.7010377,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13189670829",
+    "url": "",
+    "lat": 30.2156883,
+    "lon": -97.7010513,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-186",
@@ -1368,6 +2466,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n12644114243",
+    "url": "",
+    "lat": 30.2181123,
+    "lon": -97.8288275,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12644118760",
+    "url": "",
+    "lat": 30.2184553,
+    "lon": -97.8293809,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1522",
     "url": "https://cctv.austinmobility.io/image/1522.jpg",
     "lat": 30.218525,
@@ -1404,6 +2520,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13201107274",
+    "url": "",
+    "lat": 30.2195841,
+    "lon": -97.8266601,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-289",
     "url": "https://cctv.austinmobility.io/image/289.jpg",
     "lat": 30.219666,
@@ -1422,6 +2547,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n12644114926",
+    "url": "",
+    "lat": 30.2199866,
+    "lon": -97.8276358,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1360",
     "url": "https://cctv.austinmobility.io/image/1360.jpg",
     "lat": 30.220241,
@@ -1429,6 +2563,15 @@
     "name": "RIVERSIDE DR / CORIANDER DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n12644116857",
+    "url": "",
+    "lat": 30.2202892,
+    "lon": -97.8282677,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-321",
@@ -1456,6 +2599,15 @@
     "name": "US-290 @ S Congress Ave",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13358645501",
+    "url": "",
+    "lat": 30.2223375,
+    "lon": -97.7486869,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-744",
@@ -1512,6 +2664,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13926346301",
+    "url": "",
+    "lat": 30.2234572,
+    "lon": -97.7632549,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13926345003",
+    "url": "",
+    "lat": 30.2238951,
+    "lon": -97.7639144,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1448",
     "url": "https://cctv.austinmobility.io/image/1448.jpg",
     "lat": 30.223968,
@@ -1519,6 +2689,15 @@
     "name": "RIVERSIDE DR / VARGAS RD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14132149401",
+    "url": "",
+    "lat": 30.2241637,
+    "lon": -97.7504393,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1530",
@@ -1575,6 +2754,33 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13095304466",
+    "url": "",
+    "lat": 30.2258721,
+    "lon": -97.8042227,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13320433501",
+    "url": "",
+    "lat": 30.2259067,
+    "lon": -97.752074,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12644093867",
+    "url": "",
+    "lat": 30.2260984,
+    "lon": -97.8230363,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-962",
     "url": "https://cctv.austinmobility.io/image/962.jpg",
     "lat": 30.226185,
@@ -1584,6 +2790,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13472282516",
+    "url": "",
+    "lat": 30.2266167,
+    "lon": -97.823878,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-VVMtMjkwIEAgUyAxc3QgU3QgKDYwMCkgNTc2",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-290%20%40%20S%201st%20St%20%28600%29%20576&districtCode=AUS",
     "lat": 30.226715,
@@ -1591,6 +2806,24 @@
     "name": "US-290 @ S 1st St",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13322874601",
+    "url": "",
+    "lat": 30.2268167,
+    "lon": -97.7540393,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13201107275",
+    "url": "",
+    "lat": 30.2269037,
+    "lon": -97.8220911,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-410",
@@ -1638,6 +2871,33 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13095304464",
+    "url": "",
+    "lat": 30.2276394,
+    "lon": -97.8212947,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12644104583",
+    "url": "",
+    "lat": 30.2277811,
+    "lon": -97.8217262,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12644104584",
+    "url": "",
+    "lat": 30.2278707,
+    "lon": -97.8216627,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1506",
     "url": "https://cctv.austinmobility.io/image/1506.jpg",
     "lat": 30.22801,
@@ -1654,6 +2914,69 @@
     "name": "MENCHACA RD / REDD ST",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13095304461",
+    "url": "",
+    "lat": 30.2283969,
+    "lon": -97.8227133,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13971181901",
+    "url": "",
+    "lat": 30.228441,
+    "lon": -97.7067619,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13447434701",
+    "url": "",
+    "lat": 30.228484,
+    "lon": -97.7572938,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13095304463",
+    "url": "",
+    "lat": 30.2287643,
+    "lon": -97.8212172,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12644101214",
+    "url": "",
+    "lat": 30.228858,
+    "lon": -97.8211702,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13095304465",
+    "url": "",
+    "lat": 30.2291382,
+    "lon": -97.8194532,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13095304462",
+    "url": "",
+    "lat": 30.2291938,
+    "lon": -97.8220807,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-440",
@@ -1683,6 +3006,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13971183501",
+    "url": "",
+    "lat": 30.229739,
+    "lon": -97.7057012,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-9",
     "url": "https://cctv.austinmobility.io/image/9.jpg",
     "lat": 30.229994,
@@ -1690,6 +3022,15 @@
     "name": "ESCARPMENT BLVD / WILLIAM CANNON DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13239272992",
+    "url": "",
+    "lat": 30.2300158,
+    "lon": -97.8154947,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-VVMtMjkwIEAgTWFuY2hhY2EgUmQgKDIwMDApIDU3Mw",
@@ -1710,6 +3051,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13302423401",
+    "url": "",
+    "lat": 30.2314203,
+    "lon": -97.7511868,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-603",
     "url": "https://cctv.austinmobility.io/image/603.jpg",
     "lat": 30.231491,
@@ -1726,6 +3076,24 @@
     "name": "US-290 @ Packsaddle Pass",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n14047311701",
+    "url": "",
+    "lat": 30.2315516,
+    "lon": -97.7916952,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14046813902",
+    "url": "",
+    "lat": 30.2315559,
+    "lon": -97.7914377,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1529",
@@ -1791,6 +3159,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14068798601",
+    "url": "",
+    "lat": 30.2323911,
+    "lon": -97.924356,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1500",
     "url": "https://cctv.austinmobility.io/image/1500.jpg",
     "lat": 30.23241,
@@ -1809,6 +3186,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13239272990",
+    "url": "",
+    "lat": 30.2325374,
+    "lon": -97.814358,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13239272991",
+    "url": "",
+    "lat": 30.2325454,
+    "lon": -97.8158052,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-VVMtMjkwIEAgQnJvZGllIExuICg0ODAwKQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-290%20%40%20Brodie%20Ln%20%284800%29&districtCode=AUS",
     "lat": 30.232799999999997,
@@ -1816,6 +3211,42 @@
     "name": "US-290 @ Brodie Ln",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13322875501",
+    "url": "",
+    "lat": 30.2329532,
+    "lon": -97.7580013,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13201107276",
+    "url": "",
+    "lat": 30.2330168,
+    "lon": -97.8207481,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13272541101",
+    "url": "",
+    "lat": 30.2330219,
+    "lon": -97.7544335,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13272541801",
+    "url": "",
+    "lat": 30.2330219,
+    "lon": -97.7544335,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-VVMtMjkwIEAgQnVyZ2VyIEN0ciAoNDYwMCk",
@@ -1881,6 +3312,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13201107277",
+    "url": "",
+    "lat": 30.2340758,
+    "lon": -97.8123245,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-155",
     "url": "https://cctv.austinmobility.io/image/155.jpg",
     "lat": 30.234114,
@@ -1888,6 +3328,15 @@
     "name": "PLEASANT VALLEY RD / RIVERSIDE DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13239177398",
+    "url": "",
+    "lat": 30.2341377,
+    "lon": -97.8127857,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-VVMtMjkwIEAgUyBMYW1hciBCbHZkICgyNTAwKSA1NzE",
@@ -2016,6 +3465,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14070983001",
+    "url": "",
+    "lat": 30.2368574,
+    "lon": -97.7717965,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14071005101",
+    "url": "",
+    "lat": 30.2369263,
+    "lon": -97.7713976,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-VVMtMjkwIEAgTW9udGVyZXkgT2FrcyBCbHZkICg1NDAwKQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-290%20%40%20Monterey%20Oaks%20Blvd%20%285400%29&districtCode=AUS",
     "lat": 30.23695,
@@ -2052,6 +3519,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13572940201",
+    "url": "",
+    "lat": 30.238258,
+    "lon": -97.7987664,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-712",
     "url": "https://cctv.austinmobility.io/image/712.jpg",
     "lat": 30.23867,
@@ -2059,6 +3535,15 @@
     "name": "LAMAR BLVD / PANTHER TRL",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13529242901",
+    "url": "",
+    "lat": 30.2386932,
+    "lon": -97.7893662,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-104",
@@ -2077,6 +3562,15 @@
     "name": "PLEASANT VALLEY RD / ELMONT DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13529232002",
+    "url": "",
+    "lat": 30.2390335,
+    "lon": -97.7886554,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-TFAtMzYwIEAgR3VzIEZydWggUGFyaw",
@@ -2176,6 +3670,15 @@
     "name": "IH-35 @ Woodland",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13610431602",
+    "url": "",
+    "lat": 30.2417276,
+    "lon": -97.8013891,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-13",
@@ -2295,6 +3798,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13555994302",
+    "url": "",
+    "lat": 30.2442099,
+    "lon": -97.8018836,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-758",
     "url": "https://cctv.austinmobility.io/image/758.jpg",
     "lat": 30.244257,
@@ -2331,6 +3843,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13555993901",
+    "url": "",
+    "lat": 30.2450862,
+    "lon": -97.8027714,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-713",
     "url": "https://cctv.austinmobility.io/image/713.jpg",
     "lat": 30.245348,
@@ -2356,6 +3877,24 @@
     "name": "CONGRESS AVE / ANNIE ST",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13529236601",
+    "url": "",
+    "lat": 30.2462494,
+    "lon": -97.7785358,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13924494301",
+    "url": "",
+    "lat": 30.246752,
+    "lon": -97.7654485,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-99",
@@ -2446,6 +3985,15 @@
     "name": "RIVERSIDE DR / 35 SVRD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14047395002",
+    "url": "",
+    "lat": 30.2480108,
+    "lon": -97.7702045,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-364",
@@ -2556,6 +4104,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14103263701",
+    "url": "",
+    "lat": 30.2510785,
+    "lon": -97.8023941,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13572948101",
+    "url": "",
+    "lat": 30.251093,
+    "lon": -97.8023689,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1425",
     "url": "https://cctv.austinmobility.io/image/1425.jpg",
     "lat": 30.251514,
@@ -2601,6 +4167,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14163268101",
+    "url": "",
+    "lat": 30.2531011,
+    "lon": -97.7128736,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14115435508",
+    "url": "",
+    "lat": 30.2534759,
+    "lon": -97.6922091,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-795",
     "url": "https://cctv.austinmobility.io/image/795.jpg",
     "lat": 30.253627,
@@ -2626,6 +4210,15 @@
     "name": "AIRPORT BLVD / LEVANDER LOOP",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n12644029119",
+    "url": "",
+    "lat": 30.2539616,
+    "lon": -97.8083412,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-245",
@@ -2682,6 +4275,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n12840680713",
+    "url": "",
+    "lat": 30.2563077,
+    "lon": -97.8098878,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13639497301",
+    "url": "",
+    "lat": 30.2565844,
+    "lon": -97.8019682,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-632",
     "url": "https://cctv.austinmobility.io/image/632.jpg",
     "lat": 30.256609,
@@ -2709,6 +4320,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n12839147384",
+    "url": "",
+    "lat": 30.2571296,
+    "lon": -97.7470512,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-722",
     "url": "https://cctv.austinmobility.io/image/722.jpg",
     "lat": 30.257143,
@@ -2716,6 +4336,24 @@
     "name": "CONGRESS AVE / RIVERSIDE DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13115162289",
+    "url": "",
+    "lat": 30.2571639,
+    "lon": -97.9138536,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12644031018",
+    "url": "",
+    "lat": 30.2573907,
+    "lon": -97.8032202,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-32",
@@ -2799,6 +4437,42 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n12840680714",
+    "url": "",
+    "lat": 30.2586746,
+    "lon": -97.8105883,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13606861901",
+    "url": "",
+    "lat": 30.2588269,
+    "lon": -97.7591944,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13545218747",
+    "url": "",
+    "lat": 30.2589215,
+    "lon": -97.6936625,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13545218748",
+    "url": "",
+    "lat": 30.2589682,
+    "lon": -97.6933844,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-102",
     "url": "https://cctv.austinmobility.io/image/102.jpg",
     "lat": 30.259111,
@@ -2808,6 +4482,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14065050902",
+    "url": "",
+    "lat": 30.2593686,
+    "lon": -97.7364363,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-380",
     "url": "https://cctv.austinmobility.io/image/380.jpg",
     "lat": 30.259584,
@@ -2815,6 +4498,15 @@
     "name": "BARTON SPRINGS RD / BOULDIN AVE",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n12840710926",
+    "url": "",
+    "lat": 30.25961,
+    "lon": -97.8049024,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-721",
@@ -2871,6 +4563,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14065057401",
+    "url": "",
+    "lat": 30.2603772,
+    "lon": -97.7363592,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1274",
     "url": "https://cctv.austinmobility.io/image/1274.jpg",
     "lat": 30.260589,
@@ -2878,6 +4579,15 @@
     "name": "CESAR CHAVEZ ST / SAN MARCOS ST",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n12840680715",
+    "url": "",
+    "lat": 30.2607192,
+    "lon": -97.8079001,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-100",
@@ -2914,6 +4624,24 @@
     "name": "CESAR CHAVEZ ST / 35 SVRD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13525446901",
+    "url": "",
+    "lat": 30.261311,
+    "lon": -97.7372964,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13525485601",
+    "url": "",
+    "lat": 30.2614385,
+    "lon": -97.7373169,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-148",
@@ -2961,6 +4689,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13523011901",
+    "url": "",
+    "lat": 30.2619527,
+    "lon": -97.7581409,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-379",
     "url": "https://cctv.austinmobility.io/image/379.jpg",
     "lat": 30.261982,
@@ -2970,6 +4707,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13593904701",
+    "url": "",
+    "lat": 30.2621054,
+    "lon": -97.7578901,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-631",
     "url": "https://cctv.austinmobility.io/image/631.jpg",
     "lat": 30.262125,
@@ -2977,6 +4723,15 @@
     "name": "SOUTHWEST PKWY / TRAVIS COOK RD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14245109201",
+    "url": "",
+    "lat": 30.2622332,
+    "lon": -97.7362808,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1402",
@@ -3123,6 +4878,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13529472601",
+    "url": "",
+    "lat": 30.2640546,
+    "lon": -97.7469313,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-106",
     "url": "https://cctv.austinmobility.io/image/106.jpg",
     "lat": 30.264071,
@@ -3186,6 +4950,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14055048101",
+    "url": "",
+    "lat": 30.2646691,
+    "lon": -97.7379732,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-563",
     "url": "https://cctv.austinmobility.io/image/563.jpg",
     "lat": 30.264683,
@@ -3193,6 +4966,24 @@
     "name": "COLORADO ST / 2ND ST",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13593550202",
+    "url": "",
+    "lat": 30.2646943,
+    "lon": -97.7569458,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13523010801",
+    "url": "",
+    "lat": 30.2647451,
+    "lon": -97.7571567,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-101",
@@ -3402,6 +5193,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13523121651",
+    "url": "",
+    "lat": 30.2663911,
+    "lon": -97.7560918,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-539",
     "url": "https://cctv.austinmobility.io/image/539.jpg",
     "lat": 30.266434,
@@ -3481,6 +5281,15 @@
     "name": "CESAR CHAVEZ ST / B R REYNOLDS DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13538595301",
+    "url": "",
+    "lat": 30.2670038,
+    "lon": -97.757463,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-354",
@@ -3906,6 +5715,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14108177401",
+    "url": "",
+    "lat": 30.2726322,
+    "lon": -97.7324141,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-343",
     "url": "https://cctv.austinmobility.io/image/343.jpg",
     "lat": 30.272729,
@@ -3933,6 +5751,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13531405801",
+    "url": "",
+    "lat": 30.2730212,
+    "lon": -97.7651128,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-691",
     "url": "https://cctv.austinmobility.io/image/691.jpg",
     "lat": 30.273203,
@@ -3940,6 +5767,24 @@
     "name": "12TH ST / SAN JACINTO BLVD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13545218746",
+    "url": "",
+    "lat": 30.2734548,
+    "lon": -97.6980002,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13854687801",
+    "url": "",
+    "lat": 30.2735025,
+    "lon": -97.8453393,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-2",
@@ -3958,6 +5803,15 @@
     "name": "SPRINGDALE RD / OAK SPRINGS DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13854687802",
+    "url": "",
+    "lat": 30.2735782,
+    "lon": -97.8452418,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1537",
@@ -4059,6 +5913,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14136274401",
+    "url": "",
+    "lat": 30.2756919,
+    "lon": -97.7360581,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1520",
     "url": "https://cctv.austinmobility.io/image/1520.jpg",
     "lat": 30.275765,
@@ -4149,6 +6012,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13440766801",
+    "url": "",
+    "lat": 30.2770405,
+    "lon": -97.8092611,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-719",
     "url": "https://cctv.austinmobility.io/image/719.jpg",
     "lat": 30.277128,
@@ -4167,6 +6039,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13355887165",
+    "url": "",
+    "lat": 30.2773273,
+    "lon": -97.8201024,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-528",
     "url": "https://cctv.austinmobility.io/image/528.jpg",
     "lat": 30.277605,
@@ -4183,6 +6064,15 @@
     "name": "LAKE AUSTIN BLVD / VETERANS DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14047614101",
+    "url": "",
+    "lat": 30.2777249,
+    "lon": -97.7673113,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-605",
@@ -4239,6 +6129,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13538792701",
+    "url": "",
+    "lat": 30.2787212,
+    "lon": -97.7686399,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-66",
     "url": "https://cctv.austinmobility.io/image/66.jpg",
     "lat": 30.278975,
@@ -4282,6 +6181,15 @@
     "name": "15TH ST / WEST AVE",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13530911101",
+    "url": "",
+    "lat": 30.2792908,
+    "lon": -97.8129804,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-386",
@@ -4383,6 +6291,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13546606532",
+    "url": "",
+    "lat": 30.2807931,
+    "lon": -97.7030448,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13539268501",
+    "url": "",
+    "lat": 30.2809788,
+    "lon": -97.766116,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1392",
     "url": "https://cctv.austinmobility.io/image/1392.jpg",
     "lat": 30.281027,
@@ -4437,6 +6363,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14067171301",
+    "url": "",
+    "lat": 30.2818826,
+    "lon": -97.728553,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1487",
     "url": "https://cctv.austinmobility.io/image/1487.jpg",
     "lat": 30.281963,
@@ -4444,6 +6379,15 @@
     "name": "ROBERT DEDMAN DR / ROBERT DEDMAN DR (Manor Garage)",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n12843067821",
+    "url": "",
+    "lat": 30.2820784,
+    "lon": -97.808223,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1501",
@@ -4491,6 +6435,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13608455601",
+    "url": "",
+    "lat": 30.2826184,
+    "lon": -97.7027511,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-250",
     "url": "https://cctv.austinmobility.io/image/250.jpg",
     "lat": 30.282768,
@@ -4507,6 +6460,24 @@
     "name": "ENFIELD RD / WEST LYNN ST",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13591746702",
+    "url": "",
+    "lat": 30.2828992,
+    "lon": -97.7027183,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13568387101",
+    "url": "",
+    "lat": 30.2830659,
+    "lon": -97.7667409,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-244",
@@ -4626,6 +6597,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14092946301",
+    "url": "",
+    "lat": 30.2855223,
+    "lon": -97.8120245,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-217",
     "url": "https://cctv.austinmobility.io/image/217.jpg",
     "lat": 30.285862,
@@ -4642,6 +6622,15 @@
     "name": "GUADALUPE ST / WEST MALL UT  (UT CROSSWALK)",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13537037601",
+    "url": "",
+    "lat": 30.2860474,
+    "lon": -97.7632947,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-119",
@@ -4716,6 +6705,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13568002801",
+    "url": "",
+    "lat": 30.2878696,
+    "lon": -97.7630963,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1292",
     "url": "https://cctv.austinmobility.io/image/1292.jpg",
     "lat": 30.287935,
@@ -4732,6 +6730,15 @@
     "name": "24TH ST / SAN GABRIEL ST",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13454386701",
+    "url": "",
+    "lat": 30.2881685,
+    "lon": -97.7966069,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-405",
@@ -4887,6 +6894,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13567962501",
+    "url": "",
+    "lat": 30.2917578,
+    "lon": -97.7612014,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-757",
     "url": "https://cctv.austinmobility.io/image/757.jpg",
     "lat": 30.291985,
@@ -4905,6 +6921,33 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n12843067822",
+    "url": "",
+    "lat": 30.2920972,
+    "lon": -97.7981686,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13596859001",
+    "url": "",
+    "lat": 30.2923534,
+    "lon": -97.7982346,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13543879001",
+    "url": "",
+    "lat": 30.292448,
+    "lon": -97.7591968,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-37",
     "url": "https://cctv.austinmobility.io/image/37.jpg",
     "lat": 30.292496,
@@ -4921,6 +6964,15 @@
     "name": "IH-35 @ Concordia Upper",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13596861601",
+    "url": "",
+    "lat": 30.2932627,
+    "lon": -97.8223542,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-SUgtMzUgQCBDb25jb3JkaWEgTG93ZXIgKDM3MDAp",
@@ -4977,6 +7029,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13908142101",
+    "url": "",
+    "lat": 30.2950815,
+    "lon": -97.6764394,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-697",
     "url": "https://cctv.austinmobility.io/image/697.jpg",
     "lat": 30.295429,
@@ -4993,6 +7054,15 @@
     "name": "LP-1 @ Bowman Ave",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13908133402",
+    "url": "",
+    "lat": 30.2965398,
+    "lon": -97.6758191,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-77",
@@ -5029,6 +7099,15 @@
     "name": "AIRPORT BLVD / WILSHIRE BLVD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13840759108",
+    "url": "",
+    "lat": 30.2980984,
+    "lon": -97.752024,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-90",
@@ -5112,6 +7191,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13535315101",
+    "url": "",
+    "lat": 30.3004042,
+    "lon": -97.7589393,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-312",
     "url": "https://cctv.austinmobility.io/image/312.jpg",
     "lat": 30.300432,
@@ -5128,6 +7216,15 @@
     "name": "38TH ST / SPEEDWAY",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13535619001",
+    "url": "",
+    "lat": 30.3007991,
+    "lon": -97.757811,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1188",
@@ -5148,6 +7245,33 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13993264401",
+    "url": "",
+    "lat": 30.3014301,
+    "lon": -97.9346405,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13894268601",
+    "url": "",
+    "lat": 30.3014357,
+    "lon": -97.7959504,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13993294301",
+    "url": "",
+    "lat": 30.3014563,
+    "lon": -97.9346405,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-U0gtMTMwIEAgQmxvb3IgUmQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-130%20%40%20Bloor%20Rd&districtCode=AUS",
     "lat": 30.30146,
@@ -5155,6 +7279,24 @@
     "name": "SH-130 @ Bloor Rd",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13949682201",
+    "url": "",
+    "lat": 30.3015759,
+    "lon": -97.934594,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13539223901",
+    "url": "",
+    "lat": 30.3018567,
+    "lon": -97.7589031,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-SUgtMzUgQCBBaXJwb3J0IEJsdmQgMTQw",
@@ -5211,6 +7353,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14136269501",
+    "url": "",
+    "lat": 30.3028452,
+    "lon": -97.7140069,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-552",
     "url": "https://cctv.austinmobility.io/image/552.jpg",
     "lat": 30.303034,
@@ -5218,6 +7369,15 @@
     "name": "EXPOSITION BLVD / WESTOVER RD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13115244077",
+    "url": "",
+    "lat": 30.3030961,
+    "lon": -97.9305205,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-TFAtMSBAIE9ha21vbnQgQmx2ZCAoMjkwMCkgNTM",
@@ -5247,6 +7407,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14065007501",
+    "url": "",
+    "lat": 30.3039454,
+    "lon": -97.8450952,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13239311442",
+    "url": "",
+    "lat": 30.3041746,
+    "lon": -97.940987,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-801",
     "url": "https://cctv.austinmobility.io/image/801.jpg",
     "lat": 30.304252,
@@ -5254,6 +7432,15 @@
     "name": "BARBARA JORDAN BLVD / MUELLER BLVD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13112535517",
+    "url": "",
+    "lat": 30.3045396,
+    "lon": -97.9391034,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1300",
@@ -5265,6 +7452,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13239311443",
+    "url": "",
+    "lat": 30.3046244,
+    "lon": -97.9398451,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-394",
     "url": "https://cctv.austinmobility.io/image/394.jpg",
     "lat": 30.304853,
@@ -5272,6 +7468,15 @@
     "name": "45TH ST / RED RIVER ST",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14090819001",
+    "url": "",
+    "lat": 30.3050121,
+    "lon": -97.7097937,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-89",
@@ -5292,6 +7497,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13309079806",
+    "url": "",
+    "lat": 30.3065543,
+    "lon": -97.7084678,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13233148447",
+    "url": "",
+    "lat": 30.3068278,
+    "lon": -97.7090406,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-395",
     "url": "https://cctv.austinmobility.io/image/395.jpg",
     "lat": 30.306995,
@@ -5301,6 +7524,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13427602501",
+    "url": "",
+    "lat": 30.3070888,
+    "lon": -97.7096155,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-660",
     "url": "https://cctv.austinmobility.io/image/660.jpg",
     "lat": 30.307089,
@@ -5308,6 +7540,15 @@
     "name": "38TH ST / SHOAL CREEK BLVD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13115224215",
+    "url": "",
+    "lat": 30.3077949,
+    "lon": -97.9300829,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-833",
@@ -5328,6 +7569,33 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13309079805",
+    "url": "",
+    "lat": 30.3079044,
+    "lon": -97.7076197,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13568386301",
+    "url": "",
+    "lat": 30.3079137,
+    "lon": -97.7583336,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13599466201",
+    "url": "",
+    "lat": 30.3081412,
+    "lon": -97.7563798,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-TFAtMSBAIDM1dGggU3RyZWV0ICgzNDAwKSA0OA",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-1%20%40%2035th%20Street%20%283400%29%2048&districtCode=AUS",
     "lat": 30.308526999999998,
@@ -5344,6 +7612,33 @@
     "name": "MANOR RD / NORTHEAST DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13115318103",
+    "url": "",
+    "lat": 30.3085396,
+    "lon": -97.9178696,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13115254519",
+    "url": "",
+    "lat": 30.3085606,
+    "lon": -97.9236601,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13309079804",
+    "url": "",
+    "lat": 30.3085938,
+    "lon": -97.7091578,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-396",
@@ -5418,6 +7713,33 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13115295082",
+    "url": "",
+    "lat": 30.3096446,
+    "lon": -97.9180882,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13523230001",
+    "url": "",
+    "lat": 30.3097332,
+    "lon": -97.7716169,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13115295083",
+    "url": "",
+    "lat": 30.3099514,
+    "lon": -97.9186044,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-401",
     "url": "https://cctv.austinmobility.io/image/401.jpg",
     "lat": 30.310062,
@@ -5425,6 +7747,24 @@
     "name": "MANOR RD / LOYOLA LN",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14078620601",
+    "url": "",
+    "lat": 30.3101016,
+    "lon": -97.682605,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14136269201",
+    "url": "",
+    "lat": 30.3101855,
+    "lon": -97.7100735,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-239",
@@ -5454,6 +7794,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13115318102",
+    "url": "",
+    "lat": 30.3109504,
+    "lon": -97.9180463,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-25",
     "url": "https://cctv.austinmobility.io/image/25.jpg",
     "lat": 30.312069,
@@ -5461,6 +7810,15 @@
     "name": "AIRPORT BLVD / 51ST ST",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14125639201",
+    "url": "",
+    "lat": 30.312644,
+    "lon": -97.9128767,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1190",
@@ -5479,6 +7837,15 @@
     "name": "MANOR RD / SUSQUEHANNA LN",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13574322701",
+    "url": "",
+    "lat": 30.3131327,
+    "lon": -97.771752,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1310",
@@ -5652,6 +8019,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13818833401",
+    "url": "",
+    "lat": 30.3188536,
+    "lon": -97.8615142,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1311",
     "url": "https://cctv.austinmobility.io/image/1311.jpg",
     "lat": 30.318915,
@@ -5661,6 +8037,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13818832401",
+    "url": "",
+    "lat": 30.3189392,
+    "lon": -97.8613745,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1521",
     "url": "https://cctv.austinmobility.io/image/1521.jpg",
     "lat": 30.319143,
@@ -5668,6 +8053,15 @@
     "name": "BERKMAN DR / PATTON LN",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13930430003",
+    "url": "",
+    "lat": 30.3195441,
+    "lon": -97.8529245,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1309",
@@ -5814,6 +8208,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13525310801",
+    "url": "",
+    "lat": 30.3224944,
+    "lon": -97.7197858,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-SUgtMzUgQCBVUy0yOTAgKDYwMDApIDEzNQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-35%20%40%20US-290%20%286000%29%20135&districtCode=AUS",
     "lat": 30.322668,
@@ -5848,6 +8251,15 @@
     "name": "LAMAR BLVD / HOUSTON ST",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13525352001",
+    "url": "",
+    "lat": 30.3233104,
+    "lon": -97.7237911,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-458",
@@ -5895,6 +8307,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13525352201",
+    "url": "",
+    "lat": 30.3256938,
+    "lon": -97.7262583,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-83",
     "url": "https://cctv.austinmobility.io/image/83.jpg",
     "lat": 30.325851,
@@ -5920,6 +8341,15 @@
     "name": "CAMERON RD / ST JOHNS AVE",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13522691797",
+    "url": "",
+    "lat": 30.3261141,
+    "lon": -97.7260433,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-VVMtMjkwIEAgVVMtMTgzIE5CICg3NjAwKSA1OXg",
@@ -5949,6 +8379,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14113590615",
+    "url": "",
+    "lat": 30.3270399,
+    "lon": -97.6384141,
+    "name": "Flock Camera",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14113592993",
+    "url": "",
+    "lat": 30.3271306,
+    "lon": -97.6383625,
+    "name": "Flock Camera",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-SUgtMzUgQCBOIG9mIFVTLTI5MA",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-35%20%40%20N%20of%20US-290&districtCode=AUS",
     "lat": 30.327240999999997,
@@ -5956,6 +8404,15 @@
     "name": "IH-35 @ N of US-290",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13608264901",
+    "url": "",
+    "lat": 30.3279306,
+    "lon": -97.7274486,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1472",
@@ -5992,6 +8449,24 @@
     "name": "CAMERON RD / MC KIE DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14100336101",
+    "url": "",
+    "lat": 30.3296903,
+    "lon": -97.6888113,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13696422501",
+    "url": "",
+    "lat": 30.3298454,
+    "lon": -97.3424878,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-520",
@@ -6057,6 +8532,42 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13546582301",
+    "url": "",
+    "lat": 30.331228,
+    "lon": -97.7340634,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14136142091",
+    "url": "",
+    "lat": 30.3315402,
+    "lon": -97.8581982,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13959092422",
+    "url": "",
+    "lat": 30.3319751,
+    "lon": -97.5599976,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13608260001",
+    "url": "",
+    "lat": 30.332113,
+    "lon": -97.7339597,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-VVMtMTgzIEAgQ2FtZXJvbiBSZA",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-183%20%40%20Cameron%20Rd&districtCode=AUS",
     "lat": 30.332286,
@@ -6102,6 +8613,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13900163201",
+    "url": "",
+    "lat": 30.3335135,
+    "lon": -97.5593577,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-449",
     "url": "https://cctv.austinmobility.io/image/449.jpg",
     "lat": 30.33396,
@@ -6120,6 +8640,42 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13556676502",
+    "url": "",
+    "lat": 30.3340165,
+    "lon": -97.7382939,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13568401701",
+    "url": "",
+    "lat": 30.3344492,
+    "lon": -97.7546054,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13608212101",
+    "url": "",
+    "lat": 30.334572,
+    "lon": -97.7509262,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13696424502",
+    "url": "",
+    "lat": 30.3345853,
+    "lon": -97.3613115,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-521",
     "url": "https://cctv.austinmobility.io/image/521.jpg",
     "lat": 30.3346,
@@ -6127,6 +8683,24 @@
     "name": "ALLANDALE RD / NORTHLAND DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13608180101",
+    "url": "",
+    "lat": 30.3346657,
+    "lon": -97.7487169,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13339734436",
+    "url": "",
+    "lat": 30.3348391,
+    "lon": -97.5504561,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-82",
@@ -6147,6 +8721,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13608240801",
+    "url": "",
+    "lat": 30.3350461,
+    "lon": -97.7403771,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-260",
     "url": "https://cctv.austinmobility.io/image/260.jpg",
     "lat": 30.335251,
@@ -6165,6 +8748,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14174386901",
+    "url": "",
+    "lat": 30.3362135,
+    "lon": -97.7006272,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-TFAtMSBAIFJNLTIyMjIgKDU2MDApIDQz",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-1%20%40%20RM-2222%20%285600%29%2043&districtCode=AUS",
     "lat": 30.336221,
@@ -6172,6 +8764,15 @@
     "name": "LP-1 @ RM-2222",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13563233401",
+    "url": "",
+    "lat": 30.3363072,
+    "lon": -97.7012657,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-170",
@@ -6190,6 +8791,51 @@
     "name": "BURNET RD / ROMERIA DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14075848301",
+    "url": "",
+    "lat": 30.3370184,
+    "lon": -97.6921875,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14075839701",
+    "url": "",
+    "lat": 30.337076,
+    "lon": -97.6922623,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13563232701",
+    "url": "",
+    "lat": 30.3372118,
+    "lon": -97.700552,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14075848601",
+    "url": "",
+    "lat": 30.3372826,
+    "lon": -97.6920464,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14075848401",
+    "url": "",
+    "lat": 30.3373259,
+    "lon": -97.6921216,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-544",
@@ -6217,6 +8863,15 @@
     "name": "AIRPORT BLVD / LAMAR BLVD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13768980501",
+    "url": "",
+    "lat": 30.3384142,
+    "lon": -97.373204,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-169",
@@ -6318,6 +8973,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13571621601",
+    "url": "",
+    "lat": 30.3419218,
+    "lon": -97.5637851,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1314",
     "url": "https://cctv.austinmobility.io/image/1314.jpg",
     "lat": 30.342,
@@ -6379,6 +9043,15 @@
     "name": "US-183 @ Georgian Dr",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13265883401",
+    "url": "",
+    "lat": 30.344943,
+    "lon": -97.3810702,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-Rk0tNzM0IEAgVVMtMjkwIFdC",
@@ -6444,6 +9117,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13337309810",
+    "url": "",
+    "lat": 30.3465109,
+    "lon": -97.6732825,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13389579501",
+    "url": "",
+    "lat": 30.346904,
+    "lon": -97.3895498,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-573",
     "url": "https://cctv.austinmobility.io/image/573.jpg",
     "lat": 30.347004,
@@ -6451,6 +9142,51 @@
     "name": "ANDERSON LN SVRD / LAMAR BLVD SVRD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13305331405",
+    "url": "",
+    "lat": 30.3473046,
+    "lon": -97.3833006,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14110393401",
+    "url": "",
+    "lat": 30.3473587,
+    "lon": -97.9166892,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14107594301",
+    "url": "",
+    "lat": 30.3474362,
+    "lon": -97.9167672,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13337309809",
+    "url": "",
+    "lat": 30.347626,
+    "lon": -97.6725824,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13337309808",
+    "url": "",
+    "lat": 30.3476885,
+    "lon": -97.6725287,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-VVMtMTgzIEAgTGFtYXIgQmx2ZCAoNzkwMCkgMjMw",
@@ -6471,6 +9207,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13191137499",
+    "url": "",
+    "lat": 30.3484816,
+    "lon": -97.5560554,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-218",
     "url": "https://cctv.austinmobility.io/image/218.jpg",
     "lat": 30.34849,
@@ -6480,6 +9225,42 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13191137500",
+    "url": "",
+    "lat": 30.3485148,
+    "lon": -97.539186,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14161706121",
+    "url": "",
+    "lat": 30.3492947,
+    "lon": -97.5268408,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13191137498",
+    "url": "",
+    "lat": 30.3494763,
+    "lon": -97.5558208,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13191163101",
+    "url": "",
+    "lat": 30.3498943,
+    "lon": -97.5380626,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-708",
     "url": "https://cctv.austinmobility.io/image/708.jpg",
     "lat": 30.350573,
@@ -6487,6 +9268,15 @@
     "name": "BURNET RD / RICHCREEK RD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13265897501",
+    "url": "",
+    "lat": 30.3507624,
+    "lon": -97.3870052,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-284",
@@ -6507,6 +9297,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13722162890",
+    "url": "",
+    "lat": 30.3510766,
+    "lon": -97.5897706,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-VVMtMTgzIEAgQW5kZXJzb24gU3EgKDgwMDApIDIyOQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-183%20%40%20Anderson%20Sq%20%288000%29%20229&districtCode=AUS",
     "lat": 30.351112999999998,
@@ -6514,6 +9313,24 @@
     "name": "US-183 @ Anderson Sq",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13543894001",
+    "url": "",
+    "lat": 30.351545,
+    "lon": -97.7487057,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14092758501",
+    "url": "",
+    "lat": 30.3515719,
+    "lon": -97.389672,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-929",
@@ -6525,6 +9342,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13265881601",
+    "url": "",
+    "lat": 30.3516209,
+    "lon": -97.3910886,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13265890201",
+    "url": "",
+    "lat": 30.3516791,
+    "lon": -97.393485,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-TFAtMSBAIEZhciBXZXN0IEJsdmQgKDcwMDApIDM5",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-1%20%40%20Far%20West%20Blvd%20%287000%29%2039&districtCode=AUS",
     "lat": 30.351779999999998,
@@ -6532,6 +9367,33 @@
     "name": "LP-1 @ Far West Blvd",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n14161224401",
+    "url": "",
+    "lat": 30.351849,
+    "lon": -97.4057828,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13832165201",
+    "url": "",
+    "lat": 30.3518967,
+    "lon": -97.4094854,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13832165202",
+    "url": "",
+    "lat": 30.3519508,
+    "lon": -97.4218489,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-592",
@@ -6561,6 +9423,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13113142629",
+    "url": "",
+    "lat": 30.3522643,
+    "lon": -97.7944968,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-267",
     "url": "https://cctv.austinmobility.io/image/267.jpg",
     "lat": 30.352457,
@@ -6579,6 +9450,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13265903801",
+    "url": "",
+    "lat": 30.3525111,
+    "lon": -97.4116601,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13696432601",
+    "url": "",
+    "lat": 30.3525378,
+    "lon": -97.4218271,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-Rk0tNzM0IEAgU0gtMTMwIFNC",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-734%20%40%20SH-130%20SB&districtCode=AUS",
     "lat": 30.35299,
@@ -6595,6 +9484,15 @@
     "name": "RESEARCH BLVD SVRD / ANDERSON SQ",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13575024978",
+    "url": "",
+    "lat": 30.353281,
+    "lon": -97.5936991,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-303",
@@ -6631,6 +9529,15 @@
     "name": "SH-130 @ Parmer Ln",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13271082801",
+    "url": "",
+    "lat": 30.3550452,
+    "lon": -97.38284,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-530",
@@ -6685,6 +9592,15 @@
     "name": "US-183 @ Clearfield Dr",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13113142630",
+    "url": "",
+    "lat": 30.3570079,
+    "lon": -97.790554,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1483",
@@ -6777,6 +9693,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13680908320",
+    "url": "",
+    "lat": 30.3596505,
+    "lon": -97.5625587,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1477",
     "url": "https://cctv.austinmobility.io/image/1477.jpg",
     "lat": 30.360039,
@@ -6784,6 +9709,33 @@
     "name": "RUNDBERG LN / NORTH CREEK DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13276480401",
+    "url": "",
+    "lat": 30.3601334,
+    "lon": -97.8320907,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13265927301",
+    "url": "",
+    "lat": 30.3602243,
+    "lon": -97.4067485,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13276482301",
+    "url": "",
+    "lat": 30.3603047,
+    "lon": -97.8320115,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-578",
@@ -6867,6 +9819,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13347209801",
+    "url": "",
+    "lat": 30.3624339,
+    "lon": -97.8510003,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-494",
     "url": "https://cctv.austinmobility.io/image/494.jpg",
     "lat": 30.362911,
@@ -6892,6 +9853,33 @@
     "name": "OHLEN RD / RESEARCH BLVD SVRD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14189672403",
+    "url": "",
+    "lat": 30.3633122,
+    "lon": -97.7437848,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13775144301",
+    "url": "",
+    "lat": 30.3633635,
+    "lon": -97.4006327,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13337309806",
+    "url": "",
+    "lat": 30.3635966,
+    "lon": -97.7399641,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1",
@@ -6930,6 +9918,42 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n12570065353",
+    "url": "",
+    "lat": 30.3649219,
+    "lon": -97.6505414,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13337309807",
+    "url": "",
+    "lat": 30.3649354,
+    "lon": -97.7395123,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13775144701",
+    "url": "",
+    "lat": 30.3650305,
+    "lon": -97.4040805,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12570065352",
+    "url": "",
+    "lat": 30.3650498,
+    "lon": -97.6505716,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-475",
     "url": "https://cctv.austinmobility.io/image/475.jpg",
     "lat": 30.365328,
@@ -6937,6 +9961,15 @@
     "name": "RUNDBERG LN / COLLINFIELD DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13337309805",
+    "url": "",
+    "lat": 30.3657538,
+    "lon": -97.7404174,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-481",
@@ -6957,6 +9990,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13954466301",
+    "url": "",
+    "lat": 30.3668486,
+    "lon": -97.3735141,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13544888301",
+    "url": "",
+    "lat": 30.3669778,
+    "lon": -97.6484889,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1481",
     "url": "https://cctv.austinmobility.io/image/1481.jpg",
     "lat": 30.367003,
@@ -6964,6 +10015,15 @@
     "name": "MEARNS MEADOW BLVD / RUTLAND DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13113142622",
+    "url": "",
+    "lat": 30.3671079,
+    "lon": -97.6491446,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-301",
@@ -7002,6 +10062,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13757991501",
+    "url": "",
+    "lat": 30.3682002,
+    "lon": -97.6128086,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-709",
     "url": "https://cctv.austinmobility.io/image/709.jpg",
     "lat": 30.368286,
@@ -7029,6 +10098,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13757997501",
+    "url": "",
+    "lat": 30.3688425,
+    "lon": -97.6137639,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-U0gtMTMwIEAgSG93YXJkIExu",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-130%20%40%20Howard%20Ln&districtCode=AUS",
     "lat": 30.368869999999998,
@@ -7036,6 +10114,24 @@
     "name": "SH-130 @ Howard Ln",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13770505501",
+    "url": "",
+    "lat": 30.3689121,
+    "lon": -97.423105,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14127222401",
+    "url": "",
+    "lat": 30.3694708,
+    "lon": -97.7418022,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-480",
@@ -7092,6 +10188,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13113142623",
+    "url": "",
+    "lat": 30.3720598,
+    "lon": -97.648126,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13113142624",
+    "url": "",
+    "lat": 30.3722997,
+    "lon": -97.6481282,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-325",
     "url": "https://cctv.austinmobility.io/image/325.jpg",
     "lat": 30.372438,
@@ -7146,6 +10260,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13113142628",
+    "url": "",
+    "lat": 30.3735692,
+    "lon": -97.6626971,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13113142627",
+    "url": "",
+    "lat": 30.3736175,
+    "lon": -97.6628909,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-504",
     "url": "https://cctv.austinmobility.io/image/504.jpg",
     "lat": 30.37413,
@@ -7162,6 +10294,24 @@
     "name": "MESA DR / STECK AVE",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13113142625",
+    "url": "",
+    "lat": 30.3744751,
+    "lon": -97.661156,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13113142626",
+    "url": "",
+    "lat": 30.3744807,
+    "lon": -97.6610197,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-473",
@@ -7198,6 +10348,24 @@
     "name": "FM-734 @ Samsung Blvd",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13544887401",
+    "url": "",
+    "lat": 30.3766292,
+    "lon": -97.6576528,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13544872702",
+    "url": "",
+    "lat": 30.3767861,
+    "lon": -97.6582408,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-177",
@@ -7290,6 +10458,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13695972101",
+    "url": "",
+    "lat": 30.3787878,
+    "lon": -97.9458379,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-VVMtMTgzIEAgTFAtMSBOQiAoOTIwMCkgMjIz",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-183%20%40%20LP-1%20NB%20%289200%29%20223&districtCode=AUS",
     "lat": 30.379188,
@@ -7333,6 +10510,15 @@
     "name": "US-183 @ LP-1 SB",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13695866801",
+    "url": "",
+    "lat": 30.3808652,
+    "lon": -97.9446402,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-19",
@@ -7434,6 +10620,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13542079702",
+    "url": "",
+    "lat": 30.3865326,
+    "lon": -97.648168,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-Rk0tNzM0IEAgRGVzc2F1IFJk",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-734%20%40%20Dessau%20Rd&districtCode=AUS",
     "lat": 30.38668,
@@ -7459,6 +10654,15 @@
     "name": "RM-620 @ Mansfield Dam Rd",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13547449602",
+    "url": "",
+    "lat": 30.3874295,
+    "lon": -97.6487731,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-Uk0tNjIwIEAgTG93IFdhdGVyIENyb3NzaW5nIFJk",
@@ -7515,6 +10719,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14131099702",
+    "url": "",
+    "lat": 30.3892157,
+    "lon": -97.7105529,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1527",
     "url": "https://cctv.austinmobility.io/image/1527.jpg",
     "lat": 30.389371,
@@ -7551,6 +10764,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13347208402",
+    "url": "",
+    "lat": 30.3900419,
+    "lon": -97.8481158,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-TFAtMSBAIENhcGl0YWwgb2YgVFggSHd5ICg5OTAwKSAzMg",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-1%20%40%20Capital%20of%20TX%20Hwy%20%289900%29%2032&districtCode=AUS",
     "lat": 30.390123,
@@ -7558,6 +10780,15 @@
     "name": "LP-1 @ Capital of TX Hwy",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13115243232",
+    "url": "",
+    "lat": 30.3903852,
+    "lon": -97.8482364,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1278",
@@ -7596,6 +10827,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14141182901",
+    "url": "",
+    "lat": 30.3911485,
+    "lon": -97.9366593,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-174",
     "url": "https://cctv.austinmobility.io/image/174.jpg",
     "lat": 30.391165,
@@ -7603,6 +10843,15 @@
     "name": "BRAKER LN / BURNET RD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n3862265063",
+    "url": "",
+    "lat": 30.3913369,
+    "lon": -97.9335198,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-257",
@@ -7632,6 +10881,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14085693065",
+    "url": "",
+    "lat": 30.392397,
+    "lon": -97.9348367,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1401",
     "url": "https://cctv.austinmobility.io/image/1401.jpg",
     "lat": 30.392456,
@@ -7641,6 +10899,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13444336701",
+    "url": "",
+    "lat": 30.3924948,
+    "lon": -97.7316378,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14066986401",
+    "url": "",
+    "lat": 30.39295,
+    "lon": -97.6809893,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-Uk0tNjIwIEAgU3QgTHVrZXMgQ2h1cmNo",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=RM-620%20%40%20St%20Lukes%20Church&districtCode=AUS",
     "lat": 30.393065,
@@ -7648,6 +10924,42 @@
     "name": "RM-620 @ St Lukes Church",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13354252269",
+    "url": "",
+    "lat": 30.3931002,
+    "lon": -97.7265689,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13721193445",
+    "url": "",
+    "lat": 30.393195,
+    "lon": -97.7305384,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13354188015",
+    "url": "",
+    "lat": 30.3935077,
+    "lon": -97.7276654,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13354188016",
+    "url": "",
+    "lat": 30.3940368,
+    "lon": -97.726554,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-214",
@@ -7666,6 +10978,15 @@
     "name": "US-183 @ Great Hills Trl",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13354188014",
+    "url": "",
+    "lat": 30.3943156,
+    "lon": -97.7266951,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-258",
@@ -7749,6 +11070,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13310776009",
+    "url": "",
+    "lat": 30.3961661,
+    "lon": -97.7267383,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-Uk0tNjIwIEAgRG91YmxlIERvbWUgUmQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=RM-620%20%40%20Double%20Dome%20Rd&districtCode=AUS",
     "lat": 30.396568,
@@ -7783,6 +11113,24 @@
     "name": "RM-620 @ Water Plant N",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13650859101",
+    "url": "",
+    "lat": 30.3980846,
+    "lon": -97.7458255,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13310776014",
+    "url": "",
+    "lat": 30.3981446,
+    "lon": -97.7260368,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1467",
@@ -7848,6 +11196,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13310776013",
+    "url": "",
+    "lat": 30.399316,
+    "lon": -97.7255882,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14116275401",
+    "url": "",
+    "lat": 30.3993532,
+    "lon": -97.6550712,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1298",
     "url": "https://cctv.austinmobility.io/image/1298.jpg",
     "lat": 30.399542,
@@ -7855,6 +11221,15 @@
     "name": "PARMER LN / HARRISGLENN DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13416506501",
+    "url": "",
+    "lat": 30.3999654,
+    "lon": -97.733026,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1431",
@@ -7884,6 +11259,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13342918801",
+    "url": "",
+    "lat": 30.4004136,
+    "lon": -97.7258394,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13342926801",
+    "url": "",
+    "lat": 30.4004136,
+    "lon": -97.7258394,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-254",
     "url": "https://cctv.austinmobility.io/image/254.jpg",
     "lat": 30.400536,
@@ -7900,6 +11293,24 @@
     "name": "BRAKER LN / JOLLYVILLE RD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13482930301",
+    "url": "",
+    "lat": 30.4012582,
+    "lon": -97.7247921,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13580282002",
+    "url": "",
+    "lat": 30.4014459,
+    "lon": -97.725954,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-TFAtMSBAIFN0b25lbGFrZSBSZCAoMTEyMDApIDMw",
@@ -7947,6 +11358,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14229538301",
+    "url": "",
+    "lat": 30.4024053,
+    "lon": -97.7244099,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13547444001",
+    "url": "",
+    "lat": 30.4027712,
+    "lon": -97.6568728,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-595",
     "url": "https://cctv.austinmobility.io/image/595.jpg",
     "lat": 30.402821,
@@ -7954,6 +11383,15 @@
     "name": "2205 BLK GRACY FARMS LN (Schwab / Stoneleigh Condos)",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13310776010",
+    "url": "",
+    "lat": 30.4034589,
+    "lon": -97.7240664,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-196",
@@ -7983,6 +11421,42 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13310776011",
+    "url": "",
+    "lat": 30.4037064,
+    "lon": -97.7237791,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13965770219",
+    "url": "",
+    "lat": 30.4041832,
+    "lon": -97.7251688,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13310776012",
+    "url": "",
+    "lat": 30.4048241,
+    "lon": -97.7239749,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13965766315",
+    "url": "",
+    "lat": 30.4049334,
+    "lon": -97.7235503,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-471",
     "url": "https://cctv.austinmobility.io/image/471.jpg",
     "lat": 30.404934,
@@ -7990,6 +11464,24 @@
     "name": "BURNET RD / GAULT LN",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13427214201",
+    "url": "",
+    "lat": 30.4049486,
+    "lon": -97.6414871,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13427214501",
+    "url": "",
+    "lat": 30.4050023,
+    "lon": -97.6416144,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-416",
@@ -8008,6 +11500,15 @@
     "name": "FM-734 @ McCallen Pass",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n14134175001",
+    "url": "",
+    "lat": 30.4054656,
+    "lon": -97.7211499,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-Rk0tNzM0IEAgQ2VudGVyIExha2UgRHI",
@@ -8064,6 +11565,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13556574497",
+    "url": "",
+    "lat": 30.407454,
+    "lon": -97.6784798,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-SUgtMzUgQCBQYXJtZXIgTG4gKDEyNzAwKSAxMTY",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-35%20%40%20Parmer%20Ln%20%2812700%29%20116&districtCode=AUS",
     "lat": 30.407749,
@@ -8100,6 +11610,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13433513201",
+    "url": "",
+    "lat": 30.4079184,
+    "lon": -97.6374609,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-195",
     "url": "https://cctv.austinmobility.io/image/195.jpg",
     "lat": 30.40803,
@@ -8109,6 +11628,33 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13433512901",
+    "url": "",
+    "lat": 30.4080387,
+    "lon": -97.6373481,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13436463601",
+    "url": "",
+    "lat": 30.4080637,
+    "lon": -97.6406335,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13433514701",
+    "url": "",
+    "lat": 30.4080882,
+    "lon": -97.6404946,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-Rk0tNzM0IEAgTGFtYXIgQmx2ZA",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-734%20%40%20Lamar%20Blvd&districtCode=AUS",
     "lat": 30.408158,
@@ -8116,6 +11662,15 @@
     "name": "FM-734 @ Lamar Blvd",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13535271601",
+    "url": "",
+    "lat": 30.4083126,
+    "lon": -97.6780439,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-TFAtMSBAIER1dmFsIFJkICgxMjAwMCkgMjc",
@@ -8134,6 +11689,24 @@
     "name": "SH-130 @ N of Cameron Rd",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13302444901",
+    "url": "",
+    "lat": 30.4101443,
+    "lon": -97.648389,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13433518001",
+    "url": "",
+    "lat": 30.4104311,
+    "lon": -97.6482301,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1046",
@@ -8172,6 +11745,42 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13535275701",
+    "url": "",
+    "lat": 30.4119174,
+    "lon": -97.6873754,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13360425903",
+    "url": "",
+    "lat": 30.4121026,
+    "lon": -97.6346593,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13434584201",
+    "url": "",
+    "lat": 30.4121886,
+    "lon": -97.6343907,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13360435901",
+    "url": "",
+    "lat": 30.4122089,
+    "lon": -97.634424,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1280",
     "url": "https://cctv.austinmobility.io/image/1280.jpg",
     "lat": 30.412386,
@@ -8179,6 +11788,15 @@
     "name": "FM 620 RD / VISTA PARKE DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13685946902",
+    "url": "",
+    "lat": 30.4131571,
+    "lon": -97.8507872,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-172",
@@ -8190,6 +11808,33 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13347208401",
+    "url": "",
+    "lat": 30.4134946,
+    "lon": -97.8492997,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13707316701",
+    "url": "",
+    "lat": 30.4137421,
+    "lon": -97.6585691,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13707317301",
+    "url": "",
+    "lat": 30.4141824,
+    "lon": -97.659245,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1287",
     "url": "https://cctv.austinmobility.io/image/1287.jpg",
     "lat": 30.414342,
@@ -8197,6 +11842,69 @@
     "name": "MC CALLEN PASS / CENTER RIDGE DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13728206801",
+    "url": "",
+    "lat": 30.4143496,
+    "lon": -97.6931408,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13334743101",
+    "url": "",
+    "lat": 30.4143505,
+    "lon": -97.6741631,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13334742401",
+    "url": "",
+    "lat": 30.4145695,
+    "lon": -97.6752791,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13292443502",
+    "url": "",
+    "lat": 30.414997,
+    "lon": -97.6352456,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13292526801",
+    "url": "",
+    "lat": 30.4151084,
+    "lon": -97.6351054,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13360436701",
+    "url": "",
+    "lat": 30.4151151,
+    "lon": -97.6369282,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13411165601",
+    "url": "",
+    "lat": 30.4151632,
+    "lon": -97.6369788,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-TFAtMSBAIENlZGFyIEJlbmQgKDEyMjAwKSAyMw",
@@ -8208,6 +11916,51 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13272546902",
+    "url": "",
+    "lat": 30.4154837,
+    "lon": -97.6559423,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13108257637",
+    "url": "",
+    "lat": 30.4157605,
+    "lon": -97.6552328,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13272546901",
+    "url": "",
+    "lat": 30.4158855,
+    "lon": -97.6627757,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13334743102",
+    "url": "",
+    "lat": 30.415975,
+    "lon": -97.6737991,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13334747301",
+    "url": "",
+    "lat": 30.4162182,
+    "lon": -97.674752,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-Uk0tNjIwIEAgV2lsc29uIFBhcmtlIEF2ZQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=RM-620%20%40%20Wilson%20Parke%20Ave&districtCode=AUS",
     "lat": 30.416556999999997,
@@ -8215,6 +11968,15 @@
     "name": "RM-620 @ Wilson Parke Ave",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13302454202",
+    "url": "",
+    "lat": 30.416724,
+    "lon": -97.6570476,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-501",
@@ -8226,6 +11988,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13272547701",
+    "url": "",
+    "lat": 30.4171969,
+    "lon": -97.6620836,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-232",
     "url": "https://cctv.austinmobility.io/image/232.jpg",
     "lat": 30.417286,
@@ -8233,6 +12004,15 @@
     "name": "DUVAL RD / JOLLYVILLE RD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13302457201",
+    "url": "",
+    "lat": 30.4173329,
+    "lon": -97.6578836,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1288",
@@ -8244,6 +12024,42 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13434584202",
+    "url": "",
+    "lat": 30.4179097,
+    "lon": -97.6309329,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13360448601",
+    "url": "",
+    "lat": 30.4179453,
+    "lon": -97.6309092,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13360448201",
+    "url": "",
+    "lat": 30.4180138,
+    "lon": -97.631323,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13302454201",
+    "url": "",
+    "lat": 30.4180211,
+    "lon": -97.658885,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-739",
     "url": "https://cctv.austinmobility.io/image/739.jpg",
     "lat": 30.418306,
@@ -8251,6 +12067,15 @@
     "name": "12500 BLK N LAMAR BLVD (Connally High School)",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13302453501",
+    "url": "",
+    "lat": 30.418765,
+    "lon": -97.6600827,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-SUgtMzUgQCBOIExhbWFyIEJsdmQgKDEzNDAwKSAxMTI",
@@ -8271,6 +12096,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14079995101",
+    "url": "",
+    "lat": 30.4191883,
+    "lon": -97.5910571,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14080002801",
+    "url": "",
+    "lat": 30.4192685,
+    "lon": -97.5913937,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-770",
     "url": "https://cctv.austinmobility.io/image/770.jpg",
     "lat": 30.419407,
@@ -8278,6 +12121,15 @@
     "name": "HOWARD LN / HEATHERWILDE BLVD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13320491201",
+    "url": "",
+    "lat": 30.4195049,
+    "lon": -97.5791779,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-TFAtMSBAIFBhcm1lciBMbiAoMTI0MDApIDIx",
@@ -8289,6 +12141,60 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13293425302",
+    "url": "",
+    "lat": 30.4200074,
+    "lon": -97.6446061,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13302422201",
+    "url": "",
+    "lat": 30.4200493,
+    "lon": -97.6449619,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13292927302",
+    "url": "",
+    "lat": 30.4201578,
+    "lon": -97.6444423,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13360452201",
+    "url": "",
+    "lat": 30.4202258,
+    "lon": -97.6296322,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13434627601",
+    "url": "",
+    "lat": 30.4203075,
+    "lon": -97.6294446,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13360452202",
+    "url": "",
+    "lat": 30.4203231,
+    "lon": -97.6294702,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-953",
     "url": "https://cctv.austinmobility.io/image/953.jpg",
     "lat": 30.420591,
@@ -8296,6 +12202,33 @@
     "name": "PARMER LN / MOPAC EXPY SVRD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13411165401",
+    "url": "",
+    "lat": 30.4212901,
+    "lon": -97.6697308,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13330638301",
+    "url": "",
+    "lat": 30.4213231,
+    "lon": -97.669796,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13325113502",
+    "url": "",
+    "lat": 30.4218196,
+    "lon": -97.6707462,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-Uk0tNjIwIEAgQ29uY29yZGlhIFVuaXZlcnNpdHkgRHI",
@@ -8316,6 +12249,33 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13325118201",
+    "url": "",
+    "lat": 30.422807,
+    "lon": -97.6708247,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13325116601",
+    "url": "",
+    "lat": 30.423039,
+    "lon": -97.6687768,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13325115801",
+    "url": "",
+    "lat": 30.4233087,
+    "lon": -97.6693362,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-U0gtMTMwIEAgUGVjYW4gU3Q",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-130%20%40%20Pecan%20St&districtCode=AUS",
     "lat": 30.423354999999997,
@@ -8323,6 +12283,42 @@
     "name": "SH-130 @ Pecan St",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n14191775602",
+    "url": "",
+    "lat": 30.4234486,
+    "lon": -97.6581231,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13360455101",
+    "url": "",
+    "lat": 30.423454,
+    "lon": -97.6318542,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13360455102",
+    "url": "",
+    "lat": 30.423479,
+    "lon": -97.6319263,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13360455401",
+    "url": "",
+    "lat": 30.423479,
+    "lon": -97.6319263,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1019",
@@ -8343,6 +12339,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13565645701",
+    "url": "",
+    "lat": 30.4248332,
+    "lon": -97.7556575,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-VVMtMTgzIEAgUGF2aWxsaW9uIEJsdmQgKDEyMjAwKSAyMTU",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-183%20%40%20Pavillion%20Blvd%20%2812200%29%20215&districtCode=AUS",
     "lat": 30.425117,
@@ -8350,6 +12355,60 @@
     "name": "US-183 @ Pavillion Blvd",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13565645501",
+    "url": "",
+    "lat": 30.4252369,
+    "lon": -97.7548801,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13411165402",
+    "url": "",
+    "lat": 30.4257747,
+    "lon": -97.6341264,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13360456002",
+    "url": "",
+    "lat": 30.4258084,
+    "lon": -97.6341672,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13351840217",
+    "url": "",
+    "lat": 30.426258,
+    "lon": -97.7549396,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13351836202",
+    "url": "",
+    "lat": 30.4262587,
+    "lon": -97.7549414,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13565644901",
+    "url": "",
+    "lat": 30.4270144,
+    "lon": -97.7558855,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-215",
@@ -8379,6 +12438,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13293390601",
+    "url": "",
+    "lat": 30.4284319,
+    "lon": -97.6409727,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13292014701",
+    "url": "",
+    "lat": 30.4284559,
+    "lon": -97.6447587,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-Uk0tNjIwIEAgQm91bGRlciBMbiBT",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=RM-620%20%40%20Boulder%20Ln%20S&districtCode=AUS",
     "lat": 30.428651,
@@ -8397,6 +12474,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13292443501",
+    "url": "",
+    "lat": 30.4287723,
+    "lon": -97.6411601,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-502",
     "url": "https://cctv.austinmobility.io/image/502.jpg",
     "lat": 30.428783,
@@ -8404,6 +12490,24 @@
     "name": "FM 620 RD / BOULDER LN (South)",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14117066202",
+    "url": "",
+    "lat": 30.4289047,
+    "lon": -97.634873,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13293425301",
+    "url": "",
+    "lat": 30.4292309,
+    "lon": -97.6420701,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-SUgtMzUgQCBPd2VuIFRlY2ggKDEzOTAwKSAxMDk",
@@ -8422,6 +12526,24 @@
     "name": "US-183 @ Oak Knoll Dr",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13293401901",
+    "url": "",
+    "lat": 30.429619,
+    "lon": -97.6376592,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13293425303",
+    "url": "",
+    "lat": 30.4297857,
+    "lon": -97.6378625,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-TFAtMSBAIFNjb2ZpZWxkIFJpZGdlIFBrd3kgMTI5MDA",
@@ -8449,6 +12571,24 @@
     "name": "SPICEWOOD SPRINGS RD / FOUR IRON DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13341353901",
+    "url": "",
+    "lat": 30.4317579,
+    "lon": -97.6038143,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13411155903",
+    "url": "",
+    "lat": 30.4317579,
+    "lon": -97.6038143,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-773",
@@ -8485,6 +12625,24 @@
     "name": "MC NEIL DR / 183 HWY SVRD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14158104201",
+    "url": "",
+    "lat": 30.4363601,
+    "lon": -97.5697165,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13293425304",
+    "url": "",
+    "lat": 30.436419,
+    "lon": -97.640488,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-Uk0tNjIwIEAgQ2FueW9uIENyZWVrIFdlc3Q",
@@ -8577,6 +12735,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13541921201",
+    "url": "",
+    "lat": 30.4409105,
+    "lon": -97.6343574,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13926728444",
+    "url": "",
+    "lat": 30.4409254,
+    "lon": -97.6341622,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1503",
     "url": "https://cctv.austinmobility.io/image/1503.jpg",
     "lat": 30.44113,
@@ -8604,6 +12780,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13926728445",
+    "url": "",
+    "lat": 30.4414817,
+    "lon": -97.6286615,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-Uk0tNjIwIEAgQm91bGRlciBMbiBO",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=RM-620%20%40%20Boulder%20Ln%20N&districtCode=AUS",
     "lat": 30.442179,
@@ -8620,6 +12805,15 @@
     "name": "US-183 @ Roxie Dr",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13854603601",
+    "url": "",
+    "lat": 30.4422185,
+    "lon": -97.6291518,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-280",
@@ -8721,6 +12915,33 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13852444901",
+    "url": "",
+    "lat": 30.4473442,
+    "lon": -97.5352524,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13450865501",
+    "url": "",
+    "lat": 30.4475283,
+    "lon": -97.6521207,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13409294201",
+    "url": "",
+    "lat": 30.4485604,
+    "lon": -97.6557624,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-208",
     "url": "https://cctv.austinmobility.io/image/208.jpg",
     "lat": 30.448647,
@@ -8784,6 +13005,33 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14133525518",
+    "url": "",
+    "lat": 30.4505135,
+    "lon": -97.5424484,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14133525517",
+    "url": "",
+    "lat": 30.4506686,
+    "lon": -97.5426711,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14116277001",
+    "url": "",
+    "lat": 30.4517469,
+    "lon": -97.6066632,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-U0gtMTMwIEAgUGZsdWdlcnZpbGxlIFBrd3k",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-130%20%40%20Pflugerville%20Pkwy&districtCode=AUS",
     "lat": 30.452161,
@@ -8791,6 +13039,15 @@
     "name": "SH-130 @ Pflugerville Pkwy",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n14090851801",
+    "url": "",
+    "lat": 30.4527676,
+    "lon": -97.6533906,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-389",
@@ -8854,6 +13111,42 @@
     "name": "ANDERSON MILL RD / MORRIS RD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14018345206",
+    "url": "",
+    "lat": 30.4563057,
+    "lon": -97.6686565,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13446689801",
+    "url": "",
+    "lat": 30.4563668,
+    "lon": -97.6680022,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14018330397",
+    "url": "",
+    "lat": 30.4565131,
+    "lon": -97.6690793,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14018337364",
+    "url": "",
+    "lat": 30.45725,
+    "lon": -97.6686051,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-491",
@@ -8928,6 +13221,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13440533101",
+    "url": "",
+    "lat": 30.4632395,
+    "lon": -97.6680514,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-1357",
     "url": "https://cctv.austinmobility.io/image/1357.jpg",
     "lat": 30.463852,
@@ -8944,6 +13246,42 @@
     "name": "FM 620 RD / DEERBROOK TRL",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n12627498558",
+    "url": "",
+    "lat": 30.4640519,
+    "lon": -97.7892716,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13352145233",
+    "url": "",
+    "lat": 30.4644683,
+    "lon": -97.5984065,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13805074807",
+    "url": "",
+    "lat": 30.4648399,
+    "lon": -97.825057,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13113460263",
+    "url": "",
+    "lat": 30.4650067,
+    "lon": -97.5982099,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-U0gtMTMwIEAgRk0tNjg1",
@@ -8964,6 +13302,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14077501201",
+    "url": "",
+    "lat": 30.4653445,
+    "lon": -97.6002373,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13113461554",
+    "url": "",
+    "lat": 30.4657759,
+    "lon": -97.5990228,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-488",
     "url": "https://cctv.austinmobility.io/image/488.jpg",
     "lat": 30.465965,
@@ -8971,6 +13327,24 @@
     "name": "FM 620 RD / PECAN PARK BLVD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13273228471",
+    "url": "",
+    "lat": 30.4667936,
+    "lon": -97.5956759,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14090163402",
+    "url": "",
+    "lat": 30.4673017,
+    "lon": -97.8093656,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-VVMtMTgzIEAgUk0tNjIwIE5CICgxMzgwMCkgMjA0",
@@ -8991,6 +13365,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13226735601",
+    "url": "",
+    "lat": 30.4681276,
+    "lon": -97.7936955,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-SUgtMzUgQCBQaWNhZGlsbHkgRHIgKDE2NzAwKSAxMDA",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-35%20%40%20Picadilly%20Dr%20%2816700%29%20100&districtCode=AUS",
     "lat": 30.468321,
@@ -8998,6 +13381,24 @@
     "name": "IH-35 @ Picadilly Dr",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13226737701",
+    "url": "",
+    "lat": 30.4684882,
+    "lon": -97.7912148,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13316685802",
+    "url": "",
+    "lat": 30.4688153,
+    "lon": -97.7942453,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-VVMtMTgzIEAgUk0tNjIwIFNCICgxMzkwMCkgMjAz",
@@ -9009,6 +13410,51 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13316688101",
+    "url": "",
+    "lat": 30.4694194,
+    "lon": -97.7921073,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13357608532",
+    "url": "",
+    "lat": 30.4695302,
+    "lon": -97.5956007,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13273312581",
+    "url": "",
+    "lat": 30.4706915,
+    "lon": -97.5944263,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14090160401",
+    "url": "",
+    "lat": 30.4708713,
+    "lon": -97.8093949,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14090162001",
+    "url": "",
+    "lat": 30.4709947,
+    "lon": -97.8093151,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-532",
     "url": "https://cctv.austinmobility.io/image/532.jpg",
     "lat": 30.471434,
@@ -9016,6 +13462,24 @@
     "name": "PARMER LN / AMBERGLEN BLVD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14083927803",
+    "url": "",
+    "lat": 30.471836,
+    "lon": -97.8035205,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13716079070",
+    "url": "",
+    "lat": 30.4721745,
+    "lon": -97.7030522,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-TFAtMSBAIFNILTQ1ICgxNjAwMCk",
@@ -9054,6 +13518,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14090163401",
+    "url": "",
+    "lat": 30.4736074,
+    "lon": -97.804758,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14090160802",
+    "url": "",
+    "lat": 30.473664,
+    "lon": -97.8048997,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-SUgtMzUgQCBQYXJrZXIgRHIgKDE2OTAwKSA5OA",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-35%20%40%20Parker%20Dr%20%2816900%29%2098&districtCode=AUS",
     "lat": 30.473805,
@@ -9061,6 +13543,15 @@
     "name": "IH-35 @ Parker Dr",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13295761097",
+    "url": "",
+    "lat": 30.4739113,
+    "lon": -97.5962466,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-778",
@@ -9072,6 +13563,24 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n14127246301",
+    "url": "",
+    "lat": 30.4754694,
+    "lon": -97.8149858,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14106263301",
+    "url": "",
+    "lat": 30.4759087,
+    "lon": -97.8162713,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-256",
     "url": "https://cctv.austinmobility.io/image/256.jpg",
     "lat": 30.475994,
@@ -9079,6 +13588,60 @@
     "name": "FM 620 RD / PARMER LN",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13451572501",
+    "url": "",
+    "lat": 30.4761576,
+    "lon": -97.6615096,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13231484901",
+    "url": "",
+    "lat": 30.477327,
+    "lon": -97.799797,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13074782101",
+    "url": "",
+    "lat": 30.4774219,
+    "lon": -97.6431856,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13532745505",
+    "url": "",
+    "lat": 30.4780134,
+    "lon": -97.7976464,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13231486301",
+    "url": "",
+    "lat": 30.4783472,
+    "lon": -97.7994194,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13469347801",
+    "url": "",
+    "lat": 30.4791857,
+    "lon": -97.6829178,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-U0gtNDUgQCBMYSBGcm9udGVyYSBCbHZkICgxNzAp",
@@ -9126,6 +13689,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13575020801",
+    "url": "",
+    "lat": 30.4802506,
+    "lon": -97.6698399,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-aus-U0gtNDUgV0IgQCBJSC0zNQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-45%20WB%20%40%20IH-35&districtCode=AUS",
     "lat": 30.480586,
@@ -9133,6 +13705,24 @@
     "name": "SH-45 WB @ IH-35",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13788338143",
+    "url": "",
+    "lat": 30.4813558,
+    "lon": -97.6812619,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13968914201",
+    "url": "",
+    "lat": 30.4815492,
+    "lon": -97.6637564,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-247",
@@ -9144,6 +13734,15 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13334641901",
+    "url": "",
+    "lat": 30.481876,
+    "lon": -97.6678732,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-3",
     "url": "https://cctv.austinmobility.io/image/3.jpg",
     "lat": 30.481957,
@@ -9151,6 +13750,33 @@
     "name": "STAKED PLAINS DR / LAKELINE BLVD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n14250353101",
+    "url": "",
+    "lat": 30.4821437,
+    "lon": -97.6146559,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13632164901",
+    "url": "",
+    "lat": 30.4826976,
+    "lon": -97.6727159,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13422151201",
+    "url": "",
+    "lat": 30.4827176,
+    "lon": -97.6930255,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-SUgtMzUgQCBTdW5kYW5jZSBQa3d5ICgyNTAwKSA5Ng",
@@ -9162,6 +13788,132 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13575018401",
+    "url": "",
+    "lat": 30.483622,
+    "lon": -97.6784175,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13575018001",
+    "url": "",
+    "lat": 30.4836564,
+    "lon": -97.6768774,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13359735801",
+    "url": "",
+    "lat": 30.4836662,
+    "lon": -97.6767838,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13575018201",
+    "url": "",
+    "lat": 30.4838458,
+    "lon": -97.6777393,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13359730002",
+    "url": "",
+    "lat": 30.4838581,
+    "lon": -97.6777107,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13575018301",
+    "url": "",
+    "lat": 30.4840306,
+    "lon": -97.6784666,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13334729503",
+    "url": "",
+    "lat": 30.4841515,
+    "lon": -97.6720668,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13301029502",
+    "url": "",
+    "lat": 30.484379,
+    "lon": -97.6743811,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13312286201",
+    "url": "",
+    "lat": 30.4849486,
+    "lon": -97.6785241,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13305437901",
+    "url": "",
+    "lat": 30.4849881,
+    "lon": -97.6723458,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13312285601",
+    "url": "",
+    "lat": 30.4854987,
+    "lon": -97.6765274,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13074795401",
+    "url": "",
+    "lat": 30.4863328,
+    "lon": -97.650193,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13074786601",
+    "url": "",
+    "lat": 30.4866344,
+    "lon": -97.6504403,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13787752902",
+    "url": "",
+    "lat": 30.4876639,
+    "lon": -97.6618875,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-420",
     "url": "https://cctv.austinmobility.io/image/420.jpg",
     "lat": 30.487953,
@@ -9169,6 +13921,24 @@
     "name": "PARMER LN / LAKELINE BLVD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13301039604",
+    "url": "",
+    "lat": 30.4883155,
+    "lon": -97.6784754,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14130075001",
+    "url": "",
+    "lat": 30.4887331,
+    "lon": -97.6779583,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-aus-SUgtMzUgQCBIZXN0ZXJzIENyb3NzaW5n",
@@ -9180,6 +13950,51 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13551194542",
+    "url": "",
+    "lat": 30.4888735,
+    "lon": -97.623848,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13464603301",
+    "url": "",
+    "lat": 30.4892054,
+    "lon": -97.6759101,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13481014926",
+    "url": "",
+    "lat": 30.4902754,
+    "lon": -97.6296526,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14056421401",
+    "url": "",
+    "lat": 30.4920356,
+    "lon": -97.6870269,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13631429501",
+    "url": "",
+    "lat": 30.4925693,
+    "lon": -97.5817502,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-599",
     "url": "https://cctv.austinmobility.io/image/599.jpg",
     "lat": 30.494162,
@@ -9187,6 +14002,51 @@
     "name": "AVERY RANCH BLVD / STAKED PLAINS DR",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13422187401",
+    "url": "",
+    "lat": 30.494568,
+    "lon": -97.671887,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13736053701",
+    "url": "",
+    "lat": 30.4946355,
+    "lon": -97.8109918,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13422187701",
+    "url": "",
+    "lat": 30.4949437,
+    "lon": -97.6710478,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13305437701",
+    "url": "",
+    "lat": 30.4957461,
+    "lon": -97.6783806,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14041641802",
+    "url": "",
+    "lat": 30.4960118,
+    "lon": -97.6557202,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "austin-1519",
@@ -9198,6 +14058,42 @@
     "provider": "Austin"
   },
   {
+    "id": "flock-n13505256702",
+    "url": "",
+    "lat": 30.496182,
+    "lon": -97.6766495,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13074830301",
+    "url": "",
+    "lat": 30.4963677,
+    "lon": -97.6571624,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13451237101",
+    "url": "",
+    "lat": 30.4973953,
+    "lon": -97.6882396,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13302513101",
+    "url": "",
+    "lat": 30.497704,
+    "lon": -97.6792928,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "austin-281",
     "url": "https://cctv.austinmobility.io/image/281.jpg",
     "lat": 30.498076,
@@ -9205,5 +14101,32 @@
     "name": "PARMER LN / AVERY RANCH BLVD",
     "ink": "red",
     "provider": "Austin"
+  },
+  {
+    "id": "flock-n13469348501",
+    "url": "",
+    "lat": 30.4986444,
+    "lon": -97.6817058,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13604165501",
+    "url": "",
+    "lat": 30.4989316,
+    "lon": -97.6786539,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13604165005",
+    "url": "",
+    "lat": 30.4999667,
+    "lon": -97.6772159,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   }
 ]

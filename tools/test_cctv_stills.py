@@ -49,7 +49,10 @@ class PackCamTests(unittest.TestCase):
         self.assertGreaterEqual(len(near), 1, "Oleaster Dr has no packed CCTV within 25 km")
         for row in rows:
             self.assertTrue(row["id"])
-            self.assertTrue(row["url"].startswith("https://"))
+            if row.get("provider") == "Flock":
+                self.assertEqual(row["url"], "")
+            else:
+                self.assertTrue(row["url"].startswith("https://"))
             self.assertIn(row["ink"], ("red", "blue"))
             self.assertTrue(row["name"])
         self.assertTrue(any(row["ink"] == "blue" for row in rows))

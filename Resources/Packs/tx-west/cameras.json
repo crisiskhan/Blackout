@@ -54,6 +54,33 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13644420516",
+    "url": "",
+    "lat": 31.1915494,
+    "lon": -105.4306064,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13644428227",
+    "url": "",
+    "lat": 31.1916115,
+    "lon": -105.4307803,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13644432637",
+    "url": "",
+    "lat": 31.1926657,
+    "lon": -105.4343148,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-SUgtMTAgQCBNTSAxMDIuMw",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20MM%20102.3&districtCode=ELP",
     "lat": 31.192763,
@@ -61,6 +88,69 @@
     "name": "IH-10 @ MM 102.3",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13644402583",
+    "url": "",
+    "lat": 31.1927661,
+    "lon": -105.4345548,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13644411235",
+    "url": "",
+    "lat": 31.1929246,
+    "lon": -105.4344237,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13644405196",
+    "url": "",
+    "lat": 31.1929851,
+    "lon": -105.4346449,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14021076362",
+    "url": "",
+    "lat": 31.1931888,
+    "lon": -105.4344779,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14021084573",
+    "url": "",
+    "lat": 31.1931893,
+    "lon": -105.4344748,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14021091180",
+    "url": "",
+    "lat": 31.1933113,
+    "lon": -105.4343779,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14021078063",
+    "url": "",
+    "lat": 31.1933142,
+    "lon": -105.4343772,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-SUgtMTAgQCBNTSA5Ng",
@@ -126,6 +216,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13534741801",
+    "url": "",
+    "lat": 31.6532862,
+    "lon": -106.1777557,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-SUgtMTAgQCBIb3Jpem9u",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Horizon&districtCode=ELP",
     "lat": 31.659543999999997,
@@ -189,6 +288,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13998611801",
+    "url": "",
+    "lat": 31.6781825,
+    "lon": -106.3162521,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-TFAtMzc1IEAgVyBaYXJhZ296YQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20W%20Zaragoza&districtCode=ELP",
     "lat": 31.678611,
@@ -214,6 +322,51 @@
     "name": "LP-375 @ Alameda",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13950685601",
+    "url": "",
+    "lat": 31.6808447,
+    "lon": -106.3127065,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13534731503",
+    "url": "",
+    "lat": 31.6826209,
+    "lon": -106.2147845,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13477882201",
+    "url": "",
+    "lat": 31.6826305,
+    "lon": -106.2147397,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13527812801",
+    "url": "",
+    "lat": 31.6829438,
+    "lon": -106.148301,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13534731502",
+    "url": "",
+    "lat": 31.6831844,
+    "lon": -106.1488284,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-SUgtMTAgQCBFYXN0bGFrZQ",
@@ -252,6 +405,42 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13534744301",
+    "url": "",
+    "lat": 31.6978453,
+    "lon": -106.2119913,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13527814701",
+    "url": "",
+    "lat": 31.698766,
+    "lon": -106.2119881,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13527812802",
+    "url": "",
+    "lat": 31.6990756,
+    "lon": -106.2113644,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13534745801",
+    "url": "",
+    "lat": 31.6990988,
+    "lon": -106.211132,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-SUgtMTAgQCBBIGFuZCBNIENpcmNsZQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20A%20and%20M%20Circle&districtCode=ELP",
     "lat": 31.699993,
@@ -277,6 +466,15 @@
     "name": "IH-10 @ Americas",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13959004501",
+    "url": "",
+    "lat": 31.7008639,
+    "lon": -106.2988601,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-SUgtMTAgQCBMUC0zNzUgSE0gUw",
@@ -306,6 +504,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13983910401",
+    "url": "",
+    "lat": 31.7041962,
+    "lon": -106.3313754,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14096033201",
+    "url": "",
+    "lat": 31.704779,
+    "lon": -106.3051365,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-Rk0tNzYvTiBMb29wIEAgWmFyYWdvemE",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-76%2FN%20Loop%20%40%20Zaragoza&districtCode=ELP",
     "lat": 31.704822999999998,
@@ -313,6 +529,15 @@
     "name": "FM-76/N Loop @ Zaragoza",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n14077402401",
+    "url": "",
+    "lat": 31.7053285,
+    "lon": -106.3095902,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-Sm9lIEJhdHRsZSBAIFJvamFz",
@@ -369,6 +594,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13527231901",
+    "url": "",
+    "lat": 31.7207922,
+    "lon": -106.3045446,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-TFAtMzc1IEAgQm9iIEhvcGU",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Bob%20Hope&districtCode=ELP",
     "lat": 31.720806999999997,
@@ -378,6 +612,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13979168801",
+    "url": "",
+    "lat": 31.7209447,
+    "lon": -106.3046271,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-Rk0tNzYvTiBMb29wIEAgTGVlIFRyZXZpbm8",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-76%2FN%20Loop%20%40%20Lee%20Trevino&districtCode=ELP",
     "lat": 31.720969,
@@ -385,6 +628,15 @@
     "name": "FM-76/N Loop @ Lee Trevino",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13773227001",
+    "url": "",
+    "lat": 31.721674,
+    "lon": -106.306529,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-TFAtMzc1IEAgQnJvYWR3YXk",
@@ -403,6 +655,96 @@
     "name": "FM-659/Zaragoza @ George Deiter",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13375436780",
+    "url": "",
+    "lat": 31.725694,
+    "lon": -106.3045857,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13984177101",
+    "url": "",
+    "lat": 31.7262633,
+    "lon": -106.3054035,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13984158202",
+    "url": "",
+    "lat": 31.72648,
+    "lon": -106.3039364,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13984165501",
+    "url": "",
+    "lat": 31.7265838,
+    "lon": -106.3038695,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13984178501",
+    "url": "",
+    "lat": 31.7267074,
+    "lon": -106.3062496,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13527233601",
+    "url": "",
+    "lat": 31.7269958,
+    "lon": -106.3032581,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13076896969",
+    "url": "",
+    "lat": 31.7275165,
+    "lon": -106.3038453,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13984176001",
+    "url": "",
+    "lat": 31.7275779,
+    "lon": -106.3042576,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13380385855",
+    "url": "",
+    "lat": 31.7285609,
+    "lon": -106.3480918,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13380353779",
+    "url": "",
+    "lat": 31.7286944,
+    "lon": -106.3475118,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-SUgtMTAgQCBMZWUgVHJldmlubyBETVM",
@@ -441,6 +783,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14250233101",
+    "url": "",
+    "lat": 31.7352494,
+    "lon": -106.2941043,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-TFAtMzc1IEAgUGVsaWNhbm8gRE1T",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Pelicano%20DMS&districtCode=ELP",
     "lat": 31.735827999999998,
@@ -448,6 +799,15 @@
     "name": "LP-375 @ Pellicano DMS",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n14101395501",
+    "url": "",
+    "lat": 31.7376942,
+    "lon": -106.2918943,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-SUgtMTAgQCBMZWUgVHJldmlubw",
@@ -468,6 +828,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13375459118",
+    "url": "",
+    "lat": 31.7405136,
+    "lon": -106.3198999,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13375459119",
+    "url": "",
+    "lat": 31.7408721,
+    "lon": -106.3207816,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-TFAtMzc1IEAgVmlzdGEgZGVsIFNvbA",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Vista%20del%20Sol&districtCode=ELP",
     "lat": 31.741477,
@@ -477,6 +855,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14137760003",
+    "url": "",
+    "lat": 31.7416659,
+    "lon": -106.3777407,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-U0gtMjAvQWxhbWVkYSBAIENhcm9saW5h",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FAlameda%20%40%20Carolina&districtCode=ELP",
     "lat": 31.741712,
@@ -484,6 +871,33 @@
     "name": "SH-20/Alameda @ Carolina",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13772597103",
+    "url": "",
+    "lat": 31.7418581,
+    "lon": -106.3539746,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13194762506",
+    "url": "",
+    "lat": 31.7419233,
+    "lon": -106.35399,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13194779442",
+    "url": "",
+    "lat": 31.7419322,
+    "lon": -106.3540567,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-SUgtMTAgQCBMb21hbGFuZA",
@@ -502,6 +916,15 @@
     "name": "LP-375 @ Ascarate Lake",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13468601601",
+    "url": "",
+    "lat": 31.7473786,
+    "lon": -106.3293762,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-TGVlIFRyZXZpbm8gQCBQZWxsaWNhbm8",
@@ -540,6 +963,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14137765701",
+    "url": "",
+    "lat": 31.7513313,
+    "lon": -106.3458974,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-R2VvcmdlIERpZXRlciBAIFZpc3RhIGRlbCBTb2w",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=George%20Dieter%20%40%20Vista%20del%20Sol&districtCode=ELP",
     "lat": 31.75151,
@@ -558,6 +990,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13343132401",
+    "url": "",
+    "lat": 31.7518365,
+    "lon": -106.3432617,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-Rk0tNzYvTiBMb29wIEAgSGF3a2lucw",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-76%2FN%20Loop%20%40%20Hawkins&districtCode=ELP",
     "lat": 31.752209999999998,
@@ -565,6 +1006,15 @@
     "name": "FM-76/N Loop @ Hawkins",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13772615301",
+    "url": "",
+    "lat": 31.7522226,
+    "lon": -106.3457399,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-TFAtMzc1IEAgTmV3IFdvcmxk",
@@ -583,6 +1033,15 @@
     "name": "LP-375 @ Prospect",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n14051753701",
+    "url": "",
+    "lat": 31.7574383,
+    "lon": -106.47874,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-SUgtMTAgQCBNY1JhZQ",
@@ -657,6 +1116,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13446949701",
+    "url": "",
+    "lat": 31.7607037,
+    "lon": -106.2683461,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13743757401",
+    "url": "",
+    "lat": 31.7607724,
+    "lon": -106.2685319,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-U0gtMjAvQWxhbWVkYSBAIERlbHRh",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FAlameda%20%40%20Delta&districtCode=ELP",
     "lat": 31.76082,
@@ -664,6 +1141,33 @@
     "name": "SH-20/Alameda @ Delta",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13446935401",
+    "url": "",
+    "lat": 31.7608457,
+    "lon": -106.267383,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14119698501",
+    "url": "",
+    "lat": 31.760929,
+    "lon": -106.2650018,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13371218829",
+    "url": "",
+    "lat": 31.7610519,
+    "lon": -106.264114,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-VVMgNjIvMTgwIEAgUk0gMTExMQ",
@@ -684,6 +1188,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13479579502",
+    "url": "",
+    "lat": 31.7617706,
+    "lon": -106.264984,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-TFAtMzc1IEAgVVMtNTQvQkg",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20US-54%2FBH&districtCode=ELP",
     "lat": 31.761893999999998,
@@ -700,6 +1213,33 @@
     "name": "FM-76/N Loop @ Delta",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13479580501",
+    "url": "",
+    "lat": 31.7627154,
+    "lon": -106.2649972,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13375389022",
+    "url": "",
+    "lat": 31.7627569,
+    "lon": -106.2642165,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13195790438",
+    "url": "",
+    "lat": 31.7628824,
+    "lon": -106.3611521,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-TFAtMzc1IEAgU2FuIE1hcmNpYWw",
@@ -736,6 +1276,15 @@
     "name": "IH-10 @ Kansas",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13943653801",
+    "url": "",
+    "lat": 31.7642544,
+    "lon": -106.2683951,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-VVMtNTQgQCBMUC0zNzUgSE0gTg",
@@ -819,6 +1368,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13447381801",
+    "url": "",
+    "lat": 31.7680773,
+    "lon": -106.4229495,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-Rk0tNjU5L1phcmFnb3phIEAgU3VuIEZpcmU",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-659%2FZaragoza%20%40%20Sun%20Fire&districtCode=ELP",
     "lat": 31.768119,
@@ -837,6 +1395,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13960869801",
+    "url": "",
+    "lat": 31.7685012,
+    "lon": -106.3640948,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-VVM2Mi9QYWlzYW5vIEAgQWxhbWVkYQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US62%2FPaisano%20%40%20Alameda&districtCode=ELP",
     "lat": 31.768573,
@@ -844,6 +1411,42 @@
     "name": "US-62/Paisano @ Alameda",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13743855502",
+    "url": "",
+    "lat": 31.7692331,
+    "lon": -106.3035848,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13743855501",
+    "url": "",
+    "lat": 31.7692603,
+    "lon": -106.303368,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13743858401",
+    "url": "",
+    "lat": 31.7694168,
+    "lon": -106.3036544,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13743854801",
+    "url": "",
+    "lat": 31.7694515,
+    "lon": -106.3034233,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-SUgtMTEwIEAgVVMtNjIgUGFpc2Fubw",
@@ -862,6 +1465,42 @@
     "name": "US-62/Paisano East @ BOTA",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13384305601",
+    "url": "",
+    "lat": 31.7702877,
+    "lon": -106.3489811,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13924459701",
+    "url": "",
+    "lat": 31.770294,
+    "lon": -106.3486957,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13924459001",
+    "url": "",
+    "lat": 31.7705548,
+    "lon": -106.3489928,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13924458702",
+    "url": "",
+    "lat": 31.7705641,
+    "lon": -106.3486864,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-TFAtMzc1IEAgU2NodXN0ZXI",
@@ -909,6 +1548,60 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13762130001",
+    "url": "",
+    "lat": 31.7719004,
+    "lon": -106.3395604,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13762130101",
+    "url": "",
+    "lat": 31.7719058,
+    "lon": -106.3399189,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13939105901",
+    "url": "",
+    "lat": 31.7719107,
+    "lon": -106.3016772,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13924458001",
+    "url": "",
+    "lat": 31.7721857,
+    "lon": -106.3395728,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13762130301",
+    "url": "",
+    "lat": 31.7722114,
+    "lon": -106.3399352,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13825771101",
+    "url": "",
+    "lat": 31.772599,
+    "lon": -106.375177,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-VVMtNTQgQCBBbGFtZWRh",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Alameda&districtCode=ELP",
     "lat": 31.773014999999997,
@@ -916,6 +1609,33 @@
     "name": "US-54 @ Alameda",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n14086473401",
+    "url": "",
+    "lat": 31.7732131,
+    "lon": -106.3763928,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13468613801",
+    "url": "",
+    "lat": 31.7753325,
+    "lon": -106.4741669,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13414578601",
+    "url": "",
+    "lat": 31.7756419,
+    "lon": -106.2528846,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-Rk0tNjU5L1phcmFnb3phIEAgVGllcnJhIEVzdGU",
@@ -927,6 +1647,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13414579101",
+    "url": "",
+    "lat": 31.7759286,
+    "lon": -106.2530101,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-TFAtMzc1IEAgUGViYmxlIEhpbGxz",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Pebble%20Hills&districtCode=ELP",
     "lat": 31.776721,
@@ -934,6 +1663,15 @@
     "name": "LP-375 @ Pebble Hills",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13375463604",
+    "url": "",
+    "lat": 31.7768498,
+    "lon": -106.4123863,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-SUgtMTAgQCBVUyA1NCBNTiBO",
@@ -961,6 +1699,15 @@
     "name": "IH-10 @ US 54 HM S",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13892308501",
+    "url": "",
+    "lat": 31.7773767,
+    "lon": -106.5022783,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-SUgtMTAgQCBCb29uZQ",
@@ -1006,6 +1753,33 @@
     "name": "IH-10 @ Asarco",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13755628501",
+    "url": "",
+    "lat": 31.7778486,
+    "lon": -106.4135803,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13374231201",
+    "url": "",
+    "lat": 31.777931,
+    "lon": -106.5013887,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13502308801",
+    "url": "",
+    "lat": 31.7779312,
+    "lon": -106.3901036,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-SUgtMTAgQCBQYWlzYW5v",
@@ -1062,6 +1836,60 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14122768601",
+    "url": "",
+    "lat": 31.7816412,
+    "lon": -106.4375948,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13468621201",
+    "url": "",
+    "lat": 31.7818313,
+    "lon": -106.4613686,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13588506501",
+    "url": "",
+    "lat": 31.7819288,
+    "lon": -106.216741,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13588507301",
+    "url": "",
+    "lat": 31.7820996,
+    "lon": -106.2169578,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13588507101",
+    "url": "",
+    "lat": 31.7821112,
+    "lon": -106.2165129,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13588506201",
+    "url": "",
+    "lat": 31.7822782,
+    "lon": -106.2167455,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-SUgtMTAgQCBUcm93YnJpZGdl",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Trowbridge&districtCode=ELP",
     "lat": 31.782466,
@@ -1078,6 +1906,42 @@
     "name": "US-54 @ Montana",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13717176601",
+    "url": "",
+    "lat": 31.783477,
+    "lon": -106.4072159,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13298740901",
+    "url": "",
+    "lat": 31.7837011,
+    "lon": -106.4614787,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13422395001",
+    "url": "",
+    "lat": 31.7840368,
+    "lon": -106.3962556,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14028804901",
+    "url": "",
+    "lat": 31.7853136,
+    "lon": -106.4125575,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-U0gtMjAvTWVzYSBAIFN1bmJvd2w",
@@ -1098,6 +1962,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13687474004",
+    "url": "",
+    "lat": 31.7857301,
+    "lon": -106.5060642,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14005150601",
+    "url": "",
+    "lat": 31.7861552,
+    "lon": -106.4175321,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-VVMtODUvUGFpc2FubyBAIEV4ZWN1dGl2ZQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-85%2FPaisano%20%40%20Executive&districtCode=ELP",
     "lat": 31.788334,
@@ -1114,6 +1996,42 @@
     "name": "US-54 @ Trowbridge",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n14108651401",
+    "url": "",
+    "lat": 31.7887151,
+    "lon": -106.4485463,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14108651402",
+    "url": "",
+    "lat": 31.7887197,
+    "lon": -106.448439,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14108650503",
+    "url": "",
+    "lat": 31.7887904,
+    "lon": -106.4484104,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14108653801",
+    "url": "",
+    "lat": 31.7887995,
+    "lon": -106.4484918,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBBaXJ3YXk",
@@ -1134,6 +2052,42 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13751428801",
+    "url": "",
+    "lat": 31.7922553,
+    "lon": -106.2596513,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13751428601",
+    "url": "",
+    "lat": 31.7922561,
+    "lon": -106.2597218,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13751428803",
+    "url": "",
+    "lat": 31.7924739,
+    "lon": -106.2596361,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13751429101",
+    "url": "",
+    "lat": 31.7924748,
+    "lon": -106.2597241,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-TFAtMzc1IEAgRXhlY3V0aXZl",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Executive&districtCode=ELP",
     "lat": 31.792513,
@@ -1150,6 +2104,15 @@
     "name": "LP-375 @ Edgemere",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13687476201",
+    "url": "",
+    "lat": 31.7927331,
+    "lon": -106.5083272,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBIYXdraW5z",
@@ -1170,6 +2133,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13452857401",
+    "url": "",
+    "lat": 31.7934215,
+    "lon": -106.5190848,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13687474003",
+    "url": "",
+    "lat": 31.7951038,
+    "lon": -106.5112547,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-U0gtMjAvTWVzYSBAIEV4ZWN1dGl2ZQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FMesa%20%40%20Executive&districtCode=ELP",
     "lat": 31.795289999999998,
@@ -1177,6 +2158,15 @@
     "name": "SH-20/Mesa @ Executive",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13340650001",
+    "url": "",
+    "lat": 31.7954809,
+    "lon": -106.5113918,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-TFAtMzc1IEAgRG9uaXBoYW4",
@@ -1197,6 +2187,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14047317701",
+    "url": "",
+    "lat": 31.7960834,
+    "lon": -106.3327398,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBMaW1lcmljaw",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2F180-Montana%20%40%20Limerick&districtCode=ELP",
     "lat": 31.797006999999997,
@@ -1215,6 +2214,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13465199201",
+    "url": "",
+    "lat": 31.7973918,
+    "lon": -106.2294493,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBZYXJicm91Z2g",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2F180-Montana%20%40%20Yarbrough&districtCode=ELP",
     "lat": 31.797822,
@@ -1224,6 +2232,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14101882920",
+    "url": "",
+    "lat": 31.798592,
+    "lon": -106.3198245,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBMZWUgVHJldmlubw",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2F180-Montana%20%40%20Lee%20Trevino&districtCode=ELP",
     "lat": 31.799288999999998,
@@ -1231,6 +2248,15 @@
     "name": "US-62/180-Montana @ Lee Trevino",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13399369701",
+    "url": "",
+    "lat": 31.7995642,
+    "lon": -106.3184798,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-VVMtNTQgQCBQZXJzaGluZw",
@@ -1269,6 +2295,33 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13645924401",
+    "url": "",
+    "lat": 31.8046468,
+    "lon": -106.2677478,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13076898200",
+    "url": "",
+    "lat": 31.805156,
+    "lon": -106.2659139,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13076910904",
+    "url": "",
+    "lat": 31.8054532,
+    "lon": -106.2638857,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-TFAgMzc1IEAgUmFjZXRyYWNr",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP%20375%20%40%20Racetrack&districtCode=ELP",
     "lat": 31.805481999999998,
@@ -1276,6 +2329,15 @@
     "name": "LP 375 @ Racetrack",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13339800302",
+    "url": "",
+    "lat": 31.8055065,
+    "lon": -106.2689791,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-TFAtMzc1IEAgUyBNb250YW5h",
@@ -1287,6 +2349,51 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14007520301",
+    "url": "",
+    "lat": 31.8058318,
+    "lon": -106.461499,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13076910901",
+    "url": "",
+    "lat": 31.8058663,
+    "lon": -106.2660637,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14006797001",
+    "url": "",
+    "lat": 31.8059894,
+    "lon": -106.4614141,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13076910903",
+    "url": "",
+    "lat": 31.8062397,
+    "lon": -106.2640595,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13076910902",
+    "url": "",
+    "lat": 31.806352,
+    "lon": -106.2657055,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBMUCAzNzU",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2F180-Montana%20%40%20LP%20375&districtCode=ELP",
     "lat": 31.806739,
@@ -1294,6 +2401,15 @@
     "name": "US-62/180-Montana @ LP 375",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13687477501",
+    "url": "",
+    "lat": 31.8070412,
+    "lon": -106.5092233,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBUaWVycmEgRXN0ZQ",
@@ -1332,6 +2448,33 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13688767302",
+    "url": "",
+    "lat": 31.8108961,
+    "lon": -106.5119591,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13508073101",
+    "url": "",
+    "lat": 31.8115688,
+    "lon": -106.5592636,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13508072201",
+    "url": "",
+    "lat": 31.8117393,
+    "lon": -106.5594281,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-VVMtNTQgQCBWYW4gQnVyZW4",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Van%20Buren&districtCode=ELP",
     "lat": 31.812721999999997,
@@ -1341,6 +2484,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13723810701",
+    "url": "",
+    "lat": 31.8127971,
+    "lon": -106.55776,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-U0gtMjAvRG9uaXBoYW4gQCBTdW5sYW5kIFBhcms",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FDoniphan%20%40%20Sunland%20Park&districtCode=ELP",
     "lat": 31.812855,
@@ -1348,6 +2500,15 @@
     "name": "SH-20/Doniphan @ Sunland Park",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13615712401",
+    "url": "",
+    "lat": 31.8138924,
+    "lon": -106.5269494,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-SUgtMTAgQCBTdW5sYW5kIFBhcms",
@@ -1368,6 +2529,42 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13419083801",
+    "url": "",
+    "lat": 31.817485,
+    "lon": -106.5420773,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13688778601",
+    "url": "",
+    "lat": 31.8182345,
+    "lon": -106.5156892,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13315745201",
+    "url": "",
+    "lat": 31.8186758,
+    "lon": -106.5433789,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14006964803",
+    "url": "",
+    "lat": 31.8202086,
+    "lon": -106.388764,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-U1AtNjAxIEAgTHVrZQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SP-601%20%40%20Luke&districtCode=ELP",
     "lat": 31.820764999999998,
@@ -1384,6 +2581,33 @@
     "name": "SP-601 @ RM-24",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13102878113",
+    "url": "",
+    "lat": 31.8219089,
+    "lon": -106.6996012,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13102873430",
+    "url": "",
+    "lat": 31.822,
+    "lon": -106.6996844,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14006955303",
+    "url": "",
+    "lat": 31.8253025,
+    "lon": -106.4046218,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-U1AtNjAxIEAgTWFyc2hhbGw",
@@ -1422,6 +2646,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14006959101",
+    "url": "",
+    "lat": 31.8264654,
+    "lon": -106.4170553,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13625593002",
+    "url": "",
+    "lat": 31.8267492,
+    "lon": -106.4481672,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-SUgtMTAgQCBSZXNsZXI",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Resler&districtCode=ELP",
     "lat": 31.826942,
@@ -1438,6 +2680,15 @@
     "name": "SH-20/Mesa @ Sunland",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13327356101",
+    "url": "",
+    "lat": 31.8286756,
+    "lon": -106.5273134,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-U1AtNjAxIEAgR2xvYmFsIFJlYWNo",
@@ -1458,6 +2709,33 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14006962201",
+    "url": "",
+    "lat": 31.8315377,
+    "lon": -106.3628867,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13689888001",
+    "url": "",
+    "lat": 31.8331662,
+    "lon": -106.5369995,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13689887204",
+    "url": "",
+    "lat": 31.8357709,
+    "lon": -106.5502688,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-U0gtMjAvTWVzYSBAIFJlc2xlcg",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FMesa%20%40%20Resler&districtCode=ELP",
     "lat": 31.835798999999998,
@@ -1465,6 +2743,69 @@
     "name": "SH-20/Mesa @ Resler",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13448984401",
+    "url": "",
+    "lat": 31.8359398,
+    "lon": -106.5625781,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13376486902",
+    "url": "",
+    "lat": 31.836487,
+    "lon": -106.5646374,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13449069301",
+    "url": "",
+    "lat": 31.8366231,
+    "lon": -106.5624893,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13376775201",
+    "url": "",
+    "lat": 31.8374517,
+    "lon": -106.5643952,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13689908501",
+    "url": "",
+    "lat": 31.8377209,
+    "lon": -106.5618204,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13376779501",
+    "url": "",
+    "lat": 31.8377754,
+    "lon": -106.5673171,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13376777001",
+    "url": "",
+    "lat": 31.8386077,
+    "lon": -106.5673012,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-U1AtNjAxIEAgUk0tMjU",
@@ -1483,6 +2824,15 @@
     "name": "IH-10 @ Mesa",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n14006964801",
+    "url": "",
+    "lat": 31.8411329,
+    "lon": -106.3413193,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-U0gtMjAvTWVzYSBAIERvbmlwaGFu",
@@ -1512,6 +2862,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14068821001",
+    "url": "",
+    "lat": 31.8501468,
+    "lon": -106.4332047,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14130174101",
+    "url": "",
+    "lat": 31.8501615,
+    "lon": -106.6274451,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-VVMtNTQgQCBEeWVy",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Dyer&districtCode=ELP",
     "lat": 31.852280999999998,
@@ -1530,6 +2898,78 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14047355901",
+    "url": "",
+    "lat": 31.8553399,
+    "lon": -106.4229342,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14047357901",
+    "url": "",
+    "lat": 31.8553838,
+    "lon": -106.423075,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14047343703",
+    "url": "",
+    "lat": 31.8553938,
+    "lon": -106.4225499,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14047354701",
+    "url": "",
+    "lat": 31.8554347,
+    "lon": -106.4226512,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14047359510",
+    "url": "",
+    "lat": 31.8581622,
+    "lon": -106.4234111,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13812360201",
+    "url": "",
+    "lat": 31.8590299,
+    "lon": -106.4354933,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13368856601",
+    "url": "",
+    "lat": 31.8593087,
+    "lon": -106.5580528,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13368855202",
+    "url": "",
+    "lat": 31.8593627,
+    "lon": -106.5577668,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-UmVzbGVyIEAgUmVkZA",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=Resler%20%40%20Redd&districtCode=ELP",
     "lat": 31.859543,
@@ -1537,6 +2977,24 @@
     "name": "Resler @ Redd",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13368855101",
+    "url": "",
+    "lat": 31.8595995,
+    "lon": -106.557793,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13368855201",
+    "url": "",
+    "lat": 31.8596021,
+    "lon": -106.5580641,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-U0gtMjAvRG9uaXBoYW4gQCBSZWRk",
@@ -1548,6 +3006,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n14062748701",
+    "url": "",
+    "lat": 31.8624281,
+    "lon": -106.4343755,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13368857401",
+    "url": "",
+    "lat": 31.8624522,
+    "lon": -106.5738469,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-SUgtMTAgQCBSZWRk",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Redd&districtCode=ELP",
     "lat": 31.8631,
@@ -1557,6 +3033,78 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13382365201",
+    "url": "",
+    "lat": 31.8631131,
+    "lon": -106.5718493,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13424697801",
+    "url": "",
+    "lat": 31.8633609,
+    "lon": -106.5726821,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13418857201",
+    "url": "",
+    "lat": 31.8637376,
+    "lon": -106.5741305,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14016472602",
+    "url": "",
+    "lat": 31.8646416,
+    "lon": -106.6099886,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13971771602",
+    "url": "",
+    "lat": 31.8654972,
+    "lon": -106.4103995,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13971769101",
+    "url": "",
+    "lat": 31.8655503,
+    "lon": -106.4101366,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13812358301",
+    "url": "",
+    "lat": 31.8674339,
+    "lon": -106.4299162,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13403759702",
+    "url": "",
+    "lat": 31.8675431,
+    "lon": -106.5775563,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-VVMtNTQgQCBIb25kbyBQYXNz",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Hondo%20Pass&districtCode=ELP",
     "lat": 31.869387,
@@ -1564,6 +3112,33 @@
     "name": "US-54 @ Hondo Pass",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13812261001",
+    "url": "",
+    "lat": 31.8697072,
+    "lon": -106.4346209,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13812261301",
+    "url": "",
+    "lat": 31.8697789,
+    "lon": -106.4347021,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14005150602",
+    "url": "",
+    "lat": 31.8698673,
+    "lon": -106.4348068,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-TFAtMzc1IEAgTU0gMTcuMw",
@@ -1602,6 +3177,33 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13398517801",
+    "url": "",
+    "lat": 31.8806842,
+    "lon": -106.650515,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13398517901",
+    "url": "",
+    "lat": 31.8807478,
+    "lon": -106.6494233,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13339800501",
+    "url": "",
+    "lat": 31.8820782,
+    "lon": -106.5869785,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-VVMtNTQgQCBEaWFuYQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Diana&districtCode=ELP",
     "lat": 31.882555,
@@ -1618,6 +3220,96 @@
     "name": "IH-10 @ Artcraft",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13367916901",
+    "url": "",
+    "lat": 31.8837508,
+    "lon": -106.5796507,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13376809901",
+    "url": "",
+    "lat": 31.8838158,
+    "lon": -106.5761789,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13102895946",
+    "url": "",
+    "lat": 31.8839295,
+    "lon": -106.5829984,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13376809701",
+    "url": "",
+    "lat": 31.8839707,
+    "lon": -106.5758236,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13376810201",
+    "url": "",
+    "lat": 31.8841299,
+    "lon": -106.5763149,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13382363201",
+    "url": "",
+    "lat": 31.8842727,
+    "lon": -106.5760714,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13277777134",
+    "url": "",
+    "lat": 31.8857598,
+    "lon": -106.5970751,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13433442801",
+    "url": "",
+    "lat": 31.8858294,
+    "lon": -106.5970364,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13433504601",
+    "url": "",
+    "lat": 31.8887327,
+    "lon": -106.5822075,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13367917901",
+    "url": "",
+    "lat": 31.8888524,
+    "lon": -106.5818457,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-U1AtMTYgQCBEb25pcGhhbg",
@@ -1674,6 +3366,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13076895302",
+    "url": "",
+    "lat": 31.8990955,
+    "lon": -106.4395601,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13076895304",
+    "url": "",
+    "lat": 31.8991544,
+    "lon": -106.4374826,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-TFAtMzc1IEAgRHllcg",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Dyer&districtCode=ELP",
     "lat": 31.899224,
@@ -1692,6 +3402,51 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13076895303",
+    "url": "",
+    "lat": 31.8993164,
+    "lon": -106.4383423,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13076895305",
+    "url": "",
+    "lat": 31.8996074,
+    "lon": -106.4404331,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14005170503",
+    "url": "",
+    "lat": 31.9001555,
+    "lon": -106.4391622,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14005171701",
+    "url": "",
+    "lat": 31.9001778,
+    "lon": -106.4383469,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13932261101",
+    "url": "",
+    "lat": 31.9003947,
+    "lon": -106.4405206,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-TFAtMzc1IEAgVVMtNTQ",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20US-54&districtCode=ELP",
     "lat": 31.901501,
@@ -1699,6 +3454,24 @@
     "name": "LP-375 @ US-54",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13831419901",
+    "url": "",
+    "lat": 31.9030196,
+    "lon": -106.4068828,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13606779901",
+    "url": "",
+    "lat": 31.9037914,
+    "lon": -106.4166006,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-TFAtMzc1IEAgTXVzZXVtcw",
@@ -1773,6 +3546,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13932157401",
+    "url": "",
+    "lat": 31.9101777,
+    "lon": -106.4073071,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13845446101",
+    "url": "",
+    "lat": 31.9105098,
+    "lon": -106.4233779,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-VVMtNTQgQCBTdW4gVmFsbGV5",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Sun%20Valley&districtCode=ELP",
     "lat": 31.912471999999998,
@@ -1780,6 +3571,24 @@
     "name": "US-54 @ Sun Valley",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n14108518502",
+    "url": "",
+    "lat": 31.9195064,
+    "lon": -106.4230041,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14052274901",
+    "url": "",
+    "lat": 31.920723,
+    "lon": -106.4220771,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-VVMtNTQgQCBLZW53b3J0aHk",
@@ -1800,6 +3609,24 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13932267302",
+    "url": "",
+    "lat": 31.9285771,
+    "lon": -106.4077583,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13932267301",
+    "url": "",
+    "lat": 31.9296948,
+    "lon": -106.4228199,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-VVMtNTQgQCBTZWFuIEhhZ2dlcnR5",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Sean%20Haggerty&districtCode=ELP",
     "lat": 31.930501,
@@ -1816,6 +3643,15 @@
     "name": "SP-320 @ Railroad",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13727876402",
+    "url": "",
+    "lat": 31.9362464,
+    "lon": -106.4418941,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-VVMtNTQgQCBNY0NvbWJz",
@@ -1845,6 +3681,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13832719701",
+    "url": "",
+    "lat": 31.9542973,
+    "lon": -106.3611099,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-SUgtMTAgQCBWaW50b24",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Vinton&districtCode=ELP",
     "lat": 31.9576,
@@ -1872,6 +3717,15 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13850384801",
+    "url": "",
+    "lat": 31.9759198,
+    "lon": -106.6046156,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-SUgtMTAgQCBUcmF2ZWwgSW5mb3JtYXRpb24gQ2VudGVy",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Travel%20Information%20Center&districtCode=ELP",
     "lat": 31.981333,
@@ -1879,6 +3733,15 @@
     "name": "IH-10 @ Travel Information Center",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13277777133",
+    "url": "",
+    "lat": 31.983506,
+    "lon": -106.604995,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "txdot-elp-VVMtNTQgQCBTdGFuIFJvYmVydHM",
@@ -1890,6 +3753,42 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13819486601",
+    "url": "",
+    "lat": 31.9913684,
+    "lon": -106.5834483,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13971230201",
+    "url": "",
+    "lat": 31.9914797,
+    "lon": -106.5836655,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14052441803",
+    "url": "",
+    "lat": 31.9968916,
+    "lon": -106.5821113,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13417184401",
+    "url": "",
+    "lat": 31.9971572,
+    "lon": -106.5808172,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-SUgtMTAgQCBGTS0xOTA1L0FudGhvbnk",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20FM-1905%2FAnthony&districtCode=ELP",
     "lat": 31.997424,
@@ -1899,6 +3798,141 @@
     "provider": "TxDOT"
   },
   {
+    "id": "flock-n13417183701",
+    "url": "",
+    "lat": 31.9974601,
+    "lon": -106.576039,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13853683601",
+    "url": "",
+    "lat": 31.997503,
+    "lon": -106.5805792,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13853678001",
+    "url": "",
+    "lat": 31.9976363,
+    "lon": -106.583801,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13403760802",
+    "url": "",
+    "lat": 31.9978689,
+    "lon": -106.5848455,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13403763601",
+    "url": "",
+    "lat": 31.9981334,
+    "lon": -106.6057763,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14088328101",
+    "url": "",
+    "lat": 31.9991474,
+    "lon": -106.3253816,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13414441101",
+    "url": "",
+    "lat": 31.9996891,
+    "lon": -106.6066069,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14013569001",
+    "url": "",
+    "lat": 31.9998802,
+    "lon": -106.5885211,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14052443201",
+    "url": "",
+    "lat": 31.9999384,
+    "lon": -106.5936178,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13384107701",
+    "url": "",
+    "lat": 32.000254,
+    "lon": -106.6029858,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13414883201",
+    "url": "",
+    "lat": 32.0002859,
+    "lon": -106.6052586,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13277775026",
+    "url": "",
+    "lat": 32.0003557,
+    "lon": -106.6061679,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14052443101",
+    "url": "",
+    "lat": 32.0005251,
+    "lon": -106.5935018,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13102871525",
+    "url": "",
+    "lat": 32.0006069,
+    "lon": -106.5821429,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13387576501",
+    "url": "",
+    "lat": 32.0006179,
+    "lon": -106.5835993,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "txdot-elp-VVMtNTQgQCBTdGF0ZSBMaW5l",
     "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20State%20Line&districtCode=ELP",
     "lat": 32.001197,
@@ -1906,6 +3940,87 @@
     "name": "US-54 @ State Line",
     "ink": "blue",
     "provider": "TxDOT"
+  },
+  {
+    "id": "flock-n13474246602",
+    "url": "",
+    "lat": 32.0016805,
+    "lon": -106.3337304,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13264259275",
+    "url": "",
+    "lat": 32.001683,
+    "lon": -106.4089066,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13971227202",
+    "url": "",
+    "lat": 32.0039773,
+    "lon": -106.6071434,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13264253491",
+    "url": "",
+    "lat": 32.0381253,
+    "lon": -106.4633226,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13778389601",
+    "url": "",
+    "lat": 32.0425274,
+    "lon": -106.2993011,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13263957220",
+    "url": "",
+    "lat": 32.1084121,
+    "lon": -106.630617,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13392065003",
+    "url": "",
+    "lat": 32.1244336,
+    "lon": -106.6406071,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13387426501",
+    "url": "",
+    "lat": 32.1639327,
+    "lon": -106.7410377,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13387424701",
+    "url": "",
+    "lat": 32.1645339,
+    "lon": -106.7415221,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-STEwTWVzcXVpdGU",
@@ -1935,6 +4050,69 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13946463001",
+    "url": "",
+    "lat": 32.26459,
+    "lon": -106.7386741,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13265945635",
+    "url": "",
+    "lat": 32.2651903,
+    "lon": -106.730911,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13946405701",
+    "url": "",
+    "lat": 32.2653667,
+    "lon": -106.7394037,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13822904601",
+    "url": "",
+    "lat": 32.2657383,
+    "lon": -106.7312877,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13269342132",
+    "url": "",
+    "lat": 32.2664533,
+    "lon": -106.7610824,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13269353417",
+    "url": "",
+    "lat": 32.2687718,
+    "lon": -106.7622987,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13274524034",
+    "url": "",
+    "lat": 32.2749564,
+    "lon": -106.7532644,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-STEwRUJVbmlvbkxhc0NydWNlcw",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I10EBUnionLasCruces",
     "lat": 32.2770111111111,
@@ -1953,6 +4131,24 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13263847138",
+    "url": "",
+    "lat": 32.2779966,
+    "lon": -106.7394964,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13293741403",
+    "url": "",
+    "lat": 32.2782503,
+    "lon": -106.7589706,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0xMEBTTWFpblN0RUI",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-10%40SMainStEB",
     "lat": 32.281541,
@@ -1960,6 +4156,15 @@
     "name": "I-10 @ S Main St EB",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13263843051",
+    "url": "",
+    "lat": 32.2818317,
+    "lon": -106.741044,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0xMEBTTWFpblN0V0I",
@@ -1978,6 +4183,87 @@
     "name": "I-10 @ E of US 70",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13283817060",
+    "url": "",
+    "lat": 32.2830241,
+    "lon": -106.7695441,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13282299079",
+    "url": "",
+    "lat": 32.2830589,
+    "lon": -106.7608999,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13274475406",
+    "url": "",
+    "lat": 32.2832939,
+    "lon": -106.7560839,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13263854418",
+    "url": "",
+    "lat": 32.2835077,
+    "lon": -106.7714859,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13283813993",
+    "url": "",
+    "lat": 32.2840664,
+    "lon": -106.7567481,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13263857395",
+    "url": "",
+    "lat": 32.284765,
+    "lon": -106.7567118,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13263844758",
+    "url": "",
+    "lat": 32.284935,
+    "lon": -106.7499273,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13263855109",
+    "url": "",
+    "lat": 32.2854577,
+    "lon": -106.7474671,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14129974601",
+    "url": "",
+    "lat": 32.2856864,
+    "lon": -106.7486572,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0yNUBVbml2ZXJzaXR5U0I",
@@ -2016,6 +4302,15 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13892937501",
+    "url": "",
+    "lat": 32.2923633,
+    "lon": -106.7625427,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-TGFzQ3J1Y2VzTW90ZWxEcml2ZQ",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=LasCrucesMotelDrive",
     "lat": 32.294,
@@ -2023,6 +4318,186 @@
     "name": "I-10 @ Motel Drive",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13893066301",
+    "url": "",
+    "lat": 32.2952783,
+    "lon": -106.8552467,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14073160202",
+    "url": "",
+    "lat": 32.2975686,
+    "lon": -106.7633172,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14073160201",
+    "url": "",
+    "lat": 32.2976505,
+    "lon": -106.7636237,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13283776494",
+    "url": "",
+    "lat": 32.2990797,
+    "lon": -106.7366408,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13283817138",
+    "url": "",
+    "lat": 32.2993595,
+    "lon": -106.7390501,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13283813994",
+    "url": "",
+    "lat": 32.2998717,
+    "lon": -106.737562,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13283840571",
+    "url": "",
+    "lat": 32.3009265,
+    "lon": -106.7368885,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13269411916",
+    "url": "",
+    "lat": 32.3081877,
+    "lon": -106.8359032,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13281369652",
+    "url": "",
+    "lat": 32.3087454,
+    "lon": -106.7648565,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13816420201",
+    "url": "",
+    "lat": 32.3088167,
+    "lon": -106.7531541,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13281524387",
+    "url": "",
+    "lat": 32.3088167,
+    "lon": -106.7531536,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13280172995",
+    "url": "",
+    "lat": 32.308888,
+    "lon": -106.7649312,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13280435458",
+    "url": "",
+    "lat": 32.3095168,
+    "lon": -106.7662954,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13274800070",
+    "url": "",
+    "lat": 32.309628,
+    "lon": -106.765476,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13281572556",
+    "url": "",
+    "lat": 32.3096764,
+    "lon": -106.7536149,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13274810310",
+    "url": "",
+    "lat": 32.3097293,
+    "lon": -106.7659443,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13272317316",
+    "url": "",
+    "lat": 32.3098462,
+    "lon": -106.765306,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14095397501",
+    "url": "",
+    "lat": 32.3127357,
+    "lon": -106.7970156,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14019295001",
+    "url": "",
+    "lat": 32.3127512,
+    "lon": -106.7983216,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14095403001",
+    "url": "",
+    "lat": 32.3130021,
+    "lon": -106.7966493,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-STI1U0JMb2htYW5MYXNDcnVjZXM",
@@ -2043,6 +4518,177 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13270974463",
+    "url": "",
+    "lat": 32.3159113,
+    "lon": -106.7804557,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13947375101",
+    "url": "",
+    "lat": 32.3163803,
+    "lon": -106.780375,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13947373202",
+    "url": "",
+    "lat": 32.3164405,
+    "lon": -106.7811598,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13274847741",
+    "url": "",
+    "lat": 32.3168474,
+    "lon": -106.7777424,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13284031555",
+    "url": "",
+    "lat": 32.3179068,
+    "lon": -106.7463903,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13305277578",
+    "url": "",
+    "lat": 32.3181307,
+    "lon": -106.7465056,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13305227383",
+    "url": "",
+    "lat": 32.3186296,
+    "lon": -106.7476518,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13272822486",
+    "url": "",
+    "lat": 32.3274927,
+    "lon": -106.7561187,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13272879474",
+    "url": "",
+    "lat": 32.3278543,
+    "lon": -106.7561453,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13263871624",
+    "url": "",
+    "lat": 32.3283198,
+    "lon": -106.7792346,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13285847716",
+    "url": "",
+    "lat": 32.3287815,
+    "lon": -106.7794191,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13293752667",
+    "url": "",
+    "lat": 32.3290669,
+    "lon": -106.7761851,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13272304646",
+    "url": "",
+    "lat": 32.3297913,
+    "lon": -106.7808715,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13272332824",
+    "url": "",
+    "lat": 32.3347033,
+    "lon": -106.7953095,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13272307058",
+    "url": "",
+    "lat": 32.3348836,
+    "lon": -106.7952818,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13280430918",
+    "url": "",
+    "lat": 32.3360417,
+    "lon": -106.750645,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13272335832",
+    "url": "",
+    "lat": 32.3392271,
+    "lon": -106.7922459,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13293748964",
+    "url": "",
+    "lat": 32.3437736,
+    "lon": -106.7729228,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13293730999",
+    "url": "",
+    "lat": 32.3446097,
+    "lon": -106.7710418,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-TGFzQ3J1Y2VzSS0yNVNCQFVTNzA",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=LasCrucesI-25SB%40US70",
     "lat": 32.348,
@@ -2061,6 +4707,150 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13266040159",
+    "url": "",
+    "lat": 32.3536737,
+    "lon": -106.7826588,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13967130101",
+    "url": "",
+    "lat": 32.3635945,
+    "lon": -106.779253,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13967127501",
+    "url": "",
+    "lat": 32.3646529,
+    "lon": -106.7782933,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13282222661",
+    "url": "",
+    "lat": 32.3690995,
+    "lon": -106.738219,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13282218599",
+    "url": "",
+    "lat": 32.3694181,
+    "lon": -106.7385056,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13266081552",
+    "url": "",
+    "lat": 32.3773717,
+    "lon": -106.7884075,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13266052115",
+    "url": "",
+    "lat": 32.3774091,
+    "lon": -106.7882477,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14051235202",
+    "url": "",
+    "lat": 32.3898385,
+    "lon": -106.8088359,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14051240601",
+    "url": "",
+    "lat": 32.3898441,
+    "lon": -106.8088347,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13293738009",
+    "url": "",
+    "lat": 32.3903208,
+    "lon": -106.7172393,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13266053767",
+    "url": "",
+    "lat": 32.3907936,
+    "lon": -106.8071276,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13293718529",
+    "url": "",
+    "lat": 32.3916709,
+    "lon": -106.717461,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13272322647",
+    "url": "",
+    "lat": 32.4048823,
+    "lon": -106.6830808,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13954155301",
+    "url": "",
+    "lat": 32.4049473,
+    "lon": -106.656436,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13266014525",
+    "url": "",
+    "lat": 32.4083691,
+    "lon": -106.648629,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13913382302",
+    "url": "",
+    "lat": 32.4150544,
+    "lon": -106.6314109,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-VVM3MEBPcmdhbk1vdW50YWluUGFzcw",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=US70%40OrganMountainPass",
     "lat": 32.42493888888889,
@@ -2068,5 +4858,464 @@
     "name": "US 70 @ Organ Mountain Pass",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n14152432601",
+    "url": "",
+    "lat": 32.4806165,
+    "lon": -106.9219479,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14160260301",
+    "url": "",
+    "lat": 32.6650057,
+    "lon": -107.1623893,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13998639301",
+    "url": "",
+    "lat": 32.6719867,
+    "lon": -107.1728443,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13998638901",
+    "url": "",
+    "lat": 32.6722314,
+    "lon": -107.1737376,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14030457401",
+    "url": "",
+    "lat": 32.6749971,
+    "lon": -107.1795205,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14030457802",
+    "url": "",
+    "lat": 32.6753965,
+    "lon": -107.1798298,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13352190101",
+    "url": "",
+    "lat": 32.8451017,
+    "lon": -105.9706305,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13147675212",
+    "url": "",
+    "lat": 32.8525076,
+    "lon": -106.0152752,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13147675213",
+    "url": "",
+    "lat": 32.8530549,
+    "lon": -106.0153271,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13797169901",
+    "url": "",
+    "lat": 32.8533067,
+    "lon": -105.9698282,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13140293115",
+    "url": "",
+    "lat": 32.8563962,
+    "lon": -106.0069889,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13157362957",
+    "url": "",
+    "lat": 32.8599576,
+    "lon": -105.9982128,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13677080601",
+    "url": "",
+    "lat": 32.8656425,
+    "lon": -105.9804668,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13157388378",
+    "url": "",
+    "lat": 32.8716128,
+    "lon": -105.9697895,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13157360187",
+    "url": "",
+    "lat": 32.8727703,
+    "lon": -105.9649055,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13140202198",
+    "url": "",
+    "lat": 32.8728472,
+    "lon": -105.9665513,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13140260425",
+    "url": "",
+    "lat": 32.8758988,
+    "lon": -105.9614923,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13956694001",
+    "url": "",
+    "lat": 32.888319,
+    "lon": -105.9522486,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13507945901",
+    "url": "",
+    "lat": 32.8898641,
+    "lon": -105.9303029,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13507946401",
+    "url": "",
+    "lat": 32.8901878,
+    "lon": -105.9303062,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13505332901",
+    "url": "",
+    "lat": 32.8902094,
+    "lon": -105.9301009,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13144914861",
+    "url": "",
+    "lat": 32.8903886,
+    "lon": -105.9600874,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12985440028",
+    "url": "",
+    "lat": 32.8909615,
+    "lon": -105.9527697,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13114921821",
+    "url": "",
+    "lat": 32.8919773,
+    "lon": -105.9699903,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13937831001",
+    "url": "",
+    "lat": 32.8929929,
+    "lon": -105.9417556,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13903579201",
+    "url": "",
+    "lat": 32.898135,
+    "lon": -105.960495,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13147675209",
+    "url": "",
+    "lat": 32.899548,
+    "lon": -105.9698964,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13147675211",
+    "url": "",
+    "lat": 32.8996846,
+    "lon": -105.9600052,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13147675210",
+    "url": "",
+    "lat": 32.8999058,
+    "lon": -105.9605087,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13139830647",
+    "url": "",
+    "lat": 32.8999556,
+    "lon": -105.9533698,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13157386713",
+    "url": "",
+    "lat": 32.900045,
+    "lon": -105.9434044,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13854246002",
+    "url": "",
+    "lat": 32.9088363,
+    "lon": -105.4692907,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13903576901",
+    "url": "",
+    "lat": 32.9149083,
+    "lon": -105.9596516,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13157362958",
+    "url": "",
+    "lat": 32.9150665,
+    "lon": -105.925924,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13123562756",
+    "url": "",
+    "lat": 32.9153675,
+    "lon": -105.9523154,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12959226982",
+    "url": "",
+    "lat": 32.9263152,
+    "lon": -105.9432947,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13110649873",
+    "url": "",
+    "lat": 32.9319302,
+    "lon": -105.9614908,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13110649874",
+    "url": "",
+    "lat": 32.9321599,
+    "lon": -105.9604653,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13110649872",
+    "url": "",
+    "lat": 32.9322457,
+    "lon": -105.9626263,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13110649871",
+    "url": "",
+    "lat": 32.9322486,
+    "lon": -105.9625991,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12985629442",
+    "url": "",
+    "lat": 32.9344002,
+    "lon": -105.9625614,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13157446276",
+    "url": "",
+    "lat": 32.9358546,
+    "lon": -105.9641561,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12985419236",
+    "url": "",
+    "lat": 32.9360095,
+    "lon": -105.963375,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13041096781",
+    "url": "",
+    "lat": 32.9420193,
+    "lon": -105.9510777,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13147675208",
+    "url": "",
+    "lat": 32.9421918,
+    "lon": -105.9684488,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13147675207",
+    "url": "",
+    "lat": 32.9448219,
+    "lon": -105.9679455,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13138319840",
+    "url": "",
+    "lat": 32.9464633,
+    "lon": -105.9633228,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14070691001",
+    "url": "",
+    "lat": 32.9601729,
+    "lon": -105.9423517,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13260423001",
+    "url": "",
+    "lat": 33.0804937,
+    "lon": -106.0227606,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14060495501",
+    "url": "",
+    "lat": 33.0814924,
+    "lon": -105.9912323,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13932235301",
+    "url": "",
+    "lat": 33.1047509,
+    "lon": -106.0413898,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   }
 ]

@@ -1409,6 +1409,7 @@ def main() -> None:
     mesh_cams()
     update_all_cams()
     open_cams()
+    flock_cams()
     map_snap()
     expedition_tv()
     mesh_range()
@@ -1620,6 +1621,20 @@ def open_cams() -> None:
         bad(f"open camera contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
     ok("Done: NMDOT + every TxDOT still on the packed desk")
+
+
+def flock_cams() -> None:
+    """Flock ALPR discs on the packed desk. Same mark as CCTV. No public still."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_flock_cams.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"Flock camera contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: Flock ALPR discs + NO STILL")
 
 
 def expedition_tv() -> None:

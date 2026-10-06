@@ -78,6 +78,7 @@ python3 tools/test_hud_quality.py
 `test_mesh_cams.py`,
 `test_update_all_cams.py`,
 `test_open_cams.py`,
+`test_flock_cams.py`,
 `test_map_snap.py`,
 `test_expedition_tv.py`,
 `test_mesh_range.py`,

@@ -50,6 +50,8 @@ def tv_rows(
         cid = str(cam.get("id") or "").strip()
         if not cid or not _finite(cam.get("lat")) or not _finite(cam.get("lon")):
             continue
+        if not str(cam.get("url") or "").startswith("https://"):
+            continue
         by_id[cid] = cam
     packed = set(by_id)
     seen: set[str] = set()
@@ -2880,6 +2882,14 @@ class TvOrderTests(unittest.TestCase):
                 "name": "Near",
                 "url": "https://its.txdot.gov/near.jpg",
             },
+            {
+                "id": "flock-n1",
+                "lat": 31.8705,
+                "lon": -106.5973,
+                "name": "Flock",
+                "url": "",
+                "provider": "Flock",
+            },
         ]
         hops = [
             {
@@ -3021,6 +3031,7 @@ class SectionTests(unittest.TestCase):
                 "lon": -106.5974,
                 "name": "IH-10 @ Artcraft",
                 "provider": "TxDOT",
+                "url": "https://its.txdot.gov/near.jpg",
             },
             {
                 "id": "paseo",
@@ -3028,6 +3039,7 @@ class SectionTests(unittest.TestCase):
                 "lon": -106.58,
                 "name": "LP-375 @ Paseo Del Norte",
                 "provider": "TxDOT",
+                "url": "https://its.txdot.gov/paseo.jpg",
             },
             {
                 "id": "z-street",
@@ -3035,6 +3047,7 @@ class SectionTests(unittest.TestCase):
                 "lon": -106.32,
                 "name": "FM-659/Zaragoza @ Pellicano",
                 "provider": "TxDOT",
+                "url": "https://its.txdot.gov/z.jpg",
             },
             {
                 "id": "bota",
@@ -3042,6 +3055,7 @@ class SectionTests(unittest.TestCase):
                 "lon": -106.451,
                 "name": "US-62/Paisano East @ BOTA",
                 "provider": "TxDOT",
+                "url": "https://its.txdot.gov/bota.jpg",
             },
             {
                 "id": "pdn",
@@ -3049,6 +3063,7 @@ class SectionTests(unittest.TestCase):
                 "lon": -106.48,
                 "name": "Paso del Norte",
                 "provider": "TxDOT",
+                "url": "https://its.txdot.gov/pdn.jpg",
             },
             {
                 "id": "air-near",
@@ -3056,6 +3071,7 @@ class SectionTests(unittest.TestCase):
                 "lon": -106.40,
                 "name": "Airway Blvd @ Airport",
                 "provider": "TxDOT",
+                "url": "https://its.txdot.gov/air-near.jpg",
             },
             {
                 "id": "air-far",
@@ -3063,6 +3079,7 @@ class SectionTests(unittest.TestCase):
                 "lon": -106.3,
                 "name": "SP-601 @ Airport",
                 "provider": "TxDOT",
+                "url": "https://its.txdot.gov/air-far.jpg",
             },
             {
                 "id": "airway",
@@ -3070,6 +3087,15 @@ class SectionTests(unittest.TestCase):
                 "lon": -106.42,
                 "name": "IH-10 @ Airway",
                 "provider": "TxDOT",
+                "url": "https://its.txdot.gov/airway.jpg",
+            },
+            {
+                "id": "flock-n1",
+                "lat": 31.8705,
+                "lon": -106.5973,
+                "name": "Flock",
+                "provider": "Flock",
+                "url": "",
             },
         ]
         hops = [
@@ -3102,6 +3128,7 @@ class SectionTests(unittest.TestCase):
         self.assertIn("hop-air", by_kind["HOP"])
         self.assertNotIn("VENUE", [kind for kind, _ in got])
         self.assertNotIn("N/A", [kind for kind, _ in got])
+        self.assertFalse(any(row["id"] == "flock-n1" for _kind, rows in got for row in rows))
         for _kind, rows in got:
             meters = [
                 haversine_m(YOU, (float(row["lat"]), float(row["lon"])))
@@ -3138,6 +3165,7 @@ class NaHoldTests(unittest.TestCase):
                 "lon": -106.597,
                 "name": "Club",
                 "provider": "N/A",
+                "url": "https://example.invalid/na.jpg",
             },
             {
                 "id": "near",
@@ -3145,6 +3173,7 @@ class NaHoldTests(unittest.TestCase):
                 "lon": -106.5974,
                 "name": "IH-10 @ Artcraft",
                 "provider": "TxDOT",
+                "url": "https://its.txdot.gov/near.jpg",
             },
         ]
         open_kinds = [kind for kind, _ in sectioned(pack, [], YOU[0], YOU[1])]

@@ -140,6 +140,9 @@ class PackOpenCamTests(unittest.TestCase):
         ]
         self.assertGreaterEqual(len(near), 20, "Albuquerque has no packed NMDOT within 40 km")
         for row in rows:
+            if row.get("provider") == "Flock":
+                self.assertEqual(row["url"], "")
+                continue
             self.assertTrue(row["url"].startswith("https://"))
             self.assertNotIn("rtmp", row["url"])
             self.assertNotIn("video.nmroads.com", row["url"])
