@@ -2,7 +2,7 @@
 # Flatten Packs/Field/Vision into the .app root. Merge GitHub NAIP shards
 # into one aerial.pmtiles the Metal canvas actually draws. Leave NM photo
 # shards off the phone (tf-174/176 IPA ~4.21 GB then ASC INVALID; tf-173
-# 3.52 GB VALID). Leave build GeoJSON and Cesium off the phone.
+# 3.52 GB VALID). Leave build GeoJSON, Cesium, and ASK GGUF off the phone.
 set -euo pipefail
 SRC="${SRCROOT}/Resources"
 DST="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"
@@ -36,6 +36,8 @@ rsync -a \
   --exclude 'Packs/nm/aerial*.pmtiles' \
   --exclude 'Localizable' \
   --exclude 'Vision/lookalikes.json' \
+  --exclude '*.gguf' \
+  --exclude 'Field/*.gguf' \
   "${SRC}/" "${DST}/"
 rm -rf "${DST}/Resources"
 rm -rf "${DST}/Globe"
@@ -58,3 +60,4 @@ test ! -f "${DST}/Packs/tx-east/aerial-1.pmtiles"
 test ! -f "${DST}/Vision/lookalikes.json"
 test ! -d "${DST}/Localizable"
 test ! -f "${DST}/Localizable/es.json"
+test ! -f "${DST}/Field/Dolphin3.0-Llama3.2-3B-Q4_K_M.gguf"

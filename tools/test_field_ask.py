@@ -2786,14 +2786,12 @@ def answer_ask(
     pack_id: str | None,
     model_text: str | None,
 ) -> dict | None:
+    _ = pack_name
+    _ = model_text
     if not _tokens(_prepare(query)):
         return None
     if ask_book(chapter, query, locale):
         return None
-    if model_text:
-        parsed = parse_ask_json(model_text)
-        if parsed:
-            return sanitize_ask(parsed, query, chapter, pack_id)
     return grounded_ask(query, chapter, pack_id, locale)
 
 
@@ -2902,7 +2900,7 @@ class FieldAskLiveTests(unittest.TestCase):
         self.assertIn("child", prompt)
         self.assertNotIn("best in class", prompt.lower())
 
-    def test_swift_field_ask_is_dolphin_q4_on_device(self):
+    def test_swift_field_ask_has_no_on_device_model(self):
         ask = read("Packages", "FieldAsk", "Sources", "FieldAsk", "FieldAsk.swift")
         llama = read("Packages", "FieldAsk", "Sources", "FieldAsk", "FieldAskLlama.swift")
         pkg = read("Packages", "FieldAsk", "Package.swift")
@@ -2915,6 +2913,7 @@ class FieldAskLiveTests(unittest.TestCase):
         validate = read("tools", "validate_v3.py")
         tf = read(".github", "ci", "tf-archive.sh")
         unsigned = read(".github", "workflows", "xcodebuild.yml")
+        agents = read("AGENTS.md")
         self.assertIn("enum FieldAsk", ask)
         self.assertIn("static func answer(", ask)
         self.assertIn("static func prompt(", ask)
@@ -2926,8 +2925,10 @@ class FieldAskLiveTests(unittest.TestCase):
             ask,
             "local picture shadows picture(chapter:) and will not compile on device",
         )
-        self.assertIn("static func modelURL(", ask)
-        self.assertIn(MODEL_FILE, ask)
+        self.assertNotIn("static func modelURL(", ask)
+        self.assertNotIn(MODEL_FILE, ask)
+        self.assertNotIn(".gguf", ask)
+        self.assertNotIn("FieldAskLlama.complete", ask)
         self.assertIn("NO ASK MODEL", ask)
         self.assertIn(LIVE_ID, ask)
         self.assertIn("<|im_start|>", ask)
@@ -2939,6 +2940,7 @@ class FieldAskLiveTests(unittest.TestCase):
         self.assertNotIn("import llama", llama)
         self.assertIn("static func complete(", llama)
         self.assertIn("return nil", llama)
+        self.assertIn("drain the phone in an emergency", llama)
         self.assertNotIn("llama_model_load_from_file", llama)
         self.assertNotIn("print(", llama)
         self.assertNotIn("URLSession", llama)
@@ -2950,6 +2952,7 @@ class FieldAskLiveTests(unittest.TestCase):
         self.assertIn("import FieldAsk", tab)
         self.assertIn("openFieldLive(", session)
         self.assertIn("FieldAsk.answer", session)
+        self.assertNotIn("modelURL", session)
         self.assertIn("Task.detached", session)
         self.assertIn("ASK · LIVE", session)
         self.assertIn("askBusy", session)
@@ -2962,10 +2965,9 @@ class FieldAskLiveTests(unittest.TestCase):
         self.assertIn("beginFieldAsk", open_ans)
         self.assertIn("cancelFieldAsk", open_ans)
         self.assertNotIn("URLSession", tab)
-        self.assertIn(MODEL_FILE, fetch)
-        self.assertIn("5d6d02eeefa1ab5dbf23f97afdf5c2c95ad3d946dc3b6e9ab72e6c1637d54177", fetch)
-        self.assertIn("huggingface.co", fetch)
-        self.assertIn("Dolphin3.0-Llama3.2-3B-Q4_K_M.gguf", fetch)
+        self.assertIn("ASK model does not ship", fetch)
+        self.assertNotIn("huggingface.co", fetch)
+        self.assertNotIn("urllib.request", fetch)
         self.assertNotIn("URLSession", fetch)
         self.assertIn("*.gguf", gitignore)
         self.assertIn("FieldAsk", pbx)
@@ -2974,8 +2976,9 @@ class FieldAskLiveTests(unittest.TestCase):
         self.assertIn("BF2D63524A24050AD76A805D", pbx)
         self.assertIn('("FieldAsk", "FieldAsk")', gen)
         self.assertIn("FieldAsk", validate)
-        self.assertIn("fetch_field_ask_model", tf)
+        self.assertNotIn("fetch_field_ask_model", tf)
         self.assertNotIn("fetch_field_ask_model", unsigned)
+        self.assertIn("No on-device ASK model", agents)
         self.assertNotIn("best in class", fetch.lower())
         self.assertNotIn("best in class", llama.lower())
 

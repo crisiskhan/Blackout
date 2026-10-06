@@ -47,18 +47,35 @@ class CesiumGoneTests(unittest.TestCase):
 
 
 class LlamaUnlinkedTests(unittest.TestCase):
-    def test_ask_has_no_llama_binary_until_a_model_ships(self):
+    def test_ask_does_not_ship_a_model(self):
         pkg = read("Packages", "FieldAsk", "Package.swift")
         llama = read("Packages", "FieldAsk", "Sources", "FieldAsk", "FieldAskLlama.swift")
         ask = read("Packages", "FieldAsk", "Sources", "FieldAsk", "FieldAsk.swift")
+        session = read("Blackout", "FieldSession.swift")
+        fetch = read("tools", "fetch_field_ask_model.py")
+        archive = read(".github", "ci", "tf-archive.sh")
+        copy = read("tools", "copy_resources.sh")
         self.assertNotIn("import llama", llama)
         self.assertNotIn("llama-b8638-xcframework.zip", pkg)
         self.assertNotIn(".binaryTarget", pkg)
         self.assertNotIn('"llama"', pkg)
         self.assertIn("static func complete(", llama)
         self.assertIn("return nil", llama)
+        self.assertIn("drain the phone in an emergency", llama)
         self.assertIn("NO ASK MODEL", ask)
         self.assertNotIn("URLSession", llama)
+        self.assertNotIn(".gguf", ask)
+        self.assertNotIn("modelURL", ask)
+        self.assertNotIn("FieldAskLlama.complete", ask)
+        self.assertNotIn("modelURL", session)
+        self.assertNotIn("huggingface.co", fetch)
+        self.assertNotIn("urllib.request", fetch)
+        self.assertIn("ASK model does not ship", fetch)
+        self.assertNotIn("fetch_field_ask_model", archive)
+        self.assertIn("--exclude '*.gguf'", copy)
+        self.assertIn(
+            'test ! -f "${DST}/Field/Dolphin3.0-Llama3.2-3B-Q4_K_M.gguf"', copy
+        )
         inspect = read("tools", "tf_ipa_inspect.py")
         self.assertIn("org.ggml.llama", inspect)
         ci = read("tools", "test_ci_opt.py")

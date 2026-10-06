@@ -13,10 +13,8 @@ if [ -z "$NEXT" ]; then
 fi
 echo "CURRENT_PROJECT_VERSION on the command line only: $NEXT (not committed)"
 
-# Dolphin 3.0 Llama 3.2 3B Q4 for FIELD ASK. Unsigned compile must not fetch
-# this 2 GB file. Archive may. Missing weights still ship a grounded walk.
-echo "fetch ASK model if missing"
-"${PYBIN:-python3}" tools/fetch_field_ask_model.py || echo "ASK model fetch failed; archive continues"
+# No on-device ASK model. A 3B GGUF would drain the phone in an emergency.
+# FIELD ASK is the packed book walk. Do not fetch weights here.
 
 if [ -n "${SIGNING_KEYCHAIN:-}" ] && [ -f "$SIGNING_KEYCHAIN" ]; then
   security unlock-keychain -p "$SIGNING_KC_PASS" "$SIGNING_KEYCHAIN"

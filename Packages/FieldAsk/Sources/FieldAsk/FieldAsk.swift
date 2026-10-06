@@ -2,29 +2,11 @@ import Foundation
 import FieldCorpus
 
 public enum FieldAsk {
-    public static let modelFile = "Dolphin3.0-Llama3.2-3B-Q4_K_M.gguf"
     public static let missing = "NO ASK MODEL"
     public static let liveID = "ask-live"
 
     private static let childHandsEn = "Do this one move with your hands. Then tap NEXT."
     private static let childHandsEs = "Haz este único movimiento con las manos. Luego toca NEXT."
-
-    public static func modelURL(in resourceRoot: URL?) -> URL? {
-        if let root = resourceRoot {
-            let file = root.appendingPathComponent("Field").appendingPathComponent(modelFile)
-            if FileManager.default.fileExists(atPath: file.path) {
-                return file
-            }
-        }
-        if let bundled = Bundle.main.url(
-            forResource: "Dolphin3.0-Llama3.2-3B-Q4_K_M",
-            withExtension: "gguf",
-            subdirectory: "Field"
-        ) {
-            return bundled
-        }
-        return nil
-    }
 
     public static func prompt(
         query: String,
@@ -96,38 +78,14 @@ public enum FieldAsk {
         chapter: [FieldCard],
         locale: String,
         packName: String,
-        packId: String?,
-        modelURL: URL?
+        packId: String?
     ) -> FieldCard? {
+        _ = packName
         guard FieldCorpus.asking(query) else { return nil }
         if FieldCorpus.ask(chapter, query: query, locale: locale).first != nil {
             return nil
         }
-        let ground = excerpts(chapter, query: query, locale: locale)
-        if let url = modelURL,
-           let text = FieldAskLlama.complete(prompt: prompt(query: query, packName: packName, excerpts: ground, locale: locale), modelURL: url),
-           let parsed = parse(text)
-        {
-            return sanitize(parsed, query: query, chapter: chapter, packId: packId)
-        }
         return grounded(query: query, chapter: chapter, packId: packId, locale: locale)
-    }
-
-    private static func excerpts(_ chapter: [FieldCard], query: String, locale: String) -> [FieldCard] {
-        var out = Array(FieldCorpus.ask(chapter, query: query, locale: locale).prefix(6))
-        let core = [
-            "camp-start", "water-disinfect", "plant-unknown", "fungi-leave",
-            "med-cpr-adult", "med-bleed-pack", "animal-bite",
-        ]
-        for id in core {
-            if out.count >= 8 { break }
-            if let card = chapter.first(where: { $0.id == id }),
-               !out.contains(where: { $0.id == id })
-            {
-                out.append(card)
-            }
-        }
-        return out
     }
 
     private static func picture(_ chapter: [FieldCard], prefer: String? = nil) -> String {
