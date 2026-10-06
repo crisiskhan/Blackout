@@ -163,7 +163,7 @@ class VisionFinderTests(unittest.TestCase):
         session = read("Blackout", "FieldSession.swift")
         field = read("Blackout", "FieldTab.swift")
         qa = read("docs", "SOLO_QA.md")
-        self.assertIn("AVCaptureVideoDataOutput", still)
+        self.assertNotIn("AVCaptureVideoDataOutput", still)
         self.assertIn("func subjectNormalizedBox", still)
         self.assertIn("salientObjects", still)
         self.assertIn("subjectBox", still)
@@ -175,7 +175,6 @@ class VisionFinderTests(unittest.TestCase):
             "private func visionFieldButton"
         )[0]
         self.assertIn("visionCrop", vision)
-        self.assertIn("Live subject box", qa)
         self.assertIn("marks the crop", qa)
         x, y, w, h = vision_box_to_ui(0.2, 0.1, 0.4, 0.5, pad=0.12)
         self.assertAlmostEqual(x, 0.2 - 0.4 * 0.12)
@@ -227,6 +226,94 @@ class VisionKindChipTests(unittest.TestCase):
         self.assertIn("test_vision_glass.py", agents)
         self.assertIn("vision_glass()", validate)
         self.assertIn("test_vision_glass.py", validate)
+
+
+class VisionTenFinderTests(unittest.TestCase):
+    def test_finder_is_hud_chips_tap_focus_and_lamp_flash(self):
+        still = read("Blackout", "VisionStill.swift")
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("mapChipHitPoints", still)
+        self.assertIn("mapChipHitPoints", tokens)
+        self.assertIn("focusPointOfInterest", still)
+        self.assertIn("exposurePointOfInterest", still)
+        self.assertIn("captureDevicePointConverted", still)
+        self.assertIn("UITapGestureRecognizer", still)
+        self.assertIn("flashMode", still)
+        self.assertIn(".flashMode = .on", still)
+        self.assertNotIn("AVCaptureVideoDataOutput", still)
+        self.assertNotIn("lastBoxAt", still)
+        self.assertIn("locks focus", qa.lower())
+        self.assertIn("no live classify", qa.lower())
+
+    def test_kind_chip_is_a_44pt_hit(self):
+        field = read("Blackout", "FieldTab.swift")
+        hud = field.split("private var visionHUD")[1].split("private var visionWellWord")[0]
+        self.assertIn("mapChipHitPoints", hud)
+        self.assertNotIn("minHeight: 22", hud)
+        self.assertIn("HUDOverlayChipStyle", hud)
+
+
+class VisionTenHitTests(unittest.TestCase):
+    def test_crop_classifies_before_the_full_frame(self):
+        vis = read(
+            "Packages", "VisionCoreML", "Sources", "VisionCoreML", "VisionCoreML.swift"
+        )
+        session = read("Blackout", "FieldSession.swift")
+        still = read("Blackout", "VisionStill.swift")
+        classify = vis.split("func classify(observations:")[1].split(
+            "func lookalikeWord"
+        )[0]
+        self.assertIn("crop: [VisionObservation]", classify)
+        apply = session.split("func applyFieldVision")[1].split("func speakFieldVision")[0]
+        self.assertIn("aim:", apply)
+        self.assertIn("cropHits", apply)
+        self.assertIn("frameHits", apply)
+        self.assertIn("crop:", apply)
+        self.assertIn("aim", still)
+        self.assertIn("onImage?(image, aim)", still)
+
+    def test_desert_needles_and_book_cover_the_yard(self):
+        vis = read(
+            "Packages", "VisionCoreML", "Sources", "VisionCoreML", "VisionCoreML.swift"
+        )
+        inspect = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "WaterInspect.swift"
+        )
+        tx = read("Resources", "Vision", "labels.tx.json")
+        nm = read("Resources", "Vision", "labels.nm.json")
+        emit = read("tools", "v3", "vision.py")
+        qa = read("docs", "SOLO_QA.md")
+        low = vis.lower()
+        for word in (
+            "ocotillo",
+            "creosote",
+            "lechuguilla",
+            "barrel cactus",
+            "saltcedar",
+            "tamarisk",
+            "palo verde",
+        ):
+            self.assertIn(word, low)
+        for word in (
+            "ocotillo",
+            "creosote",
+            "lechuguilla",
+            "barrel",
+            "saltcedar",
+            "palo verde",
+        ):
+            self.assertIn(word, tx.lower())
+            self.assertIn(word, nm.lower())
+            self.assertIn(word, emit.lower())
+        ground = inspect.split("func visionGroundFromSpecies")[1].split(
+            "func visionKindChip"
+        )[0]
+        self.assertIn("ocotillo", ground)
+        self.assertIn("creosote", ground)
+        self.assertIn("lechuguilla", ground)
+        self.assertIn("OCOTILLO", qa)
+        self.assertIn("CREOSOTE", qa)
 
 
 class VisionHonestyTests(unittest.TestCase):

@@ -141,6 +141,108 @@
       }
     },
     {
+      "id": "tx-ocotillo",
+      "name": {
+        "en": "Ocotillo",
+        "es": "Ocotillo"
+      },
+      "kind": "cacti_yucca",
+      "lookalikes": [
+        "dead-stick-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Whip stems. Spines. Not a meal.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Tallos de látigo. Espinas. No es comida."
+      }
+    },
+    {
+      "id": "tx-creosote",
+      "name": {
+        "en": "Creosote",
+        "es": "Gobernadora"
+      },
+      "kind": "cacti_yucca",
+      "lookalikes": [
+        "greasewood-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Desert shrub. Leaves smell of rain. Not a meal.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Arbusto del desierto. No es comida."
+      }
+    },
+    {
+      "id": "tx-lechuguilla",
+      "name": {
+        "en": "Lechuguilla",
+        "es": "Lechuguilla"
+      },
+      "kind": "cacti_yucca",
+      "lookalikes": [
+        "agave-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Needle tips. Give it room.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Puntas de aguja. Da espacio."
+      }
+    },
+    {
+      "id": "tx-barrel",
+      "name": {
+        "en": "Barrel cactus",
+        "es": "Biznaga"
+      },
+      "kind": "cactus",
+      "lookalikes": [
+        "fishhook-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Hooks and ribs. Not a canteen.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Ganchos. No es cantimplora."
+      }
+    },
+    {
+      "id": "tx-saltcedar",
+      "name": {
+        "en": "Saltcedar",
+        "es": "Pino salado"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "tamarisk-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Invasive bosque tree.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Árbol invasor de bosque."
+      }
+    },
+    {
+      "id": "tx-palo-verde",
+      "name": {
+        "en": "Palo verde",
+        "es": "Palo verde"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "mesquite-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Green bark. West Texas washes.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Corteza verde. Cauces del oeste de Texas."
+      }
+    },
+    {
       "id": "tx-western-diamondback",
       "name": {
         "en": "Western diamondback",

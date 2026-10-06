@@ -3,9 +3,6 @@ import Tokens
 #if canImport(AVFoundation)
 import AVFoundation
 #endif
-#if canImport(CoreImage)
-import CoreImage
-#endif
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -22,16 +19,31 @@ struct SystemVisionHit: Equatable, Sendable {
 }
 
 enum SystemVision {
-    /// Full frame plus the subject. Desert sky and the tree behind a
-    /// cactus must not be the only words the matcher sees.
-    static func observations(from image: CGImage) -> [SystemVisionHit]? {
+    /// Full frame plus center. Desert sky must not be mixed into the crop.
+    static func frameHits(from image: CGImage) -> [SystemVisionHit]? {
         guard var hits = classify(image) else { return nil }
-        if let crop = subjectCrop(from: image), let extra = classify(crop) {
-            hits.append(contentsOf: extra)
-        }
         if let mid = centerCrop(image), let extra = classify(mid) {
             hits.append(contentsOf: extra)
         }
+        return merge(hits)
+    }
+
+    /// Saliency or the tap aim. Classified before the full frame.
+    static func cropHits(from image: CGImage, aim: CGRect? = nil) -> [SystemVisionHit]? {
+        if let crop = subjectCrop(from: image) ?? aimCrop(from: image, aim: aim) {
+            return classify(crop)
+        }
+        return nil
+    }
+
+    /// Full frame plus the subject. Desert sky and the tree behind a
+    /// cactus must not be the only words the matcher sees.
+    static func observations(from image: CGImage) -> [SystemVisionHit]? {
+        var hits = frameHits(from: image) ?? []
+        if let extra = cropHits(from: image) {
+            hits.append(contentsOf: extra)
+        }
+        if hits.isEmpty { return nil }
         return merge(hits)
     }
 
@@ -77,6 +89,15 @@ enum SystemVision {
 
     private static func subjectCrop(from image: CGImage) -> CGImage? {
         guard let n = subjectNormalizedBox(from: image) else { return nil }
+        return pixelCrop(image, n)
+    }
+
+    private static func aimCrop(from image: CGImage, aim: CGRect?) -> CGImage? {
+        guard let n = aim, n.width > 0.05, n.height > 0.05 else { return nil }
+        return pixelCrop(image, n)
+    }
+
+    private static func pixelCrop(_ image: CGImage, _ n: CGRect) -> CGImage? {
         let w = CGFloat(image.width)
         let h = CGFloat(image.height)
         let r = CGRect(x: n.minX * w, y: n.minY * h, width: n.width * w, height: n.height * h)
@@ -128,7 +149,7 @@ enum SystemVision {
 
 #if canImport(AVFoundation) && canImport(UIKit)
 struct VisionStill: UIViewControllerRepresentable {
-    var onImage: (CGImage) -> Void
+    var onImage: (CGImage, CGRect?) -> Void
     var onFail: () -> Void
     var onCancel: () -> Void
 
@@ -146,23 +167,25 @@ struct VisionStill: UIViewControllerRepresentable {
         uiViewController.onCancel = onCancel
     }
 
-    final class StillVC: UIViewController, AVCapturePhotoCaptureDelegate, AVCaptureVideoDataOutputSampleBufferDelegate {
-        var onImage: ((CGImage) -> Void)?
+    final class StillVC: UIViewController, AVCapturePhotoCaptureDelegate {
+        var onImage: ((CGImage, CGRect?) -> Void)?
         var onFail: (() -> Void)?
         var onCancel: (() -> Void)?
         private let session = AVCaptureSession()
         private let output = AVCapturePhotoOutput()
-        private let videoOut = AVCaptureVideoDataOutput()
         private let sessionQueue = DispatchQueue(label: "blackout.vision.session")
-        private let ci = CIContext(options: [.useSoftwareRenderer: false])
         private var lampButton: UIButton?
         private var statusLabel: UILabel?
         private var subjectBox: UIView?
+        private var previewLayer: AVCaptureVideoPreviewLayer?
+        private var reticleX: NSLayoutConstraint?
+        private var reticleY: NSLayoutConstraint?
         private var captureDevice: AVCaptureDevice?
+        private var aim: CGRect?
+        private var lampOn = false
         private var started = false
         private var finished = false
         private var denied = false
-        private var lastBoxAt: CFTimeInterval = 0
 
         override func viewDidLoad() {
             super.viewDidLoad()
@@ -171,6 +194,9 @@ struct VisionStill: UIViewControllerRepresentable {
             preview.videoGravity = .resizeAspectFill
             preview.name = "preview"
             view.layer.insertSublayer(preview, at: 0)
+            previewLayer = preview
+            let tap = UITapGestureRecognizer(target: self, action: #selector(aimTap(_:)))
+            view.addGestureRecognizer(tap)
             installChrome()
         }
 
@@ -241,14 +267,6 @@ struct VisionStill: UIViewControllerRepresentable {
                 if let connection = self.output.connection(with: .video), connection.isVideoOrientationSupported {
                     connection.videoOrientation = .portrait
                 }
-                self.videoOut.alwaysDiscardsLateVideoFrames = true
-                self.videoOut.setSampleBufferDelegate(self, queue: self.sessionQueue)
-                if self.session.canAddOutput(self.videoOut) {
-                    self.session.addOutput(self.videoOut)
-                    if let live = self.videoOut.connection(with: .video), live.isVideoOrientationSupported {
-                        live.videoOrientation = .portrait
-                    }
-                }
             }
             sessionQueue.async {
                 guard !self.finished else { return }
@@ -270,19 +288,12 @@ struct VisionStill: UIViewControllerRepresentable {
         private func installChrome() {
             let silver = UIColor(white: 0.86, alpha: 1)
             let accent = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
-            let close = UIButton(type: .system)
-            close.setTitle("CLOSE", for: .normal)
-            close.titleLabel?.font = .systemFont(ofSize: 13, weight: .heavy)
-            close.setTitleColor(silver, for: .normal)
+            let hit = CGFloat(BlackoutTokens.Chrome.mapChipHitPoints)
+            let close = hudChip("CLOSE", silver: silver, accent: accent, filled: false)
             close.addTarget(self, action: #selector(cancel), for: .touchUpInside)
-            close.translatesAutoresizingMaskIntoConstraints = false
 
-            let lamp = UIButton(type: .system)
-            lamp.setTitle("LAMP", for: .normal)
-            lamp.titleLabel?.font = .systemFont(ofSize: 13, weight: .heavy)
-            lamp.setTitleColor(silver, for: .normal)
+            let lamp = hudChip("LAMP", silver: silver, accent: accent, filled: false)
             lamp.addTarget(self, action: #selector(lampTapped), for: .touchUpInside)
-            lamp.translatesAutoresizingMaskIntoConstraints = false
             lampButton = lamp
 
             let capture = UIButton(type: .system)
@@ -347,17 +358,21 @@ struct VisionStill: UIViewControllerRepresentable {
             view.addSubview(status)
             view.addSubview(capture)
             let shutter = CGFloat(BlackoutTokens.Chrome.visionShutterPoints)
+            let centerX = reticle.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            let centerY = reticle.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            reticleX = centerX
+            reticleY = centerY
             NSLayoutConstraint.activate([
                 close.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
                 close.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 12),
-                close.heightAnchor.constraint(equalToConstant: 44),
+                close.heightAnchor.constraint(equalToConstant: hit),
                 close.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
                 lamp.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
                 lamp.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 12),
-                lamp.heightAnchor.constraint(equalToConstant: 44),
+                lamp.heightAnchor.constraint(equalToConstant: hit),
                 lamp.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
-                reticle.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-                reticle.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                centerX,
+                centerY,
                 reticle.widthAnchor.constraint(equalToConstant: 160),
                 reticle.heightAnchor.constraint(equalToConstant: 160),
                 ring.leadingAnchor.constraint(equalTo: reticle.leadingAnchor),
@@ -388,6 +403,66 @@ struct VisionStill: UIViewControllerRepresentable {
             inner.layer.cornerRadius = 72
         }
 
+        private func hudChip(_ title: String, silver: UIColor, accent: UIColor, filled: Bool) -> UIButton {
+            let button = UIButton(type: .system)
+            button.setTitle(title, for: .normal)
+            button.titleLabel?.font = .systemFont(
+                ofSize: CGFloat(BlackoutTokens.Chrome.mapActionChipTextPoints),
+                weight: .heavy
+            )
+            button.titleLabel?.adjustsFontSizeToFitWidth = false
+            button.setTitleColor(silver, for: .normal)
+            button.backgroundColor = filled ? accent : .clear
+            button.layer.cornerRadius = CGFloat(BlackoutTokens.Chrome.hudPlateCornerPoints)
+            button.layer.borderWidth = 1
+            button.layer.borderColor = (filled ? accent : silver.withAlphaComponent(0.45)).cgColor
+            button.contentEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+            button.translatesAutoresizingMaskIntoConstraints = false
+            return button
+        }
+
+        @objc private func aimTap(_ gesture: UITapGestureRecognizer) {
+            guard let preview = previewLayer else { return }
+            let point = gesture.location(in: view)
+            let devicePoint = preview.captureDevicePointConverted(fromLayerPoint: point)
+            lockFocus(at: devicePoint)
+            reticleX?.constant = point.x - view.bounds.midX
+            reticleY?.constant = point.y - view.bounds.midY
+            let nx = point.x / max(1, view.bounds.width)
+            let ny = point.y / max(1, view.bounds.height)
+            let side: CGFloat = 0.28
+            let box = CGRect(
+                x: min(max(0, nx - side / 2), 1 - side),
+                y: min(max(0, ny - side / 2), 1 - side),
+                width: side,
+                height: side
+            )
+            aim = box
+            layoutSubjectBox(box)
+        }
+
+        private func lockFocus(at point: CGPoint) {
+            guard let device = captureDevice else { return }
+            do {
+                try device.lockForConfiguration()
+                if device.isFocusPointOfInterestSupported {
+                    device.focusPointOfInterest = point
+                    if device.isFocusModeSupported(.autoFocus) {
+                        device.focusMode = .autoFocus
+                    }
+                }
+                if device.isExposurePointOfInterestSupported {
+                    device.exposurePointOfInterest = point
+                    if device.isExposureModeSupported(.autoExpose) {
+                        device.exposureMode = .autoExpose
+                    }
+                }
+                device.unlockForConfiguration()
+            } catch {
+                return
+            }
+        }
+
         private func setStatus(_ text: String) {
             statusLabel?.text = text
             statusLabel?.isHidden = text.isEmpty
@@ -409,13 +484,18 @@ struct VisionStill: UIViewControllerRepresentable {
                 setStatus("CAMERA DENIED")
                 return
             }
+            let flash = lampOn
             sessionQueue.async {
                 guard self.session.isRunning,
                       self.output.connections.contains(where: \.isEnabled) else {
                     DispatchQueue.main.async { self.setStatus("WAIT") }
                     return
                 }
-                self.output.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
+                let settings = AVCapturePhotoSettings()
+                if flash {
+                    settings.flashMode = .on
+                }
+                self.output.capturePhoto(with: settings, delegate: self)
             }
         }
 
@@ -430,9 +510,11 @@ struct VisionStill: UIViewControllerRepresentable {
                 try device.lockForConfiguration()
                 if device.torchMode == .on {
                     device.torchMode = .off
+                    lampOn = false
                     lampButton?.backgroundColor = .clear
                 } else if device.isTorchModeSupported(.on) {
                     try device.setTorchModeOn(level: 1)
+                    lampOn = true
                     lampButton?.backgroundColor = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
                 } else {
                     device.unlockForConfiguration()
@@ -446,6 +528,7 @@ struct VisionStill: UIViewControllerRepresentable {
         }
 
         private func lampOff() {
+            lampOn = false
             guard let device = captureDevice, device.hasTorch, device.torchMode == .on else { return }
             do {
                 try device.lockForConfiguration()
@@ -454,23 +537,6 @@ struct VisionStill: UIViewControllerRepresentable {
             } catch {
                 return
             }
-        }
-
-        func captureOutput(
-            _ output: AVCaptureOutput,
-            didOutput sampleBuffer: CMSampleBuffer,
-            from connection: AVCaptureConnection
-        ) {
-            let now = CACurrentMediaTime()
-            guard now - lastBoxAt > 0.25 else { return }
-            lastBoxAt = now
-            guard let pixel = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-            let image = ci.createCGImage(CIImage(cvPixelBuffer: pixel), from: CIImage(cvPixelBuffer: pixel).extent)
-            guard let image, let box = SystemVision.subjectNormalizedBox(from: image) else {
-                DispatchQueue.main.async { self.subjectBox?.isHidden = true }
-                return
-            }
-            DispatchQueue.main.async { self.layoutSubjectBox(box) }
         }
 
         private func layoutSubjectBox(_ n: CGRect) {
@@ -498,7 +564,7 @@ struct VisionStill: UIViewControllerRepresentable {
                     self.failClosed()
                     return
                 }
-                self.finish { self.onImage?(image) }
+                self.finish { self.onImage?(image, aim) }
             }
         }
 
