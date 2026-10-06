@@ -49,6 +49,8 @@ def _vision_ask_family(lab: dict) -> set[str]:
     if kind == "tree":
         if "loblolly" in lid:
             return {"tx-east-tree-use"}
+        if "saltcedar" in lid or "palo" in lid:
+            return {"tx-tree-use", "tx-east-tree-use", "nm-tree-use"}
         if lid.startswith("nm-"):
             return {"nm-tree-use"}
         return {"tx-tree-use", "tx-east-tree-use"}

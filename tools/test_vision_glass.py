@@ -261,7 +261,7 @@ class VisionTenHitTests(unittest.TestCase):
         )
         session = read("Blackout", "FieldSession.swift")
         still = read("Blackout", "VisionStill.swift")
-        classify = vis.split("func classify(observations:")[1].split(
+        classify = vis.split("observations: [VisionObservation]")[1].split(
             "func lookalikeWord"
         )[0]
         self.assertIn("crop: [VisionObservation]", classify)

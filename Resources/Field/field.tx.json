@@ -389,8 +389,8 @@
         "es": "Árboles del oeste de Texas — sombra, no comida"
       },
       "situation": {
-        "en": "You are in West Texas woodland, park, or bosque. Live oak, pecan, cedar elm, cottonwood. Mesquite is woodland. Shade, thorns, deadfall.",
-        "es": "Estás en arbolado, parque o bosque del oeste de Texas. Encino, pecán, olmo cedro, álamo. El mezquite es de arbolado. Sombra, espinas, madera muerta."
+        "en": "You are in West Texas woodland, park, or bosque. Live oak, pecan, cedar elm, cottonwood. Mesquite is woodland. Shade, thorns, deadfall. Palo verde and saltcedar in the washes.",
+        "es": "Estás en arbolado, parque o bosque del oeste de Texas. Encino, pecán, olmo cedro, álamo. El mezquite es de arbolado. Sombra, espinas, madera muerta. Palo verde y pino salado en los cauces."
       },
       "stop_if": [
         {
@@ -633,8 +633,8 @@
         "es": "Cactus y yuca de Texas — AVISO luego nopales"
       },
       "situation": {
-        "en": "Prickly pear and yucca country. Glochids first. Only a plant you already know is food. Unknown cactus is not a meal.",
-        "es": "País de nopal y yuca. Primero globidios. Solo una planta que ya conoces es comida. Un cactus desconocido no es comida."
+        "en": "Prickly pear and yucca country. Glochids first. Only a plant you already know is food. Unknown cactus is not a meal. Ocotillo, creosote, lechuguilla, barrel cactus.",
+        "es": "País de nopal y yuca. Primero globidios. Solo una planta que ya conoces es comida. Un cactus desconocido no es comida. Ocotillo, gobernadora, lechuguilla, biznaga."
       },
       "stop_if": [
         {

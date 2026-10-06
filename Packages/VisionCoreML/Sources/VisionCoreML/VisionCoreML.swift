@@ -99,12 +99,7 @@ public enum VisionCoreML {
         return noModelGuess()
     }
 
-    public static func classify(
-        observations: [VisionObservation],
-        crop: [VisionObservation] = [],
-        book: VisionBook,
-        locale: String = "en"
-    ) -> VisionGuess {
+    public static func classify(observations: [VisionObservation], crop: [VisionObservation] = [], book: VisionBook, locale: String = "en") -> VisionGuess {
         if !crop.isEmpty {
             let cropGuess = pick(crop, book: book, locale: locale)
             if cropGuess.labelId != "unknown", specificity(cropGuess) >= 29 {
