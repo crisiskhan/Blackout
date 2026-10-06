@@ -137,6 +137,32 @@ final class VisionCoreMLTests: XCTestCase {
         XCTAssertFalse(g.edible)
     }
 
+    func testOcotilloBeatsATreeOnTheSameStill() {
+        let g = VisionCoreML.classify(
+            observations: [
+                VisionObservation(identifier: "Tree", confidence: 0.88),
+                VisionObservation(identifier: "Ocotillo", confidence: 0.31),
+            ],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "OCOTILLO")
+        XCTAssertNotEqual(g.name, "TREE")
+        XCTAssertFalse(g.edible)
+        XCTAssertEqual(g.percent, 0)
+    }
+
+    func testCropOcotilloBeatsAFullFrameTree() {
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Tree", confidence: 0.95)],
+            crop: [VisionObservation(identifier: "Ocotillo", confidence: 0.4)],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "OCOTILLO")
+        XCTAssertNotEqual(g.name, "TREE")
+        XCTAssertFalse(g.edible)
+        XCTAssertEqual(g.percent, 0)
+    }
+
     func testYuccaBeatsATreeOnTheSameStill() {
         let g = VisionCoreML.classify(
             observations: [
@@ -433,6 +459,8 @@ final class VisionCoreMLTests: XCTestCase {
         VisionBook(state: "TX", neverEdibleUnlock: true, fungiDefault: "LEAVE_IT", labels: [
             VisionLabel(id: "tx-prickly-pear", kind: "cactus", lookalikes: ["glochid-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Prickly pear"]),
             VisionLabel(id: "tx-yucca", kind: "cacti_yucca", lookalikes: ["sotol-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Yucca"]),
+            VisionLabel(id: "tx-ocotillo", kind: "cacti_yucca", lookalikes: ["dead-stick-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Ocotillo"]),
+            VisionLabel(id: "tx-creosote", kind: "cacti_yucca", lookalikes: ["greasewood-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Creosote"]),
             VisionLabel(id: "tx-coyote", kind: "mammal", lookalikes: ["dog-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Coyote"]),
             VisionLabel(id: "tx-javelina", kind: "mammal", lookalikes: ["feral-hog-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Javelina"]),
             VisionLabel(id: "tx-turkey", kind: "bird", lookalikes: ["vulture-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Turkey"]),

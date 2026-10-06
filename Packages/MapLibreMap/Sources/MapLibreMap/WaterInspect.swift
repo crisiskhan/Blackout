@@ -725,14 +725,18 @@ public enum InspectField {
         {
             return .mammal
         }
-        if id.contains("prickly") || id.contains("cholla") || id.contains("yucca") || id.contains("sotol") {
+        if id.contains("prickly") || id.contains("cholla") || id.contains("yucca") || id.contains("sotol")
+            || id.contains("ocotillo") || id.contains("creosote") || id.contains("lechuguilla")
+            || id.contains("barrel")
+        {
             return .cactus
         }
         // Ponderosa before pond: those four letters sit inside the pine id.
         if id.contains("oak") || id.contains("mesquite") || id.contains("elm") || id.contains("pecan")
             || id.contains("pinon") || id.contains("juniper") || id.contains("aspen")
             || id.contains("cottonwood") || id.contains("pine") || id.contains("loblolly")
-            || id.contains("ponderosa")
+            || id.contains("ponderosa") || id.contains("saltcedar") || id.contains("tamarisk")
+            || id.contains("palo")
         {
             return .tree
         }

@@ -52,9 +52,9 @@ struct FieldTab: View {
             if showVision {
                 #if canImport(AVFoundation) && canImport(UIKit)
                 VisionStill(
-                    onImage: { image in
+                    onImage: { image, aim in
                         showVision = false
-                        runtime.applyFieldVision(image: image)
+                        runtime.applyFieldVision(image: image, aim: aim)
                     },
                     onFail: {
                         showVision = false
@@ -134,13 +134,14 @@ struct FieldTab: View {
            !g.noModel,
            let chip = InspectField.visionKindChip(g.labelId)
         {
-            Text(chip)
-                .font(.system(size: 11, weight: .heavy))
-                .foregroundStyle(Theme.silver)
-                .padding(.horizontal, 8)
-                .frame(minHeight: 22)
-                .background(Theme.glass())
-                .clipShape(Theme.plateRect())
+            Button(chip) {
+                openVisionKind(g)
+            }
+            .buttonStyle(HUDOverlayChipStyle())
+            .frame(
+                minWidth: BlackoutTokens.Chrome.mapChipHitPoints,
+                minHeight: BlackoutTokens.Chrome.mapChipHitPoints
+            )
         }
         if let g = runtime.field.guess {
             visionFieldButton(g)
@@ -247,6 +248,22 @@ struct FieldTab: View {
     /// model stay a name, not an invented card.
     @ViewBuilder
     private func visionFieldButton(_ g: VisionGuess) -> some View {
+        let route = visionRoute(for: g)
+        if let first = route.first {
+            Button(InspectField.label(for: first)) {
+                openRoute(route, speakFirst: true)
+            }
+            .buttonStyle(HUDActionStyle(filled: true))
+            if let book = InspectField.bookLine(for: route) {
+                Text(book)
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(Theme.silver.opacity(0.5))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private func visionRoute(for g: VisionGuess) -> [String] {
         let vision = InspectField.fieldRoute(
             forVision: g.labelId,
             state: runtime.packs?.active?.state,
@@ -259,21 +276,16 @@ struct FieldTab: View {
                 groundLat: runtime.lastGroundLat,
                 groundLon: runtime.lastGroundLon
             )
-        let route = InspectField.presentRoute(
+        return InspectField.presentRoute(
             useGround ? runtime.lastGroundRoute : vision,
             in: Set(cards.map(\.id))
         )
-        if let first = route.first {
-            Button(InspectField.label(for: first)) {
-                openRoute(route, speakFirst: true)
-            }
-            .buttonStyle(HUDActionStyle(filled: true))
-            if let book = InspectField.bookLine(for: route) {
-                Text(book)
-                    .font(.system(size: 11, weight: .heavy))
-                    .foregroundStyle(Theme.silver.opacity(0.5))
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+    }
+
+    private func openVisionKind(_ g: VisionGuess) {
+        let route = visionRoute(for: g)
+        if !route.isEmpty {
+            openRoute(route, speakFirst: true)
         }
     }
 

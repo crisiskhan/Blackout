@@ -182,7 +182,7 @@ extension AppRuntime {
         }
     }
 
-    func applyFieldVision(image: CGImage?) {
+    func applyFieldVision(image: CGImage?, aim: CGRect? = nil) {
         field.visionSeq += 1
         let seq = field.visionSeq
         guard let image else {
@@ -201,17 +201,26 @@ extension AppRuntime {
             field.visionCrop = VisionCrop(
                 x: box.minX, y: box.minY, w: box.width, h: box.height
             )
+        } else if let aim, aim.width > 0.05, aim.height > 0.05 {
+            field.visionCrop = VisionCrop(
+                x: aim.minX, y: aim.minY, w: aim.width, h: aim.height
+            )
         } else {
             field.visionCrop = nil
         }
         let book = visionBook()
         let locale = locale
+        let aimBox = aim
         DispatchQueue.global(qos: .userInitiated).async {
-            let observations = SystemVision.observations(from: image)
+            let frame = SystemVision.frameHits(from: image) ?? []
+            let crop = SystemVision.cropHits(from: image, aim: aimBox) ?? []
             let next: VisionGuess
-            if let observations, let book {
+            if (!frame.isEmpty || !crop.isEmpty), let book {
                 next = VisionCoreML.classify(
-                    observations: observations.map {
+                    observations: frame.map {
+                        VisionObservation(identifier: $0.identifier, confidence: $0.confidence)
+                    },
+                    crop: crop.map {
                         VisionObservation(identifier: $0.identifier, confidence: $0.confidence)
                     },
                     book: book,

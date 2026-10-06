@@ -99,7 +99,21 @@ public enum VisionCoreML {
         return noModelGuess()
     }
 
-    public static func classify(observations: [VisionObservation], book: VisionBook, locale: String = "en") -> VisionGuess {
+    public static func classify(observations: [VisionObservation], crop: [VisionObservation] = [], book: VisionBook, locale: String = "en") -> VisionGuess {
+        if !crop.isEmpty {
+            let cropGuess = pick(crop, book: book, locale: locale)
+            if cropGuess.labelId != "unknown", specificity(cropGuess) >= 29 {
+                return cropGuess
+            }
+        }
+        return pick(observations, book: book, locale: locale)
+    }
+
+    private static func pick(
+        _ observations: [VisionObservation],
+        book: VisionBook,
+        locale: String
+    ) -> VisionGuess {
         let usable = observations
             .filter { $0.confidence >= 0.2 }
             .sorted { $0.confidence > $1.confidence }
@@ -229,7 +243,9 @@ public enum VisionCoreML {
         }
         if id == "kind:cactus" || id == "kind:cacti_yucca" || id.contains("cactus")
             || id.contains("prickly") || id.contains("cholla") || id.contains("yucca")
-            || id.contains("sotol") || guess.name == "CACTUS" || guess.name == "YUCCA"
+            || id.contains("sotol") || id.contains("ocotillo") || id.contains("lechuguilla")
+            || id.contains("barrel") || id.contains("creosote")
+            || guess.name == "CACTUS" || guess.name == "YUCCA" || guess.name == "OCOTILLO"
         {
             return .cactus
         }
@@ -628,8 +644,14 @@ public enum VisionCoreML {
     ]
 
     private static let kindNeedles: [(MatchKind, [String])] = [
-        (.cactus, ["cactus", "cholla", "opuntia", "succulent", "saguaro", "nopal", "prickly pear"]),
-        (.cactiYucca, ["yucca", "sotol", "agave"]),
+        (.cactus, [
+            "cactus", "cholla", "opuntia", "succulent", "saguaro", "nopal",
+            "prickly pear", "barrel cactus", "barrel",
+        ]),
+        (.cactiYucca, [
+            "yucca", "sotol", "agave", "ocotillo", "lechuguilla", "creosote",
+            "creosote bush",
+        ]),
         (.snake, ["rattlesnake", "copperhead", "cottonmouth", "snake", "viper", "serpent", "sidewinder", "rattler"]),
         (.sting, ["scorpion", "tarantula", "wasp", "bee", "hornet", "yellowjacket", "yellow jacket", "bumblebee"]),
         (.gator, ["alligator", "crocodile", "caiman", "gator"]),
@@ -650,7 +672,10 @@ public enum VisionCoreML {
         (.lightning, ["lightning", "thunderstorm", "thunderbolt"]),
         (.shelter, ["tent", "campsite", "bivouac"]),
         (.wound, ["open wound", "bleeding wound", "laceration", "gash"]),
-        (.tree, ["oak", "mesquite", "elm", "pecan", "pine", "pinon", "juniper", "aspen", "cottonwood", "tree"]),
+        (.tree, [
+            "oak", "mesquite", "elm", "pecan", "pine", "pinon", "juniper", "aspen",
+            "cottonwood", "saltcedar", "tamarisk", "palo verde", "tree",
+        ]),
         (.bird, [
             "turkey", "quail", "dove", "roadrunner", "hawk", "eagle", "owl",
             "duck", "goose", "vulture", "raven", "crow", "pigeon", "pheasant",
