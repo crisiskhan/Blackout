@@ -851,13 +851,13 @@ final class AppRuntime {
         let target = naQueue[naIndex]
         naLiveSeq &+= 1
         let seq = naLiveSeq
-        if let ready = AdultDesk.playlist(target.url),
-           AdultDesk.filePlay(ready) || AdultDesk.faceKeep(target.id)
-        {
+        if let ready = AdultDesk.playlist(target.url) {
             hushNa()
             zoomStillName = nil
             zoomLive = target
-            return
+            if AdultDesk.filePlay(ready) || AdultDesk.faceKeep(target.id) {
+                return
+            }
         }
         Task { await presentLive(target, seq: seq) }
     }
@@ -869,13 +869,13 @@ final class AppRuntime {
         naIndex = next
         naLiveSeq &+= 1
         let seq = naLiveSeq
-        if let ready = AdultDesk.playlist(target.url),
-           AdultDesk.filePlay(ready) || AdultDesk.faceKeep(target.id)
-        {
+        if let ready = AdultDesk.playlist(target.url) {
             hushNa()
             zoomStillName = nil
             zoomLive = target
-            return
+            if AdultDesk.filePlay(ready) || AdultDesk.faceKeep(target.id) {
+                return
+            }
         }
         Task { await presentLive(target, seq: seq) }
     }
@@ -900,6 +900,7 @@ final class AppRuntime {
         naQueue = []
         naIndex = 0
         Task { @MainActor in
+            await Task.yield()
             NaWatch.drop()
         }
     }

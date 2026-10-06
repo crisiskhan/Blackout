@@ -24,7 +24,7 @@ struct LiveZoom: View {
             well
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 8) {
-                    Button("CLOSE") { stop(); onClose() }
+                    Button("CLOSE") { onClose() }
                         .buttonStyle(HUDOverlayChipStyle(filled: true))
                     Spacer(minLength: 0)
                     Button(kept ? "DROP" : "KEEP") { onKeep?(row) }
@@ -74,6 +74,10 @@ struct LiveZoom: View {
             chrome = nil
             start()
         }
+        .onChange(of: row.url) { _, _ in
+            chrome = nil
+            start()
+        }
         .onDisappear { stop() }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(row.name)
@@ -107,11 +111,8 @@ struct LiveZoom: View {
     }
 
     private func stop() {
-        let old = player
+        player?.pause()
         player = nil
-        if let old {
-            NaWatch.drop(old)
-        }
     }
 
     private func jump(_ by: Double) {

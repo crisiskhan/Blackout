@@ -242,17 +242,20 @@ struct NaLiveWell: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .onChange(of: pipe) { _, ok in
-            if !ok {
+            if !ok, zoomLive == nil, !holdPipe {
                 stop()
                 if playingID == row.id { playingID = nil }
             }
         }
         .onChange(of: playingID) { _, current in
-            if current != row.id { stop() }
-            else if player == nil, pipe { Task { await start() } }
+            if current != row.id {
+                if zoomLive == nil, !holdPipe { stop() }
+            } else if player == nil, pipe { Task { await start() } }
         }
         .onChange(of: row.id) { _, _ in
-            stop()
+            if zoomLive == nil, !holdPipe {
+                stop()
+            }
             dead = false
             if playingID == row.id {
                 Task { await start() }
@@ -361,13 +364,13 @@ struct NaLiveWell: View {
     private func goFull() {
         let keep = playURL
         playSeq += 1
-        player = nil
-        if playingID == row.id { playingID = nil }
         var next = row
         if AdultDesk.playlist(keep) != nil {
             next.url = keep
         }
         onFull(next)
+        player = nil
+        if playingID == row.id { playingID = nil }
     }
 
     private func toggle() {
