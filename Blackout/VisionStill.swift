@@ -564,7 +564,7 @@ struct VisionStill: UIViewControllerRepresentable {
                     self.failClosed()
                     return
                 }
-                self.finish { self.onImage?(image, aim) }
+                self.finish { [aim] in self.onImage?(image, aim) }
             }
         }
 
