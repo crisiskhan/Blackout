@@ -95,6 +95,7 @@ enum CamDesk {
         lon: Double
     ) -> [Feed] {
         reachable(pack: pack, hops: hops)
+            .filter { $0.url.hasPrefix("https://") }
             .map { cam in
                 let meters = GraphRouter.haversine(lat, lon, cam.lat, cam.lon)
                 let named = cam.name.trimmingCharacters(in: .whitespacesAndNewlines)

@@ -1,5 +1,167 @@
 [
   {
+    "id": "flock-n13971035001",
+    "url": "",
+    "lat": 34.531121,
+    "lon": -106.7625065,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14115700209",
+    "url": "",
+    "lat": 34.5712409,
+    "lon": -106.7727249,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13683967801",
+    "url": "",
+    "lat": 34.5813243,
+    "lon": -106.1049851,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14077838820",
+    "url": "",
+    "lat": 34.6527181,
+    "lon": -106.7402607,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14079095205",
+    "url": "",
+    "lat": 34.652735,
+    "lon": -106.740382,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14084138501",
+    "url": "",
+    "lat": 34.6530862,
+    "lon": -106.7406239,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13797177801",
+    "url": "",
+    "lat": 34.6630997,
+    "lon": -106.7362668,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13758856101",
+    "url": "",
+    "lat": 34.7005938,
+    "lon": -106.7637068,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13985797601",
+    "url": "",
+    "lat": 34.7866944,
+    "lon": -106.740307,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14108610201",
+    "url": "",
+    "lat": 34.797281,
+    "lon": -106.6603326,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14106279501",
+    "url": "",
+    "lat": 34.8035628,
+    "lon": -106.714886,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14106279701",
+    "url": "",
+    "lat": 34.8039841,
+    "lon": -106.714649,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14158738901",
+    "url": "",
+    "lat": 34.8044155,
+    "lon": -106.7157881,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14087970401",
+    "url": "",
+    "lat": 34.8049764,
+    "lon": -106.7206848,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14158739901",
+    "url": "",
+    "lat": 34.8050703,
+    "lon": -106.7196821,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14087970801",
+    "url": "",
+    "lat": 34.8054872,
+    "lon": -106.7203143,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13423813901",
+    "url": "",
+    "lat": 34.8104584,
+    "lon": -106.6990537,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13668926802",
+    "url": "",
+    "lat": 34.8136813,
+    "lon": -106.7567004,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNU5CQE5NNg",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40NM6",
     "lat": 34.8143888888889,
@@ -16,6 +178,123 @@
     "name": "I-25 SB @ NM 6",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13160658145",
+    "url": "",
+    "lat": 34.8148235,
+    "lon": -106.7550756,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13160142803",
+    "url": "",
+    "lat": 34.8148299,
+    "lon": -106.7562221,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13160658146",
+    "url": "",
+    "lat": 34.8148359,
+    "lon": -106.754866,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n5358328647",
+    "url": "",
+    "lat": 34.8148457,
+    "lon": -106.7562868,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13160658148",
+    "url": "",
+    "lat": 34.8149789,
+    "lon": -106.7539984,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13160658147",
+    "url": "",
+    "lat": 34.8149994,
+    "lon": -106.753674,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13668927601",
+    "url": "",
+    "lat": 34.8150843,
+    "lon": -106.7640534,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13160658150",
+    "url": "",
+    "lat": 34.8151998,
+    "lon": -106.7513665,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13683709901",
+    "url": "",
+    "lat": 34.8155736,
+    "lon": -106.8601593,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13160658152",
+    "url": "",
+    "lat": 34.8155952,
+    "lon": -106.7540149,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13160658153",
+    "url": "",
+    "lat": 34.815659,
+    "lon": -106.7564135,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13160658149",
+    "url": "",
+    "lat": 34.815701,
+    "lon": -106.7514083,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13160658151",
+    "url": "",
+    "lat": 34.8157067,
+    "lon": -106.753994,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0yNU5CQEJJQTEwNQ",
@@ -36,6 +315,24 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n12381025564",
+    "url": "",
+    "lat": 34.9390606,
+    "lon": -106.7078175,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13640881301",
+    "url": "",
+    "lat": 34.9463216,
+    "lon": -106.6931883,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNVNCQE5NMzE0",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25SB%40NM314",
     "lat": 34.94845,
@@ -43,6 +340,24 @@
     "name": "I-25 @ Isleta Blvd",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13907932301",
+    "url": "",
+    "lat": 34.9493238,
+    "lon": -106.6938123,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14104488302",
+    "url": "",
+    "lat": 34.9512943,
+    "lon": -106.7123957,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0yNU5CQEJyb2Fkd2F5",
@@ -81,6 +396,24 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13807091201",
+    "url": "",
+    "lat": 34.9858392,
+    "lon": -106.0505923,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13759894301",
+    "url": "",
+    "lat": 34.9858447,
+    "lon": -106.6136404,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNU5CQEJvYmJ5Rm9zdGVy",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40BobbyFoster",
     "lat": 34.988892,
@@ -88,6 +421,51 @@
     "name": "I-25 NB @ Bobby Foster",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13890156201",
+    "url": "",
+    "lat": 34.9895018,
+    "lon": -106.6275685,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13973643201",
+    "url": "",
+    "lat": 34.9898713,
+    "lon": -106.6248507,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13973643501",
+    "url": "",
+    "lat": 34.9898713,
+    "lon": -106.6248507,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14143596601",
+    "url": "",
+    "lat": 34.989961,
+    "lon": -106.6245407,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14143596602",
+    "url": "",
+    "lat": 34.9899616,
+    "lon": -106.6245286,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0yNVNCQEJvYmJ5Rm9zdGVy",
@@ -99,6 +477,24 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13797752101",
+    "url": "",
+    "lat": 35.0046713,
+    "lon": -105.6624134,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13807078101",
+    "url": "",
+    "lat": 35.0049533,
+    "lon": -106.0247828,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MFdCQE1vcmlhcnR5RWFzdA",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40WB%40MoriartyEast",
     "lat": 35.005007,
@@ -106,6 +502,15 @@
     "name": "I-40 WB @ Moriarty East",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13807081301",
+    "url": "",
+    "lat": 35.0053289,
+    "lon": -106.0458446,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS00MEVCQE1vcmlhcnR5RWFzdA",
@@ -117,6 +522,15 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13797759201",
+    "url": "",
+    "lat": 35.0075587,
+    "lon": -106.0382169,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-Q2xpbmVzQ29ybmVyc09uSS00MA",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=ClinesCornersOnI-40",
     "lat": 35.008205,
@@ -124,6 +538,33 @@
     "name": "I-40 @ Clines Corners",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13807087801",
+    "url": "",
+    "lat": 35.0094906,
+    "lon": -106.0438224,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13797740301",
+    "url": "",
+    "lat": 35.009674,
+    "lon": -105.6652303,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13807093401",
+    "url": "",
+    "lat": 35.0115715,
+    "lon": -106.0674531,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS00MEVCQE1vcmlhcnR5V2VzdA",
@@ -153,6 +594,42 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n14069779901",
+    "url": "",
+    "lat": 35.0184657,
+    "lon": -106.7154112,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13164193359",
+    "url": "",
+    "lat": 35.0229154,
+    "lon": -106.6354432,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13164193360",
+    "url": "",
+    "lat": 35.0230888,
+    "lon": -106.6348321,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13164193361",
+    "url": "",
+    "lat": 35.0233719,
+    "lon": -106.6353264,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNVNCQFJpb0JyYXZv",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25SB%40RioBravo",
     "lat": 35.02344444444444,
@@ -169,6 +646,24 @@
     "name": "I-25 @ Rio Bravo",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13164193362",
+    "url": "",
+    "lat": 35.0238685,
+    "lon": -106.637096,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14081014401",
+    "url": "",
+    "lat": 35.0267026,
+    "lon": -106.6863889,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS00MEVCQE1hcnRpblJvYWQ",
@@ -189,6 +684,24 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n14240974701",
+    "url": "",
+    "lat": 35.0314056,
+    "lon": -106.7537567,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13807096201",
+    "url": "",
+    "lat": 35.0323452,
+    "lon": -106.1198922,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MEBSaW9QdWVyY29fZmliZXI",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40RioPuerco_fiber",
     "lat": 35.032766,
@@ -198,6 +711,24 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n14240979201",
+    "url": "",
+    "lat": 35.0372123,
+    "lon": -106.7523522,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13807098601",
+    "url": "",
+    "lat": 35.0435445,
+    "lon": -106.1475366,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNUBTdW5wb3J0",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40Sunport",
     "lat": 35.0476,
@@ -205,6 +736,15 @@
     "name": "I-25 @ Sunport",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13357160101",
+    "url": "",
+    "lat": 35.0496605,
+    "lon": -106.6188418,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS00MEVCQFdpbGxpYW1zUmFuY2hSb2Fk",
@@ -225,6 +765,42 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13351805401",
+    "url": "",
+    "lat": 35.0521032,
+    "lon": -106.6174164,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14123659401",
+    "url": "",
+    "lat": 35.0525127,
+    "lon": -106.6846321,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13807733224",
+    "url": "",
+    "lat": 35.0556192,
+    "lon": -106.7403513,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13756977403",
+    "url": "",
+    "lat": 35.0557158,
+    "lon": -106.7055494,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-QXRyaXNjb1Zpc3RhV2VzdA",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=AtriscoVistaWest",
     "lat": 35.057732,
@@ -232,6 +808,60 @@
     "name": "I-40 West of Atrisco Vista",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13964066846",
+    "url": "",
+    "lat": 35.0580619,
+    "lon": -106.7066075,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717646802",
+    "url": "",
+    "lat": 35.0582457,
+    "lon": -106.5686578,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717646801",
+    "url": "",
+    "lat": 35.0582673,
+    "lon": -106.5865031,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700143701",
+    "url": "",
+    "lat": 35.0582906,
+    "lon": -106.5775291,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13731283901",
+    "url": "",
+    "lat": 35.0583848,
+    "lon": -106.5810256,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13685133001",
+    "url": "",
+    "lat": 35.0586435,
+    "lon": -106.6222052,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0yNUBHaWJzb24",
@@ -243,6 +873,24 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n14123658801",
+    "url": "",
+    "lat": 35.0622209,
+    "lon": -106.7084064,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13631261602",
+    "url": "",
+    "lat": 35.0628909,
+    "lon": -106.1902686,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MEBDYXJudWVsT3ZlcnBhc3M",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40CarnuelOverpass",
     "lat": 35.063202,
@@ -250,6 +898,42 @@
     "name": "I-40 @ Carnuel Overpass",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13925205302",
+    "url": "",
+    "lat": 35.0633581,
+    "lon": -106.7567176,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13631261601",
+    "url": "",
+    "lat": 35.0636389,
+    "lon": -106.1901459,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13634632701",
+    "url": "",
+    "lat": 35.064138,
+    "lon": -106.1936269,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13618963402",
+    "url": "",
+    "lat": 35.0647798,
+    "lon": -106.1934603,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS00MFdAUGFzZW9EZWxWb2xjYW4",
@@ -261,6 +945,33 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13721146601",
+    "url": "",
+    "lat": 35.0654343,
+    "lon": -106.5776171,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13728732601",
+    "url": "",
+    "lat": 35.0655019,
+    "lon": -106.5860935,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13728697703",
+    "url": "",
+    "lat": 35.0655223,
+    "lon": -106.5685629,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MEBDYXJudWVsX2ZpYmVy",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40Carnuel_fiber",
     "lat": 35.066101,
@@ -268,6 +979,15 @@
     "name": "I-40 @ Carnuel",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13728697702",
+    "url": "",
+    "lat": 35.067341,
+    "lon": -106.5686236,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS00MEVAVHJhbXdheQ",
@@ -279,6 +999,51 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13717680101",
+    "url": "",
+    "lat": 35.0683376,
+    "lon": -106.4977929,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717653001",
+    "url": "",
+    "lat": 35.0688872,
+    "lon": -106.5034514,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13295473512",
+    "url": "",
+    "lat": 35.0690772,
+    "lon": -106.5317331,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13728698301",
+    "url": "",
+    "lat": 35.0690872,
+    "lon": -106.5686083,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13295473513",
+    "url": "",
+    "lat": 35.069092,
+    "lon": -106.5317426,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MEBUcmFtd2F5",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40Tramway",
     "lat": 35.069172,
@@ -286,6 +1051,51 @@
     "name": "I-40 @ Tramway",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n14057172001",
+    "url": "",
+    "lat": 35.0693264,
+    "lon": -106.6632574,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14123660801",
+    "url": "",
+    "lat": 35.0695017,
+    "lon": -106.6439125,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14057168102",
+    "url": "",
+    "lat": 35.0696107,
+    "lon": -106.6632639,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700119801",
+    "url": "",
+    "lat": 35.0696558,
+    "lon": -106.6401163,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717652901",
+    "url": "",
+    "lat": 35.0696618,
+    "lon": -106.5095949,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0yNUBDZXNhckNoYXZleg",
@@ -297,6 +1107,78 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n12730150279",
+    "url": "",
+    "lat": 35.0699015,
+    "lon": -106.5322184,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700119802",
+    "url": "",
+    "lat": 35.0699625,
+    "lon": -106.6389257,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730150280",
+    "url": "",
+    "lat": 35.0700501,
+    "lon": -106.5317407,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730150281",
+    "url": "",
+    "lat": 35.0700776,
+    "lon": -106.5317153,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717652201",
+    "url": "",
+    "lat": 35.0703714,
+    "lon": -106.5155033,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730150278",
+    "url": "",
+    "lat": 35.0707624,
+    "lon": -106.5317296,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13295487263",
+    "url": "",
+    "lat": 35.0709206,
+    "lon": -106.5309395,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717651801",
+    "url": "",
+    "lat": 35.0710251,
+    "lon": -106.5247833,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MEBXZXN0b2ZFZGdld29vZA",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40WestofEdgewood",
     "lat": 35.0716638888889,
@@ -304,6 +1186,240 @@
     "name": "I-40 @ West of Edgewood",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13717651701",
+    "url": "",
+    "lat": 35.071798,
+    "lon": -106.5326265,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700247901",
+    "url": "",
+    "lat": 35.0727134,
+    "lon": -106.5686662,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14081154701",
+    "url": "",
+    "lat": 35.0727146,
+    "lon": -106.5774968,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14081154720",
+    "url": "",
+    "lat": 35.072791,
+    "lon": -106.5773874,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14081152604",
+    "url": "",
+    "lat": 35.0728049,
+    "lon": -106.5775971,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717682001",
+    "url": "",
+    "lat": 35.072828,
+    "lon": -106.5412963,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14081152602",
+    "url": "",
+    "lat": 35.072857,
+    "lon": -106.5774919,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700144801",
+    "url": "",
+    "lat": 35.0728823,
+    "lon": -106.5775827,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700136001",
+    "url": "",
+    "lat": 35.0730939,
+    "lon": -106.5860269,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717682601",
+    "url": "",
+    "lat": 35.0734434,
+    "lon": -106.5445465,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717682002",
+    "url": "",
+    "lat": 35.0737728,
+    "lon": -106.5503125,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700136002",
+    "url": "",
+    "lat": 35.0747363,
+    "lon": -106.5952649,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13635524501",
+    "url": "",
+    "lat": 35.0748334,
+    "lon": -106.3860112,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700121401",
+    "url": "",
+    "lat": 35.0749569,
+    "lon": -106.6239223,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717682602",
+    "url": "",
+    "lat": 35.0749826,
+    "lon": -106.5592881,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14080725601",
+    "url": "",
+    "lat": 35.0750675,
+    "lon": -106.5322462,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700127301",
+    "url": "",
+    "lat": 35.0750905,
+    "lon": -106.6221026,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717711101",
+    "url": "",
+    "lat": 35.0752161,
+    "lon": -106.5624086,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700144802",
+    "url": "",
+    "lat": 35.0753357,
+    "lon": -106.6044346,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700136101",
+    "url": "",
+    "lat": 35.0753471,
+    "lon": -106.5998859,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700146301",
+    "url": "",
+    "lat": 35.0753792,
+    "lon": -106.6093562,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700127302",
+    "url": "",
+    "lat": 35.0754534,
+    "lon": -106.6132995,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700125201",
+    "url": "",
+    "lat": 35.0754747,
+    "lon": -106.6217547,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700127201",
+    "url": "",
+    "lat": 35.075496,
+    "lon": -106.6219289,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700119803",
+    "url": "",
+    "lat": 35.0755143,
+    "lon": -106.6277035,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13703971201",
+    "url": "",
+    "lat": 35.0760089,
+    "lon": -106.5686534,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS00MEVCQEp1YW5UYWJv",
@@ -315,6 +1431,33 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13717712801",
+    "url": "",
+    "lat": 35.0764161,
+    "lon": -106.5724026,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13286578835",
+    "url": "",
+    "lat": 35.076439,
+    "lon": -106.5721383,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13728697701",
+    "url": "",
+    "lat": 35.076584,
+    "lon": -106.5686811,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MFdCQEp1YW5UYWJv",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40WB%40JuanTabo",
     "lat": 35.077207,
@@ -322,6 +1465,96 @@
     "name": "I-40 WB @ Juan Tabo",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13701753001",
+    "url": "",
+    "lat": 35.0772071,
+    "lon": -106.6083885,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13701752001",
+    "url": "",
+    "lat": 35.0773508,
+    "lon": -106.6046939,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13701764301",
+    "url": "",
+    "lat": 35.0774105,
+    "lon": -106.617189,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717726601",
+    "url": "",
+    "lat": 35.0774415,
+    "lon": -106.581885,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13701753701",
+    "url": "",
+    "lat": 35.0774729,
+    "lon": -106.6134333,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700123802",
+    "url": "",
+    "lat": 35.0775377,
+    "lon": -106.6222451,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717726602",
+    "url": "",
+    "lat": 35.0776521,
+    "lon": -106.586069,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13701765401",
+    "url": "",
+    "lat": 35.0781131,
+    "lon": -106.6241824,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13701752002",
+    "url": "",
+    "lat": 35.0782894,
+    "lon": -106.6276414,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717730401",
+    "url": "",
+    "lat": 35.0784682,
+    "lon": -106.5913834,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0yNUBDb2Fs",
@@ -333,6 +1566,60 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13717728603",
+    "url": "",
+    "lat": 35.078921,
+    "lon": -106.5954358,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717731901",
+    "url": "",
+    "lat": 35.0791399,
+    "lon": -106.5998839,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717731902",
+    "url": "",
+    "lat": 35.0794835,
+    "lon": -106.6022274,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13702358201",
+    "url": "",
+    "lat": 35.0794945,
+    "lon": -106.6139635,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13702779501",
+    "url": "",
+    "lat": 35.0797579,
+    "lon": -106.645279,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14086104501",
+    "url": "",
+    "lat": 35.0798498,
+    "lon": -106.7110436,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNUBMZWFk",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40Lead",
     "lat": 35.080009,
@@ -340,6 +1627,159 @@
     "name": "I-25 @ Lead",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13717735501",
+    "url": "",
+    "lat": 35.0801569,
+    "lon": -106.6064519,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13629018101",
+    "url": "",
+    "lat": 35.0801928,
+    "lon": -106.3909847,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717734001",
+    "url": "",
+    "lat": 35.0803931,
+    "lon": -106.6083274,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717735901",
+    "url": "",
+    "lat": 35.0804415,
+    "lon": -106.6095576,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717735502",
+    "url": "",
+    "lat": 35.0807514,
+    "lon": -106.610836,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13702392714",
+    "url": "",
+    "lat": 35.0810245,
+    "lon": -106.6199585,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717735902",
+    "url": "",
+    "lat": 35.0811054,
+    "lon": -106.6134011,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13718566702",
+    "url": "",
+    "lat": 35.0811411,
+    "lon": -106.6159368,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13718576301",
+    "url": "",
+    "lat": 35.0811796,
+    "lon": -106.6184988,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13718578701",
+    "url": "",
+    "lat": 35.0811859,
+    "lon": -106.6222059,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13718580301",
+    "url": "",
+    "lat": 35.0811918,
+    "lon": -106.6266545,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14124078201",
+    "url": "",
+    "lat": 35.0812812,
+    "lon": -106.7053822,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13644582701",
+    "url": "",
+    "lat": 35.0821952,
+    "lon": -106.2429803,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13718566703",
+    "url": "",
+    "lat": 35.0823172,
+    "lon": -106.6327866,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13718582001",
+    "url": "",
+    "lat": 35.0826308,
+    "lon": -106.6349804,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13718582002",
+    "url": "",
+    "lat": 35.0828257,
+    "lon": -106.6362944,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13718582003",
+    "url": "",
+    "lat": 35.0829957,
+    "lon": -106.63746,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0yNU5CQENlbnRyYWw",
@@ -360,6 +1800,96 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13718583201",
+    "url": "",
+    "lat": 35.0832082,
+    "lon": -106.6398913,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13718590001",
+    "url": "",
+    "lat": 35.0835244,
+    "lon": -106.6422931,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13613255201",
+    "url": "",
+    "lat": 35.0835846,
+    "lon": -106.2169035,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13613256301",
+    "url": "",
+    "lat": 35.0835846,
+    "lon": -106.2169035,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13718583202",
+    "url": "",
+    "lat": 35.0838633,
+    "lon": -106.6448039,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717342002",
+    "url": "",
+    "lat": 35.0841425,
+    "lon": -106.6481094,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717347001",
+    "url": "",
+    "lat": 35.0842038,
+    "lon": -106.6491886,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13613254001",
+    "url": "",
+    "lat": 35.0842186,
+    "lon": -106.3812297,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13613256401",
+    "url": "",
+    "lat": 35.0842961,
+    "lon": -106.1743698,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13613256402",
+    "url": "",
+    "lat": 35.0842961,
+    "lon": -106.1743698,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MEBFdWJhbms",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40Eubank",
     "lat": 35.08437,
@@ -367,6 +1897,33 @@
     "name": "I-40 @ Eubank",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13717347801",
+    "url": "",
+    "lat": 35.0844472,
+    "lon": -106.6503494,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717348301",
+    "url": "",
+    "lat": 35.0845006,
+    "lon": -106.651573,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717348302",
+    "url": "",
+    "lat": 35.0848167,
+    "lon": -106.6528849,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0yNVNCQE1MSw",
@@ -378,6 +1935,15 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13717348303",
+    "url": "",
+    "lat": 35.0849323,
+    "lon": -106.6538865,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNU5CQE1MSw",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40MLK",
     "lat": 35.085,
@@ -385,6 +1951,24 @@
     "name": "I-25 NB @ MLK",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13717348702",
+    "url": "",
+    "lat": 35.0851011,
+    "lon": -106.6550934,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717351802",
+    "url": "",
+    "lat": 35.0851178,
+    "lon": -106.6567383,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS00MEBOTTE0X2ZpYmVy",
@@ -396,6 +1980,24 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13717351801",
+    "url": "",
+    "lat": 35.0853974,
+    "lon": -106.6565267,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13613254101",
+    "url": "",
+    "lat": 35.0854445,
+    "lon": -106.3796141,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MEA5OHRoU3Q",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%4098thSt",
     "lat": 35.085773,
@@ -405,6 +2007,15 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13761538402",
+    "url": "",
+    "lat": 35.0859259,
+    "lon": -106.6850147,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-VHJhbXdheUBMb21hcw",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=Tramway%40Lomas",
     "lat": 35.086472,
@@ -412,6 +2023,24 @@
     "name": "Tramway @ Lomas",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13702781101",
+    "url": "",
+    "lat": 35.0865141,
+    "lon": -106.6443097,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13728694901",
+    "url": "",
+    "lat": 35.0869669,
+    "lon": -106.5690037,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-STQwRUJATG9tYXM",
@@ -432,6 +2061,42 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13759440501",
+    "url": "",
+    "lat": 35.087538,
+    "lon": -106.5503895,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14182062102",
+    "url": "",
+    "lat": 35.0880338,
+    "lon": -106.5782501,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13645651901",
+    "url": "",
+    "lat": 35.08854,
+    "lon": -106.3812618,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13759414101",
+    "url": "",
+    "lat": 35.0894036,
+    "lon": -106.5504315,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MEVCQFd5b21pbmc",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40EB%40Wyoming",
     "lat": 35.089928,
@@ -439,6 +2104,24 @@
     "name": "I-40 @ Wyoming",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13759410901",
+    "url": "",
+    "lat": 35.0908751,
+    "lon": -106.5509636,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13761538401",
+    "url": "",
+    "lat": 35.0911203,
+    "lon": -106.6790073,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS00MEVCQE10VmFsbGV5",
@@ -450,6 +2133,15 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13717303401",
+    "url": "",
+    "lat": 35.0911915,
+    "lon": -106.6514844,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNUBMb21hcw",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40Lomas",
     "lat": 35.091244,
@@ -457,6 +2149,24 @@
     "name": "I-25 @ Lomas",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13702783101",
+    "url": "",
+    "lat": 35.0913244,
+    "lon": -106.6501965,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717303701",
+    "url": "",
+    "lat": 35.0913471,
+    "lon": -106.6527071,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-STQwV0JATXRWYWxsZXk",
@@ -477,6 +2187,15 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13691899101",
+    "url": "",
+    "lat": 35.0935178,
+    "lon": -106.6687286,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MEBQZW5uc3lsdmFuaWE",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40Pennsylvania",
     "lat": 35.093739,
@@ -493,6 +2212,78 @@
     "name": "I-40 @ Unser",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13761538901",
+    "url": "",
+    "lat": 35.0943778,
+    "lon": -106.6777013,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13667989502",
+    "url": "",
+    "lat": 35.0945064,
+    "lon": -106.7093086,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13702784001",
+    "url": "",
+    "lat": 35.0952716,
+    "lon": -106.650828,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13702789201",
+    "url": "",
+    "lat": 35.0954023,
+    "lon": -106.6521091,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13733899501",
+    "url": "",
+    "lat": 35.0957966,
+    "lon": -106.7091402,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13733899801",
+    "url": "",
+    "lat": 35.0957966,
+    "lon": -106.7091402,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14074998001",
+    "url": "",
+    "lat": 35.0974403,
+    "lon": -106.5608392,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13701609201",
+    "url": "",
+    "lat": 35.0975114,
+    "lon": -106.566391,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS00MEBMb3Vpc2lhbmE",
@@ -513,6 +2304,60 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13884834401",
+    "url": "",
+    "lat": 35.0979388,
+    "lon": -106.5671026,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13751772401",
+    "url": "",
+    "lat": 35.0984133,
+    "lon": -106.6692117,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13728692101",
+    "url": "",
+    "lat": 35.0985544,
+    "lon": -106.5690576,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13751772402",
+    "url": "",
+    "lat": 35.0987366,
+    "lon": -106.6707233,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14125587201",
+    "url": "",
+    "lat": 35.0988581,
+    "lon": -106.5618758,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14125586501",
+    "url": "",
+    "lat": 35.0988785,
+    "lon": -106.5618903,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MEBTZWRpbGxvSGlsbA",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40SedilloHill",
     "lat": 35.100498,
@@ -520,6 +2365,24 @@
     "name": "I-40 @ Sedillo Hill WB",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13683706501",
+    "url": "",
+    "lat": 35.1005272,
+    "lon": -106.7082906,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13837909601",
+    "url": "",
+    "lat": 35.100554,
+    "lon": -106.5664872,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS00MEVCQFNlZGlsbG9fSGlsbF9maWJlcg",
@@ -549,6 +2412,24 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13837909301",
+    "url": "",
+    "lat": 35.1016553,
+    "lon": -106.5635937,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13736612601",
+    "url": "",
+    "lat": 35.1016933,
+    "lon": -106.5685067,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNUBTb2ZCaWdJ",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40SofBigI",
     "lat": 35.101913,
@@ -576,6 +2457,15 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n14092070901",
+    "url": "",
+    "lat": 35.102484,
+    "lon": -106.7126173,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MFdCdG9JMjVTQg",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40WBtoI25SB",
     "lat": 35.10314,
@@ -583,6 +2473,24 @@
     "name": "I-40 WB to I-25 SB",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13794930302",
+    "url": "",
+    "lat": 35.1034732,
+    "lon": -106.7062259,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14088357302",
+    "url": "",
+    "lat": 35.103508,
+    "lon": -106.7274239,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-Q29vcnNASWxpZmY",
@@ -603,6 +2511,15 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n14085671201",
+    "url": "",
+    "lat": 35.1039187,
+    "lon": -106.7277326,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MEBXYXNoaW5ndG9u",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%40Washington",
     "lat": 35.103981,
@@ -612,6 +2529,15 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13717334901",
+    "url": "",
+    "lat": 35.1046538,
+    "lon": -106.6705186,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MEVCL0ktMjVHb3Jl",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40EB%2FI-25Gore",
     "lat": 35.105,
@@ -619,6 +2545,15 @@
     "name": "I-40 @ I-25",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13286537640",
+    "url": "",
+    "lat": 35.1050087,
+    "lon": -106.5748458,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS00MEBDYXJsaXNsZQ",
@@ -639,6 +2574,60 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n12955214958",
+    "url": "",
+    "lat": 35.1054083,
+    "lon": -106.574889,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717336703",
+    "url": "",
+    "lat": 35.1054631,
+    "lon": -106.6449382,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13286537625",
+    "url": "",
+    "lat": 35.10548,
+    "lon": -106.5711507,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13286537626",
+    "url": "",
+    "lat": 35.1056326,
+    "lon": -106.5714477,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717336701",
+    "url": "",
+    "lat": 35.105663,
+    "lon": -106.6706355,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13700019302",
+    "url": "",
+    "lat": 35.10596,
+    "lon": -106.6579228,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MEA0dGhTdA",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40%404thSt",
     "lat": 35.106171,
@@ -646,6 +2635,24 @@
     "name": "I-40 @ 4th St",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13717342001",
+    "url": "",
+    "lat": 35.1062128,
+    "lon": -106.6447473,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717334902",
+    "url": "",
+    "lat": 35.1062218,
+    "lon": -106.6507381,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS00MEAxMnRoU3Q",
@@ -702,6 +2709,15 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13286537627",
+    "url": "",
+    "lat": 35.1066355,
+    "lon": -106.5694223,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS00MEVCQDdUSFNU",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-40EB%407THST",
     "lat": 35.1067555555556,
@@ -711,6 +2727,24 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13286537628",
+    "url": "",
+    "lat": 35.1067625,
+    "lon": -106.5694227,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13717336702",
+    "url": "",
+    "lat": 35.1071328,
+    "lon": -106.649758,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-STQwQEVhc3RvZkNvb3Jz",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I40%40EastofCoors",
     "lat": 35.107222,
@@ -718,6 +2752,42 @@
     "name": "I-40 @ East of Coors",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13286537638",
+    "url": "",
+    "lat": 35.1072291,
+    "lon": -106.5768946,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13286537639",
+    "url": "",
+    "lat": 35.1073882,
+    "lon": -106.5768631,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730192608",
+    "url": "",
+    "lat": 35.1076637,
+    "lon": -106.6589316,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13286537630",
+    "url": "",
+    "lat": 35.1077428,
+    "lon": -106.5697983,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS00MEBVbml2ZXJzaXR5",
@@ -738,6 +2808,24 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n12730192609",
+    "url": "",
+    "lat": 35.1079167,
+    "lon": -106.6597472,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13286537629",
+    "url": "",
+    "lat": 35.1079384,
+    "lon": -106.5694908,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNU5CL0dvcmU",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%2FGore",
     "lat": 35.107995,
@@ -747,6 +2835,24 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n14047336001",
+    "url": "",
+    "lat": 35.1080304,
+    "lon": -106.6589924,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13286537636",
+    "url": "",
+    "lat": 35.1082861,
+    "lon": -106.5773426,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-Q29vcnNATm9mSS00MA",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=Coors%40NofI-40",
     "lat": 35.108345,
@@ -754,6 +2860,105 @@
     "name": "Coors @ N of I-40",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13286537637",
+    "url": "",
+    "lat": 35.1084257,
+    "lon": -106.5770029,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13286537635",
+    "url": "",
+    "lat": 35.1084841,
+    "lon": -106.5751548,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13295474666",
+    "url": "",
+    "lat": 35.1085565,
+    "lon": -106.5707251,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13286537633",
+    "url": "",
+    "lat": 35.1086468,
+    "lon": -106.5719774,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13286537631",
+    "url": "",
+    "lat": 35.1086655,
+    "lon": -106.5710144,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13286537632",
+    "url": "",
+    "lat": 35.1087753,
+    "lon": -106.5721205,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13286537634",
+    "url": "",
+    "lat": 35.1088907,
+    "lon": -106.5754117,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14040448801",
+    "url": "",
+    "lat": 35.1134518,
+    "lon": -106.7009067,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14040451501",
+    "url": "",
+    "lat": 35.113492,
+    "lon": -106.6993701,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14241023501",
+    "url": "",
+    "lat": 35.114244,
+    "lon": -106.6991962,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14241023701",
+    "url": "",
+    "lat": 35.1145664,
+    "lon": -106.7013765,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS00MEBTdW5zZXRDYW55b24",
@@ -774,6 +2979,42 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n12730176581",
+    "url": "",
+    "lat": 35.1165125,
+    "lon": -106.5146158,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730176580",
+    "url": "",
+    "lat": 35.1174857,
+    "lon": -106.5154429,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730176579",
+    "url": "",
+    "lat": 35.1183066,
+    "lon": -106.5149656,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730176582",
+    "url": "",
+    "lat": 35.119011,
+    "lon": -106.5145827,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNUBDb21hbmNoZQ",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40Comanche",
     "lat": 35.12381,
@@ -792,6 +3033,60 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n14027063301",
+    "url": "",
+    "lat": 35.1278063,
+    "lon": -106.7016735,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14027063302",
+    "url": "",
+    "lat": 35.1279663,
+    "lon": -106.7013638,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14027062401",
+    "url": "",
+    "lat": 35.1280406,
+    "lon": -106.7019301,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14027061902",
+    "url": "",
+    "lat": 35.128233,
+    "lon": -106.701645,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14232990201",
+    "url": "",
+    "lat": 35.128425,
+    "lon": -106.5333517,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14232943101",
+    "url": "",
+    "lat": 35.1305164,
+    "lon": -106.5637743,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNUBNb25nb21lcnk",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40Mongomery",
     "lat": 35.132748,
@@ -799,6 +3094,42 @@
     "name": "I-25 @ Montgomery",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n12730161543",
+    "url": "",
+    "lat": 35.136388,
+    "lon": -106.616311,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730161545",
+    "url": "",
+    "lat": 35.1367825,
+    "lon": -106.6190041,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730161544",
+    "url": "",
+    "lat": 35.1373364,
+    "lon": -106.6180206,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13164191267",
+    "url": "",
+    "lat": 35.1388044,
+    "lon": -106.641101,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0yNUBKZWZmZXJzb24",
@@ -810,6 +3141,24 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n14136517701",
+    "url": "",
+    "lat": 35.1419679,
+    "lon": -106.6624724,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13643175101",
+    "url": "",
+    "lat": 35.1436994,
+    "lon": -106.666105,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-STI1TkJGcm9udGFnZVJkQE9zdW5h",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I25NBFrontageRd%40Osuna",
     "lat": 35.145113,
@@ -817,6 +3166,60 @@
     "name": "I-25 NB Frontage Rd @ Osuna",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n14138187801",
+    "url": "",
+    "lat": 35.1471663,
+    "lon": -106.7135188,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13975428401",
+    "url": "",
+    "lat": 35.1484425,
+    "lon": -106.586183,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13608729592",
+    "url": "",
+    "lat": 35.1499076,
+    "lon": -106.6324106,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13975428701",
+    "url": "",
+    "lat": 35.1517221,
+    "lon": -106.5870171,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13328355101",
+    "url": "",
+    "lat": 35.15268,
+    "lon": -106.63843,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13970993001",
+    "url": "",
+    "lat": 35.1529837,
+    "lon": -106.6345205,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0yNUBTYW5NYXRlbw",
@@ -828,6 +3231,42 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13970991501",
+    "url": "",
+    "lat": 35.1541336,
+    "lon": -106.6318504,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14115808801",
+    "url": "",
+    "lat": 35.1553029,
+    "lon": -106.6511454,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14115818501",
+    "url": "",
+    "lat": 35.1556383,
+    "lon": -106.6539079,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13643191101",
+    "url": "",
+    "lat": 35.1556969,
+    "lon": -106.6542447,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNUBTYW5BbnRvbmlv",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40SanAntonio",
     "lat": 35.160198,
@@ -835,6 +3274,24 @@
     "name": "I-25 @ San Antonio",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13975428402",
+    "url": "",
+    "lat": 35.1602398,
+    "lon": -106.5865617,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13719200802",
+    "url": "",
+    "lat": 35.1621921,
+    "lon": -106.6333445,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-Tk01MzZATk0xNA",
@@ -846,6 +3303,60 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13753101901",
+    "url": "",
+    "lat": 35.1701127,
+    "lon": -106.6325453,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13892891103",
+    "url": "",
+    "lat": 35.1719605,
+    "lon": -106.5779353,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13620533144",
+    "url": "",
+    "lat": 35.1721935,
+    "lon": -106.3387476,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13639942701",
+    "url": "",
+    "lat": 35.1724042,
+    "lon": -106.5861071,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730171633",
+    "url": "",
+    "lat": 35.17295,
+    "lon": -106.5784445,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730171634",
+    "url": "",
+    "lat": 35.1730493,
+    "lon": -106.578509,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-STI1U0JAUERO",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I25SB%40PDN",
     "lat": 35.173489,
@@ -853,6 +3364,15 @@
     "name": "I-25 SB @ PDN",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n12730171635",
+    "url": "",
+    "lat": 35.1738368,
+    "lon": -106.5803853,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-VHJhbXdheUBQRE4",
@@ -900,6 +3420,24 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13164192472",
+    "url": "",
+    "lat": 35.1774366,
+    "lon": -106.6295655,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13670517301",
+    "url": "",
+    "lat": 35.1778034,
+    "lon": -106.630962,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNUBOb2ZQYXNlb0RlbE5vcnRl",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40NofPaseoDelNorte",
     "lat": 35.178,
@@ -918,6 +3456,60 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13670510202",
+    "url": "",
+    "lat": 35.179684,
+    "lon": -106.6442939,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13643437701",
+    "url": "",
+    "lat": 35.1797519,
+    "lon": -106.3297112,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13643427401",
+    "url": "",
+    "lat": 35.1798722,
+    "lon": -106.3294928,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13153744265",
+    "url": "",
+    "lat": 35.1798897,
+    "lon": -106.6695691,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13153744264",
+    "url": "",
+    "lat": 35.1798926,
+    "lon": -106.6695556,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13153404438",
+    "url": "",
+    "lat": 35.1800082,
+    "lon": -106.666618,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-UGFzZW9EZWxOb3J0ZUF0Q29vcnM",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=PaseoDelNorteAtCoors",
     "lat": 35.181,
@@ -925,6 +3517,24 @@
     "name": "Paseo Del Norte @ Coors",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13792135301",
+    "url": "",
+    "lat": 35.181066,
+    "lon": -106.667639,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13153484022",
+    "url": "",
+    "lat": 35.1813848,
+    "lon": -106.6667176,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-UEROQFdlc3RvZlJpb0dyYW5kZVJpdmVy",
@@ -954,6 +3564,60 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13670520701",
+    "url": "",
+    "lat": 35.1883686,
+    "lon": -106.6152231,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13792380701",
+    "url": "",
+    "lat": 35.1886438,
+    "lon": -106.6152694,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13670516901",
+    "url": "",
+    "lat": 35.1889566,
+    "lon": -106.6416901,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13792135908",
+    "url": "",
+    "lat": 35.1916859,
+    "lon": -106.6572308,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13929354701",
+    "url": "",
+    "lat": 35.1927763,
+    "lon": -106.6803314,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12381010187",
+    "url": "",
+    "lat": 35.1931746,
+    "lon": -106.6564747,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-VHJhbXdheQ",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=Tramway",
     "lat": 35.196884,
@@ -961,6 +3625,159 @@
     "name": "I-25 @ S of Tramway",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n12730192969",
+    "url": "",
+    "lat": 35.2012724,
+    "lon": -106.6576474,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14001156601",
+    "url": "",
+    "lat": 35.2012953,
+    "lon": -106.6586079,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13631448001",
+    "url": "",
+    "lat": 35.2019775,
+    "lon": -106.5781778,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730192970",
+    "url": "",
+    "lat": 35.2021906,
+    "lon": -106.6580836,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730210205",
+    "url": "",
+    "lat": 35.2023535,
+    "lon": -106.649244,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13153391675",
+    "url": "",
+    "lat": 35.2029127,
+    "lon": -106.6471156,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730192972",
+    "url": "",
+    "lat": 35.2029554,
+    "lon": -106.6567014,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730192971",
+    "url": "",
+    "lat": 35.2029976,
+    "lon": -106.6576008,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13153400705",
+    "url": "",
+    "lat": 35.2030675,
+    "lon": -106.6474635,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730210204",
+    "url": "",
+    "lat": 35.2031532,
+    "lon": -106.6491907,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13153383535",
+    "url": "",
+    "lat": 35.2031877,
+    "lon": -106.6469646,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13153399441",
+    "url": "",
+    "lat": 35.203334,
+    "lon": -106.6472786,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13153397915",
+    "url": "",
+    "lat": 35.2033391,
+    "lon": -106.6472747,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730210201",
+    "url": "",
+    "lat": 35.2034592,
+    "lon": -106.649794,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730210202",
+    "url": "",
+    "lat": 35.2037483,
+    "lon": -106.6516937,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13643411801",
+    "url": "",
+    "lat": 35.2038392,
+    "lon": -106.3133722,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13643351802",
+    "url": "",
+    "lat": 35.2040009,
+    "lon": -106.3129315,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0yNU5CVHJhbXdheQ",
@@ -972,6 +3789,177 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n12730210203",
+    "url": "",
+    "lat": 35.2042288,
+    "lon": -106.6512909,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13790518401",
+    "url": "",
+    "lat": 35.2091697,
+    "lon": -106.3089337,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13696479601",
+    "url": "",
+    "lat": 35.2099602,
+    "lon": -106.308329,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13144766392",
+    "url": "",
+    "lat": 35.2105035,
+    "lon": -106.6590326,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13173836880",
+    "url": "",
+    "lat": 35.2110525,
+    "lon": -106.6554673,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13173836879",
+    "url": "",
+    "lat": 35.2111128,
+    "lon": -106.6558214,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13173836878",
+    "url": "",
+    "lat": 35.21135,
+    "lon": -106.6558766,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13173836877",
+    "url": "",
+    "lat": 35.2113567,
+    "lon": -106.6555822,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13163342657",
+    "url": "",
+    "lat": 35.2179988,
+    "lon": -106.6964605,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13172083376",
+    "url": "",
+    "lat": 35.21808,
+    "lon": -106.6769614,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13643351801",
+    "url": "",
+    "lat": 35.2186413,
+    "lon": -106.3025671,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13643338901",
+    "url": "",
+    "lat": 35.2186615,
+    "lon": -106.3024217,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13868521402",
+    "url": "",
+    "lat": 35.219051,
+    "lon": -106.6772422,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13172133677",
+    "url": "",
+    "lat": 35.2195552,
+    "lon": -106.6616801,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13172133676",
+    "url": "",
+    "lat": 35.219824,
+    "lon": -106.6618606,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13993941402",
+    "url": "",
+    "lat": 35.2213238,
+    "lon": -106.696356,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13032402899",
+    "url": "",
+    "lat": 35.2276403,
+    "lon": -106.649685,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13272548305",
+    "url": "",
+    "lat": 35.2290248,
+    "lon": -106.6506573,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13389421301",
+    "url": "",
+    "lat": 35.2313969,
+    "lon": -106.6589044,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-NTI4U291dGhlcm4",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=528Southern",
     "lat": 35.241018,
@@ -979,6 +3967,60 @@
     "name": "NM 528 @ Southern Blvd",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13149600083",
+    "url": "",
+    "lat": 35.2414276,
+    "lon": -106.6565063,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13149606262",
+    "url": "",
+    "lat": 35.2414971,
+    "lon": -106.6953036,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13929348501",
+    "url": "",
+    "lat": 35.2415378,
+    "lon": -106.7327124,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13929351001",
+    "url": "",
+    "lat": 35.2416571,
+    "lon": -106.7251258,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13148538191",
+    "url": "",
+    "lat": 35.2417397,
+    "lon": -106.6971265,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13233275754",
+    "url": "",
+    "lat": 35.2418161,
+    "lon": -106.7366852,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-NTI4U2FiYW5h",
@@ -1008,6 +4050,60 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13048680308",
+    "url": "",
+    "lat": 35.2709562,
+    "lon": -106.6080314,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13976308103",
+    "url": "",
+    "lat": 35.2710891,
+    "lon": -106.6087189,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730208569",
+    "url": "",
+    "lat": 35.2752851,
+    "lon": -106.6597605,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730208570",
+    "url": "",
+    "lat": 35.2760649,
+    "lon": -106.6597766,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12730208571",
+    "url": "",
+    "lat": 35.2770749,
+    "lon": -106.6573915,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14020651003",
+    "url": "",
+    "lat": 35.2777128,
+    "lon": -106.6575312,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNU5CQEJlcm5hbGlsbG8",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40Bernalillo",
     "lat": 35.2803305555556,
@@ -1024,6 +4120,24 @@
     "name": "I-25 @ Bernalillo",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13643146501",
+    "url": "",
+    "lat": 35.2998153,
+    "lon": -106.5499235,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13643156801",
+    "url": "",
+    "lat": 35.3053052,
+    "lon": -106.5489197,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-VVM1NTBASS0yNQ",
@@ -1053,6 +4167,33 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13329579002",
+    "url": "",
+    "lat": 35.31821,
+    "lon": -106.54455,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13329578901",
+    "url": "",
+    "lat": 35.31885,
+    "lon": -106.54503,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13329579001",
+    "url": "",
+    "lat": 35.31885,
+    "lon": -106.54503,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-VVM1NTBAV29mcml2ZXJicmlkZ2U",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=US550%40Wofriverbridge",
     "lat": 35.322651,
@@ -1060,6 +4201,33 @@
     "name": "US 550 @ W of River Bridge",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13771609692",
+    "url": "",
+    "lat": 35.3227117,
+    "lon": -106.5739104,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14054793701",
+    "url": "",
+    "lat": 35.3276744,
+    "lon": -106.5672154,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13153418195",
+    "url": "",
+    "lat": 35.3294806,
+    "lon": -106.572279,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-VVM1NTBFQE5NNTI4",
@@ -1080,6 +4248,42 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n13073683297",
+    "url": "",
+    "lat": 35.333121,
+    "lon": -106.5769943,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13393855177",
+    "url": "",
+    "lat": 35.3337033,
+    "lon": -106.5792531,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13159881305",
+    "url": "",
+    "lat": 35.3374831,
+    "lon": -106.5846187,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13360704192",
+    "url": "",
+    "lat": 35.3711225,
+    "lon": -106.6365149,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNUBSb3dlTkI",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25%40RoweNB",
     "lat": 35.494961,
@@ -1096,6 +4300,15 @@
     "name": "I-25 @ Rowe SB",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n14053172502",
+    "url": "",
+    "lat": 35.4963186,
+    "lon": -106.7304026,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0yNUBMYV9CYWphZGFfTG93ZXI",
@@ -1134,6 +4347,33 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n14236128601",
+    "url": "",
+    "lat": 35.5752282,
+    "lon": -105.762235,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14185949101",
+    "url": "",
+    "lat": 35.5883795,
+    "lon": -106.0674465,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14086247001",
+    "url": "",
+    "lat": 35.5889562,
+    "lon": -105.7718595,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-R2xvcmlldHRh",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=Glorietta",
     "lat": 35.591301,
@@ -1141,6 +4381,15 @@
     "name": "I-25 @ Glorieta",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13295495533",
+    "url": "",
+    "lat": 35.6030078,
+    "lon": -106.0017301,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0yNU5CQENlcnJpbGxvc19Sb2Fk",
@@ -1161,6 +4410,24 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n11832103005",
+    "url": "",
+    "lat": 35.6072195,
+    "lon": -105.9959492,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14187396701",
+    "url": "",
+    "lat": 35.6149195,
+    "lon": -106.1156123,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNW5iQFJpY2hhcmRzQXZl",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25nb%40RichardsAve",
     "lat": 35.620175,
@@ -1179,6 +4446,33 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n14145451901",
+    "url": "",
+    "lat": 35.6260294,
+    "lon": -106.0409744,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14145448902",
+    "url": "",
+    "lat": 35.627841,
+    "lon": -106.0242104,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14145448901",
+    "url": "",
+    "lat": 35.6303272,
+    "lon": -106.0227077,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-SS0yNU5CQFN0X0ZyYW5jaXM",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=I-25NB%40St_Francis",
     "lat": 35.634075,
@@ -1186,6 +4480,15 @@
     "name": "I-25 NB @ St. Francis",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n14145447302",
+    "url": "",
+    "lat": 35.6350654,
+    "lon": -106.0198097,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-SS0yNVNCQFN0X0ZyYW5jaXNfRHI",
@@ -1197,6 +4500,15 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n14145488401",
+    "url": "",
+    "lat": 35.6358175,
+    "lon": -106.0439841,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-aTI1bmJAb2xkcGVjb3N0cmFpbA",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=i25nb%40oldpecostrail",
     "lat": 35.6362,
@@ -1204,6 +4516,15 @@
     "name": "I-25 NB @ Old Pecos Trail",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n14145481505",
+    "url": "",
+    "lat": 35.6369993,
+    "lon": -106.0355885,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   },
   {
     "id": "nmdot-aS0yNXNiQG9sZHBlY29zdHJhaWw",
@@ -1215,6 +4536,357 @@
     "provider": "NMDOT"
   },
   {
+    "id": "flock-n14143281103",
+    "url": "",
+    "lat": 35.6385595,
+    "lon": -105.9960813,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14143282503",
+    "url": "",
+    "lat": 35.6385595,
+    "lon": -105.9960813,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14145492901",
+    "url": "",
+    "lat": 35.6387243,
+    "lon": -106.0228996,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14145501501",
+    "url": "",
+    "lat": 35.6387243,
+    "lon": -106.0228996,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14145447301",
+    "url": "",
+    "lat": 35.6389403,
+    "lon": -106.0173819,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14145444502",
+    "url": "",
+    "lat": 35.6389474,
+    "lon": -106.0174047,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14145448301",
+    "url": "",
+    "lat": 35.6390039,
+    "lon": -106.0173859,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14136448301",
+    "url": "",
+    "lat": 35.6421059,
+    "lon": -105.9574825,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13191676201",
+    "url": "",
+    "lat": 35.6423167,
+    "lon": -106.0145771,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13295471194",
+    "url": "",
+    "lat": 35.6430228,
+    "lon": -106.0153979,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13191524200",
+    "url": "",
+    "lat": 35.6430693,
+    "lon": -106.0136855,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13191524199",
+    "url": "",
+    "lat": 35.6442374,
+    "lon": -106.01375,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14143273602",
+    "url": "",
+    "lat": 35.645513,
+    "lon": -105.9654432,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14143273901",
+    "url": "",
+    "lat": 35.645526,
+    "lon": -105.9654358,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14143273201",
+    "url": "",
+    "lat": 35.6459514,
+    "lon": -105.965583,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14143273601",
+    "url": "",
+    "lat": 35.6459601,
+    "lon": -105.9655008,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14144705901",
+    "url": "",
+    "lat": 35.6469859,
+    "lon": -105.9565583,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14144697305",
+    "url": "",
+    "lat": 35.6470578,
+    "lon": -105.9564943,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14144697306",
+    "url": "",
+    "lat": 35.6470578,
+    "lon": -105.9564943,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13948719301",
+    "url": "",
+    "lat": 35.6480673,
+    "lon": -106.0189198,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13973665201",
+    "url": "",
+    "lat": 35.6505241,
+    "lon": -106.0006917,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14108420902",
+    "url": "",
+    "lat": 35.6508301,
+    "lon": -106.0021885,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14055119401",
+    "url": "",
+    "lat": 35.6520101,
+    "lon": -106.0021868,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14143342303",
+    "url": "",
+    "lat": 35.6520923,
+    "lon": -105.9565871,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14143343901",
+    "url": "",
+    "lat": 35.6520923,
+    "lon": -105.9565871,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14143344401",
+    "url": "",
+    "lat": 35.6521172,
+    "lon": -105.9565755,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14143344403",
+    "url": "",
+    "lat": 35.6521172,
+    "lon": -105.9565755,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14071033001",
+    "url": "",
+    "lat": 35.6581258,
+    "lon": -105.9599877,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14053954801",
+    "url": "",
+    "lat": 35.6789394,
+    "lon": -105.9518896,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14071415601",
+    "url": "",
+    "lat": 35.6795635,
+    "lon": -105.9494506,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14136425901",
+    "url": "",
+    "lat": 35.6805861,
+    "lon": -105.9484993,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n12401314694",
+    "url": "",
+    "lat": 35.6822153,
+    "lon": -105.9762987,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14072023901",
+    "url": "",
+    "lat": 35.6830034,
+    "lon": -105.9408663,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13069729842",
+    "url": "",
+    "lat": 35.6920484,
+    "lon": -105.949316,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14065334601",
+    "url": "",
+    "lat": 35.7931398,
+    "lon": -105.9539972,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n7597940807",
+    "url": "",
+    "lat": 35.8078137,
+    "lon": -105.913069,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13809972451",
+    "url": "",
+    "lat": 35.8229554,
+    "lon": -105.9754644,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13924518501",
+    "url": "",
+    "lat": 35.8395149,
+    "lon": -105.9888507,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14053858501",
+    "url": "",
+    "lat": 35.8787094,
+    "lon": -106.2949279,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
     "id": "nmdot-VVM4NC0yODVATk01MDI",
     "url": "https://servicev5.nmroads.com/RealMapWAR/GetCameraImage?ts=0&cameraName=US84-285%40NM502",
     "lat": 35.890781,
@@ -1222,5 +4894,41 @@
     "name": "US 285 @ Pojoaque",
     "ink": "blue",
     "provider": "NMDOT"
+  },
+  {
+    "id": "flock-n13771177501",
+    "url": "",
+    "lat": 35.8966255,
+    "lon": -106.0049332,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n14061538901",
+    "url": "",
+    "lat": 35.9010688,
+    "lon": -106.3051389,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13771177901",
+    "url": "",
+    "lat": 35.9067085,
+    "lon": -105.9746831,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
+  },
+  {
+    "id": "flock-n13588513002",
+    "url": "",
+    "lat": 35.9457094,
+    "lon": -106.1164332,
+    "name": "Flock",
+    "ink": "blue",
+    "provider": "Flock"
   }
 ]
