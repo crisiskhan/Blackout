@@ -479,6 +479,12 @@ ADULT_LIZZY = (
     "lust4lizzie",
     "lust 4 lizzy",
 )
+ADULT_CAKEZ = (
+    "miss_ladycakez69",
+    "missladycakez69",
+    "miss ladycakez 69",
+    "miss ladycakez69",
+)
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
     ("ITSSTEPHHONEYXO21", ADULT_STEPH),
@@ -520,6 +526,7 @@ ADULT_FACES = (
     ("GIULIANA CABRAZIA", ADULT_GIULIANA),
     ("ALEJAMIEL18", ADULT_ALEJA),
     ("LUST4LIZZY", ADULT_LIZZY),
+    ("MISS LADYCAKEZ69", ADULT_CAKEZ),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_KEEP_CHIP = "KEEP"
@@ -1601,6 +1608,7 @@ ADULT_FACE_POSTS = (
     ("ITISASHLEY", ("itisashley", "luvashxx")),
     ("GIULIANA CABRAZIA", ("gcabrazia", "giulianacabrazia_", "giulianacabrazia2")),
     ("LUST4LIZZY", ("lust4lizzy",)),
+    ("MISS LADYCAKEZ69", ("miss_ladycakez69", "missladycakez69")),
 )
 ADULT_FACE_STILLS = (
     ("P283XrKRjsV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"),
@@ -1665,6 +1673,7 @@ ADULT_FACE_GIFTS = (
     ("ITISASHLEY", ("itisashley", "luvashxx", "itisashleyy", "ofcourseashley")),
     ("GIULIANA CABRAZIA", ("giulianacabrazia", "giulianacabrazia2", "gcabrazia")),
     ("LUST4LIZZY", ("lust4lizzy",)),
+    ("MISS LADYCAKEZ69", ("missladycakez69", "miss_ladycakez69")),
 )
 ADULT_FACE_KILL = (
     "loli",
@@ -3533,6 +3542,7 @@ class AdultDeskTests(unittest.TestCase):
                 "GIULIANA CABRAZIA",
                 "ALEJAMIEL18",
                 "LUST4LIZZY",
+                "MISS LADYCAKEZ69",
             ],
         )
         fat_kinds = [f"KIND{index:02d}" for index in range(40)]
@@ -4645,6 +4655,12 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("LUST4LIZZY", desk)
         self.assertIn("lust4lizzy", desk)
         self.assertIn("7YfN2Aly", desk)
+        self.assertIn("MISS LADYCAKEZ69", desk)
+        self.assertIn("miss_ladycakez69", desk)
+        self.assertIn("missladycakez69", desk)
+        self.assertIn("cakezNeedles", desk)
+        self.assertNotIn("misscakes69", desk)
+        self.assertNotIn("Dreka Cakez", desk)
         self.assertNotIn("sXkXlr2e", desk)
         self.assertIn("alejamiel18", desk)
         self.assertIn("alejamieles", desk)
@@ -5165,6 +5181,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("GIULIANA CABRAZIA", adult_rail([]))
         self.assertIn("ALEJAMIEL18", adult_rail([]))
         self.assertIn("LUST4LIZZY", adult_rail([]))
+        self.assertIn("MISS LADYCAKEZ69", adult_rail([]))
         self.assertGreaterEqual(len(adult_face_hold_rooms("ITISASHLEY")), 20)
         self.assertEqual(adult_face_hold_rooms("ITISASHLEY")[0]["seconds"], 696)
         self.assertEqual(
@@ -5243,6 +5260,20 @@ class AdultDeskTests(unittest.TestCase):
             self.assertNotIn("onlyfans", row["url"].lower())
             self.assertNotIn("lizzy b", row["name"].lower())
             self.assertIn("lust4lizzy", row["seek"])
+        self.assertEqual(adult_face_hold_rooms("MISS LADYCAKEZ69"), [])
+        self.assertEqual(adult_hunt_needles("miss_ladycakez69"), list(ADULT_CAKEZ))
+        self.assertEqual(adult_hunt_needles("missladycakez69"), list(ADULT_CAKEZ))
+        self.assertTrue(any("erome.com/miss_ladycakez69" in path for path in adult_face_hunt("MISS LADYCAKEZ69")))
+        self.assertTrue(any("erome.com/missladycakez69" in path for path in adult_face_hunt("MISS LADYCAKEZ69")))
+        self.assertTrue(any("users/missladycakez69/search" in path for path in adult_face_hunt("MISS LADYCAKEZ69")))
+        self.assertTrue(any("screen-name/miss_ladycakez69" in path for path in adult_face_hunt("MISS LADYCAKEZ69")))
+        self.assertTrue(any("query=miss_ladycakez69" in path for path in adult_face_hunt("MISS LADYCAKEZ69")))
+        self.assertNotIn("cake", adult_face_needles("MISS LADYCAKEZ69") or [])
+        self.assertNotIn("lady", adult_face_needles("MISS LADYCAKEZ69") or [])
+        self.assertNotIn("cakez", adult_face_needles("MISS LADYCAKEZ69") or [])
+        self.assertNotIn("nicole", adult_face_needles("MISS LADYCAKEZ69") or [])
+        self.assertNotIn("misscakes69", adult_face_needles("MISS LADYCAKEZ69") or [])
+        self.assertNotIn("ladycake", adult_face_needles("MISS LADYCAKEZ69") or [])
         self.assertEqual(
             [row["id"] for row in adult_parse_face(
                 {
@@ -5320,6 +5351,34 @@ class AdultDeskTests(unittest.TestCase):
                     ]
                 },
                 "LUST4LIZZY",
+            )],
+            [],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "dreka-cakez-gets-fucked-during-her-job-interview",
+                            "title": "Dreka Cakez Gets Fucked During Her Job Interview",
+                            "creator": "Dreka Cakez",
+                            "durationSeconds": 1328,
+                        },
+                        {
+                            "slug": "american-cake-worships-a-cock-in-the-kitchen",
+                            "title": "American Cake Worships A Cock In The Kitchen",
+                            "creator": "American Cake",
+                            "durationSeconds": 558,
+                        },
+                        {
+                            "slug": "misscakes69-lingerie-set",
+                            "title": "Misscakes69 Lingerie Set",
+                            "creator": "Misscakes69",
+                            "durationSeconds": 180,
+                        },
+                    ]
+                },
+                "MISS LADYCAKEZ69",
             )],
             [],
         )
@@ -5428,6 +5487,18 @@ class AdultDeskTests(unittest.TestCase):
                 "https://www.example.com/lust4lizzy?utm_source=instagram&fbclid=PAdGRleAUxExRleHRuA2FlbQIxMQ"
             ),
             list(ADULT_LIZZY),
+        )
+        self.assertEqual(
+            adult_page_name(
+                "https://www.example.com/miss_ladycakez69?utm_source=instagram&fbclid=PAdGRleAUxExRleHRuA2FlbQIxMQ"
+            ),
+            "miss_ladycakez69",
+        )
+        self.assertEqual(
+            adult_hunt_needles(
+                "https://www.example.com/miss_ladycakez69?utm_source=instagram&fbclid=PAdGRleAUxExRleHRuA2FlbQIxMQ"
+            ),
+            list(ADULT_CAKEZ),
         )
         self.assertIsNone(adult_page_name("roleplay"))
         self.assertIsNone(adult_page_name("elvanavitaa"))
@@ -5752,6 +5823,7 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("GIULIANA CABRAZIA", tv)
         self.assertIn("ALEJAMIEL18", tv)
         self.assertIn("LUST4LIZZY", tv)
+        self.assertIn("MISS LADYCAKEZ69", tv)
         self.assertIn("PASTE", tv)
         self.assertIn("NO PASTE", tv)
         self.assertIn("public video search", tv.lower())
