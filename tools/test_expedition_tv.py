@@ -6053,7 +6053,7 @@ class NaTheaterPlayTests(unittest.TestCase):
         self.assertIn("NaWatch.play(", live)
         self.assertIn("NaWatch.play(", zoom)
         self.assertIn("NaWatch.drop(", live)
-        self.assertIn("NaWatch.drop(", zoom)
+        self.assertNotIn("NaWatch.drop", zoom)
         self.assertIn("dismantleUIView", live)
         self.assertIn("dismantleUIView", zoom)
         self.assertNotIn(".id(row.id)", na)
@@ -6068,6 +6068,7 @@ class NaTheaterPlayTests(unittest.TestCase):
         close = app.split("func closeLive()")[1].split("func holdCam(")[0]
         self.assertIn("NaWatch.drop", close)
         self.assertLess(close.find("zoomLive = nil"), close.find("NaWatch.drop"))
+        self.assertLess(close.find("Task.yield()"), close.find("NaWatch.drop"))
         self.assertIn("movie playback", qa.lower())
         self.assertIn("sound", qa.lower())
         self.assertIn("AdultDesk.faceKeep", sock if (sock := read("Blackout", "UpdateSocket.swift")) else "")
@@ -6080,6 +6081,7 @@ class NaTheaterPlayTests(unittest.TestCase):
         self.assertNotIn("NaWatch.drop", go_full)
         self.assertNotIn("stop()", go_full)
         self.assertIn("onFull(next)", go_full)
+        self.assertLess(go_full.find("onFull(next)"), go_full.find("player = nil"))
         self.assertEqual(
             adult_ready_play(
                 {
@@ -6139,18 +6141,51 @@ class NaTheaterStayUpTests(unittest.TestCase):
         self.assertIn("stays mounted", qa.lower())
         close = app.split("func closeLive()")[1].split("func holdCam(")[0]
         self.assertLess(close.find("zoomLive = nil"), close.find("NaWatch.drop"))
-        self.assertNotIn("replaceCurrentItem(with: nil)", zoom.split("private func stop()")[1].split("private func jump")[0])
+        self.assertLess(close.find("Task.yield()"), close.find("NaWatch.drop"))
+        self.assertNotIn("NaWatch.drop", zoom)
+        self.assertNotIn("replaceCurrentItem(with: nil)", zoom)
+        self.assertIn(".onChange(of: row.url)", zoom)
+        close_chip = next(line for line in zoom.splitlines() if 'Button("CLOSE")' in line)
+        self.assertNotIn("stop()", close_chip)
+        playing = well.split(".onChange(of: playingID)")[1].split(".onChange(of: row.id)")[0]
+        self.assertIn("zoomLive == nil", playing)
+        self.assertIn("holdPipe", playing)
+        self.assertLess(playing.find("zoomLive == nil"), playing.find("stop()"))
+        row_swap = well.split(".onChange(of: row.id)")[1].split(".onDisappear")[0]
+        self.assertIn("zoomLive == nil", row_swap)
+        self.assertIn("holdPipe", row_swap)
+        self.assertLess(row_swap.find("zoomLive == nil"), row_swap.find("stop()"))
+        pipe_swap = well.split(".onChange(of: pipe)")[1].split(".onChange(of: playingID)")[0]
+        self.assertIn("zoomLive == nil", pipe_swap)
+        self.assertIn("holdPipe", pipe_swap)
+        self.assertLess(pipe_swap.find("zoomLive == nil"), pipe_swap.find("stop()"))
+        go_full = well.split("private func goFull()")[1].split("private func toggle()")[0]
+        self.assertLess(go_full.find("onFull(next)"), go_full.find("player = nil"))
+        halt = well.split("private func stop()")[1].split("private func jump")[0]
+        self.assertIn("NaWatch.drop", halt)
+        self.assertLess(halt.find("player = nil"), halt.find("NaWatch.drop"))
+        self.assertNotIn("Task", halt)
+        self.assertIn("closelive drops", qa.lower())
+        self.assertIn("any ready playlist", qa.lower())
         chip = na.split("ForEach(naKindChips")[1].split("private var naBrowseStrip")[0]
         self.assertIn("clampNaPick()", chip)
         self.assertIn("naPlayingID", na.split("private var naStageRow")[1].split("private var naHasPrev")[0])
         open_live = app.split("func openLive(")[1].split("func stepLive(")[0]
         self.assertIn("AdultDesk.faceKeep", open_live)
-        self.assertIn("AdultDesk.filePlay(ready)", open_live)
-        self.assertIn("zoomLive =", open_live)
+        self.assertIn("AdultDesk.playlist(target.url)", open_live)
+        self.assertIn("zoomLive = target", open_live)
+        self.assertLess(open_live.find("playlist(target.url)"), open_live.find("zoomLive = target"))
+        self.assertLess(open_live.find("zoomLive = target"), open_live.find("filePlay"))
         self.assertLess(open_live.find("zoomLive ="), open_live.find("presentLive"))
+        gate = open_live.split("zoomLive = target")[1].split("presentLive")[0]
+        self.assertIn("filePlay", gate)
+        self.assertIn("faceKeep", gate)
+        self.assertIn("return", gate)
         step = app.split("func stepLive(")[1].split("private func presentLive(")[0]
         self.assertIn("AdultDesk.faceKeep", step)
-        self.assertIn("AdultDesk.filePlay(ready)", step)
+        self.assertIn("AdultDesk.playlist(target.url)", step)
+        self.assertLess(step.find("playlist(target.url)"), step.find("zoomLive = target"))
+        self.assertLess(step.find("zoomLive = target"), step.find("filePlay"))
         self.assertLess(step.find("zoomLive ="), step.find("presentLive"))
 
 
