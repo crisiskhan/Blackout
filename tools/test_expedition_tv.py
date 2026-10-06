@@ -4661,6 +4661,10 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("cakezNeedles", desk)
         self.assertNotIn("misscakes69", desk)
         self.assertNotIn("Dreka Cakez", desk)
+        self.assertNotIn("ladyvphatcakes", desk.lower())
+        self.assertNotIn("miss ladycakes", desk.lower())
+        self.assertNotIn("loadgirls", desk.lower())
+        self.assertNotIn("nicole8899", desk.lower())
         self.assertNotIn("sXkXlr2e", desk)
         self.assertIn("alejamiel18", desk)
         self.assertIn("alejamieles", desk)
@@ -5376,6 +5380,18 @@ class AdultDeskTests(unittest.TestCase):
                             "creator": "Misscakes69",
                             "durationSeconds": 180,
                         },
+                        {
+                            "slug": "bbw-miss-ladycakes-takes-a-big-old-cock",
+                            "title": "BBW Miss Ladycakes Takes a Big Old Cock",
+                            "creator": "Miss Ladycakes",
+                            "durationSeconds": 412,
+                        },
+                        {
+                            "slug": "janny-all-natural-naughty-milf",
+                            "title": "Janny All Natural Naughty MILF",
+                            "creator": "Janny",
+                            "durationSeconds": 24,
+                        },
                     ]
                 },
                 "MISS LADYCAKEZ69",
@@ -5824,6 +5840,9 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("ALEJAMIEL18", tv)
         self.assertIn("LUST4LIZZY", tv)
         self.assertIn("MISS LADYCAKEZ69", tv)
+        self.assertIn("BBW Miss Ladycakes", tv)
+        self.assertIn("ladyvphatcakes", tv)
+        self.assertIn("Janny loadgirls squat", tv)
         self.assertIn("PASTE", tv)
         self.assertIn("NO PASTE", tv)
         self.assertIn("public video search", tv.lower())
