@@ -4,7 +4,7 @@ import SwiftUI
 import Tokens
 import UIKit
 
-/// Full-field adult HLS. Pinch zooms the player. Watch chrome on glass.
+/// Full-field adult HLS. Pinch zooms the player. Watch chrome sleeps off the picture.
 struct LiveZoom: View {
     let row: NaLive.Row
     let pipe: Bool
@@ -17,71 +17,43 @@ struct LiveZoom: View {
     var onNext: (() -> Void)?
     @State private var player: AVPlayer?
     @State private var chrome: String?
+    @State private var showChrome = true
+    @State private var hideTask: Task<Void, Never>?
 
     var body: some View {
         ZStack {
             Theme.void.ignoresSafeArea()
             well
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(spacing: 8) {
-                    Button("CLOSE") { onClose() }
-                        .buttonStyle(HUDOverlayChipStyle(filled: true))
-                    Spacer(minLength: 0)
-                    Button(kept ? "DROP" : "KEEP") { onKeep?(row) }
-                        .buttonStyle(HUDOverlayChipStyle(filled: kept))
-                }
-                HStack(spacing: 8) {
-                    Text(row.name)
-                        .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(Color.white)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.7)
-                    Spacer(minLength: 8)
-                    TimelineView(.periodic(from: .now, by: player == nil ? 60 : 1.0)) { _ in
-                        Text(NaWatch.clock(player, seconds: row.seconds, armed: player != nil))
-                            .font(.system(size: 13, weight: .heavy))
-                            .foregroundStyle(Theme.silver)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                    }
-                }
-                .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
-                HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                    Button("PREV") { step(-1) }
-                        .buttonStyle(HUDOverlayChipStyle())
-                    Button("NEXT") { step(1) }
-                        .buttonStyle(HUDOverlayChipStyle())
-                    Button("REWIND 15") { jump(-Double(NaWatch.jump)) }
-                        .buttonStyle(HUDOverlayChipStyle())
-                    Button("AHEAD 15") { jump(Double(NaWatch.jump)) }
-                        .buttonStyle(HUDOverlayChipStyle())
-                }
-                if let chrome {
-                    Text(chrome)
-                        .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(Theme.warn)
-                        .textCase(.uppercase)
-                }
-                Spacer()
-            }
-            .padding(12)
         }
-        .onAppear { start() }
+        .overlay(alignment: .top) { topRail }
+        .overlay(alignment: .bottom) { bottomRail }
+        .animation(Theme.Motion.sleep, value: showChrome)
+        .onAppear {
+            start()
+            wakeChrome()
+        }
         .onChange(of: pipe) { _, ok in
             if !ok { stop() }
         }
         .onChange(of: row.id) { _, _ in
             chrome = nil
             start()
+            wakeChrome()
         }
         .onChange(of: row.url) { _, _ in
             chrome = nil
             start()
+            wakeChrome()
         }
-        .onDisappear { stop() }
+        .onDisappear {
+            hideTask?.cancel()
+            stop()
+        }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(row.name)
         .accessibilityValue(pipe ? "LIVE" : "NO PIPE")
+        .accessibilityHint(showChrome ? "CLOSE" : "TAP")
+        .accessibilityAction(named: "CLOSE") { onClose() }
     }
 
     @ViewBuilder
@@ -91,13 +63,116 @@ struct LiveZoom: View {
                 .font(.system(size: 15, weight: .heavy))
                 .foregroundStyle(Theme.warn)
         } else if let player {
-            LiveZoomScroll(player: player)
-                .ignoresSafeArea()
+            LiveZoomScroll(
+                player: player,
+                onFieldTap: toggleChrome,
+                onFieldMove: sleepChrome
+            )
+            .ignoresSafeArea()
         } else {
             Text("NO STREAM")
                 .font(.system(size: 15, weight: .heavy))
                 .foregroundStyle(Theme.silver)
         }
+    }
+
+    private var topRail: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Button("CLOSE") { onClose() }
+                    .buttonStyle(HUDOverlayChipStyle(filled: true))
+                Spacer(minLength: 0)
+                TimelineView(.periodic(from: .now, by: player == nil ? 60 : 1.0)) { _ in
+                    Text(NaWatch.clock(player, seconds: row.seconds, armed: player != nil))
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(Theme.silver)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+                Button(kept ? "DROP" : "KEEP") {
+                    wakeChrome()
+                    onKeep?(row)
+                }
+                .buttonStyle(HUDOverlayChipStyle(filled: kept))
+            }
+            Text(row.name)
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(Theme.silver)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
+        .padding(.bottom, 16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(edgeFade(top: true))
+        .opacity(showChrome ? 1 : 0)
+        .allowsHitTesting(showChrome)
+        .accessibilityHidden(!showChrome)
+    }
+
+    private var bottomRail: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let chrome {
+                Text(chrome)
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.warn)
+                    .textCase(.uppercase)
+            }
+            HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                Button("PREV") { step(-1) }
+                    .buttonStyle(HUDOverlayChipStyle())
+                Button("NEXT") { step(1) }
+                    .buttonStyle(HUDOverlayChipStyle())
+                Button("REWIND 15") { jump(-Double(NaWatch.jump)) }
+                    .buttonStyle(HUDOverlayChipStyle())
+                Button("AHEAD 15") { jump(Double(NaWatch.jump)) }
+                    .buttonStyle(HUDOverlayChipStyle())
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 16)
+        .padding(.bottom, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(edgeFade(top: false))
+        .opacity(showChrome ? 1 : 0)
+        .allowsHitTesting(showChrome)
+        .accessibilityHidden(!showChrome)
+    }
+
+    private func edgeFade(top: Bool) -> some View {
+        LinearGradient(
+            colors: top
+                ? [Theme.void.opacity(0.72), Theme.void.opacity(0)]
+                : [Theme.void.opacity(0), Theme.void.opacity(0.72)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .allowsHitTesting(false)
+    }
+
+    private func toggleChrome() {
+        if showChrome {
+            sleepChrome()
+        } else {
+            wakeChrome()
+        }
+    }
+
+    private func wakeChrome() {
+        hideTask?.cancel()
+        showChrome = true
+        hideTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(BlackoutTokens.Chrome.chromeIdleSeconds))
+            if Task.isCancelled { return }
+            if chrome != nil { return }
+            showChrome = false
+        }
+    }
+
+    private func sleepChrome() {
+        hideTask?.cancel()
+        showChrome = false
     }
 
     private func start() {
@@ -116,6 +191,7 @@ struct LiveZoom: View {
     }
 
     private func jump(_ by: Double) {
+        wakeChrome()
         if let why = NaWatch.seek(player, url: row.url, by: by) {
             chrome = why
             return
@@ -124,6 +200,7 @@ struct LiveZoom: View {
     }
 
     private func step(_ delta: Int) {
+        wakeChrome()
         if delta < 0, !canPrev {
             chrome = "FIRST"
             return
@@ -143,21 +220,44 @@ struct LiveZoom: View {
 
 private struct LiveZoomScroll: UIViewRepresentable {
     let player: AVPlayer
+    var onFieldTap: () -> Void
+    var onFieldMove: () -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onFieldTap: onFieldTap, onFieldMove: onFieldMove)
+    }
 
     func makeUIView(context: Context) -> ZoomView {
-        ZoomView(player: player)
+        let view = ZoomView(player: player)
+        view.coordinator = context.coordinator
+        return view
     }
 
     func updateUIView(_ uiView: ZoomView, context: Context) {
+        context.coordinator.onFieldTap = onFieldTap
+        context.coordinator.onFieldMove = onFieldMove
+        uiView.coordinator = context.coordinator
         uiView.apply(player)
     }
 
-    static func dismantleUIView(_ uiView: ZoomView, coordinator: ()) {
+    static func dismantleUIView(_ uiView: ZoomView, coordinator: Coordinator) {
+        uiView.coordinator = nil
         uiView.apply(nil)
+    }
+
+    final class Coordinator {
+        var onFieldTap: () -> Void
+        var onFieldMove: () -> Void
+
+        init(onFieldTap: @escaping () -> Void, onFieldMove: @escaping () -> Void) {
+            self.onFieldTap = onFieldTap
+            self.onFieldMove = onFieldMove
+        }
     }
 
     final class ZoomView: UIScrollView, UIScrollViewDelegate {
         let host = PlayerHost()
+        var coordinator: Coordinator?
         private var lastSize: CGSize = .zero
 
         init(player: AVPlayer) {
@@ -173,9 +273,13 @@ private struct LiveZoomScroll: UIViewRepresentable {
             host.player = player
             host.isUserInteractionEnabled = true
             addSubview(host)
-            let tap = UITapGestureRecognizer(target: self, action: #selector(toggleZoom(_:)))
-            tap.numberOfTapsRequired = 2
-            addGestureRecognizer(tap)
+            let zoomTap = UITapGestureRecognizer(target: self, action: #selector(toggleZoom(_:)))
+            zoomTap.numberOfTapsRequired = 2
+            let fieldTap = UITapGestureRecognizer(target: self, action: #selector(tapField))
+            fieldTap.numberOfTapsRequired = 1
+            fieldTap.require(toFail: zoomTap)
+            addGestureRecognizer(zoomTap)
+            addGestureRecognizer(fieldTap)
         }
 
         required init?(coder: NSCoder) { nil }
@@ -190,6 +294,14 @@ private struct LiveZoomScroll: UIViewRepresentable {
 
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
             centerHost()
+        }
+
+        func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
+            coordinator?.onFieldMove()
+        }
+
+        func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+            coordinator?.onFieldMove()
         }
 
         override func layoutSubviews() {
@@ -225,6 +337,10 @@ private struct LiveZoomScroll: UIViewRepresentable {
             let insetX = max(0, (bounds.width - frame.width) / 2)
             let insetY = max(0, (bounds.height - frame.height) / 2)
             contentInset = UIEdgeInsets(top: insetY, left: insetX, bottom: insetY, right: insetX)
+        }
+
+        @objc private func tapField() {
+            coordinator?.onFieldTap()
         }
 
         @objc private func toggleZoom(_ tap: UITapGestureRecognizer) {

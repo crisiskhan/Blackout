@@ -2,55 +2,126 @@ import SwiftUI
 import UIKit
 import Tokens
 
-/// Full-field packed JPEG. Pinch zooms the file on disk. No recompress.
+/// Full-field packed JPEG. Pinch zooms the file on disk. CLOSE sleeps off the picture.
 struct StillZoom: View {
     let name: String
     let onClose: () -> Void
+    @State private var showChrome = true
+    @State private var hideTask: Task<Void, Never>?
 
     var body: some View {
         ZStack {
             Theme.void.ignoresSafeArea()
             if let still {
-                StillZoomScroll(still: still)
-                    .ignoresSafeArea()
+                StillZoomScroll(
+                    still: still,
+                    onFieldTap: toggleChrome,
+                    onFieldMove: sleepChrome
+                )
+                .ignoresSafeArea()
             } else {
                 Text("NO STILL")
                     .font(.system(size: 15, weight: .heavy))
                     .foregroundStyle(Theme.silver)
             }
-            VStack {
-                HStack {
-                    Button("CLOSE") { onClose() }
-                        .buttonStyle(HUDOverlayChipStyle(filled: true))
-                    Spacer(minLength: 0)
-                }
-                .padding(12)
-                Spacer()
-            }
         }
+        .overlay(alignment: .top) { topRail }
+        .animation(Theme.Motion.sleep, value: showChrome)
+        .onAppear { wakeChrome() }
+        .onDisappear { hideTask?.cancel() }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(still == nil ? "NO STILL" : "STILL")
+        .accessibilityHint(showChrome ? "CLOSE" : "TAP")
+        .accessibilityAction(named: "CLOSE") { onClose() }
+    }
+
+    private var topRail: some View {
+        HStack {
+            Button("CLOSE") { onClose() }
+                .buttonStyle(HUDOverlayChipStyle(filled: true))
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
+        .padding(.bottom, 16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            LinearGradient(
+                colors: [Theme.void.opacity(0.72), Theme.void.opacity(0)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .allowsHitTesting(false)
+        )
+        .opacity(showChrome ? 1 : 0)
+        .allowsHitTesting(showChrome)
+        .accessibilityHidden(!showChrome)
     }
 
     private var still: UIImage? {
         let url = SnapManifest.folder().appendingPathComponent(name)
         return UIImage(contentsOfFile: url.path)
     }
+
+    private func toggleChrome() {
+        if showChrome {
+            sleepChrome()
+        } else {
+            wakeChrome()
+        }
+    }
+
+    private func wakeChrome() {
+        hideTask?.cancel()
+        showChrome = true
+        hideTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(BlackoutTokens.Chrome.chromeIdleSeconds))
+            if Task.isCancelled { return }
+            showChrome = false
+        }
+    }
+
+    private func sleepChrome() {
+        hideTask?.cancel()
+        showChrome = false
+    }
 }
 
 private struct StillZoomScroll: UIViewRepresentable {
     let still: UIImage
+    var onFieldTap: () -> Void
+    var onFieldMove: () -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onFieldTap: onFieldTap, onFieldMove: onFieldMove)
+    }
 
     func makeUIView(context: Context) -> ZoomView {
-        ZoomView(still: still)
+        let view = ZoomView(still: still)
+        view.coordinator = context.coordinator
+        return view
     }
 
     func updateUIView(_ uiView: ZoomView, context: Context) {
+        context.coordinator.onFieldTap = onFieldTap
+        context.coordinator.onFieldMove = onFieldMove
+        uiView.coordinator = context.coordinator
         uiView.apply(still)
+    }
+
+    final class Coordinator {
+        var onFieldTap: () -> Void
+        var onFieldMove: () -> Void
+
+        init(onFieldTap: @escaping () -> Void, onFieldMove: @escaping () -> Void) {
+            self.onFieldTap = onFieldTap
+            self.onFieldMove = onFieldMove
+        }
     }
 
     final class ZoomView: UIScrollView, UIScrollViewDelegate {
         let imageView = UIImageView()
+        var coordinator: Coordinator?
         private var lastSize: CGSize = .zero
 
         init(still: UIImage) {
@@ -68,9 +139,13 @@ private struct StillZoomScroll: UIViewRepresentable {
             imageView.clipsToBounds = false
             imageView.isUserInteractionEnabled = true
             addSubview(imageView)
-            let tap = UITapGestureRecognizer(target: self, action: #selector(toggleZoom(_:)))
-            tap.numberOfTapsRequired = 2
-            addGestureRecognizer(tap)
+            let zoomTap = UITapGestureRecognizer(target: self, action: #selector(toggleZoom(_:)))
+            zoomTap.numberOfTapsRequired = 2
+            let fieldTap = UITapGestureRecognizer(target: self, action: #selector(tapField))
+            fieldTap.numberOfTapsRequired = 1
+            fieldTap.require(toFail: zoomTap)
+            addGestureRecognizer(zoomTap)
+            addGestureRecognizer(fieldTap)
         }
 
         required init?(coder: NSCoder) { nil }
@@ -89,6 +164,14 @@ private struct StillZoomScroll: UIViewRepresentable {
 
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
             centerImage()
+        }
+
+        func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
+            coordinator?.onFieldMove()
+        }
+
+        func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+            coordinator?.onFieldMove()
         }
 
         override func layoutSubviews() {
@@ -123,6 +206,10 @@ private struct StillZoomScroll: UIViewRepresentable {
             let insetX = max(0, (bounds.width - frame.width) / 2)
             let insetY = max(0, (bounds.height - frame.height) / 2)
             contentInset = UIEdgeInsets(top: insetY, left: insetX, bottom: insetY, right: insetX)
+        }
+
+        @objc private func tapField() {
+            coordinator?.onFieldTap()
         }
 
         @objc private func toggleZoom(_ tap: UITapGestureRecognizer) {
