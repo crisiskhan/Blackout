@@ -5732,6 +5732,38 @@ class LiveZoomTests(unittest.TestCase):
         self.assertNotIn(".spring(", zoom)
         self.assertNotIn("rtmp", zoom.lower())
 
+    def test_full_field_chrome_sleeps_off_the_picture(self):
+        zoom = read("Blackout", "LiveZoom.swift")
+        still = read("Blackout", "StillZoom.swift")
+        qa = read("docs", "SOLO_QA.md")
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
+        self.assertIn("showChrome", zoom)
+        self.assertIn("chromeIdleSeconds", zoom)
+        self.assertIn("chromeIdleSeconds", tokens)
+        self.assertIn("onFieldTap", zoom)
+        self.assertIn("require(toFail:", zoom)
+        self.assertIn("overlay(alignment: .top)", zoom)
+        self.assertIn("overlay(alignment: .bottom)", zoom)
+        self.assertIn("allowsHitTesting", zoom)
+        self.assertIn("safeAreaPadding", zoom)
+        self.assertIn("CLOSE", zoom)
+        self.assertIn("REWIND 15", zoom)
+        self.assertIn("AHEAD 15", zoom)
+        self.assertNotIn('Button("LIVE")', zoom)
+        self.assertNotIn("NaWatch.drop", zoom)
+        wake = zoom.split("private func wakeChrome")[1].split("private func sleepChrome")[0]
+        self.assertIn("showChrome = false", wake)
+        self.assertNotIn("if chrome != nil", wake)
+        self.assertIn("showChrome", still)
+        self.assertIn("onFieldTap", still)
+        self.assertIn("require(toFail:", still)
+        self.assertIn("overlay(alignment: .top)", still)
+        self.assertIn("safeAreaPadding", still)
+        tv = next(line for line in qa.splitlines() if "EXPEDITION `TV`" in line)
+        self.assertIn("chrome fades", tv)
+        self.assertIn("never sit on the picture", tv)
+        self.assertNotIn("stay on the field", tv)
+
 
 class ClosedSourcesTests(unittest.TestCase):
     def test_tv_and_harvest_refuse_unsecured_alpr_and_streams(self):
