@@ -77,33 +77,33 @@ struct LiveZoom: View {
     }
 
     private var topRail: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                Button("CLOSE") { onClose() }
-                    .buttonStyle(HUDOverlayChipStyle(filled: true))
-                Spacer(minLength: 0)
-                TimelineView(.periodic(from: .now, by: player == nil ? 60 : 1.0)) { _ in
-                    Text(NaWatch.clock(player, seconds: row.seconds, armed: player != nil))
-                        .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(Theme.silver)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                }
-                Button(kept ? "DROP" : "KEEP") {
-                    wakeChrome()
-                    onKeep?(row)
-                }
-                .buttonStyle(HUDOverlayChipStyle(filled: kept))
-            }
+        HStack(spacing: 8) {
+            Button("CLOSE") { onClose() }
+                .buttonStyle(HUDOverlayChipStyle(filled: true))
             Text(row.name)
                 .font(.system(size: 13, weight: .heavy))
                 .foregroundStyle(Theme.silver)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            TimelineView(.periodic(from: .now, by: player == nil ? 60 : 1.0)) { _ in
+                Text(NaWatch.clock(player, seconds: row.seconds, armed: player != nil))
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.silver)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            Button(kept ? "DROP" : "KEEP") {
+                wakeChrome()
+                onKeep?(row)
+            }
+            .buttonStyle(HUDOverlayChipStyle(filled: kept))
         }
         .padding(.horizontal, 12)
-        .padding(.top, 8)
-        .padding(.bottom, 16)
+        .padding(.top, 6)
+        .padding(.bottom, 10)
+        .safeAreaPadding(.top)
+        .safeAreaPadding(.horizontal)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(edgeFade(top: true))
         .opacity(showChrome ? 1 : 0)
@@ -131,8 +131,10 @@ struct LiveZoom: View {
             }
         }
         .padding(.horizontal, 12)
-        .padding(.top, 16)
-        .padding(.bottom, 8)
+        .padding(.top, 10)
+        .padding(.bottom, 6)
+        .safeAreaPadding(.bottom)
+        .safeAreaPadding(.horizontal)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(edgeFade(top: false))
         .opacity(showChrome ? 1 : 0)
@@ -165,7 +167,6 @@ struct LiveZoom: View {
         hideTask = Task { @MainActor in
             try? await Task.sleep(for: .seconds(BlackoutTokens.Chrome.chromeIdleSeconds))
             if Task.isCancelled { return }
-            if chrome != nil { return }
             showChrome = false
         }
     }
