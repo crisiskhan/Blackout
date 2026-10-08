@@ -62,6 +62,8 @@ enum NaWatch {
 
     @MainActor
     private static var pipe: AVPlayer?
+    @MainActor
+    static var era: UInt = 0
 
     /// Movie playback. FIELD SAY / PTT leave the session in record —
     /// AVPlayer is then silent, or the audio unit crashes the phone.
@@ -76,6 +78,7 @@ enum NaWatch {
 
     @MainActor
     static func play(url: URL, headers: [String: String]) -> AVPlayer {
+        era &+= 1
         hear()
         if let current = pipe,
            let asset = current.currentItem?.asset as? AVURLAsset,
@@ -114,17 +117,26 @@ enum NaWatch {
     }
 
     /// Detach first, then drop the item on the next turn so the layer
-    /// is not sitting on a niled item (ASC 72 class).
+    /// is not sitting on a niled item (ASC 72 class). A later play()
+    /// bumps era so CLOSE cannot nil a remounted item.
     @MainActor
     static func drop(_ victim: AVPlayer? = nil) {
         let old = victim ?? pipe
         guard let old else { return }
+        let seen = era
         if pipe === old { pipe = nil }
         old.pause()
         Task { @MainActor in
             await Task.yield()
+            guard seen == era else { return }
             old.replaceCurrentItem(with: nil)
         }
+    }
+
+    @MainActor
+    static func drop(ifEra seen: UInt) {
+        guard seen == era else { return }
+        drop()
     }
 
     static func still(id: String, maxEdge: Int) -> UIImage? {
@@ -241,6 +253,12 @@ struct NaLiveWell: View {
             watchRail
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .onChange(of: holdPipe) { _, held in
+            if held { return }
+            if playingID == row.id, player == nil, pipe {
+                Task { await start() }
+            }
+        }
         .onChange(of: pipe) { _, ok in
             if !ok, zoomLive == nil, !holdPipe {
                 stop()
@@ -368,9 +386,8 @@ struct NaLiveWell: View {
         if AdultDesk.playlist(keep) != nil {
             next.url = keep
         }
-        onFull(next)
         player = nil
-        if playingID == row.id { playingID = nil }
+        onFull(next)
     }
 
     private func toggle() {
@@ -397,6 +414,7 @@ struct NaLiveWell: View {
     private func start() async {
         playSeq += 1
         let seq = playSeq
+        guard zoomLive == nil, !holdPipe else { return }
         guard pipe, playingID == row.id else { return }
         guard let raw = await onPlay(row), let play = AdultDesk.playlist(raw),
               let url = URL(string: play), url.scheme == "https"
@@ -406,7 +424,7 @@ struct NaLiveWell: View {
             dead = true
             return
         }
-        guard playingID == row.id, seq == playSeq else { return }
+        guard zoomLive == nil, !holdPipe, playingID == row.id, seq == playSeq else { return }
         playURL = play
         player = NaWatch.play(url: url, headers: AdultDesk.playHeaders(play))
         paused = false

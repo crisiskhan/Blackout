@@ -896,12 +896,15 @@ final class AppRuntime {
 
     func closeLive() {
         naLiveSeq &+= 1
+        let seq = naLiveSeq
+        let era = NaWatch.era
         zoomLive = nil
         naQueue = []
         naIndex = 0
         Task { @MainActor in
             await Task.yield()
-            NaWatch.drop()
+            guard seq == naLiveSeq, zoomLive == nil else { return }
+            NaWatch.drop(ifEra: era)
         }
     }
 
