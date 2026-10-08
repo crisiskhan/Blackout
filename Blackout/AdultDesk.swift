@@ -384,6 +384,15 @@ enum AdultDesk {
         "miss ladycakez 69",
         "miss ladycakez69",
     ]
+    static let exoticaNeedles = [
+        "exoticaxxx",
+        "exoticaslim",
+        "ilovekaylaxx",
+        "slimexotica",
+        "missskaylax",
+        "missskaylaxx",
+        "missskaylaxxx",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
@@ -426,6 +435,7 @@ enum AdultDesk {
         ("ALEJAMIEL18", alejaNeedles),
         ("LUST4LIZZY", lizzyNeedles),
         ("MISS LADYCAKEZ69", cakezNeedles),
+        ("EXOTICAXXX", exoticaNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -486,6 +496,15 @@ enum AdultDesk {
         ("GIULIANA CABRAZIA", ["giulianacabrazia", "giulianacabrazia2", "gcabrazia"]),
         ("LUST4LIZZY", ["lust4lizzy"]),
         ("MISS LADYCAKEZ69", ["missladycakez69", "miss_ladycakez69"]),
+        ("EXOTICAXXX", [
+            "exoticaxxx",
+            "exoticaslim",
+            "ilovekaylaxx",
+            "slimexotica",
+            "missskaylax",
+            "missskaylaxx",
+            "missskaylaxxx",
+        ]),
     ]
     /// Proven guest albums. Hunt these first so a JSON desk cannot blank the chip.
     static let faceDesks: [(String, [String])] = [
@@ -556,6 +575,7 @@ enum AdultDesk {
             "lgNTnZw1",
         ]),
         ("LUST4LIZZY", ["7YfN2Aly"]),
+        ("EXOTICAXXX", ["64PV5qNR", "e1YBZ1zA", "KMootfxL"]),
     ]
     /// Public X handles. Hunt the guest timeline, not a paywalled store.
     static let facePosts: [(String, [String])] = [
@@ -599,6 +619,7 @@ enum AdultDesk {
         ("GIULIANA CABRAZIA", ["gcabrazia", "giulianacabrazia_", "giulianacabrazia2"]),
         ("LUST4LIZZY", ["lust4lizzy"]),
         ("MISS LADYCAKEZ69", ["miss_ladycakez69", "missladycakez69"]),
+        ("EXOTICAXXX", ["exoticaslim", "exoticaxxx", "ilovekaylaxx", "missskaylax"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
@@ -918,6 +939,11 @@ enum AdultDesk {
         ("LUST4LIZZY", [
             ("file", "https://v51.erome.com/8277/7YfN2Aly/JbdRKMkf_720p.mp4", 14, "Lust4lizzy"),
         ]),
+        ("EXOTICAXXX", [
+            ("file", "https://v102.erome.com/8145/64PV5qNR/0XmpTQB4_720p.mp4", 28, "Exoticaslim"),
+            ("file", "https://v42.erome.com/8145/e1YBZ1zA/UZflSlfW_720p.mp4", 12, "Exoticaslim"),
+            ("file", "https://v108.erome.com/8044/KMootfxL/nhsZGrI3_720p.mp4", 9, "Exoticaslim"),
+        ]),
     ]
     /// Guest stills for baked pin tokens. Star stills are `preview-batch/{slug}/thumb.webp`.
     static let faceStills: [(String, String)] = [
@@ -1162,6 +1188,13 @@ enum AdultDesk {
             let piece = part.removingPercentEncoding ?? part
             if skip.contains(piece.lowercased()) { continue }
             if piece.allSatisfy(\.isNumber), piece.count >= 8 { continue }
+            if piece.count >= 3,
+               let head = piece.first,
+               head.isLetter,
+               piece.dropFirst().allSatisfy(\.isNumber)
+            {
+                continue
+            }
             if let name = pageToken(piece) { return name }
         }
         if let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
