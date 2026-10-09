@@ -241,6 +241,9 @@ enum AdultDesk {
         "monaacutee",
         "mona acutee",
         "monaacute",
+        "monaamelon",
+        "monamelon",
+        "mona cute",
     ]
     static let hizNeedles = [
         "imhizbaeexx",
@@ -270,6 +273,8 @@ enum AdultDesk {
         "jacqievains",
         "jacqie vains",
         "jackie vains",
+        "jacquelinevalentine",
+        "jacqueline valentine",
     ]
     static let lilianaNeedles = [
         "lilianaspage",
@@ -304,6 +309,8 @@ enum AdultDesk {
         "debvarela",
         "deb varela",
         "debvarela_",
+        "debbieayoub",
+        "debbie ayoub",
     ]
     static let doseNeedles = [
         "doubledosetwins",
@@ -333,16 +340,25 @@ enum AdultDesk {
         "strawberrysandra20",
         "strawberry sandra",
         "strawberrysandra",
+        "sandraaurey",
+        "sandrakitty",
+        "sandrakittyreels",
+        "strawberrysandy",
+        "sandra aurey",
     ]
     static let itochiNeedles = [
         "itochianata",
         "ito chianata",
         "ito_chianata",
         "ito-chianata",
+        "itochi_anata",
+        "itochi anata",
     ]
     static let elvanaNeedles = [
         "elvanavitaa",
         "elvana vitaa",
+        "elvanavita",
+        "elvana vita",
     ]
     static let slavicNeedles = [
         "slaviccaramel",
@@ -377,12 +393,17 @@ enum AdultDesk {
         "lust4lizzy",
         "lust4lizzie",
         "lust 4 lizzy",
+        "you_me620",
+        "itslizzylust",
+        "lizzy lust",
     ]
     static let cakezNeedles = [
         "miss_ladycakez69",
         "missladycakez69",
         "miss ladycakez 69",
         "miss ladycakez69",
+        "lady_cakez69",
+        "ladycakez69",
     ]
     static let exoticaNeedles = [
         "exoticaxxx",
@@ -392,6 +413,7 @@ enum AdultDesk {
         "missskaylax",
         "missskaylaxx",
         "missskaylaxxx",
+        "iloveekaylaaa",
     ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
@@ -469,33 +491,33 @@ enum AdultDesk {
         ("LILI VICTORIA", ["lilivictoria32", "lilivictoria"]),
         ("ZURI BELLA ROSE", ["zuribellarose"]),
         ("SARIIXO", ["officialsariixo", "sariixo"]),
-        ("MONA ACUTEE", ["monaacutee", "monaacute"]),
+        ("MONA ACUTEE", ["monaacutee", "monaacute", "monaamelon", "monamelon"]),
         ("IMHIZBAEEXX", ["imhizbaeexx", "imhizbaee", "imhizbae", "hizbaeexx"]),
         ("YESS ENIA69", ["yessenialoch", "yessenia69"]),
         ("VAL2YUMMI", ["val2yummi", "val2yummy"]),
         ("KIRAWWRRRA", ["kirawrrra", "kirawrrra2"]),
-        ("JACQIE VAINS", ["jacqievains"]),
+        ("JACQIE VAINS", ["jacqievains", "jacquelinevalentine"]),
         ("LILIANAS PAGE", ["lilianaspage"]),
         ("FREAKYYSTACKSS", ["freakyystackss", "freakyystacks"]),
         ("ASAIA HERNANDEZ", ["asaiahernandez"]),
         ("JASMINEGTV", ["jasminegtv1", "jasminegtv"]),
         ("IMANGELJESSYY", ["imangeljessyy", "imangeljessy", "angeljessyy"]),
         ("GRACIE BONN", ["graciebon1", "itsgraciebonn"]),
-        ("DEBVARELA", ["debvarela"]),
+        ("DEBVARELA", ["debvarela", "debbieayoub"]),
         ("DOUBLE DOSE TWINS", ["doubledosetwins"]),
         ("PAMELA YAMZ", ["pamelayamz"]),
         ("ANNABELLE RIOS", ["annabellrio", "annabelleriossss", "annabellerios"]),
         ("NICOLEEE 1329", ["nicoleee1329"]),
         ("EUNICEG", ["euniceg"]),
-        ("STRAWBERRY SANDRA", ["strawberrysandra20", "strawberrysandra"]),
-        ("ITOCHIANATA", ["itochianata"]),
-        ("ELVANA VITAA", ["elvanavitaa"]),
+        ("STRAWBERRY SANDRA", ["strawberrysandra20", "strawberrysandra", "sandraaurey", "sandrakitty", "sandrakittyreels"]),
+        ("ITOCHIANATA", ["itochianata", "itochi_anata"]),
+        ("ELVANA VITAA", ["elvanavitaa", "elvanavita"]),
         ("SLAVIC CARAMEL", ["slaviccaramel"]),
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
         ("ITISASHLEY", ["itisashley", "luvashxx", "itisashleyy", "ofcourseashley"]),
         ("GIULIANA CABRAZIA", ["giulianacabrazia", "giulianacabrazia2", "gcabrazia"]),
-        ("LUST4LIZZY", ["lust4lizzy"]),
-        ("MISS LADYCAKEZ69", ["missladycakez69", "miss_ladycakez69"]),
+        ("LUST4LIZZY", ["lust4lizzy", "you_me620", "itslizzylust"]),
+        ("MISS LADYCAKEZ69", ["missladycakez69", "miss_ladycakez69", "ladycakez69"]),
         ("EXOTICAXXX", [
             "exoticaxxx",
             "exoticaslim",
@@ -504,6 +526,7 @@ enum AdultDesk {
             "missskaylax",
             "missskaylaxx",
             "missskaylaxxx",
+            "iloveekaylaaa",
         ]),
     ]
     /// Proven guest albums. Hunt these first so a JSON desk cannot blank the chip.
@@ -574,6 +597,7 @@ enum AdultDesk {
             "wBFdLsw0",
             "lgNTnZw1",
         ]),
+        ("STRAWBERRY SANDRA", ["4ftzrUvv"]),
         ("LUST4LIZZY", ["7YfN2Aly"]),
         ("EXOTICAXXX", ["64PV5qNR", "e1YBZ1zA", "KMootfxL"]),
     ]
@@ -592,12 +616,12 @@ enum AdultDesk {
         ("LILI VICTORIA", ["lilivictoria32"]),
         ("ZURI BELLA ROSE", ["zuribellarose"]),
         ("SARIIXO", ["officialsariixo"]),
-        ("MONA ACUTEE", ["monaacutee"]),
+        ("MONA ACUTEE", ["monaacutee", "monaamelon"]),
         ("IMHIZBAEEXX", ["imhizbaeexx_"]),
         ("YESS ENIA69", ["yessenialoch", "yess_enia69"]),
         ("VAL2YUMMI", ["val2yummi"]),
         ("KIRAWWRRRA", ["kirawrrra"]),
-        ("JACQIE VAINS", ["jacqievains"]),
+        ("JACQIE VAINS", ["jacqievains", "jacquelinevalentine"]),
         ("LILIANAS PAGE", ["lilianaspage"]),
         ("FREAKYYSTACKSS", ["freakyystackss"]),
         ("ASAIA HERNANDEZ", ["asaia_hernandez"]),
@@ -610,16 +634,16 @@ enum AdultDesk {
         ("ANNABELLE RIOS", ["annabellrio", "annabelleriossss"]),
         ("NICOLEEE 1329", ["_nicoleee_1329"]),
         ("EUNICEG", ["euniceg___"]),
-        ("STRAWBERRY SANDRA", ["strawberrysandra20"]),
-        ("ITOCHIANATA", ["itochianata"]),
-        ("ELVANA VITAA", ["elvanavitaa"]),
+        ("STRAWBERRY SANDRA", ["strawberrysandra20", "sandrakittyreels", "sandraaurey"]),
+        ("ITOCHIANATA", ["itochianata", "itochi_anata"]),
+        ("ELVANA VITAA", ["elvanavitaa", "elvanavita"]),
         ("SLAVIC CARAMEL", ["slaviccaramel"]),
         ("LIL BUSSY GIRL", ["lilbussygirl"]),
         ("ITISASHLEY", ["itisashley", "luvashxx"]),
         ("GIULIANA CABRAZIA", ["gcabrazia", "giulianacabrazia_", "giulianacabrazia2"]),
-        ("LUST4LIZZY", ["lust4lizzy"]),
-        ("MISS LADYCAKEZ69", ["miss_ladycakez69", "missladycakez69"]),
-        ("EXOTICAXXX", ["exoticaslim", "exoticaxxx", "ilovekaylaxx", "missskaylax"]),
+        ("LUST4LIZZY", ["lust4lizzy", "you_me620"]),
+        ("MISS LADYCAKEZ69", ["miss_ladycakez69", "missladycakez69", "lady_cakez69"]),
+        ("EXOTICAXXX", ["exoticaslim", "exoticaxxx", "ilovekaylaxx", "missskaylax", "iloveekaylaaa"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
@@ -936,8 +960,23 @@ enum AdultDesk {
             ("file", "https://v90.erome.com/7069/22xZVJW7/84QuWv1D_720p.mp4", 15, "Aleja Miel"),
             ("file", "https://v5.erome.com/1052/lgNTnZw1/gQCNHSEx_720p.mp4", 15, "Aleja miel"),
         ]),
+        ("JACQIE VAINS", [
+            ("post", "https://video.twimg.com/amplify_video/1930924360342085632/vid/avc1/720x1280/5SNL_GF8dsxxamYH.mp4?tag=14", 8, "Jacqievains"),
+            ("post", "https://video.twimg.com/amplify_video/2097107327535157248/vid/avc1/720x1280/5l_W4wBeWlkAYK9T.mp4?tag=29", 7, "Jacqievains"),
+        ]),
+        ("STRAWBERRY SANDRA", [
+            ("file", "https://v44.erome.com/6526/4ftzrUvv/n3Hv2H83_720p.mp4", 7, "Sandrakittyreels"),
+            ("file", "https://v44.erome.com/6526/4ftzrUvv/QEZoNl55_720p.mp4", 6, "Sandrakittyreels"),
+            ("file", "https://v44.erome.com/6526/4ftzrUvv/ZSgKZOhN_720p.mp4", 5, "Sandrakittyreels"),
+            ("file", "https://v44.erome.com/6526/4ftzrUvv/FRNEUCKD_720p.mp4", 5, "Sandrakittyreels"),
+        ]),
         ("LUST4LIZZY", [
+            ("post", "https://video.twimg.com/amplify_video/1923641866395774976/vid/avc1/1080x1080/lgd7LQcOEwmYXLfO.mp4?tag=16", 1759, "You_me620"),
             ("file", "https://v51.erome.com/8277/7YfN2Aly/JbdRKMkf_720p.mp4", 14, "Lust4lizzy"),
+            ("post", "https://video.twimg.com/amplify_video/2064654191843287040/vid/avc1/720x1280/TM7aJ5ZP7vBaVOf3.mp4?tag=14", 14, "You_me620"),
+            ("post", "https://video.twimg.com/amplify_video/2029118675081363456/vid/avc1/1080x1920/ZbWt15tkKIqGBYEu.mp4?tag=21", 12, "You_me620"),
+            ("post", "https://video.twimg.com/amplify_video/2029118648086847488/vid/avc1/720x1280/xYA-M3EtbQObs0tC.mp4?tag=21", 12, "You_me620"),
+            ("post", "https://video.twimg.com/amplify_video/2054107907562536960/vid/avc1/1080x1920/jgh2duEQoMXKOLXd.mp4?tag=27", 9, "You_me620"),
         ]),
         ("EXOTICAXXX", [
             ("file", "https://v102.erome.com/8145/64PV5qNR/0XmpTQB4_720p.mp4", 28, "Exoticaslim"),
@@ -968,6 +1007,13 @@ enum AdultDesk {
         ("_aOTP7lmij_AcXCq", "https://pbs.twimg.com/amplify_video_thumb/2094082244461662208/img/bJtLomDZgHidTVjf.jpg"),
         ("HuEPu5ag47rrOayB", "https://pbs.twimg.com/amplify_video_thumb/1729887557100683264/img/VGhugB2H-T5-HeXa.jpg"),
         ("QQ1zFXpVl4_G_cv4", "https://pbs.twimg.com/amplify_video_thumb/2096650760713101312/img/DqvxfJNEv3T15Fpx.jpg"),
+        ("lgd7LQcOEwmYXLfO", "https://pbs.twimg.com/amplify_video_thumb/1923641866395774976/img/pJcGtnImTQZAYz28.jpg"),
+        ("TM7aJ5ZP7vBaVOf3", "https://pbs.twimg.com/amplify_video_thumb/2064654191843287040/img/OjQ1Qaq5yH3TSsEn.jpg"),
+        ("ZbWt15tkKIqGBYEu", "https://pbs.twimg.com/amplify_video_thumb/2029118675081363456/img/S_T358hXjLfM0Mei.jpg"),
+        ("xYA-M3EtbQObs0tC", "https://pbs.twimg.com/amplify_video_thumb/2029118648086847488/img/XMoJPSPQzWS_wOz5.jpg"),
+        ("jgh2duEQoMXKOLXd", "https://pbs.twimg.com/amplify_video_thumb/2054107907562536960/img/yLBJF6577Di2ddbT.jpg"),
+        ("5SNL_GF8dsxxamYH", "https://pbs.twimg.com/amplify_video_thumb/1930924360342085632/img/3vbyusbQAyhmJw3R.jpg"),
+        ("5l_W4wBeWlkAYK9T", "https://pbs.twimg.com/amplify_video_thumb/2097107327535157248/img/n6zpdS-JHDNbs0jU.jpg"),
     ]
     static let loveAgent =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -1410,7 +1456,7 @@ enum AdultDesk {
         if let cut = file.range(of: ".") {
             file = String(file[..<cut.lowerBound])
         }
-        guard file.count >= 4, file.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" }) else {
+        guard file.count >= 4, file.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" || $0 == "-" }) else {
             return nil
         }
         return file
