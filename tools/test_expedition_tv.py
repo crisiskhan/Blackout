@@ -342,6 +342,9 @@ ADULT_MONA = (
     "monaacutee",
     "mona acutee",
     "monaacute",
+    "monaamelon",
+    "monamelon",
+    "mona cute",
 )
 ADULT_HIZ = (
     "imhizbaeexx",
@@ -371,6 +374,8 @@ ADULT_JACQIE = (
     "jacqievains",
     "jacqie vains",
     "jackie vains",
+    "jacquelinevalentine",
+    "jacqueline valentine",
 )
 ADULT_LILIANA = (
     "lilianaspage",
@@ -405,6 +410,8 @@ ADULT_DEB = (
     "debvarela",
     "deb varela",
     "debvarela_",
+    "debbieayoub",
+    "debbie ayoub",
 )
 ADULT_DOSE = (
     "doubledosetwins",
@@ -434,16 +441,25 @@ ADULT_SANDRA = (
     "strawberrysandra20",
     "strawberry sandra",
     "strawberrysandra",
+    "sandraaurey",
+    "sandrakitty",
+    "sandrakittyreels",
+    "strawberrysandy",
+    "sandra aurey",
 )
 ADULT_ITOCHI = (
     "itochianata",
     "ito chianata",
     "ito_chianata",
     "ito-chianata",
+    "itochi_anata",
+    "itochi anata",
 )
 ADULT_ELVANA = (
     "elvanavitaa",
     "elvana vitaa",
+    "elvanavita",
+    "elvana vita",
 )
 ADULT_SLAVIC = (
     "slaviccaramel",
@@ -478,12 +494,17 @@ ADULT_LIZZY = (
     "lust4lizzy",
     "lust4lizzie",
     "lust 4 lizzy",
+    "you_me620",
+    "itslizzylust",
+    "lizzy lust",
 )
 ADULT_CAKEZ = (
     "miss_ladycakez69",
     "missladycakez69",
     "miss ladycakez 69",
     "miss ladycakez69",
+    "lady_cakez69",
+    "ladycakez69",
 )
 ADULT_EXOTICA = (
     "exoticaxxx",
@@ -493,6 +514,7 @@ ADULT_EXOTICA = (
     "missskaylax",
     "missskaylaxx",
     "missskaylaxxx",
+    "iloveekaylaaa",
 )
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
@@ -1498,8 +1520,23 @@ ADULT_FACE_HOLDS = (
         ("file", "https://v90.erome.com/7069/22xZVJW7/84QuWv1D_720p.mp4", 15, "Aleja Miel"),
         ("file", "https://v5.erome.com/1052/lgNTnZw1/gQCNHSEx_720p.mp4", 15, "Aleja miel"),
     )),
+    ("JACQIE VAINS", (
+        ("post", "https://video.twimg.com/amplify_video/1930924360342085632/vid/avc1/720x1280/5SNL_GF8dsxxamYH.mp4?tag=14", 8, "Jacqievains"),
+        ("post", "https://video.twimg.com/amplify_video/2097107327535157248/vid/avc1/720x1280/5l_W4wBeWlkAYK9T.mp4?tag=29", 7, "Jacqievains"),
+    )),
+    ("STRAWBERRY SANDRA", (
+        ("file", "https://v44.erome.com/6526/4ftzrUvv/n3Hv2H83_720p.mp4", 7, "Sandrakittyreels"),
+        ("file", "https://v44.erome.com/6526/4ftzrUvv/QEZoNl55_720p.mp4", 6, "Sandrakittyreels"),
+        ("file", "https://v44.erome.com/6526/4ftzrUvv/ZSgKZOhN_720p.mp4", 5, "Sandrakittyreels"),
+        ("file", "https://v44.erome.com/6526/4ftzrUvv/FRNEUCKD_720p.mp4", 5, "Sandrakittyreels"),
+    )),
     ("LUST4LIZZY", (
+        ("post", "https://video.twimg.com/amplify_video/1923641866395774976/vid/avc1/1080x1080/lgd7LQcOEwmYXLfO.mp4?tag=16", 1759, "You_me620"),
         ("file", "https://v51.erome.com/8277/7YfN2Aly/JbdRKMkf_720p.mp4", 14, "Lust4lizzy"),
+        ("post", "https://video.twimg.com/amplify_video/2064654191843287040/vid/avc1/720x1280/TM7aJ5ZP7vBaVOf3.mp4?tag=14", 14, "You_me620"),
+        ("post", "https://video.twimg.com/amplify_video/2029118675081363456/vid/avc1/1080x1920/ZbWt15tkKIqGBYEu.mp4?tag=21", 12, "You_me620"),
+        ("post", "https://video.twimg.com/amplify_video/2029118648086847488/vid/avc1/720x1280/xYA-M3EtbQObs0tC.mp4?tag=21", 12, "You_me620"),
+        ("post", "https://video.twimg.com/amplify_video/2054107907562536960/vid/avc1/1080x1920/jgh2duEQoMXKOLXd.mp4?tag=27", 9, "You_me620"),
     )),
     ("EXOTICAXXX", (
         ("file", "https://v102.erome.com/8145/64PV5qNR/0XmpTQB4_720p.mp4", 28, "Exoticaslim"),
@@ -1525,6 +1562,7 @@ ADULT_FACE_DESKS = (
     ("ANNABELLE RIOS", ("uto61E9C", "HTwoGgwW", "FDZSNMht", "ZCXHIMZ5")),
     ("ITISASHLEY", ("tNRwgjor", "kcGtCmxt", "PoAT0le0", "9e8OKgPA", "ogqEfuYU", "t3MTaJMC", "6svu4cRT")),
     ("ALEJAMIEL18", ("y01IMarw", "22xZVJW7", "z3OqMDEp", "GCq1t8hI", "wBFdLsw0", "lgNTnZw1")),
+    ("STRAWBERRY SANDRA", ("4ftzrUvv",)),
     ("LUST4LIZZY", ("7YfN2Aly",)),
     ("EXOTICAXXX", ("64PV5qNR", "e1YBZ1zA", "KMootfxL")),
 )
@@ -1604,12 +1642,12 @@ ADULT_FACE_POSTS = (
     ("LILI VICTORIA", ("lilivictoria32",)),
     ("ZURI BELLA ROSE", ("zuribellarose",)),
     ("SARIIXO", ("officialsariixo",)),
-    ("MONA ACUTEE", ("monaacutee",)),
+    ("MONA ACUTEE", ("monaacutee", "monaamelon")),
     ("IMHIZBAEEXX", ("imhizbaeexx_",)),
     ("YESS ENIA69", ("yessenialoch", "yess_enia69")),
     ("VAL2YUMMI", ("val2yummi",)),
     ("KIRAWWRRRA", ("kirawrrra",)),
-    ("JACQIE VAINS", ("jacqievains",)),
+    ("JACQIE VAINS", ("jacqievains", "jacquelinevalentine")),
     ("LILIANAS PAGE", ("lilianaspage",)),
     ("FREAKYYSTACKSS", ("freakyystackss",)),
     ("ASAIA HERNANDEZ", ("asaia_hernandez",)),
@@ -1622,16 +1660,16 @@ ADULT_FACE_POSTS = (
     ("ANNABELLE RIOS", ("annabellrio", "annabelleriossss")),
     ("NICOLEEE 1329", ("_nicoleee_1329",)),
     ("EUNICEG", ("euniceg___",)),
-    ("STRAWBERRY SANDRA", ("strawberrysandra20",)),
-    ("ITOCHIANATA", ("itochianata",)),
-    ("ELVANA VITAA", ("elvanavitaa",)),
+    ("STRAWBERRY SANDRA", ("strawberrysandra20", "sandrakittyreels", "sandraaurey")),
+    ("ITOCHIANATA", ("itochianata", "itochi_anata")),
+    ("ELVANA VITAA", ("elvanavitaa", "elvanavita")),
     ("SLAVIC CARAMEL", ("slaviccaramel",)),
     ("LIL BUSSY GIRL", ("lilbussygirl",)),
     ("ITISASHLEY", ("itisashley", "luvashxx")),
     ("GIULIANA CABRAZIA", ("gcabrazia", "giulianacabrazia_", "giulianacabrazia2")),
-    ("LUST4LIZZY", ("lust4lizzy",)),
-    ("MISS LADYCAKEZ69", ("miss_ladycakez69", "missladycakez69")),
-    ("EXOTICAXXX", ("exoticaslim", "exoticaxxx", "ilovekaylaxx", "missskaylax")),
+    ("LUST4LIZZY", ("lust4lizzy", "you_me620")),
+    ("MISS LADYCAKEZ69", ("miss_ladycakez69", "missladycakez69", "lady_cakez69")),
+    ("EXOTICAXXX", ("exoticaslim", "exoticaxxx", "ilovekaylaxx", "missskaylax", "iloveekaylaaa")),
 )
 ADULT_FACE_STILLS = (
     ("P283XrKRjsV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"),
@@ -1655,6 +1693,13 @@ ADULT_FACE_STILLS = (
     ("_aOTP7lmij_AcXCq", "https://pbs.twimg.com/amplify_video_thumb/2094082244461662208/img/bJtLomDZgHidTVjf.jpg"),
     ("HuEPu5ag47rrOayB", "https://pbs.twimg.com/amplify_video_thumb/1729887557100683264/img/VGhugB2H-T5-HeXa.jpg"),
     ("QQ1zFXpVl4_G_cv4", "https://pbs.twimg.com/amplify_video_thumb/2096650760713101312/img/DqvxfJNEv3T15Fpx.jpg"),
+    ("lgd7LQcOEwmYXLfO", "https://pbs.twimg.com/amplify_video_thumb/1923641866395774976/img/pJcGtnImTQZAYz28.jpg"),
+    ("TM7aJ5ZP7vBaVOf3", "https://pbs.twimg.com/amplify_video_thumb/2064654191843287040/img/OjQ1Qaq5yH3TSsEn.jpg"),
+    ("ZbWt15tkKIqGBYEu", "https://pbs.twimg.com/amplify_video_thumb/2029118675081363456/img/S_T358hXjLfM0Mei.jpg"),
+    ("xYA-M3EtbQObs0tC", "https://pbs.twimg.com/amplify_video_thumb/2029118648086847488/img/XMoJPSPQzWS_wOz5.jpg"),
+    ("jgh2duEQoMXKOLXd", "https://pbs.twimg.com/amplify_video_thumb/2054107907562536960/img/yLBJF6577Di2ddbT.jpg"),
+    ("5SNL_GF8dsxxamYH", "https://pbs.twimg.com/amplify_video_thumb/1930924360342085632/img/3vbyusbQAyhmJw3R.jpg"),
+    ("5l_W4wBeWlkAYK9T", "https://pbs.twimg.com/amplify_video_thumb/2097107327535157248/img/n6zpdS-JHDNbs0jU.jpg"),
 )
 ADULT_FACE_GIFTS = (
     ("ITSSTEPHHONEY21", ("itsstephhoneyxo21", "itsstephhoney21", "stephaniehvip")),
@@ -1670,33 +1715,33 @@ ADULT_FACE_GIFTS = (
     ("LILI VICTORIA", ("lilivictoria32", "lilivictoria")),
     ("ZURI BELLA ROSE", ("zuribellarose",)),
     ("SARIIXO", ("officialsariixo", "sariixo")),
-    ("MONA ACUTEE", ("monaacutee", "monaacute")),
+    ("MONA ACUTEE", ("monaacutee", "monaacute", "monaamelon", "monamelon")),
     ("IMHIZBAEEXX", ("imhizbaeexx", "imhizbaee", "imhizbae", "hizbaeexx")),
     ("YESS ENIA69", ("yessenialoch", "yessenia69")),
     ("VAL2YUMMI", ("val2yummi", "val2yummy")),
     ("KIRAWWRRRA", ("kirawrrra", "kirawrrra2")),
-    ("JACQIE VAINS", ("jacqievains",)),
+    ("JACQIE VAINS", ("jacqievains", "jacquelinevalentine")),
     ("LILIANAS PAGE", ("lilianaspage",)),
     ("FREAKYYSTACKSS", ("freakyystackss", "freakyystacks")),
     ("ASAIA HERNANDEZ", ("asaiahernandez",)),
     ("JASMINEGTV", ("jasminegtv1", "jasminegtv")),
     ("IMANGELJESSYY", ("imangeljessyy", "imangeljessy", "angeljessyy")),
     ("GRACIE BONN", ("graciebon1", "itsgraciebonn")),
-    ("DEBVARELA", ("debvarela",)),
+    ("DEBVARELA", ("debvarela", "debbieayoub")),
     ("DOUBLE DOSE TWINS", ("doubledosetwins",)),
     ("PAMELA YAMZ", ("pamelayamz",)),
     ("ANNABELLE RIOS", ("annabellrio", "annabelleriossss", "annabellerios")),
     ("NICOLEEE 1329", ("nicoleee1329",)),
     ("EUNICEG", ("euniceg",)),
-    ("STRAWBERRY SANDRA", ("strawberrysandra20", "strawberrysandra")),
-    ("ITOCHIANATA", ("itochianata",)),
-    ("ELVANA VITAA", ("elvanavitaa",)),
+    ("STRAWBERRY SANDRA", ("strawberrysandra20", "strawberrysandra", "sandraaurey", "sandrakitty", "sandrakittyreels")),
+    ("ITOCHIANATA", ("itochianata", "itochi_anata")),
+    ("ELVANA VITAA", ("elvanavitaa", "elvanavita")),
     ("SLAVIC CARAMEL", ("slaviccaramel",)),
     ("LIL BUSSY GIRL", ("lilbussygirl",)),
     ("ITISASHLEY", ("itisashley", "luvashxx", "itisashleyy", "ofcourseashley")),
     ("GIULIANA CABRAZIA", ("giulianacabrazia", "giulianacabrazia2", "gcabrazia")),
-    ("LUST4LIZZY", ("lust4lizzy",)),
-    ("MISS LADYCAKEZ69", ("missladycakez69", "miss_ladycakez69")),
+    ("LUST4LIZZY", ("lust4lizzy", "you_me620", "itslizzylust")),
+    ("MISS LADYCAKEZ69", ("missladycakez69", "miss_ladycakez69", "ladycakez69")),
     ("EXOTICAXXX", (
         "exoticaxxx",
         "exoticaslim",
@@ -1705,6 +1750,7 @@ ADULT_FACE_GIFTS = (
         "missskaylax",
         "missskaylaxx",
         "missskaylaxxx",
+        "iloveekaylaaa",
     )),
 )
 ADULT_FACE_KILL = (
@@ -1877,7 +1923,7 @@ def adult_post_key(raw: str) -> str | None:
     file = path[-1].lower()
     if "." in file:
         file = file.split(".", 1)[0]
-    if len(file) < 4 or not all(ch.isalnum() or ch == "_" for ch in file):
+    if len(file) < 4 or not all(ch.isalnum() or ch in "_-" for ch in file):
         return None
     return file
 
@@ -4303,10 +4349,12 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("euniceg", adult_face_queries("EUNICEG"))
         self.assertIn("strawberrysandra20", adult_face_queries("STRAWBERRY SANDRA"))
         self.assertIn("itochianata", adult_face_queries("ITOCHIANATA"))
+        self.assertEqual(adult_hunt_needles("itochi_anata"), list(ADULT_ITOCHI))
         self.assertNotIn("itochi", adult_face_needles("ITOCHIANATA") or [])
         self.assertNotIn("anata", adult_face_needles("ITOCHIANATA") or [])
         self.assertEqual(adult_face_hold_rooms("ITOCHIANATA"), [])
         self.assertTrue(any("users/itochianata/search" in path for path in adult_face_hunt("ITOCHIANATA")))
+        self.assertTrue(any("users/itochi_anata/search" in path or "screen-name/itochi_anata" in path for path in adult_face_hunt("ITOCHIANATA")))
         self.assertFalse(any("users/itochi/search" in path for path in adult_face_hunt("ITOCHIANATA")))
         self.assertEqual(
             [row["id"] for row in adult_parse_face(
@@ -4687,7 +4735,21 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("ALEJAMIEL18", desk)
         self.assertIn("LUST4LIZZY", desk)
         self.assertIn("lust4lizzy", desk)
+        self.assertIn('"you_me620"', desk)
+        self.assertIn('"itslizzylust"', desk)
+        self.assertNotIn('"lust4liz"', desk)
         self.assertIn("7YfN2Aly", desk)
+        self.assertIn("lgd7LQcOEwmYXLfO", desk)
+        self.assertIn("4ftzrUvv", desk)
+        self.assertIn('"jacquelinevalentine"', desk)
+        self.assertIn('"sandrakittyreels"', desk)
+        self.assertIn('"sandraaurey"', desk)
+        self.assertIn('"lady_cakez69"', desk)
+        self.assertIn('"ladycakez69"', desk)
+        self.assertIn('"debbieayoub"', desk)
+        self.assertIn('"monaamelon"', desk)
+        self.assertIn('"iloveekaylaaa"', desk)
+        self.assertIn('"itochi_anata"', desk)
         self.assertIn("MISS LADYCAKEZ69", desk)
         self.assertIn("miss_ladycakez69", desk)
         self.assertIn("missladycakez69", desk)
@@ -5299,23 +5361,61 @@ class AdultDeskTests(unittest.TestCase):
             self.assertTrue(
                 "alejamiel18" in row["seek"] or "alejamieles" in row["seek"] or "aleja miel" in row["seek"]
             )
-        self.assertGreaterEqual(len(adult_face_hold_rooms("LUST4LIZZY")), 1)
-        self.assertEqual(adult_face_hold_rooms("LUST4LIZZY")[0]["seconds"], 14)
+        self.assertGreaterEqual(len(adult_face_hold_rooms("LUST4LIZZY")), 6)
+        self.assertEqual(adult_face_hold_rooms("LUST4LIZZY")[0]["seconds"], 1759)
         self.assertTrue(any("7YfN2Aly" in path for path in adult_face_hunt("LUST4LIZZY")))
+        self.assertTrue(any("lgd7LQcOEwmYXLfO" in row["url"] for row in adult_face_hold_rooms("LUST4LIZZY")))
+        self.assertTrue(any("erome.com/you_me620" in path or "screen-name/you_me620" in path for path in adult_face_hunt("LUST4LIZZY")))
         self.assertEqual(adult_hunt_needles("lust4lizzy"), list(ADULT_LIZZY))
         self.assertEqual(adult_hunt_needles("lust4lizzie"), list(ADULT_LIZZY))
+        self.assertEqual(adult_hunt_needles("you_me620"), list(ADULT_LIZZY))
+        self.assertEqual(adult_hunt_needles("itslizzylust"), list(ADULT_LIZZY))
+        self.assertNotEqual(adult_hunt_needles("lust4liz"), list(ADULT_LIZZY))
         self.assertNotIn("lizzy", adult_face_needles("LUST4LIZZY") or [])
         self.assertNotIn("liz", adult_face_needles("LUST4LIZZY") or [])
+        self.assertNotIn("lust4liz", adult_face_needles("LUST4LIZZY") or [])
+        self.assertNotIn("lust4liz929", adult_face_needles("LUST4LIZZY") or [])
         for row in adult_face_hold_rooms("LUST4LIZZY"):
             self.assertNotIn("onlyfans", row["name"].lower())
             self.assertNotIn("onlyfans", row["url"].lower())
             self.assertNotIn("lizzy b", row["name"].lower())
-            self.assertIn("lust4lizzy", row["seek"])
+            self.assertTrue(
+                "lust4lizzy" in row["seek"] or "you_me620" in row["seek"],
+                row["seek"],
+            )
+        self.assertGreaterEqual(len(adult_face_hold_rooms("JACQIE VAINS")), 2)
+        self.assertEqual(
+            [row["seconds"] for row in adult_face_hold_rooms("JACQIE VAINS")],
+            [8, 7],
+        )
+        self.assertTrue(any("5SNL_GF8dsxxamYH" in row["url"] for row in adult_face_hold_rooms("JACQIE VAINS")))
+        self.assertEqual(adult_hunt_needles("jacquelinevalentine"), list(ADULT_JACQIE))
+        self.assertNotIn("jacqueline", adult_face_needles("JACQIE VAINS") or [])
+        for row in adult_face_hold_rooms("JACQIE VAINS"):
+            self.assertNotIn("onlyfans", row["name"].lower())
+            self.assertNotIn("onlyfans", row["url"].lower())
+            self.assertIn("jacqievains", row["seek"])
+        self.assertGreaterEqual(len(adult_face_hold_rooms("STRAWBERRY SANDRA")), 4)
+        self.assertEqual(adult_face_hold_rooms("STRAWBERRY SANDRA")[0]["seconds"], 7)
+        self.assertTrue(any("4ftzrUvv" in path for path in adult_face_hunt("STRAWBERRY SANDRA")))
+        self.assertEqual(adult_hunt_needles("sandraaurey"), list(ADULT_SANDRA))
+        self.assertEqual(adult_hunt_needles("sandrakittyreels"), list(ADULT_SANDRA))
+        self.assertNotIn("sandra", adult_face_needles("STRAWBERRY SANDRA") or [])
+        for row in adult_face_hold_rooms("STRAWBERRY SANDRA"):
+            self.assertNotIn("onlyfans", row["name"].lower())
+            self.assertNotIn("onlyfans", row["url"].lower())
+            self.assertTrue(
+                "sandrakittyreels" in row["seek"] or "sandraaurey" in row["seek"] or "strawberrysandra20" in row["seek"],
+                row["seek"],
+            )
         self.assertEqual(adult_face_hold_rooms("MISS LADYCAKEZ69"), [])
         self.assertEqual(adult_hunt_needles("miss_ladycakez69"), list(ADULT_CAKEZ))
         self.assertEqual(adult_hunt_needles("missladycakez69"), list(ADULT_CAKEZ))
+        self.assertEqual(adult_hunt_needles("lady_cakez69"), list(ADULT_CAKEZ))
+        self.assertEqual(adult_hunt_needles("ladycakez69"), list(ADULT_CAKEZ))
         self.assertTrue(any("erome.com/miss_ladycakez69" in path for path in adult_face_hunt("MISS LADYCAKEZ69")))
         self.assertTrue(any("erome.com/missladycakez69" in path for path in adult_face_hunt("MISS LADYCAKEZ69")))
+        self.assertTrue(any("erome.com/ladycakez69" in path for path in adult_face_hunt("MISS LADYCAKEZ69")))
         self.assertTrue(any("users/missladycakez69/search" in path for path in adult_face_hunt("MISS LADYCAKEZ69")))
         self.assertTrue(any("screen-name/miss_ladycakez69" in path for path in adult_face_hunt("MISS LADYCAKEZ69")))
         self.assertTrue(any("query=miss_ladycakez69" in path for path in adult_face_hunt("MISS LADYCAKEZ69")))
@@ -5323,8 +5423,13 @@ class AdultDeskTests(unittest.TestCase):
         self.assertNotIn("lady", adult_face_needles("MISS LADYCAKEZ69") or [])
         self.assertNotIn("cakez", adult_face_needles("MISS LADYCAKEZ69") or [])
         self.assertNotIn("nicole", adult_face_needles("MISS LADYCAKEZ69") or [])
+        self.assertNotIn("nicole8899", adult_face_needles("MISS LADYCAKEZ69") or [])
         self.assertNotIn("misscakes69", adult_face_needles("MISS LADYCAKEZ69") or [])
         self.assertNotIn("ladycake", adult_face_needles("MISS LADYCAKEZ69") or [])
+        self.assertEqual(adult_hunt_needles("elvanavita"), list(ADULT_ELVANA))
+        self.assertEqual(adult_hunt_needles("debbieayoub"), list(ADULT_DEB))
+        self.assertEqual(adult_hunt_needles("monaamelon"), list(ADULT_MONA))
+        self.assertEqual(adult_hunt_needles("iloveekaylaaa"), list(ADULT_EXOTICA))
         self.assertGreaterEqual(len(adult_face_hold_rooms("EXOTICAXXX")), 3)
         self.assertEqual(
             [row["seconds"] for row in adult_face_hold_rooms("EXOTICAXXX")],
@@ -5424,6 +5529,12 @@ class AdultDeskTests(unittest.TestCase):
                             "title": "She's so thick! Lizzy B",
                             "creator": "Lizzy B",
                             "durationSeconds": 180,
+                        },
+                        {
+                            "slug": "lust4liz929-fit-mom",
+                            "title": "Lust4Liz Fit Mom Of 2",
+                            "creator": "Lust4Liz929",
+                            "durationSeconds": 90,
                         }
                     ]
                 },
@@ -6005,6 +6116,9 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("GIULIANA CABRAZIA", tv)
         self.assertIn("ALEJAMIEL18", tv)
         self.assertIn("LUST4LIZZY", tv)
+        self.assertIn("29:19", tv)
+        self.assertIn("you_me620", tv)
+        self.assertIn("itochi_anata", tv)
         self.assertIn("MISS LADYCAKEZ69", tv)
         self.assertIn("EXOTICAXXX", tv)
         self.assertIn("0:28", tv)
