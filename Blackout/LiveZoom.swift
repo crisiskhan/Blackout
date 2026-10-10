@@ -191,6 +191,7 @@ struct LiveZoom: View {
     }
 
     private func stop() {
+        player?.currentItem?.cancelPendingSeeks()
         player?.pause()
         player = nil
     }

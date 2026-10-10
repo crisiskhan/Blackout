@@ -99,6 +99,7 @@ enum NaWatch {
         item.preferredForwardBufferDuration = 4
         item.preferredPeakBitRate = peak
         if let current = pipe {
+            current.currentItem?.cancelPendingSeeks()
             current.replaceCurrentItem(with: item)
             current.automaticallyWaitsToMinimizeStalling = true
             current.isMuted = false
@@ -125,6 +126,7 @@ enum NaWatch {
         let seen = era
         if pipe === old { pipe = nil }
         old.pause()
+        old.currentItem?.cancelPendingSeeks()
         Task { @MainActor in
             await Task.yield()
             guard seen == era else { return }
@@ -187,15 +189,17 @@ enum NaWatch {
         return min(end, max(0, at))
     }
 
+    @MainActor
     static func scrub(_ player: AVPlayer?, url: String, at: Double, packed: Int) -> String? {
-        guard let player, player.currentItem != nil else { return "NO STREAM" }
+        guard let player, let item = player.currentItem else { return "NO STREAM" }
         guard AdultDesk.filePlay(url) else { return "LIVE" }
+        if item.status == .failed { return "NO STREAM" }
         let next = place(at, span: span(player, packed: packed))
-        player.seek(
-            to: CMTime(seconds: next, preferredTimescale: 600),
-            toleranceBefore: .zero,
-            toleranceAfter: .zero
-        )
+        guard next.isFinite else { return "NO STREAM" }
+        let time = CMTime(seconds: next, preferredTimescale: 600)
+        guard time.isValid, time.isNumeric else { return "NO STREAM" }
+        item.cancelPendingSeeks()
+        player.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero)
         return nil
     }
 
@@ -235,6 +239,7 @@ struct NaLiveWell: View {
     @State private var paused = false
     @State private var playURL = ""
     @State private var playSeq = 0
+    @State private var lift = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -280,32 +285,33 @@ struct NaLiveWell: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .onChange(of: holdPipe) { _, held in
             if held { return }
+            lift = false
             if playingID == row.id, player == nil, pipe {
                 Task { await start() }
             }
         }
         .onChange(of: pipe) { _, ok in
-            if !ok, zoomLive == nil, !holdPipe {
+            if !ok, zoomLive == nil, !holdPipe, !lift {
                 stop()
                 if playingID == row.id { playingID = nil }
             }
         }
         .onChange(of: playingID) { _, current in
             if current != row.id {
-                if zoomLive == nil, !holdPipe { stop() }
-            } else if player == nil, pipe { Task { await start() } }
+                if zoomLive == nil, !holdPipe, !lift { stop() }
+            } else if player == nil, pipe, !lift { Task { await start() } }
         }
         .onChange(of: row.id) { _, _ in
-            if zoomLive == nil, !holdPipe {
+            if zoomLive == nil, !holdPipe, !lift {
                 stop()
             }
             dead = false
-            if playingID == row.id {
+            if playingID == row.id, !lift {
                 Task { await start() }
             }
         }
         .onDisappear {
-            if zoomLive == nil, !holdPipe {
+            if zoomLive == nil, !holdPipe, !lift {
                 stop()
                 if playingID == row.id { playingID = nil }
             }
@@ -318,7 +324,7 @@ struct NaLiveWell: View {
 
     private var playing: Bool { armed && !paused }
 
-    private var armed: Bool { playingID == row.id && player != nil }
+    private var armed: Bool { playingID == row.id && player != nil && !lift }
 
     private var watchRail: some View {
         HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
@@ -407,8 +413,13 @@ struct NaLiveWell: View {
         if AdultDesk.playlist(keep) != nil {
             next.url = keep
         }
+        lift = true
         player = nil
-        onFull(next)
+        Task { @MainActor in
+            await Task.yield()
+            guard lift else { return }
+            onFull(next)
+        }
     }
 
     private func toggle() {
@@ -435,7 +446,7 @@ struct NaLiveWell: View {
     private func start() async {
         playSeq += 1
         let seq = playSeq
-        guard zoomLive == nil, !holdPipe else { return }
+        guard !lift, zoomLive == nil, !holdPipe else { return }
         guard pipe, playingID == row.id else { return }
         guard let raw = await onPlay(row), let play = AdultDesk.playlist(raw),
               let url = URL(string: play), url.scheme == "https"
@@ -445,7 +456,7 @@ struct NaLiveWell: View {
             dead = true
             return
         }
-        guard zoomLive == nil, !holdPipe, playingID == row.id, seq == playSeq else { return }
+        guard !lift, zoomLive == nil, !holdPipe, playingID == row.id, seq == playSeq else { return }
         playURL = play
         player = NaWatch.play(url: url, headers: AdultDesk.playHeaders(play))
         paused = false

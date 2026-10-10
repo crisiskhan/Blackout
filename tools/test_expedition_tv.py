@@ -6576,7 +6576,10 @@ class NaTheaterStayUpTests(unittest.TestCase):
         self.assertLess(pipe_swap.find("zoomLive == nil"), pipe_swap.find("stop()"))
         go_full = well.split("private func goFull()")[1].split("private func toggle()")[0]
         self.assertLess(go_full.find("player = nil"), go_full.find("onFull(next)"))
-        halt = well.split("private func stop()")[1].split("private func jump")[0]
+        self.assertIn("Task.yield()", go_full)
+        self.assertLess(go_full.find("player = nil"), go_full.find("Task.yield()"))
+        self.assertLess(go_full.find("Task.yield()"), go_full.find("onFull(next)"))
+        halt = well.split("private func stop()")[1].split("private func stepPrev")[0]
         self.assertIn("NaWatch.drop", halt)
         self.assertLess(halt.find("player = nil"), halt.find("NaWatch.drop"))
         self.assertNotIn("Task", halt)
@@ -6614,13 +6617,19 @@ class NaTheaterStayUpTests(unittest.TestCase):
         start = well.split("private func start()")[1].split("private func stop()")[0]
         close = app.split("func closeLive()")[1].split("func holdCam(")[0]
         self.assertLess(go_full.find("player = nil"), go_full.find("onFull(next)"))
+        self.assertIn("Task.yield()", go_full)
+        self.assertLess(go_full.find("lift = true"), go_full.find("player = nil"))
+        self.assertLess(go_full.find("player = nil"), go_full.find("Task.yield()"))
+        self.assertLess(go_full.find("Task.yield()"), go_full.find("onFull(next)"))
         self.assertNotIn("playingID = nil", go_full)
         self.assertNotIn("NaWatch.drop", go_full)
         self.assertNotIn("stop()", go_full)
         self.assertIn("zoomLive == nil", start)
         self.assertIn("holdPipe", start)
+        self.assertIn("!lift", start)
         self.assertLess(start.find("zoomLive == nil"), start.find("NaWatch.play"))
         self.assertLess(start.find("!holdPipe"), start.find("NaWatch.play"))
+        self.assertLess(start.find("!lift"), start.find("NaWatch.play"))
         self.assertIn("onChange(of: holdPipe)", well)
         remount = well.split(".onChange(of: holdPipe)")[1].split(".onChange")[0]
         self.assertIn("start()", remount)
@@ -6641,6 +6650,60 @@ class NaTheaterStayUpTests(unittest.TestCase):
         self.assertIn("TAP PLAY after CLOSE", tv)
         self.assertIn("any ready playlist", tv)
         self.assertIn("closelive drops", tv.lower())
+        self.assertIn("without a fade", tv)
+        self.assertIn("yields one turn", tv)
+
+
+class NaTheaterLayerCrashTests(unittest.TestCase):
+    def test_na_cannot_stack_layers_or_drop_under_a_fade(self):
+        live = read("Blackout", "NaLive.swift")
+        zoom = read("Blackout", "LiveZoom.swift")
+        root = read("Blackout", "RootChrome.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        qa = read("docs", "SOLO_QA.md")
+        watch = live.split("enum NaWatch")[1].split("struct NaLiveWell")[0]
+        well = live.split("struct NaLiveWell")[1]
+        go_full = well.split("private func goFull()")[1].split("private func toggle()")[0]
+        start = well.split("private func start()")[1].split("private func stop()")[0]
+        drop = watch.split("static func drop(_ victim")[1].split("static func drop(ifEra")[0]
+        play = watch.split("static func play(")[1].split("static func drop(_ victim")[0]
+        scrub = watch.split("static func scrub(")[1].split("static func clock(")[0]
+        overlay = root.split("if let row = runtime.zoomLive")[1].split(".animation(")[0]
+        tv = next(line for line in qa.splitlines() if "EXPEDITION `TV`" in line)
+        self.assertIn("@State private var lift", well)
+        self.assertIn("lift = true", go_full)
+        self.assertIn("Task.yield()", go_full)
+        self.assertLess(go_full.find("lift = true"), go_full.find("player = nil"))
+        self.assertLess(go_full.find("player = nil"), go_full.find("Task.yield()"))
+        self.assertLess(go_full.find("Task.yield()"), go_full.find("onFull(next)"))
+        self.assertIn("!lift", start)
+        self.assertLess(start.find("!lift"), start.find("NaWatch.play"))
+        disappear = well.split(".onDisappear")[1].split(".accessibilityElement")[0]
+        self.assertIn("!lift", disappear)
+        row_swap = well.split(".onChange(of: row.id)")[1].split(".onDisappear")[0]
+        self.assertIn("!lift", row_swap)
+        pipe_swap = well.split(".onChange(of: pipe)")[1].split(".onChange(of: playingID)")[0]
+        self.assertIn("!lift", pipe_swap)
+        playing = well.split(".onChange(of: playingID)")[1].split(".onChange(of: row.id)")[0]
+        self.assertIn("!lift", playing)
+        remount = well.split(".onChange(of: holdPipe)")[1].split(".onChange")[0]
+        self.assertIn("lift = false", remount)
+        self.assertNotIn(".transition", overlay)
+        self.assertNotIn("runtime.zoomLive?.id", root.split("struct RootChrome")[1].split("private var armedHUD")[0])
+        self.assertIn("cancelPendingSeeks", drop)
+        self.assertLess(drop.find("cancelPendingSeeks"), drop.find("replaceCurrentItem"))
+        self.assertIn("cancelPendingSeeks", play)
+        self.assertLess(play.find("cancelPendingSeeks"), play.find("replaceCurrentItem"))
+        self.assertIn("isNumeric", scrub)
+        self.assertIn("isValid", scrub)
+        self.assertIn("cancelPendingSeeks", scrub)
+        self.assertIn("@MainActor\n    static func scrub(", watch)
+        close = app.split("func closeLive()")[1].split("func holdCam(")[0]
+        self.assertIn("drop(ifEra: era)", close)
+        self.assertNotIn("NaWatch.drop", zoom)
+        self.assertIn("yields one turn", tv)
+        self.assertIn("without a fade", tv)
+        self.assertIn("before the live layer", tv)
 
 
 def desk_text() -> str:

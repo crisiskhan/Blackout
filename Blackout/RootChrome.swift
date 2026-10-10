@@ -53,11 +53,9 @@ struct RootChrome: View {
                     onPrev: { runtime.stepLive(-1) },
                     onNext: { runtime.stepLive(1) }
                 )
-                    .transition(.opacity)
             }
         }
         .animation(Theme.Motion.heavy, value: runtime.zoomStillName)
-        .animation(Theme.Motion.heavy, value: runtime.zoomLive?.id)
         .tint(Theme.silver)
         .preferredColorScheme(runtime.lamp == .sun ? .light : .dark)
         .onAppear {
