@@ -29,18 +29,16 @@ struct LiveZoom: View {
         .overlay(alignment: .bottom) { bottomRail }
         .animation(Theme.Motion.sleep, value: showChrome)
         .onAppear {
-            start()
-            wakeChrome()
+            Task { @MainActor in
+                await Task.yield()
+                start()
+                wakeChrome()
+            }
         }
         .onChange(of: pipe) { _, ok in
             if !ok { stop() }
         }
-        .onChange(of: row.id) { _, _ in
-            chrome = nil
-            start()
-            wakeChrome()
-        }
-        .onChange(of: row.url) { _, _ in
+        .onChange(of: row) { _, _ in
             chrome = nil
             start()
             wakeChrome()
@@ -282,6 +280,7 @@ private struct LiveZoomScroll: UIViewRepresentable {
         required init?(coder: NSCoder) { nil }
 
         func apply(_ player: AVPlayer?) {
+            if host.player === player { return }
             host.player = player
         }
 
