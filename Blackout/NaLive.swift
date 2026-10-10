@@ -55,7 +55,6 @@ enum NaLive {
 }
 
 enum NaWatch {
-    static let jump = 15
     static let peak: Double = 2_500_000
     static let wellStill = 640
     static let tileStill = 264
@@ -164,20 +163,39 @@ enum NaWatch {
         return UIImage(cgImage: cg)
     }
 
-    static func seek(_ player: AVPlayer?, url: String, by: Double) -> String? {
-        guard let player, player.currentItem != nil else { return "NO STREAM" }
-        guard AdultDesk.filePlay(url) else { return "LIVE" }
-        let now = player.currentTime().seconds
-        guard now.isFinite else { return "NO STREAM" }
-        var next = now + by
-        if next < 0 { next = 0 }
-        if let item = player.currentItem {
+    static func span(_ player: AVPlayer?, packed: Int) -> Double {
+        if let item = player?.currentItem {
             let dur = item.duration.seconds
             if dur.isFinite, dur > 0 {
-                next = min(next, max(0, dur - 0.25))
+                return dur
             }
         }
-        player.seek(to: CMTime(seconds: next, preferredTimescale: 600), toleranceBefore: .zero, toleranceAfter: .zero)
+        return packed > 0 ? Double(packed) : 0
+    }
+
+    static func unit(_ player: AVPlayer?) -> Double {
+        guard let player else { return 0 }
+        let now = player.currentTime().seconds
+        guard now.isFinite, now >= 0 else { return 0 }
+        return now
+    }
+
+    static func place(_ at: Double, span: Double) -> Double {
+        guard at.isFinite else { return 0 }
+        guard span.isFinite, span > 0 else { return 0 }
+        let end = max(0, span - 0.25)
+        return min(end, max(0, at))
+    }
+
+    static func scrub(_ player: AVPlayer?, url: String, at: Double, packed: Int) -> String? {
+        guard let player, player.currentItem != nil else { return "NO STREAM" }
+        guard AdultDesk.filePlay(url) else { return "LIVE" }
+        let next = place(at, span: span(player, packed: packed))
+        player.seek(
+            to: CMTime(seconds: next, preferredTimescale: 600),
+            toleranceBefore: .zero,
+            toleranceAfter: .zero
+        )
         return nil
     }
 
@@ -250,6 +268,13 @@ struct NaLiveWell: View {
                     .minimumScaleFactor(0.7)
             }
             well
+            NaScrub(
+                url: playURL.isEmpty ? row.url : playURL,
+                seconds: row.seconds,
+                player: player,
+                armed: armed,
+                onWhy: onWhy
+            )
             watchRail
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -307,10 +332,6 @@ struct NaLiveWell: View {
                 .buttonStyle(HUDOverlayChipStyle(filled: playing))
             Button(kept ? "DROP" : "KEEP") { onKeep?(row) }
                 .buttonStyle(HUDOverlayChipStyle(filled: kept))
-            Button("REWIND 15") { jump(-Double(NaWatch.jump)) }
-                .buttonStyle(HUDOverlayChipStyle())
-            Button("AHEAD 15") { jump(Double(NaWatch.jump)) }
-                .buttonStyle(HUDOverlayChipStyle())
         }
     }
 
@@ -441,14 +462,6 @@ struct NaLiveWell: View {
         }
     }
 
-    private func jump(_ by: Double) {
-        if let why = NaWatch.seek(player, url: playURL.isEmpty ? row.url : playURL, by: by) {
-            onWhy?(why)
-            return
-        }
-        onWhy?(nil)
-    }
-
     private func stepPrev() {
         if !canPrev {
             onWhy?("FIRST")
@@ -463,6 +476,171 @@ struct NaLiveWell: View {
             return
         }
         onNext?()
+    }
+}
+
+/// 44pt HUD film rail. Files drag. Live is a full accent bar that chromes LIVE.
+struct NaScrub: View {
+    let url: String
+    let seconds: Int
+    let player: AVPlayer?
+    let armed: Bool
+    var onWhy: ((String?) -> Void)?
+    var onDrag: (() -> Void)?
+    @State private var held: Double?
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: armed && !live ? 0.2 : 60)) { _ in
+            rail
+        }
+        .onChange(of: url) { _, _ in
+            held = nil
+        }
+    }
+
+    private var live: Bool { !AdultDesk.filePlay(url) }
+
+    private var rail: some View {
+        let hit = CGFloat(BlackoutTokens.Chrome.mapChipHitPoints)
+        let span = NaWatch.span(player, packed: seconds)
+        let now = held ?? NaWatch.unit(player)
+        let left = live ? "LIVE" : AdultDesk.clock(Int(now.rounded()))
+        let rest = max(0, span - now)
+        let right = live || span <= 0 ? "" : AdultDesk.clock(Int(rest.rounded()))
+        let mark = live ? 1.0 : (span > 0 ? min(1, max(0, now / span)) : 0)
+        return HStack(spacing: 8) {
+            Text(left)
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(Theme.silver)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .frame(minWidth: 44, alignment: .leading)
+            GeometryReader { geo in
+                let width = geo.size.width
+                let track: CGFloat = 10
+                let head: CGFloat = 16
+                let inset = head / 2
+                let travel = max(0, width - head)
+                let x = live ? width : (inset + CGFloat(mark) * travel)
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Theme.void)
+                        .frame(height: track)
+                    Capsule()
+                        .fill(Theme.accent)
+                        .frame(width: max(track, x), height: track)
+                    if !live {
+                        Circle()
+                            .fill(Theme.accent)
+                            .frame(width: head, height: head)
+                            .overlay(
+                                Circle()
+                                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
+                            )
+                            .shadow(color: Theme.void.opacity(0.85), radius: 3, y: 1)
+                            .offset(x: x - inset)
+                    }
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Theme.metalHigh.opacity(0.40),
+                                    Color.clear,
+                                    Color.clear,
+                                    Theme.metalLow.opacity(0.42),
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .frame(height: track)
+                        .allowsHitTesting(false)
+                    Capsule()
+                        .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1.2))
+                        .frame(height: track)
+                }
+                .frame(width: width, height: hit)
+                .contentShape(Rectangle())
+                .onTapGesture(count: 1, coordinateSpace: .local) { point in
+                    apply(x: point.x, width: width)
+                }
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 16)
+                        .onChanged { gesture in
+                            let dx = abs(gesture.translation.width)
+                            let dy = abs(gesture.translation.height)
+                            guard dx >= dy else { return }
+                            apply(x: gesture.location.x, width: width)
+                        }
+                        .onEnded { _ in
+                            held = nil
+                        }
+                )
+            }
+            .frame(height: hit)
+            if !right.isEmpty {
+                Text(right)
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.silver)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .frame(minWidth: 44, alignment: .trailing)
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: hit)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("SCRUB")
+        .accessibilityValue(
+            live ? "LIVE" : (span > 0 ? "\(left) / \(AdultDesk.clock(Int(span.rounded())))" : left)
+        )
+        .accessibilityAdjustableAction { direction in
+            step(direction)
+        }
+    }
+
+    private func apply(x: CGFloat, width: CGFloat) {
+        onDrag?()
+        if live {
+            onWhy?("LIVE")
+            return
+        }
+        guard width > 0 else { return }
+        let span = NaWatch.span(player, packed: seconds)
+        let t = min(1, max(0, Double(x / width)))
+        let at = NaWatch.place(t * span, span: span)
+        held = at
+        if let why = NaWatch.scrub(player, url: url, at: at, packed: seconds) {
+            onWhy?(why)
+            return
+        }
+        onWhy?(nil)
+    }
+
+    private func step(_ direction: AccessibilityAdjustmentDirection) {
+        onDrag?()
+        if live {
+            onWhy?("LIVE")
+            return
+        }
+        let span = NaWatch.span(player, packed: seconds)
+        let now = held ?? NaWatch.unit(player)
+        let stride = max(1, span * 0.05)
+        let delta: Double
+        switch direction {
+        case .increment:
+            delta = stride
+        case .decrement:
+            delta = -stride
+        @unknown default:
+            return
+        }
+        let at = NaWatch.place(now + delta, span: span)
+        held = at
+        if let why = NaWatch.scrub(player, url: url, at: at, packed: seconds) {
+            onWhy?(why)
+            return
+        }
+        onWhy?(nil)
     }
 }
 

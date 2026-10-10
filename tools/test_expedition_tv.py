@@ -635,6 +635,43 @@ def adult_file_play(raw: str) -> bool:
     return ".mp4" in low and ".m3u8" not in low
 
 
+NA_SCRUB_TAIL = 0.25
+
+
+def na_watch_span(duration: object, packed: object = 0) -> float:
+    """Known file length. Live or unknown is 0."""
+    if _finite(duration) and float(duration) > 0:
+        return float(duration)
+    if _finite(packed) and float(packed) > 0:
+        return float(packed)
+    return 0.0
+
+
+def na_watch_unit(now: object) -> float:
+    """Playhead seconds. Unknown or negative is 0."""
+    if _finite(now) and float(now) >= 0:
+        return float(now)
+    return 0.0
+
+
+def na_watch_place(at: object, span: object) -> float:
+    """Clamp a seek onto the file. Leave a 0.25s tail so the last frame holds."""
+    if not _finite(at):
+        return 0.0
+    if not _finite(span) or float(span) <= 0:
+        return 0.0
+    end = max(0.0, float(span) - NA_SCRUB_TAIL)
+    return min(end, max(0.0, float(at)))
+
+
+def na_watch_scrub(url: str, at: object, span: object) -> str | None:
+    """Refuse live HLS. Files seek to place(at, span)."""
+    if not adult_file_play(url):
+        return "LIVE"
+    na_watch_place(at, span)
+    return None
+
+
 def adult_ready_play(row: dict) -> str | None:
     """Held guest files play as stored. Live rooms still resolve."""
     play = adult_playlist(str(row.get("url") or ""))
@@ -5030,8 +5067,10 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("keepNa", app)
         self.assertIn("stepLive", app)
         self.assertIn("NaWatch", live)
-        self.assertIn("REWIND 15", live)
-        self.assertIn("AHEAD 15", live)
+        self.assertIn("NaScrub", live)
+        self.assertIn("static func scrub(", live)
+        self.assertNotIn("REWIND 15", live)
+        self.assertNotIn("AHEAD 15", live)
         self.assertIn("PAUSE", live)
         self.assertIn("KEEP", live)
         gate = na_gate_body(tv)
@@ -5960,8 +5999,9 @@ class LiveZoomTests(unittest.TestCase):
         self.assertIn("PREV", zoom)
         self.assertIn("NEXT", zoom)
         self.assertIn("KEEP", zoom)
-        self.assertIn("REWIND 15", zoom)
-        self.assertIn("AHEAD 15", zoom)
+        self.assertIn("NaScrub", zoom)
+        self.assertNotIn("REWIND 15", zoom)
+        self.assertNotIn("AHEAD 15", zoom)
         self.assertIn("TAP FULL", live)
         self.assertIn("onFull", live)
         self.assertIn("openLive", na)
@@ -5992,8 +6032,10 @@ class LiveZoomTests(unittest.TestCase):
         self.assertIn("allowsHitTesting", zoom)
         self.assertIn("safeAreaPadding", zoom)
         self.assertIn("CLOSE", zoom)
-        self.assertIn("REWIND 15", zoom)
-        self.assertIn("AHEAD 15", zoom)
+        self.assertIn("NaScrub", zoom)
+        self.assertIn("onDrag:", zoom)
+        self.assertNotIn("REWIND 15", zoom)
+        self.assertNotIn("AHEAD 15", zoom)
         self.assertNotIn('Button("LIVE")', zoom)
         self.assertNotIn("NaWatch.drop", zoom)
         wake = zoom.split("private func wakeChrome")[1].split("private func sleepChrome")[0]
@@ -6008,6 +6050,91 @@ class LiveZoomTests(unittest.TestCase):
         self.assertIn("chrome fades", tv)
         self.assertIn("never sit on the picture", tv)
         self.assertNotIn("stay on the field", tv)
+
+
+class NaScrubRailTests(unittest.TestCase):
+    def test_place_clamps_to_the_file(self):
+        self.assertEqual(na_watch_place(-4, 100), 0)
+        self.assertEqual(na_watch_place(0, 100), 0)
+        self.assertEqual(na_watch_place(50, 100), 50)
+        self.assertEqual(na_watch_place(100, 100), 99.75)
+        self.assertEqual(na_watch_place(200, 100), 99.75)
+        self.assertEqual(na_watch_place(12, 0), 0)
+        self.assertEqual(na_watch_place(float("nan"), 100), 0)
+        self.assertEqual(na_watch_place(12, float("inf")), 0)
+
+    def test_span_and_unit_refuse_unknown(self):
+        self.assertEqual(na_watch_span(0), 0)
+        self.assertEqual(na_watch_span(-1), 0)
+        self.assertEqual(na_watch_span(float("inf")), 0)
+        self.assertEqual(na_watch_span(None, packed=40), 40)
+        self.assertEqual(na_watch_span(1759), 1759)
+        self.assertEqual(na_watch_unit(-1), 0)
+        self.assertEqual(na_watch_unit(None), 0)
+        self.assertEqual(na_watch_unit(12.4), 12.4)
+
+    def test_scrub_live_refuses_and_files_place(self):
+        self.assertEqual(
+            na_watch_scrub("https://cdn.example.com/room.m3u8", 10, 100),
+            "LIVE",
+        )
+        self.assertIsNone(
+            na_watch_scrub("https://cdn.example.com/cut.mp4", 10, 100)
+        )
+        self.assertEqual(na_watch_place(10, 100), 10)
+        self.assertEqual(
+            na_watch_scrub("https://cdn.example.com/cut.mp4.m3u8", 4, 40),
+            "LIVE",
+        )
+
+    def test_watch_and_full_use_a_hud_scrub_not_skip_chips(self):
+        live = read("Blackout", "NaLive.swift")
+        zoom = read("Blackout", "LiveZoom.swift")
+        qa = read("docs", "SOLO_QA.md")
+        tv = next(line for line in qa.splitlines() if "EXPEDITION `TV`" in line)
+        self.assertIn("static func scrub(", live)
+        self.assertIn("static func span(", live)
+        self.assertIn("static func unit(", live)
+        self.assertIn("static func place(", live)
+        self.assertIn("packed:", live)
+        self.assertIn("struct NaScrub", live)
+        self.assertIn("NaScrub(", live)
+        self.assertIn("NaScrub(", zoom)
+        self.assertNotIn("static let jump", live)
+        self.assertNotIn("static func seek(", live)
+        self.assertNotIn("REWIND 15", live)
+        self.assertNotIn("AHEAD 15", live)
+        self.assertNotIn("REWIND 15", zoom)
+        self.assertNotIn("AHEAD 15", zoom)
+        self.assertNotIn("UISlider", live)
+        self.assertNotIn("Slider(", live)
+        self.assertNotIn("UISlider", zoom)
+        self.assertNotIn("Slider(", zoom)
+        rail = live.split("struct NaScrub")[1]
+        self.assertIn("mapChipHitPoints", rail)
+        self.assertIn("Theme.accent", rail)
+        self.assertIn("Theme.silver", rail)
+        self.assertIn("Theme.void", rail)
+        self.assertIn("Capsule()", rail)
+        self.assertIn("Theme.metalStroke", rail)
+        self.assertIn("DragGesture", rail)
+        self.assertIn("dx >= dy", rail)
+        self.assertIn("onTapGesture", rail)
+        self.assertIn("AdultDesk.filePlay", rail)
+        self.assertIn("LIVE", rail)
+        self.assertIn("SCRUB", rail)
+        self.assertIn("onDrag", rail)
+        self.assertIn("accessibilityAdjustableAction", rail)
+        self.assertIn("NaWatch.scrub(", rail)
+        self.assertIn("NaWatch.place(", rail)
+        self.assertIn("NaWatch.span(", rail)
+        self.assertIn("NaWatch.unit(", rail)
+        self.assertIn("onDrag:", zoom)
+        self.assertIn("wakeChrome", zoom)
+        self.assertIn("SCRUB", tv)
+        self.assertIn("HUD rail", tv)
+        self.assertNotIn("REWIND 15", tv)
+        self.assertNotIn("AHEAD 15", tv)
 
 
 class ClosedSourcesTests(unittest.TestCase):
@@ -6072,8 +6199,9 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("PAUSE", tv)
         self.assertIn("PREV", tv)
         self.assertIn("NEXT", tv)
-        self.assertIn("REWIND 15", tv)
-        self.assertIn("AHEAD 15", tv)
+        self.assertIn("SCRUB", tv)
+        self.assertNotIn("REWIND 15", tv)
+        self.assertNotIn("AHEAD 15", tv)
         self.assertIn("TAP FULL", tv)
         self.assertIn("zoom", tv.lower())
         self.assertIn("section", tv.lower())
@@ -6172,8 +6300,9 @@ class NaTheaterTests(unittest.TestCase):
         self.assertIn("DROP", live)
         self.assertIn("PREV", live)
         self.assertIn("NEXT", live)
-        self.assertIn("REWIND 15", live)
-        self.assertIn("AHEAD 15", live)
+        self.assertIn("NaScrub", live)
+        self.assertNotIn("REWIND 15", live)
+        self.assertNotIn("AHEAD 15", live)
         self.assertIn("PAUSE", live)
         self.assertIn("NaWatch", live)
         self.assertIn("enum AdultKeep", keep)
@@ -6198,8 +6327,9 @@ class NaTheaterTests(unittest.TestCase):
         self.assertIn("PREV", zoom)
         self.assertIn("NEXT", zoom)
         self.assertIn("KEEP", zoom)
-        self.assertIn("REWIND 15", zoom)
-        self.assertIn("AHEAD 15", zoom)
+        self.assertIn("NaScrub", zoom)
+        self.assertNotIn("REWIND 15", zoom)
+        self.assertNotIn("AHEAD 15", zoom)
         kept = {
             "id": "adult-keep",
             "name": "SHELF",

@@ -119,14 +119,18 @@ struct LiveZoom: View {
                     .foregroundStyle(Theme.warn)
                     .textCase(.uppercase)
             }
+            NaScrub(
+                url: row.url,
+                seconds: row.seconds,
+                player: player,
+                armed: player != nil,
+                onWhy: { chrome = $0 },
+                onDrag: wakeChrome
+            )
             HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
                 Button("PREV") { step(-1) }
                     .buttonStyle(HUDOverlayChipStyle())
                 Button("NEXT") { step(1) }
-                    .buttonStyle(HUDOverlayChipStyle())
-                Button("REWIND 15") { jump(-Double(NaWatch.jump)) }
-                    .buttonStyle(HUDOverlayChipStyle())
-                Button("AHEAD 15") { jump(Double(NaWatch.jump)) }
                     .buttonStyle(HUDOverlayChipStyle())
             }
         }
@@ -189,15 +193,6 @@ struct LiveZoom: View {
     private func stop() {
         player?.pause()
         player = nil
-    }
-
-    private func jump(_ by: Double) {
-        wakeChrome()
-        if let why = NaWatch.seek(player, url: row.url, by: by) {
-            chrome = why
-            return
-        }
-        chrome = nil
     }
 
     private func step(_ delta: Int) {
