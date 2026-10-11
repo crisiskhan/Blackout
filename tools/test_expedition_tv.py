@@ -635,6 +635,81 @@ def adult_file_play(raw: str) -> bool:
     return ".mp4" in low and ".m3u8" not in low
 
 
+NA_SCRUB_TAIL = 0.25
+
+
+def na_watch_span(duration: object, packed: object = 0) -> float:
+    """Known file length. Live or unknown is 0."""
+    if _finite(duration) and float(duration) > 0:
+        return float(duration)
+    if _finite(packed) and float(packed) > 0:
+        return float(packed)
+    return 0.0
+
+
+def na_watch_unit(now: object) -> float:
+    """Playhead seconds. Unknown or negative is 0."""
+    if _finite(now) and float(now) >= 0:
+        return float(now)
+    return 0.0
+
+
+def na_watch_place(at: object, span: object) -> float:
+    """Clamp a seek onto the file. Leave a 0.25s tail so the last frame holds."""
+    if not _finite(at):
+        return 0.0
+    if not _finite(span) or float(span) <= 0:
+        return 0.0
+    end = max(0.0, float(span) - NA_SCRUB_TAIL)
+    return min(end, max(0.0, float(at)))
+
+
+def na_watch_scrub(
+    url: str,
+    at: object,
+    span: object,
+    *,
+    ready: bool = True,
+    duration: object | None = None,
+) -> str | None:
+    """Refuse live HLS. Files seek only on a ready numeric duration."""
+    if not adult_file_play(url):
+        return "LIVE"
+    length = span if duration is None else duration
+    if not ready or not _finite(length) or float(length) <= 0:
+        return "NO STREAM"
+    na_watch_place(at, length)
+    return None
+
+
+def timeline_closures(src: str) -> list[str]:
+    """TimelineView content bodies. Gestures must not live inside them."""
+    out: list[str] = []
+    start = 0
+    while True:
+        i = src.find("TimelineView(", start)
+        if i < 0:
+            break
+        brace = src.find("{", i)
+        if brace < 0:
+            break
+        depth = 0
+        end = None
+        for j in range(brace, len(src)):
+            if src[j] == "{":
+                depth += 1
+            elif src[j] == "}":
+                depth -= 1
+                if depth == 0:
+                    end = j
+                    break
+        if end is None:
+            break
+        out.append(src[brace : end + 1])
+        start = end + 1
+    return out
+
+
 def adult_ready_play(row: dict) -> str | None:
     """Held guest files play as stored. Live rooms still resolve."""
     play = adult_playlist(str(row.get("url") or ""))
@@ -5030,8 +5105,10 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("keepNa", app)
         self.assertIn("stepLive", app)
         self.assertIn("NaWatch", live)
-        self.assertIn("REWIND 15", live)
-        self.assertIn("AHEAD 15", live)
+        self.assertIn("NaScrub", live)
+        self.assertIn("static func scrub(", live)
+        self.assertNotIn("REWIND 15", live)
+        self.assertNotIn("AHEAD 15", live)
         self.assertIn("PAUSE", live)
         self.assertIn("KEEP", live)
         gate = na_gate_body(tv)
@@ -5960,8 +6037,9 @@ class LiveZoomTests(unittest.TestCase):
         self.assertIn("PREV", zoom)
         self.assertIn("NEXT", zoom)
         self.assertIn("KEEP", zoom)
-        self.assertIn("REWIND 15", zoom)
-        self.assertIn("AHEAD 15", zoom)
+        self.assertIn("NaScrub", zoom)
+        self.assertNotIn("REWIND 15", zoom)
+        self.assertNotIn("AHEAD 15", zoom)
         self.assertIn("TAP FULL", live)
         self.assertIn("onFull", live)
         self.assertIn("openLive", na)
@@ -5992,8 +6070,10 @@ class LiveZoomTests(unittest.TestCase):
         self.assertIn("allowsHitTesting", zoom)
         self.assertIn("safeAreaPadding", zoom)
         self.assertIn("CLOSE", zoom)
-        self.assertIn("REWIND 15", zoom)
-        self.assertIn("AHEAD 15", zoom)
+        self.assertIn("NaScrub", zoom)
+        self.assertIn("onDrag:", zoom)
+        self.assertNotIn("REWIND 15", zoom)
+        self.assertNotIn("AHEAD 15", zoom)
         self.assertNotIn('Button("LIVE")', zoom)
         self.assertNotIn("NaWatch.drop", zoom)
         wake = zoom.split("private func wakeChrome")[1].split("private func sleepChrome")[0]
@@ -6008,6 +6088,129 @@ class LiveZoomTests(unittest.TestCase):
         self.assertIn("chrome fades", tv)
         self.assertIn("never sit on the picture", tv)
         self.assertNotIn("stay on the field", tv)
+
+
+class NaScrubRailTests(unittest.TestCase):
+    def test_place_clamps_to_the_file(self):
+        self.assertEqual(na_watch_place(-4, 100), 0)
+        self.assertEqual(na_watch_place(0, 100), 0)
+        self.assertEqual(na_watch_place(50, 100), 50)
+        self.assertEqual(na_watch_place(100, 100), 99.75)
+        self.assertEqual(na_watch_place(200, 100), 99.75)
+        self.assertEqual(na_watch_place(12, 0), 0)
+        self.assertEqual(na_watch_place(float("nan"), 100), 0)
+        self.assertEqual(na_watch_place(12, float("inf")), 0)
+
+    def test_span_and_unit_refuse_unknown(self):
+        self.assertEqual(na_watch_span(0), 0)
+        self.assertEqual(na_watch_span(-1), 0)
+        self.assertEqual(na_watch_span(float("inf")), 0)
+        self.assertEqual(na_watch_span(None, packed=40), 40)
+        self.assertEqual(na_watch_span(1759), 1759)
+        self.assertEqual(na_watch_unit(-1), 0)
+        self.assertEqual(na_watch_unit(None), 0)
+        self.assertEqual(na_watch_unit(12.4), 12.4)
+
+    def test_scrub_live_refuses_and_files_place(self):
+        self.assertEqual(
+            na_watch_scrub("https://cdn.example.com/room.m3u8", 10, 100),
+            "LIVE",
+        )
+        self.assertIsNone(
+            na_watch_scrub("https://cdn.example.com/cut.mp4", 10, 100)
+        )
+        self.assertEqual(na_watch_place(10, 100), 10)
+        self.assertEqual(
+            na_watch_scrub("https://cdn.example.com/cut.mp4.m3u8", 4, 40),
+            "LIVE",
+        )
+        self.assertEqual(
+            na_watch_scrub(
+                "https://cdn.example.com/cut.mp4",
+                800,
+                1759,
+                ready=False,
+            ),
+            "NO STREAM",
+        )
+        self.assertEqual(
+            na_watch_scrub(
+                "https://cdn.example.com/cut.mp4",
+                800,
+                1759,
+                ready=True,
+                duration=float("nan"),
+            ),
+            "NO STREAM",
+        )
+        self.assertEqual(
+            na_watch_scrub(
+                "https://cdn.example.com/cut.mp4",
+                800,
+                1759,
+                ready=True,
+                duration=0,
+            ),
+            "NO STREAM",
+        )
+        self.assertIsNone(
+            na_watch_scrub(
+                "https://cdn.example.com/cut.mp4",
+                800,
+                1759,
+                ready=True,
+                duration=1759,
+            )
+        )
+
+    def test_watch_and_full_use_a_hud_scrub_not_skip_chips(self):
+        live = read("Blackout", "NaLive.swift")
+        zoom = read("Blackout", "LiveZoom.swift")
+        qa = read("docs", "SOLO_QA.md")
+        tv = next(line for line in qa.splitlines() if "EXPEDITION `TV`" in line)
+        self.assertIn("static func scrub(", live)
+        self.assertIn("static func span(", live)
+        self.assertIn("static func unit(", live)
+        self.assertIn("static func place(", live)
+        self.assertIn("packed:", live)
+        self.assertIn("struct NaScrub", live)
+        self.assertIn("NaScrub(", live)
+        self.assertIn("NaScrub(", zoom)
+        self.assertNotIn("static let jump", live)
+        self.assertNotIn("static func seek(", live)
+        self.assertNotIn("REWIND 15", live)
+        self.assertNotIn("AHEAD 15", live)
+        self.assertNotIn("REWIND 15", zoom)
+        self.assertNotIn("AHEAD 15", zoom)
+        self.assertNotIn("UISlider", live)
+        self.assertNotIn("Slider(", live)
+        self.assertNotIn("UISlider", zoom)
+        self.assertNotIn("Slider(", zoom)
+        rail = live.split("struct NaScrub")[1]
+        self.assertIn("mapChipHitPoints", rail)
+        self.assertIn("Theme.accent", rail)
+        self.assertIn("Theme.silver", rail)
+        self.assertIn("Theme.void", rail)
+        self.assertIn("Capsule()", rail)
+        self.assertIn("Theme.metalStroke", rail)
+        self.assertIn("DragGesture", rail)
+        self.assertIn("dx >= dy", rail)
+        self.assertIn("onTapGesture", rail)
+        self.assertIn("AdultDesk.filePlay", rail)
+        self.assertIn("LIVE", rail)
+        self.assertIn("SCRUB", rail)
+        self.assertIn("onDrag", rail)
+        self.assertIn("accessibilityAdjustableAction", rail)
+        self.assertIn("NaWatch.scrub(", rail)
+        self.assertIn("NaWatch.place(", rail)
+        self.assertIn("NaWatch.span(", rail)
+        self.assertIn("NaWatch.unit(", rail)
+        self.assertIn("onDrag:", zoom)
+        self.assertIn("wakeChrome", zoom)
+        self.assertIn("SCRUB", tv)
+        self.assertIn("HUD rail", tv)
+        self.assertNotIn("REWIND 15", tv)
+        self.assertNotIn("AHEAD 15", tv)
 
 
 class ClosedSourcesTests(unittest.TestCase):
@@ -6072,8 +6275,9 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("PAUSE", tv)
         self.assertIn("PREV", tv)
         self.assertIn("NEXT", tv)
-        self.assertIn("REWIND 15", tv)
-        self.assertIn("AHEAD 15", tv)
+        self.assertIn("SCRUB", tv)
+        self.assertNotIn("REWIND 15", tv)
+        self.assertNotIn("AHEAD 15", tv)
         self.assertIn("TAP FULL", tv)
         self.assertIn("zoom", tv.lower())
         self.assertIn("section", tv.lower())
@@ -6172,8 +6376,9 @@ class NaTheaterTests(unittest.TestCase):
         self.assertIn("DROP", live)
         self.assertIn("PREV", live)
         self.assertIn("NEXT", live)
-        self.assertIn("REWIND 15", live)
-        self.assertIn("AHEAD 15", live)
+        self.assertIn("NaScrub", live)
+        self.assertNotIn("REWIND 15", live)
+        self.assertNotIn("AHEAD 15", live)
         self.assertIn("PAUSE", live)
         self.assertIn("NaWatch", live)
         self.assertIn("enum AdultKeep", keep)
@@ -6198,8 +6403,9 @@ class NaTheaterTests(unittest.TestCase):
         self.assertIn("PREV", zoom)
         self.assertIn("NEXT", zoom)
         self.assertIn("KEEP", zoom)
-        self.assertIn("REWIND 15", zoom)
-        self.assertIn("AHEAD 15", zoom)
+        self.assertIn("NaScrub", zoom)
+        self.assertNotIn("REWIND 15", zoom)
+        self.assertNotIn("AHEAD 15", zoom)
         kept = {
             "id": "adult-keep",
             "name": "SHELF",
@@ -6429,7 +6635,8 @@ class NaTheaterStayUpTests(unittest.TestCase):
         self.assertLess(close.find("Task.yield()"), close.find("NaWatch.drop"))
         self.assertNotIn("NaWatch.drop", zoom)
         self.assertNotIn("replaceCurrentItem(with: nil)", zoom)
-        self.assertIn(".onChange(of: row.url)", zoom)
+        self.assertIn(".onChange(of: row) {", zoom)
+        self.assertNotIn(".onChange(of: row.url)", zoom)
         close_chip = next(line for line in zoom.splitlines() if 'Button("CLOSE")' in line)
         self.assertNotIn("stop()", close_chip)
         playing = well.split(".onChange(of: playingID)")[1].split(".onChange(of: row.id)")[0]
@@ -6446,7 +6653,10 @@ class NaTheaterStayUpTests(unittest.TestCase):
         self.assertLess(pipe_swap.find("zoomLive == nil"), pipe_swap.find("stop()"))
         go_full = well.split("private func goFull()")[1].split("private func toggle()")[0]
         self.assertLess(go_full.find("player = nil"), go_full.find("onFull(next)"))
-        halt = well.split("private func stop()")[1].split("private func jump")[0]
+        self.assertIn("Task.yield()", go_full)
+        self.assertLess(go_full.find("player = nil"), go_full.find("Task.yield()"))
+        self.assertLess(go_full.find("Task.yield()"), go_full.find("onFull(next)"))
+        halt = well.split("private func stop()")[1].split("private func stepPrev")[0]
         self.assertIn("NaWatch.drop", halt)
         self.assertLess(halt.find("player = nil"), halt.find("NaWatch.drop"))
         self.assertNotIn("Task", halt)
@@ -6484,13 +6694,19 @@ class NaTheaterStayUpTests(unittest.TestCase):
         start = well.split("private func start()")[1].split("private func stop()")[0]
         close = app.split("func closeLive()")[1].split("func holdCam(")[0]
         self.assertLess(go_full.find("player = nil"), go_full.find("onFull(next)"))
+        self.assertIn("Task.yield()", go_full)
+        self.assertLess(go_full.find("lift = true"), go_full.find("player = nil"))
+        self.assertLess(go_full.find("player = nil"), go_full.find("Task.yield()"))
+        self.assertLess(go_full.find("Task.yield()"), go_full.find("onFull(next)"))
         self.assertNotIn("playingID = nil", go_full)
         self.assertNotIn("NaWatch.drop", go_full)
         self.assertNotIn("stop()", go_full)
         self.assertIn("zoomLive == nil", start)
         self.assertIn("holdPipe", start)
+        self.assertIn("!lift", start)
         self.assertLess(start.find("zoomLive == nil"), start.find("NaWatch.play"))
         self.assertLess(start.find("!holdPipe"), start.find("NaWatch.play"))
+        self.assertLess(start.find("!lift"), start.find("NaWatch.play"))
         self.assertIn("onChange(of: holdPipe)", well)
         remount = well.split(".onChange(of: holdPipe)")[1].split(".onChange")[0]
         self.assertIn("start()", remount)
@@ -6511,6 +6727,157 @@ class NaTheaterStayUpTests(unittest.TestCase):
         self.assertIn("TAP PLAY after CLOSE", tv)
         self.assertIn("any ready playlist", tv)
         self.assertIn("closelive drops", tv.lower())
+        self.assertIn("without a fade", tv)
+        self.assertIn("yields one turn", tv)
+
+
+class NaTheaterLayerCrashTests(unittest.TestCase):
+    def test_na_cannot_stack_layers_or_drop_under_a_fade(self):
+        live = read("Blackout", "NaLive.swift")
+        zoom = read("Blackout", "LiveZoom.swift")
+        root = read("Blackout", "RootChrome.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        qa = read("docs", "SOLO_QA.md")
+        watch = live.split("enum NaWatch")[1].split("struct NaLiveWell")[0]
+        well = live.split("struct NaLiveWell")[1]
+        go_full = well.split("private func goFull()")[1].split("private func toggle()")[0]
+        start = well.split("private func start()")[1].split("private func stop()")[0]
+        drop = watch.split("static func drop(_ victim")[1].split("static func drop(ifEra")[0]
+        play = watch.split("static func play(")[1].split("static func drop(_ victim")[0]
+        scrub = watch.split("static func scrub(")[1].split("static func clock(")[0]
+        overlay = root.split("if let row = runtime.zoomLive")[1].split(".animation(")[0]
+        tv = next(line for line in qa.splitlines() if "EXPEDITION `TV`" in line)
+        self.assertIn("@State private var lift", well)
+        self.assertIn("lift = true", go_full)
+        self.assertIn("Task.yield()", go_full)
+        self.assertLess(go_full.find("lift = true"), go_full.find("player = nil"))
+        self.assertLess(go_full.find("player = nil"), go_full.find("Task.yield()"))
+        self.assertLess(go_full.find("Task.yield()"), go_full.find("onFull(next)"))
+        self.assertIn("!lift", start)
+        self.assertLess(start.find("!lift"), start.find("NaWatch.play"))
+        disappear = well.split(".onDisappear")[1].split(".accessibilityElement")[0]
+        self.assertIn("!lift", disappear)
+        row_swap = well.split(".onChange(of: row.id)")[1].split(".onDisappear")[0]
+        self.assertIn("!lift", row_swap)
+        pipe_swap = well.split(".onChange(of: pipe)")[1].split(".onChange(of: playingID)")[0]
+        self.assertIn("!lift", pipe_swap)
+        playing = well.split(".onChange(of: playingID)")[1].split(".onChange(of: row.id)")[0]
+        self.assertIn("!lift", playing)
+        remount = well.split(".onChange(of: holdPipe)")[1].split(".onChange")[0]
+        self.assertIn("lift = false", remount)
+        self.assertNotIn(".transition", overlay)
+        self.assertNotIn("runtime.zoomLive?.id", root.split("struct RootChrome")[1].split("private var armedHUD")[0])
+        self.assertIn("cancelPendingSeeks", drop)
+        self.assertLess(drop.find("cancelPendingSeeks"), drop.find("replaceCurrentItem"))
+        self.assertIn("cancelPendingSeeks", play)
+        self.assertLess(play.find("cancelPendingSeeks"), play.find("replaceCurrentItem"))
+        self.assertIn("isNumeric", scrub)
+        self.assertIn("isValid", scrub)
+        self.assertIn("cancelPendingSeeks", scrub)
+        self.assertIn("@MainActor\n    static func scrub(", watch)
+        close = app.split("func closeLive()")[1].split("func holdCam(")[0]
+        self.assertIn("drop(ifEra: era)", close)
+        self.assertNotIn("NaWatch.drop", zoom)
+        self.assertIn("yields one turn", tv)
+        self.assertIn("without a fade", tv)
+        self.assertIn("before the live layer", tv)
+
+
+class NaTheaterReadyCrashTests(unittest.TestCase):
+    def test_scrub_refuses_packed_seek_until_ready(self):
+        live = read("Blackout", "NaLive.swift")
+        watch = live.split("enum NaWatch")[1].split("struct NaLiveWell")[0]
+        scrub = watch.split("static func scrub(")[1].split("static func clock(")[0]
+        self.assertIn("item.status == .readyToPlay", scrub)
+        self.assertIn("duration.isNumeric", scrub)
+        self.assertIn("duration.isValid", scrub)
+        self.assertNotIn("span(player, packed: packed)", scrub)
+        self.assertNotIn("toleranceBefore", scrub)
+        self.assertIn("cancelPendingSeeks", scrub)
+
+    def test_na_scrub_timeline_does_not_own_the_drag(self):
+        live = read("Blackout", "NaLive.swift")
+        scrub = live.split("struct NaScrub")[1].split("private struct NaLiveLayer")[0]
+        self.assertIn("DragGesture", scrub)
+        self.assertIn("onTapGesture", scrub)
+        self.assertNotIn("private var rail", scrub)
+        self.assertNotIn("{ _ in\n            rail", scrub)
+        for block in timeline_closures(scrub):
+            self.assertNotIn("DragGesture", block)
+            self.assertNotIn("onTapGesture", block)
+            self.assertNotIn("simultaneousGesture", block)
+
+    def test_live_layer_does_not_rebind_the_same_player(self):
+        live = read("Blackout", "NaLive.swift")
+        seat = live.split("static func seat(")[1].split("static func evict(")[0]
+        self.assertIn("superview === parent", seat)
+        self.assertIn("return", seat)
+
+    def test_tap_full_waits_the_next_run_loop(self):
+        live = read("Blackout", "NaLive.swift")
+        zoom = read("Blackout", "LiveZoom.swift")
+        qa = read("docs", "SOLO_QA.md")
+        well = live.split("struct NaLiveWell")[1]
+        go_full = well.split("private func goFull()")[1].split("private func toggle()")[0]
+        self.assertIn("Task.yield()", go_full)
+        self.assertIn("DispatchQueue.main.async", go_full)
+        self.assertLess(go_full.find("player = nil"), go_full.find("Task.yield()"))
+        self.assertLess(go_full.find("Task.yield()"), go_full.find("DispatchQueue.main.async"))
+        self.assertLess(go_full.find("DispatchQueue.main.async"), go_full.find("onFull(next)"))
+        appear = zoom.split(".onAppear")[1].split(".onChange")[0]
+        self.assertIn("Task.yield()", appear)
+        self.assertLess(appear.find("Task.yield()"), appear.find("start()"))
+        tv = next(line for line in qa.splitlines() if "EXPEDITION `TV`" in line)
+        self.assertIn("next run loop", tv)
+        self.assertIn("only once the file is ready", tv)
+        self.assertIn("without rebinding", tv)
+
+    def test_full_start_is_one_row_change(self):
+        zoom = read("Blackout", "LiveZoom.swift")
+        self.assertIn(".onChange(of: row) {", zoom)
+        self.assertNotIn(".onChange(of: row.id)", zoom)
+        self.assertNotIn(".onChange(of: row.url)", zoom)
+
+    def test_replay_cancels_seeks_before_the_new_layer(self):
+        live = read("Blackout", "NaLive.swift")
+        play = live.split("enum NaWatch")[1].split("struct NaLiveWell")[0].split(
+            "static func play("
+        )[1].split("static func drop(_ victim")[0]
+        self.assertGreaterEqual(play.count("cancelPendingSeeks"), 2)
+
+
+class NaTheaterOneLayerTests(unittest.TestCase):
+    def test_well_and_full_share_one_player_layer(self):
+        live = read("Blackout", "NaLive.swift")
+        zoom = read("Blackout", "LiveZoom.swift")
+        qa = read("docs", "SOLO_QA.md")
+        watch = live.split("enum NaWatch")[1].split("struct NaLiveWell")[0]
+        well_layer = live.split("struct NaLiveLayer")[1]
+        self.assertEqual(watch.count("AVPlayerLayer.self"), 1)
+        self.assertEqual(live.count("AVPlayerLayer.self"), 1)
+        self.assertEqual(zoom.count("AVPlayerLayer.self"), 0)
+        self.assertEqual(zoom.count("override class var layerClass"), 0)
+        self.assertNotIn("final class PlayerHost", zoom)
+        self.assertNotIn("final class PlayerView", live)
+        self.assertIn("static func seat(", watch)
+        self.assertIn("static func evict(", watch)
+        self.assertIn("NaWatch.seat(", well_layer)
+        self.assertIn("NaWatch.evict(", well_layer)
+        self.assertIn("NaWatch.seat(", zoom)
+        self.assertIn("NaWatch.evict(", zoom)
+        dismantle = well_layer.split("static func dismantleUIView")[1]
+        self.assertIn("NaWatch.evict(", dismantle)
+        self.assertNotIn("player = nil", dismantle)
+        zoom_dismantle = zoom.split("static func dismantleUIView")[1].split(
+            "final class Coordinator"
+        )[0]
+        self.assertIn("NaWatch.evict(", zoom_dismantle)
+        drop = watch.split("static func drop(_ victim")[1].split("static func drop(ifEra")[0]
+        self.assertIn(".player = nil", drop)
+        self.assertLess(drop.find(".player = nil"), drop.find("replaceCurrentItem"))
+        tv = next(line for line in qa.splitlines() if "EXPEDITION `TV`" in line)
+        self.assertIn("one player layer", tv)
+        self.assertIn("reparents", tv)
 
 
 def desk_text() -> str:
