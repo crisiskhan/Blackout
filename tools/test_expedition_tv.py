@@ -516,6 +516,11 @@ ADULT_EXOTICA = (
     "missskaylaxxx",
     "iloveekaylaaa",
 )
+ADULT_GABRIELLE = (
+    "gabriellethegoddesss",
+    "gabrielle the goddesss",
+    "charneciamuriel",
+)
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
     ("ITSSTEPHHONEYXO21", ADULT_STEPH),
@@ -559,6 +564,7 @@ ADULT_FACES = (
     ("LUST4LIZZY", ADULT_LIZZY),
     ("MISS LADYCAKEZ69", ADULT_CAKEZ),
     ("EXOTICAXXX", ADULT_EXOTICA),
+    ("GABRIELLETHEGODDESSS", ADULT_GABRIELLE),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_KEEP_CHIP = "KEEP"
@@ -1618,6 +1624,47 @@ ADULT_FACE_HOLDS = (
         ("file", "https://v42.erome.com/8145/e1YBZ1zA/UZflSlfW_720p.mp4", 12, "Exoticaslim"),
         ("file", "https://v108.erome.com/8044/KMootfxL/nhsZGrI3_720p.mp4", 9, "Exoticaslim"),
     )),
+    ("GABRIELLETHEGODDESSS", (
+        ("file", "https://v90.erome.com/6445/xwTo2lME/hymCYrmN_720p.mp4", 538, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/GhqgmlqM_720p.mp4", 509, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/myy5jZHe_720p.mp4", 486, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/6xpHMyMj_720p.mp4", 396, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/KJUbFWGO_720p.mp4", 249, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/ACLKLS4V_720p.mp4", 240, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/wfjwCNSv_720p.mp4", 204, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/LWjzvY1S_720p.mp4", 169, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/NVW9vy0v_720p.mp4", 145, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/thhQ60Z1_720p.mp4", 123, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/RhhwvVwF_720p.mp4", 104, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/8jQnjMwy_720p.mp4", 81, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/2USnd83y_720p.mp4", 69, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/9q1hsMiu_720p.mp4", 59, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/TSM5kWhc_720p.mp4", 50, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/r0i5y5nj_720p.mp4", 46, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/p6wxZBqI_720p.mp4", 33, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/8F8E9ZX5_720p.mp4", 32, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/TZbJAKWm_720p.mp4", 30, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/WkGxfEEe_720p.mp4", 30, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/KF58ibDv_720p.mp4", 28, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/apFp6tTJ_720p.mp4", 26, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/WQIpS3Zh_720p.mp4", 25, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/QDdWFkOR_720p.mp4", 24, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/A3fmO5ts_720p.mp4", 21, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/ANR1wppg_720p.mp4", 21, "Gabriellethegoddesss"),
+        ("file", "https://v333.erome.com/2716/kdgY4R08/k1bH6onK_720p.mp4", 16, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/IXGn5i6y_720p.mp4", 14, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/idholTCT_720p.mp4", 12, "Gabriellethegoddesss"),
+        ("file", "https://v333.erome.com/2716/kdgY4R08/Elwzmxsp_720p.mp4", 9, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/2YpcN9c4_720p.mp4", 8, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/U1L26dsJ_720p.mp4", 8, "Gabriellethegoddesss"),
+        ("file", "https://v333.erome.com/2716/kdgY4R08/xiKD1PSq_720p.mp4", 8, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/2hM7y54E_720p.mp4", 7, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/msCqnSjQ_720p.mp4", 7, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/qPpqdAEv_720p.mp4", 7, "Gabriellethegoddesss"),
+        ("file", "https://v90.erome.com/6445/xwTo2lME/4zILDaYo_720p.mp4", 6, "Gabriellethegoddesss"),
+        ("file", "https://v333.erome.com/2716/kdgY4R08/Tjg5SlNM_720p.mp4", 6, "Gabriellethegoddesss"),
+        ("file", "https://v333.erome.com/2716/kdgY4R08/9tmV02Vf_720p.mp4", 5, "Gabriellethegoddesss"),
+    )),
 )
 ADULT_FACE_DESKS = (
     ("ITSSTEPHHONEY21", ("RUX8bZH5",)),
@@ -1640,6 +1687,7 @@ ADULT_FACE_DESKS = (
     ("STRAWBERRY SANDRA", ("4ftzrUvv",)),
     ("LUST4LIZZY", ("7YfN2Aly",)),
     ("EXOTICAXXX", ("64PV5qNR", "e1YBZ1zA", "KMootfxL")),
+    ("GABRIELLETHEGODDESSS", ("xwTo2lME", "kdgY4R08")),
 )
 ADULT_DESK_ORIGIN = "https://www.erome.com"
 ADULT_DESK_FOLLOW = 12
@@ -1745,6 +1793,7 @@ ADULT_FACE_POSTS = (
     ("LUST4LIZZY", ("lust4lizzy", "you_me620")),
     ("MISS LADYCAKEZ69", ("miss_ladycakez69", "missladycakez69", "lady_cakez69")),
     ("EXOTICAXXX", ("exoticaslim", "exoticaxxx", "ilovekaylaxx", "missskaylax", "iloveekaylaaa")),
+    ("GABRIELLETHEGODDESSS", ("charneciamuriel", "gabriellethegoddesss")),
 )
 ADULT_FACE_STILLS = (
     ("P283XrKRjsV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"),
@@ -1827,6 +1876,7 @@ ADULT_FACE_GIFTS = (
         "missskaylaxxx",
         "iloveekaylaaa",
     )),
+    ("GABRIELLETHEGODDESSS", ("gabriellethegoddesss", "charneciamuriel", "goddessgabrielle")),
 )
 ADULT_FACE_KILL = (
     "loli",
@@ -3697,6 +3747,7 @@ class AdultDeskTests(unittest.TestCase):
                 "LUST4LIZZY",
                 "MISS LADYCAKEZ69",
                 "EXOTICAXXX",
+                "GABRIELLETHEGODDESSS",
             ],
         )
         fat_kinds = [f"KIND{index:02d}" for index in range(40)]
@@ -4839,6 +4890,17 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("64PV5qNR", desk)
         self.assertIn("e1YBZ1zA", desk)
         self.assertIn("KMootfxL", desk)
+        self.assertIn("GABRIELLETHEGODDESSS", desk)
+        self.assertIn("gabrielleNeedles", desk)
+        self.assertIn("gabriellethegoddesss", desk)
+        self.assertIn("charneciamuriel", desk)
+        self.assertIn("goddessgabrielle", desk)
+        self.assertIn("xwTo2lME", desk)
+        self.assertIn("kdgY4R08", desk)
+        self.assertIn("hymCYrmN", desk)
+        self.assertNotIn("milkmami89", desk.lower())
+        self.assertNotIn("killnation123", desk.lower())
+        self.assertNotIn("gabrielle union", desk.lower())
         self.assertNotIn("creamy exotica", desk.lower())
         self.assertNotIn("kayla otto", desk.lower())
         self.assertNotIn("persianbrat", desk.lower())
@@ -5372,6 +5434,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("LUST4LIZZY", adult_rail([]))
         self.assertIn("MISS LADYCAKEZ69", adult_rail([]))
         self.assertIn("EXOTICAXXX", adult_rail([]))
+        self.assertIn("GABRIELLETHEGODDESSS", adult_rail([]))
         self.assertGreaterEqual(len(adult_face_hold_rooms("ITISASHLEY")), 20)
         self.assertEqual(adult_face_hold_rooms("ITISASHLEY")[0]["seconds"], 696)
         self.assertEqual(
@@ -5533,6 +5596,99 @@ class AdultDeskTests(unittest.TestCase):
             self.assertNotIn("onlyfans", row["name"].lower())
             self.assertNotIn("onlyfans", row["url"].lower())
             self.assertIn("exoticaslim", row["seek"])
+        self.assertGreaterEqual(len(adult_face_hold_rooms("GABRIELLETHEGODDESSS")), 39)
+        self.assertEqual(
+            [row["seconds"] for row in adult_face_hold_rooms("GABRIELLETHEGODDESSS")],
+            [
+                538,
+                509,
+                486,
+                396,
+                249,
+                240,
+                204,
+                169,
+                145,
+                123,
+                104,
+                81,
+                69,
+                59,
+                50,
+                46,
+                33,
+                32,
+                30,
+                30,
+                28,
+                26,
+                25,
+                24,
+                21,
+                21,
+                16,
+                14,
+                12,
+                9,
+                8,
+                8,
+                8,
+                7,
+                7,
+                7,
+                6,
+                6,
+                5,
+            ],
+        )
+        self.assertTrue(any("xwTo2lME" in path for path in adult_face_hunt("GABRIELLETHEGODDESSS")))
+        self.assertTrue(any("erome.com/a/kdgY4R08" in path for path in adult_face_hunt("GABRIELLETHEGODDESSS")))
+        self.assertTrue(any("erome.com/gabriellethegoddesss" in path for path in adult_face_hunt("GABRIELLETHEGODDESSS")))
+        self.assertTrue(any("erome.com/charneciamuriel" in path for path in adult_face_hunt("GABRIELLETHEGODDESSS")))
+        self.assertTrue(any("users/gabriellethegoddesss/search" in path for path in adult_face_hunt("GABRIELLETHEGODDESSS")))
+        self.assertTrue(any("screen-name/charneciamuriel" in path for path in adult_face_hunt("GABRIELLETHEGODDESSS")))
+        self.assertTrue(any("query=gabriellethegoddesss" in path for path in adult_face_hunt("GABRIELLETHEGODDESSS")))
+        self.assertEqual(adult_hunt_needles("gabriellethegoddesss"), list(ADULT_GABRIELLE))
+        self.assertEqual(adult_hunt_needles("charneciamuriel"), list(ADULT_GABRIELLE))
+        self.assertTrue(any("goddessgabrielle" in path for path in adult_face_hunt("GABRIELLETHEGODDESSS")))
+        self.assertEqual(
+            adult_hunt_needles("https://x.com/charneciamuriel?s=21"),
+            list(ADULT_GABRIELLE),
+        )
+        self.assertEqual(
+            adult_hunt_needles("https://www.erome.com/gabriellethegoddesss"),
+            list(ADULT_GABRIELLE),
+        )
+        self.assertEqual(adult_page_name("https://x.com/charneciamuriel?s=21"), "charneciamuriel")
+        self.assertEqual(
+            adult_page_name("https://www.erome.com/gabriellethegoddesss"),
+            "gabriellethegoddesss",
+        )
+        self.assertNotIn("gabrielle", adult_face_needles("GABRIELLETHEGODDESSS") or [])
+        self.assertNotIn("goddess", adult_face_needles("GABRIELLETHEGODDESSS") or [])
+        self.assertNotIn("charnecia", adult_face_needles("GABRIELLETHEGODDESSS") or [])
+        self.assertNotIn("muriel", adult_face_needles("GABRIELLETHEGODDESSS") or [])
+        self.assertNotIn("milkmami89", adult_face_needles("GABRIELLETHEGODDESSS") or [])
+        self.assertNotIn("milkmami", adult_face_needles("GABRIELLETHEGODDESSS") or [])
+        self.assertNotIn("goddessgabrielle", adult_face_needles("GABRIELLETHEGODDESSS") or [])
+        self.assertFalse(
+            any("44hnTwXR" in row["url"] for row in adult_face_hold_rooms("GABRIELLETHEGODDESSS"))
+        )
+        self.assertFalse(
+            any("TlfEYNEd" in row["url"] for row in adult_face_hold_rooms("GABRIELLETHEGODDESSS"))
+        )
+        self.assertFalse(
+            any("fRfxdOVI" in row["url"] for row in adult_face_hold_rooms("GABRIELLETHEGODDESSS"))
+        )
+        self.assertFalse(
+            any("h3D7u1nk" in row["url"] for row in adult_face_hold_rooms("GABRIELLETHEGODDESSS"))
+        )
+        for row in adult_face_hold_rooms("GABRIELLETHEGODDESSS"):
+            self.assertNotIn("onlyfans", row["name"].lower())
+            self.assertNotIn("onlyfans", row["url"].lower())
+            self.assertNotIn("milkmami89", row["name"].lower())
+            self.assertNotIn("milkmami89", row["seek"])
+            self.assertIn("gabriellethegoddesss", row["seek"])
         self.assertEqual(
             [row["id"] for row in adult_parse_face(
                 {
@@ -5702,6 +5858,52 @@ class AdultDeskTests(unittest.TestCase):
                     ]
                 },
                 "EXOTICAXXX",
+            )],
+            [],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "gabrielle-union-hot-scene",
+                            "title": "Gabrielle Union",
+                            "creator": "Gabrielle Union",
+                            "durationSeconds": 240,
+                        },
+                        {
+                            "slug": "daily-goddess-worship",
+                            "title": "Goddess Worship",
+                            "creator": "Goddess",
+                            "durationSeconds": 180,
+                        },
+                        {
+                            "slug": "milkmami89-home-video",
+                            "title": "Milkmami89",
+                            "creator": "Milkmami89",
+                            "durationSeconds": 90,
+                        },
+                        {
+                            "slug": "gabrielle-the-goddess-tease",
+                            "title": "Gabrielle the Goddess",
+                            "creator": "Gabrielle",
+                            "durationSeconds": 80,
+                        },
+                        {
+                            "slug": "charnecia-smith-interview",
+                            "title": "Charnecia Smith",
+                            "creator": "Charnecia",
+                            "durationSeconds": 70,
+                        },
+                        {
+                            "slug": "self-time-bedroom",
+                            "title": "Self time",
+                            "creator": "Self time",
+                            "durationSeconds": 60,
+                        },
+                    ]
+                },
+                "GABRIELLETHEGODDESSS",
             )],
             [],
         )
@@ -6325,6 +6527,12 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("itochi_anata", tv)
         self.assertIn("MISS LADYCAKEZ69", tv)
         self.assertIn("EXOTICAXXX", tv)
+        self.assertIn("GABRIELLETHEGODDESSS", tv)
+        self.assertIn("8:58", tv)
+        self.assertIn("charneciamuriel", tv)
+        self.assertIn("goddessgabrielle", tv)
+        self.assertIn("Gabrielle Union", tv)
+        self.assertIn("milkmami89", tv)
         self.assertIn("0:28", tv)
         self.assertIn("Creamy Exotica", tv)
         self.assertIn("Kayla Otto", tv)

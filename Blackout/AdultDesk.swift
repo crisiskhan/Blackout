@@ -415,6 +415,11 @@ enum AdultDesk {
         "missskaylaxxx",
         "iloveekaylaaa",
     ]
+    static let gabrielleNeedles = [
+        "gabriellethegoddesss",
+        "gabrielle the goddesss",
+        "charneciamuriel",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
@@ -458,6 +463,7 @@ enum AdultDesk {
         ("LUST4LIZZY", lizzyNeedles),
         ("MISS LADYCAKEZ69", cakezNeedles),
         ("EXOTICAXXX", exoticaNeedles),
+        ("GABRIELLETHEGODDESSS", gabrielleNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -528,6 +534,7 @@ enum AdultDesk {
             "missskaylaxxx",
             "iloveekaylaaa",
         ]),
+        ("GABRIELLETHEGODDESSS", ["gabriellethegoddesss", "charneciamuriel", "goddessgabrielle"]),
     ]
     /// Proven guest albums. Hunt these first so a JSON desk cannot blank the chip.
     static let faceDesks: [(String, [String])] = [
@@ -600,6 +607,7 @@ enum AdultDesk {
         ("STRAWBERRY SANDRA", ["4ftzrUvv"]),
         ("LUST4LIZZY", ["7YfN2Aly"]),
         ("EXOTICAXXX", ["64PV5qNR", "e1YBZ1zA", "KMootfxL"]),
+        ("GABRIELLETHEGODDESSS", ["xwTo2lME", "kdgY4R08"]),
     ]
     /// Public X handles. Hunt the guest timeline, not a paywalled store.
     static let facePosts: [(String, [String])] = [
@@ -644,6 +652,7 @@ enum AdultDesk {
         ("LUST4LIZZY", ["lust4lizzy", "you_me620"]),
         ("MISS LADYCAKEZ69", ["miss_ladycakez69", "missladycakez69", "lady_cakez69"]),
         ("EXOTICAXXX", ["exoticaslim", "exoticaxxx", "ilovekaylaxx", "missskaylax", "iloveekaylaaa"]),
+        ("GABRIELLETHEGODDESSS", ["charneciamuriel", "gabriellethegoddesss"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
@@ -982,6 +991,47 @@ enum AdultDesk {
             ("file", "https://v102.erome.com/8145/64PV5qNR/0XmpTQB4_720p.mp4", 28, "Exoticaslim"),
             ("file", "https://v42.erome.com/8145/e1YBZ1zA/UZflSlfW_720p.mp4", 12, "Exoticaslim"),
             ("file", "https://v108.erome.com/8044/KMootfxL/nhsZGrI3_720p.mp4", 9, "Exoticaslim"),
+        ]),
+        ("GABRIELLETHEGODDESSS", [
+            ("file", "https://v90.erome.com/6445/xwTo2lME/hymCYrmN_720p.mp4", 538, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/GhqgmlqM_720p.mp4", 509, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/myy5jZHe_720p.mp4", 486, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/6xpHMyMj_720p.mp4", 396, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/KJUbFWGO_720p.mp4", 249, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/ACLKLS4V_720p.mp4", 240, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/wfjwCNSv_720p.mp4", 204, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/LWjzvY1S_720p.mp4", 169, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/NVW9vy0v_720p.mp4", 145, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/thhQ60Z1_720p.mp4", 123, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/RhhwvVwF_720p.mp4", 104, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/8jQnjMwy_720p.mp4", 81, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/2USnd83y_720p.mp4", 69, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/9q1hsMiu_720p.mp4", 59, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/TSM5kWhc_720p.mp4", 50, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/r0i5y5nj_720p.mp4", 46, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/p6wxZBqI_720p.mp4", 33, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/8F8E9ZX5_720p.mp4", 32, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/TZbJAKWm_720p.mp4", 30, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/WkGxfEEe_720p.mp4", 30, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/KF58ibDv_720p.mp4", 28, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/apFp6tTJ_720p.mp4", 26, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/WQIpS3Zh_720p.mp4", 25, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/QDdWFkOR_720p.mp4", 24, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/A3fmO5ts_720p.mp4", 21, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/ANR1wppg_720p.mp4", 21, "Gabriellethegoddesss"),
+            ("file", "https://v333.erome.com/2716/kdgY4R08/k1bH6onK_720p.mp4", 16, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/IXGn5i6y_720p.mp4", 14, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/idholTCT_720p.mp4", 12, "Gabriellethegoddesss"),
+            ("file", "https://v333.erome.com/2716/kdgY4R08/Elwzmxsp_720p.mp4", 9, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/2YpcN9c4_720p.mp4", 8, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/U1L26dsJ_720p.mp4", 8, "Gabriellethegoddesss"),
+            ("file", "https://v333.erome.com/2716/kdgY4R08/xiKD1PSq_720p.mp4", 8, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/2hM7y54E_720p.mp4", 7, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/msCqnSjQ_720p.mp4", 7, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/qPpqdAEv_720p.mp4", 7, "Gabriellethegoddesss"),
+            ("file", "https://v90.erome.com/6445/xwTo2lME/4zILDaYo_720p.mp4", 6, "Gabriellethegoddesss"),
+            ("file", "https://v333.erome.com/2716/kdgY4R08/Tjg5SlNM_720p.mp4", 6, "Gabriellethegoddesss"),
+            ("file", "https://v333.erome.com/2716/kdgY4R08/9tmV02Vf_720p.mp4", 5, "Gabriellethegoddesss"),
         ]),
     ]
     /// Guest stills for baked pin tokens. Star stills are `preview-batch/{slug}/thumb.webp`.
