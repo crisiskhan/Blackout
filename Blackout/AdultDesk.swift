@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 
 /// Adult directory for N/A after the 10s hold. Women and couples. JSON only. No player.
@@ -673,6 +674,17 @@ enum AdultDesk {
     static let keepChip = "KEEP"
     static let loveOrigin = "https://lovescape.cam"
     static let loveTags = ["girls", "couples"]
+    static let loveKeys: [String: String] = [
+        "1Dzcc6OjP73LKbtI": "Y64UVwX5RrIWnOLp",
+        "7uUnbD0jMCB9GH32": "lzCQ6QBTnLpB0zMF",
+        "Fq6m2TO2ZeBkRPm9": "xb6di1NF9EFXHUwb",
+        "GrRncsoByZmsiT6L": "NigHYyOD9l4rvAEb",
+        "N2oLovTIXb0o28Uj": "ABE7Sj8jh3oPM2ae",
+        "NTK9aqcLmNFMWrpQ": "tOcYOap4Ty1l9Jzb",
+        "OLzu7QlySkG2fVRn": "CsovScFH9VirSJ4Z",
+        "Ohi7eTRBpkAuML0l": "kExe29N2sLFrHGqu",
+        "Ook7quaiNgiyuhai": "EQueeGh2kaewa3ch",
+    ]
     static let railExtra = 8
     static let huntAtOnce = 4
     static let huntPages = 2
@@ -1384,8 +1396,8 @@ enum AdultDesk {
 
     static func userAgent(_ raw: String) -> String {
         let host = URL(string: raw)?.host?.lowercased() ?? ""
-        if loveHost(raw) || giftHost(raw) || deskHost(raw) || postHost(raw) || webHost(raw)
-            || tubeHost(raw) || host.contains("bornstar")
+        if loveFile(raw) || loveHost(raw) || giftHost(raw) || deskHost(raw) || postHost(raw)
+            || webHost(raw) || tubeHost(raw) || host.contains("bornstar")
         {
             return loveAgent
         }
@@ -1393,7 +1405,7 @@ enum AdultDesk {
     }
 
     static func referer(_ raw: String) -> String {
-        if loveHost(raw) { return "\(loveOrigin)/" }
+        if loveFile(raw) || loveHost(raw) { return "\(loveOrigin)/" }
         if giftHost(raw) { return "\(giftOrigin)/" }
         if deskHost(raw) { return "\(deskOrigin)/" }
         if postHost(raw) { return "https://x.com/" }
@@ -2723,11 +2735,23 @@ enum AdultDesk {
 
     static func playlist(_ raw: String) -> String? {
         let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let url = URL(string: text), url.scheme?.lowercased() == "https" else { return nil }
+        guard let url = URL(string: text), let scheme = url.scheme?.lowercased() else { return nil }
         let low = text.lowercased()
+        if scheme == "file" {
+            let path = url.path.lowercased()
+            guard path.contains("adult-love"), path.hasSuffix(".m3u8") else { return nil }
+            if low.contains("/cpa/") || low.contains("mouflon-advert") { return nil }
+            return text
+        }
+        guard scheme == "https" else { return nil }
         if low.contains("/cpa/") || low.contains("mouflon-advert") { return nil }
         if !low.contains(".m3u8") && !low.contains(".mp4") { return nil }
         return text
+    }
+
+    static func loveFile(_ raw: String) -> Bool {
+        let low = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return low.hasPrefix("file:") && low.contains("adult-love") && low.contains(".m3u8")
     }
 
     static func filePlay(_ raw: String) -> Bool {
@@ -2746,6 +2770,105 @@ enum AdultDesk {
         return play
     }
 
+    static func lovePlay(_ source: String, _ data: Data) -> String? {
+        if let hit = livePlay(source, data) { return hit }
+        guard let text = loveRewrite(source, data) else { return nil }
+        return loveStore(text, from: source)
+    }
+
+    static func loveDecrypt(_ token: String, pdkey: String) -> String? {
+        let blob = token.trimmingCharacters(in: .whitespacesAndNewlines)
+        let key = pdkey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !blob.isEmpty, !key.isEmpty else { return nil }
+        let reversed = String(blob.reversed())
+        let pad = String(repeating: "=", count: (4 - reversed.count % 4) % 4)
+        guard let data = Data(base64Encoded: reversed + pad), !data.isEmpty else { return nil }
+        let hash = Array(SHA256.hash(data: Data(key.utf8)))
+        guard !hash.isEmpty else { return nil }
+        let out = data.enumerated().map { offset, byte in byte ^ hash[offset % hash.count] }
+        guard let text = String(bytes: out, encoding: .utf8), !text.isEmpty else { return nil }
+        guard text.unicodeScalars.allSatisfy({ $0.isASCII && $0.value >= 32 && $0.value <= 126 }) else {
+            return nil
+        }
+        return text
+    }
+
+    static func loveRewrite(_ source: String, _ data: Data) -> String? {
+        guard playlist(source) != nil else { return nil }
+        let text = String(data: data, encoding: .utf8) ?? ""
+        let low = text.lowercased()
+        if low.contains("mouflon-advert") || low.contains("/cpa/") { return nil }
+        if low.contains("#ext-x-stream-inf") { return nil }
+        if !low.contains("#ext-x-mouflon:uri:") || !low.contains("#extinf") { return nil }
+        var found = loveQueryKey(source)
+        var pending: String?
+        var count = 0
+        var out: [String] = []
+        for line in text.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline).map(String.init) {
+            let row = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            if row.hasPrefix("#EXT-X-MOUFLON:PSCH:") {
+                let parts = row.split(separator: ":").map(String.init)
+                if parts.count >= 4, found.isEmpty {
+                    found = lovePkey([parts[3]])
+                }
+                continue
+            }
+            if row.uppercased().hasPrefix("#EXT-X-MOUFLON:URI:") {
+                let uri = String(row.dropFirst("#EXT-X-MOUFLON:URI:".count))
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                pending = loveUnlock(uri, pkey: found)
+                continue
+            }
+            if row.uppercased().hasPrefix("#EXT-X-MOUFLON") {
+                continue
+            }
+            if row.lowercased().contains("media.mp4") {
+                if let next = pending {
+                    out.append(next)
+                    count += 1
+                    pending = nil
+                }
+                continue
+            }
+            if !row.isEmpty, !row.hasPrefix("#"), let next = pending {
+                out.append(next)
+                count += 1
+                pending = nil
+                continue
+            }
+            out.append(line)
+        }
+        guard count > 0 else { return nil }
+        return out.joined(separator: "\n") + "\n"
+    }
+
+    static func loveStore(_ text: String, from source: String) -> String? {
+        guard playlist(source) != nil else { return nil }
+        let blob = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let low = blob.lowercased()
+        guard !blob.isEmpty, !low.contains("media.mp4"), low.contains("#extinf") else { return nil }
+        let data = Data((blob + "\n").utf8)
+        guard data.count > 32, data.count < 3_000_000 else { return nil }
+        let digest = SHA256.hash(data: Data(source.utf8)).map { String(format: "%02x", $0) }.joined()
+        let name = "adult-love-\(digest.prefix(16)).m3u8"
+        let dir = SnapManifest.folder()
+        try? FileManager.default.createDirectory(
+            at: dir,
+            withIntermediateDirectories: true,
+            attributes: [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication]
+        )
+        let url = dir.appendingPathComponent(name)
+        do {
+            try data.write(
+                to: url,
+                options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication]
+            )
+        } catch {
+            return nil
+        }
+        return url.absoluteString
+    }
+
     static func loveVariant(_ source: String, _ data: Data) -> String? {
         guard playlist(source) != nil else { return nil }
         let text = String(data: data, encoding: .utf8) ?? ""
@@ -2753,7 +2876,7 @@ enum AdultDesk {
         if low.contains("mouflon-advert") || low.contains("/cpa/") { return nil }
         if !low.contains("#ext-x-stream-inf") { return nil }
         var psch = ""
-        var pkey = ""
+        var pkeys: [String] = []
         var variants: [String] = []
         for line in text.split(whereSeparator: \.isNewline).map(String.init) {
             let row = line.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -2761,7 +2884,7 @@ enum AdultDesk {
                 let parts = row.split(separator: ":").map(String.init)
                 if parts.count >= 4 {
                     psch = parts[2]
-                    pkey = parts[3]
+                    pkeys.append(parts[3])
                 }
             }
             if row.lowercased().hasPrefix("https://"), let play = playlist(row) {
@@ -2769,6 +2892,7 @@ enum AdultDesk {
             }
         }
         guard let pick = lovePick(variants) else { return nil }
+        let pkey = lovePkey(pkeys)
         if psch.isEmpty || pkey.isEmpty { return pick }
         let sep = pick.contains("?") ? "&" : "?"
         return "\(pick)\(sep)psch=\(psch)&pkey=\(pkey)"
@@ -2927,6 +3051,51 @@ enum AdultDesk {
     private static func loveMaster(_ raw: String) -> String? {
         guard let play = playlist(raw) else { return nil }
         return play.replacingOccurrences(of: "_240p.m3u8", with: "_auto.m3u8")
+    }
+
+    private static func lovePkey(_ pkeys: [String]) -> String {
+        if let hit = pkeys.first(where: { loveKeys[$0] != nil }) { return hit }
+        return pkeys.last ?? ""
+    }
+
+    private static func loveQueryKey(_ raw: String) -> String {
+        guard let url = URL(string: raw),
+              let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
+        else { return "" }
+        return items.first(where: { $0.name == "pkey" })?.value ?? ""
+    }
+
+    private static func loveToken(_ uri: String) -> String? {
+        let parts = uri.split(separator: "_", omittingEmptySubsequences: false).map(String.init)
+        guard parts.count >= 3 else { return nil }
+        var hit: String?
+        for i in 0..<(parts.count - 2) {
+            let left = parts[i]
+            let mid = parts[i + 1]
+            let right = parts[i + 2]
+            guard !left.isEmpty, left.allSatisfy(\.isNumber),
+                  !mid.isEmpty, !mid.allSatisfy(\.isNumber),
+                  right.first?.isNumber == true
+            else { continue }
+            hit = mid
+        }
+        return hit
+    }
+
+    private static func loveUnlock(_ uri: String, pkey: String) -> String? {
+        let raw = uri.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let token = loveToken(raw) else { return nil }
+        var keys: [String] = []
+        if let hit = loveKeys[pkey] { keys.append(hit) }
+        for value in loveKeys.values where !keys.contains(value) {
+            keys.append(value)
+        }
+        for pdkey in keys {
+            if let plain = loveDecrypt(token, pdkey: pdkey) {
+                return raw.replacingOccurrences(of: "_\(token)_", with: "_\(plain)_")
+            }
+        }
+        return nil
     }
 
     private static func lovePick(_ variants: [String]) -> String? {

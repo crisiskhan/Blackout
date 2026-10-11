@@ -23,6 +23,9 @@ final class UpdateSocket {
     private var adultStillBusy = false
     private var adultStillQueued: [NaLive.Row] = []
     private var adultPlay: [String: String] = [:]
+    private var adultLoveFeed: [String: String] = [:]
+    private var adultLoveID = ""
+    private var adultLoveTask: Task<Void, Never>?
     private var adultPublishTask: Task<Void, Never>?
     private var adultPending: [[AdultDesk.Room]] = []
 
@@ -244,7 +247,12 @@ final class UpdateSocket {
             batches = await fetchFacePages(session, topic)
             adultRooms = AdultDesk.merge([held, kept] + batches)
         } else {
+            async let love = fetchLovePages(session)
             batches = await fetchAdultPages(session, from: 0, count: 1)
+            let loveRows = await love
+            if !loveRows.isEmpty {
+                batches.append(contentsOf: loveRows)
+            }
             adultRooms = AdultDesk.merge([held, kept] + batches)
             if AdultDesk.pages > 1 {
                 let rest = await fetchAdultPages(session, from: 1, count: AdultDesk.pages - 1)
@@ -263,6 +271,7 @@ final class UpdateSocket {
         }
         session.invalidateAndCancel()
         adultPlay = adultPlay.filter { key, _ in adultRooms.contains { $0.id == key } }
+        adultLoveFeed = adultLoveFeed.filter { key, _ in adultPlay[key] != nil }
     }
 
     private func fetchLovePages(_ session: URLSession) async -> [[AdultDesk.Room]] {
@@ -507,6 +516,9 @@ final class UpdateSocket {
         let id = row.id.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !id.isEmpty else { return AdultDesk.playlist(row.url) }
         if let cached = adultPlay[id], AdultDesk.playlist(cached) != nil {
+            if AdultDesk.loveFile(cached), let feed = adultLoveFeed[id] {
+                pulseLove(id, feed: feed)
+            }
             return cached
         }
         if let ready = AdultDesk.playlist(row.url),
@@ -524,35 +536,83 @@ final class UpdateSocket {
         config.allowsConstrainedNetworkAccess = true
         config.tlsMinimumSupportedProtocolVersion = .TLSv12
         let session = URLSession(configuration: config)
-        var url: String?
+        var hit: (play: String, feed: String?)?
         if let ready = AdultDesk.playlist(row.url) {
-            url = await Self.resolveAdult(session, ready)
+            hit = await Self.resolveAdult(session, ready)
         }
-        if url == nil, !row.kinds.contains(AdultDesk.loveChip) {
+        if hit == nil, !row.kinds.contains(AdultDesk.loveChip) {
             if let path = AdultDesk.context(row.handle),
                let data = await Self.fetchAdult(session, path)
             {
-                url = AdultDesk.stream(data)
+                if let url = AdultDesk.stream(data) {
+                    hit = (url, nil)
+                }
             }
-            if url == nil, let edge = AdultDesk.edge(row.handle),
+            if hit == nil, let edge = AdultDesk.edge(row.handle),
                let data = await Self.fetchAdultPost(session, edge.path, body: edge.body)
             {
-                url = AdultDesk.stream(data)
+                if let url = AdultDesk.stream(data) {
+                    hit = (url, nil)
+                }
             }
         }
         session.invalidateAndCancel()
-        guard let url else { return nil }
-        adultPlay[id] = url
-        return url
+        guard let hit else { return nil }
+        adultPlay[id] = hit.play
+        if let feed = hit.feed {
+            adultLoveFeed[id] = feed
+            pulseLove(id, feed: feed)
+        } else if adultLoveID == id {
+            adultLoveTask?.cancel()
+            adultLoveID = ""
+        }
+        return hit.play
     }
 
-    nonisolated private static func resolveAdult(_ session: URLSession, _ raw: String) async -> String? {
+    private func pulseLove(_ id: String, feed: String) {
+        let token = id.trimmingCharacters(in: .whitespacesAndNewlines)
+        let src = feed.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !token.isEmpty, AdultDesk.playlist(src) != nil else { return }
+        adultLoveTask?.cancel()
+        adultLoveID = token
+        adultLoveTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                guard let self, !Task.isCancelled, self.pipe, self.adultLoveID == token else { return }
+                guard self.adultPlay[token] != nil else { return }
+                let config = URLSessionConfiguration.ephemeral
+                config.timeoutIntervalForRequest = 8
+                config.timeoutIntervalForResource = 12
+                config.waitsForConnectivity = false
+                config.allowsExpensiveNetworkAccess = true
+                config.allowsConstrainedNetworkAccess = true
+                config.tlsMinimumSupportedProtocolVersion = .TLSv12
+                let session = URLSession(configuration: config)
+                let data = await Self.fetchAdult(session, src)
+                session.invalidateAndCancel()
+                guard let data, let text = AdultDesk.loveRewrite(src, data) else { continue }
+                _ = AdultDesk.loveStore(text, from: src)
+            }
+        }
+    }
+
+    nonisolated private static func resolveAdult(
+        _ session: URLSession,
+        _ raw: String
+    ) async -> (play: String, feed: String?)? {
         guard let play = AdultDesk.playlist(raw) else { return nil }
         guard let data = await fetchAdult(session, play) else { return nil }
-        if let hit = AdultDesk.livePlay(play, data) { return hit }
+        if let hit = AdultDesk.livePlay(play, data) { return (hit, nil) }
+        if let hit = AdultDesk.lovePlay(play, data) {
+            return (hit, AdultDesk.loveFile(hit) ? play : nil)
+        }
         guard let next = AdultDesk.loveVariant(play, data) else { return nil }
         guard let more = await fetchAdult(session, next) else { return nil }
-        return AdultDesk.livePlay(next, more)
+        if let hit = AdultDesk.livePlay(next, more) { return (hit, nil) }
+        if let hit = AdultDesk.lovePlay(next, more) {
+            return (hit, AdultDesk.loveFile(hit) ? next : nil)
+        }
+        return nil
     }
 
     func applyHopStills(_ hopStills: [(id: String, jpeg: Data)]) {

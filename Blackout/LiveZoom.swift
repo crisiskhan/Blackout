@@ -180,7 +180,7 @@ struct LiveZoom: View {
 
     private func start() {
         guard pipe, let play = AdultDesk.playlist(row.url),
-              let url = URL(string: play), url.scheme == "https"
+              let url = URL(string: play)
         else {
             stop()
             return

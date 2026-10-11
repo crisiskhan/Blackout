@@ -9,6 +9,8 @@ Tap a still to pinch-zoom the packed JPEG.
 """
 from __future__ import annotations
 
+import base64
+import hashlib
 import json
 import math
 import re
@@ -570,6 +572,19 @@ ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_KEEP_CHIP = "KEEP"
 ADULT_LOVE_ORIGIN = "https://lovescape.cam"
 ADULT_LOVE_TAGS = ("girls", "couples")
+# Guest PSCH keys the public master already lists. Last playlist pkeys are
+# decoys without a matching pdkey — pick a known pair or TAP PLAY is dead.
+ADULT_LOVE_KEYS = {
+    "1Dzcc6OjP73LKbtI": "Y64UVwX5RrIWnOLp",
+    "7uUnbD0jMCB9GH32": "lzCQ6QBTnLpB0zMF",
+    "Fq6m2TO2ZeBkRPm9": "xb6di1NF9EFXHUwb",
+    "GrRncsoByZmsiT6L": "NigHYyOD9l4rvAEb",
+    "N2oLovTIXb0o28Uj": "ABE7Sj8jh3oPM2ae",
+    "NTK9aqcLmNFMWrpQ": "tOcYOap4Ty1l9Jzb",
+    "OLzu7QlySkG2fVRn": "CsovScFH9VirSJ4Z",
+    "Ohi7eTRBpkAuML0l": "kExe29N2sLFrHGqu",
+    "Ook7quaiNgiyuhai": "EQueeGh2kaewa3ch",
+}
 ADULT_RAIL_EXTRA = 8
 ADULT_HUNT_AT_ONCE = 4
 ADULT_HUNT_PAGES = 2
@@ -624,11 +639,15 @@ ADULT_WOMAN = {
 
 
 def adult_playlist(raw: str) -> str | None:
-    """HTTPS HLS only. Refuse guest advert / preview clips."""
+    """HTTPS HLS, or a rewritten local love feed. Refuse guest advert / preview clips."""
     text = str(raw or "").strip()
-    if not text.lower().startswith("https://"):
-        return None
     low = text.lower()
+    if low.startswith("file:"):
+        if "adult-love" in low and ".m3u8" in low and "/cpa/" not in low:
+            return text
+        return None
+    if not low.startswith("https://"):
+        return None
     if "/cpa/" in low or "mouflon-advert" in low:
         return None
     if ".m3u8" not in low and ".mp4" not in low:
@@ -744,8 +763,138 @@ def adult_live_play(source: str, text: str) -> str | None:
     return play
 
 
+def adult_love_pdkey(pkey: str) -> str | None:
+    token = str(pkey or "").strip()
+    if not token:
+        return None
+    return ADULT_LOVE_KEYS.get(token)
+
+
+def adult_love_pkey(pkeys: list[str]) -> str:
+    """First guest pkey we can unlock. Last playlist rows are often decoys."""
+    known = [row for row in pkeys if row in ADULT_LOVE_KEYS]
+    if known:
+        return known[0]
+    return pkeys[-1] if pkeys else ""
+
+
+def adult_love_token(plain: str, pdkey: str) -> str:
+    """Reverse of loveDecrypt. Tests mint a fixture token from a known cut name."""
+    raw = str(plain or "").encode("utf-8")
+    key = hashlib.sha256(str(pdkey or "").encode("utf-8")).digest()
+    out = bytes(b ^ key[i % len(key)] for i, b in enumerate(raw))
+    return base64.b64encode(out).decode("ascii").rstrip("=")[::-1]
+
+
+def adult_love_decrypt(token: str, pdkey: str) -> str | None:
+    blob = str(token or "")
+    if not blob or not pdkey:
+        return None
+    reversed_token = blob[::-1]
+    pad = "=" * ((4 - len(reversed_token) % 4) % 4)
+    try:
+        data = base64.b64decode(reversed_token + pad)
+    except Exception:
+        return None
+    if not data:
+        return None
+    key = hashlib.sha256(str(pdkey).encode("utf-8")).digest()
+    out = bytes(b ^ key[i % len(key)] for i, b in enumerate(data))
+    try:
+        text = out.decode("utf-8")
+    except Exception:
+        return None
+    if not text or any(ord(ch) < 32 or ord(ch) > 126 for ch in text):
+        return None
+    return text
+
+
+def adult_love_unlock(uri: str, pkey: str = "") -> str | None:
+    raw = str(uri or "").strip()
+    match = re.search(r"_(\d+)_([^_]+)_(\d+)", raw)
+    if not match:
+        return None
+    token = match.group(2)
+    keys = []
+    hit = adult_love_pdkey(pkey)
+    if hit:
+        keys.append(hit)
+    keys.extend(value for value in ADULT_LOVE_KEYS.values() if value not in keys)
+    for pdkey in keys:
+        plain = adult_love_decrypt(token, pdkey)
+        if plain:
+            return raw.replace(f"_{token}_", f"_{plain}_")
+    return None
+
+
+def adult_love_rewrite(text: str, pkey: str = "") -> str | None:
+    """Turn mouflon dummy media.mp4 into real HTTPS cuts. Advert stays out."""
+    blob = str(text or "")
+    low = blob.lower()
+    if "mouflon-advert" in low or "/cpa/" in low:
+        return None
+    if "#ext-x-stream-inf" in low:
+        return None
+    if "#ext-x-mouflon:uri:" not in low or "#extinf" not in low:
+        return None
+    found = pkey
+    out: list[str] = []
+    pending: str | None = None
+    count = 0
+    for line in blob.splitlines():
+        row = line.strip()
+        if row.startswith("#EXT-X-MOUFLON:PSCH:"):
+            parts = row.split(":")
+            if len(parts) >= 4 and not found:
+                found = adult_love_pkey([parts[3]])
+            continue
+        if row.startswith("#EXT-X-MOUFLON:URI:"):
+            pending = adult_love_unlock(row.split(":", 2)[-1].strip(), found)
+            continue
+        if row.upper().startswith("#EXT-X-MOUFLON"):
+            continue
+        if "media.mp4" in row.lower():
+            if pending:
+                out.append(pending)
+                count += 1
+                pending = None
+            continue
+        if row and not row.startswith("#") and pending:
+            out.append(pending)
+            count += 1
+            pending = None
+            continue
+        out.append(line)
+    if count <= 0:
+        return None
+    return "\n".join(out) + "\n"
+
+
+def adult_love_store(source: str, text: str) -> str | None:
+    """Local rewritten feed. AVPlayer reloads this file; segments stay HTTPS."""
+    play = adult_playlist(source)
+    blob = str(text or "")
+    if play is None or not blob.strip() or "media.mp4" in blob.lower():
+        return None
+    if "#extinf" not in blob.lower():
+        return None
+    digest = hashlib.sha256(play.encode("utf-8")).hexdigest()[:16]
+    return f"file:///blackout/snap/adult-love-{digest}.m3u8"
+
+
+def adult_love_play(source: str, text: str) -> str | None:
+    """Plain live HLS, or a rewritten local love feed."""
+    hit = adult_live_play(source, text)
+    if hit:
+        return hit
+    rewritten = adult_love_rewrite(text)
+    if not rewritten:
+        return None
+    return adult_love_store(source, rewritten)
+
+
 def adult_love_variant(source: str, text: str) -> str | None:
-    """Master variant with the psch/pkey the file already advertises."""
+    """Master variant with a guest pkey we can unlock, not the last decoy."""
     if adult_playlist(source) is None:
         return None
     blob = str(text or "")
@@ -755,7 +904,7 @@ def adult_love_variant(source: str, text: str) -> str | None:
     if "#ext-x-stream-inf" not in low:
         return None
     psch = ""
-    pkey = ""
+    pkeys: list[str] = []
     variants: list[str] = []
     for line in blob.splitlines():
         row = line.strip()
@@ -763,7 +912,7 @@ def adult_love_variant(source: str, text: str) -> str | None:
             parts = row.split(":")
             if len(parts) >= 4:
                 psch = parts[2]
-                pkey = parts[3]
+                pkeys.append(parts[3])
         if row.lower().startswith("https://"):
             play = adult_playlist(row)
             if play:
@@ -771,6 +920,7 @@ def adult_love_variant(source: str, text: str) -> str | None:
     pick = _adult_love_pick(variants)
     if not pick:
         return None
+    pkey = adult_love_pkey(pkeys)
     if not psch or not pkey:
         return pick
     sep = "&" if "?" in pick else "?"
@@ -3882,6 +4032,81 @@ class AdultDeskTests(unittest.TestCase):
             ),
             "https://media.example/1_480p.m3u8?playlistType=standard&psch=v2&pkey=Ook7quaiNgiyuhai",
         )
+        self.assertEqual(
+            adult_love_variant(
+                "https://edge.example/master.m3u8",
+                "\n".join(
+                    [
+                        "#EXTM3U",
+                        "#EXT-X-MOUFLON:PSCH:v2:Ook7quaiNgiyuhai",
+                        "#EXT-X-MOUFLON:PSCH:v2:rHQhP6lNYB8v13s1",
+                        "#EXT-X-STREAM-INF:BANDWIDTH=1,NAME=\"480p\"",
+                        "https://media.example/1_480p.m3u8?playlistType=standard",
+                        "#EXT-X-STREAM-INF:BANDWIDTH=2,NAME=\"240p\"",
+                        "https://media.example/1_240p.m3u8?playlistType=standard",
+                    ]
+                ),
+            ),
+            "https://media.example/1_480p.m3u8?playlistType=standard&psch=v2&pkey=Ook7quaiNgiyuhai",
+        )
+        self.assertEqual(adult_love_pdkey("Ook7quaiNgiyuhai"), "EQueeGh2kaewa3ch")
+        self.assertIsNone(adult_love_pdkey("rHQhP6lNYB8v13s1"))
+        self.assertEqual(
+            adult_love_pkey(["Ook7quaiNgiyuhai", "rHQhP6lNYB8v13s1"]),
+            "Ook7quaiNgiyuhai",
+        )
+        token = adult_love_token("fresh-segment", "EQueeGh2kaewa3ch")
+        self.assertEqual(adult_love_decrypt(token, "EQueeGh2kaewa3ch"), "fresh-segment")
+        dummy = "\n".join(
+            [
+                "#EXTM3U",
+                "#EXT-X-TARGETDURATION:2",
+                "#EXTINF:2.000",
+                "#EXT-X-MOUFLON:URI:https://media.example/1_480p_h264_12_"
+                + token
+                + "_1700000000.mp4",
+                "https://media.example/b-hls-1/media.mp4",
+                "",
+            ]
+        )
+        self.assertIsNone(
+            adult_live_play("https://media.example/1_480p.m3u8?psch=v2&pkey=Ook7quaiNgiyuhai", dummy)
+        )
+        rewritten = adult_love_rewrite(dummy, "Ook7quaiNgiyuhai")
+        self.assertIsNotNone(rewritten)
+        assert rewritten is not None
+        self.assertNotIn("media.mp4", rewritten)
+        self.assertNotIn("#EXT-X-MOUFLON", rewritten)
+        self.assertIn(
+            "https://media.example/1_480p_h264_12_fresh-segment_1700000000.mp4",
+            rewritten,
+        )
+        self.assertEqual(
+            adult_live_play(
+                "https://media.example/1_480p.m3u8?psch=v2&pkey=Ook7quaiNgiyuhai",
+                rewritten,
+            ),
+            "https://media.example/1_480p.m3u8?psch=v2&pkey=Ook7quaiNgiyuhai",
+        )
+        stored = adult_love_play(
+            "https://media.example/1_480p.m3u8?psch=v2&pkey=Ook7quaiNgiyuhai",
+            dummy,
+        )
+        self.assertIsNotNone(stored)
+        assert stored is not None
+        self.assertTrue(stored.startswith("file:"))
+        self.assertIn("adult-love-", stored)
+        self.assertTrue(stored.endswith(".m3u8"))
+        self.assertEqual(adult_playlist(stored), stored)
+        self.assertIsNone(adult_playlist("file:///tmp/other.m3u8"))
+        self.assertIsNone(adult_love_rewrite("#EXTM3U\n#EXTINF:2.000\nhttps://media.example/media.mp4\n"))
+        self.assertIsNone(
+            adult_love_rewrite(
+                "#EXTM3U\n#EXT-X-MOUFLON-ADVERT\n#EXTINF:2.000\n"
+                "#EXT-X-MOUFLON:URI:https://media.example/cpa/v2/x.mp4\n"
+                "https://media.example/cpa/v2/media.mp4\n"
+            )
+        )
         self.assertEqual(adult_count(712.0), 712)
         self.assertEqual(adult_count(1e20), 0)
         self.assertEqual(adult_count(float("nan")), 0)
@@ -4785,6 +5010,9 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("static let pages", desk)
         self.assertIn("static func parse(", desk)
         self.assertIn("static func playlist(", desk)
+        play_fn = desk.split("static func playlist(")[1].split("static func filePlay(")[0]
+        self.assertIn('"file"', play_fn)
+        self.assertIn("adult-love", play_fn)
         self.assertIn("static func directory(", desk)
         self.assertIn("static func context(", desk)
         self.assertIn("static func edge(", desk)
@@ -5012,6 +5240,13 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("static func parseLove(", desk)
         self.assertIn("static func livePlay(", desk)
         self.assertIn("static func loveVariant(", desk)
+        self.assertIn("static func loveRewrite(", desk)
+        self.assertIn("static func loveDecrypt(", desk)
+        self.assertIn("static func loveStore(", desk)
+        self.assertIn("static func lovePlay(", desk)
+        self.assertIn("static let loveKeys", desk)
+        self.assertIn("Ook7quaiNgiyuhai", desk)
+        self.assertIn("EQueeGh2kaewa3ch", desk)
         self.assertIn("static func filePlay(", desk)
         self.assertIn("static func userAgent(", desk)
         self.assertIn("static func referer(", desk)
@@ -5062,6 +5297,11 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("AdultKeep.load()", load)
         self.assertIn("keepNeedles", load)
         self.assertNotIn("adultRooms = []", load)
+        self.assertGreaterEqual(
+            load.count("fetchLovePages"),
+            2,
+            "ALL / BROWSE must fetch love rooms, not only the LOVESCAPE chip",
+        )
         self.assertIn("timeoutIntervalForResource = AdultDesk.huntNeedles(topic) != nil ? 180 : 40", sock)
         self.assertIn("inflight", sock)
         self.assertNotIn("CGImageSourceCreateImageAtIndex", sock)
@@ -5100,9 +5340,13 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("AdultDesk.parseLove", sock)
         self.assertIn("AdultDesk.livePlay", sock)
         self.assertIn("AdultDesk.loveVariant", sock)
+        self.assertIn("AdultDesk.loveRewrite", sock)
+        self.assertIn("AdultDesk.loveStore", sock)
+        self.assertIn("AdultDesk.lovePlay", sock)
         self.assertIn("AdultDesk.filePlay", sock)
         self.assertIn("fetchLovePages", sock)
         self.assertIn("resolveAdult", sock)
+        self.assertIn("pulseLove", sock)
         self.assertIn("AdultDesk.userAgent", sock)
         self.assertIn("AdultDesk.referer", sock)
         self.assertIn("AdultDesk.faceRoom", sock)
@@ -6548,6 +6792,8 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("other countries", tv)
         self.assertIn("LOVESCAPE", tv)
         self.assertIn("lovescape.cam", tv.lower())
+        self.assertIn("join the live section", tv)
+        self.assertIn("dummy media.mp4", tv)
         self.assertIn("cannot jet", tv)
         self.assertIn("cannot flash an empty plate", tv)
         self.assertIn("guest stills", tv)
@@ -6697,8 +6943,14 @@ class NaTheaterCrashTests(unittest.TestCase):
         self.assertIn("guard !id.isEmpty", rows)
         self.assertIn("playSeq", live)
         self.assertIn("AdultDesk.playlist(raw)", live)
+        well_start = live.split("private func start() async")[1].split("private func stop()")[0]
+        self.assertNotIn('url.scheme == "https"', well_start)
+        self.assertIn("AdultDesk.playlist(raw)", well_start)
 
         self.assertIn("AdultDesk.playlist(row.url)", zoom)
+        zoom_start = zoom.split("private func start()")[1].split("private func stop()")[0]
+        self.assertNotIn('url.scheme == "https"', zoom_start)
+        self.assertIn("AdultDesk.playlist(row.url)", zoom_start)
         self.assertNotRegex(
             na,
             r"\.frame\(width:[^)]*minHeight:",

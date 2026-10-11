@@ -499,7 +499,7 @@ struct NaLiveWell: View {
         guard !lift, zoomLive == nil, !holdPipe else { return }
         guard pipe, playingID == row.id else { return }
         guard let raw = await onPlay(row), let play = AdultDesk.playlist(raw),
-              let url = URL(string: play), url.scheme == "https"
+              let url = URL(string: play)
         else {
             guard seq == playSeq else { return }
             if playingID == row.id { playingID = nil }
