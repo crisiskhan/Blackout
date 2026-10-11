@@ -523,6 +523,12 @@ ADULT_GABRIELLE = (
     "gabrielle the goddesss",
     "charneciamuriel",
 )
+ADULT_PORSHA = (
+    "porshaboo",
+    "porsha boo",
+    "porshabunz",
+    "porsha bunz",
+)
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
     ("ITSSTEPHHONEYXO21", ADULT_STEPH),
@@ -567,6 +573,7 @@ ADULT_FACES = (
     ("MISS LADYCAKEZ69", ADULT_CAKEZ),
     ("EXOTICAXXX", ADULT_EXOTICA),
     ("GABRIELLETHEGODDESSS", ADULT_GABRIELLE),
+    ("PORSHABOO", ADULT_PORSHA),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_KEEP_CHIP = "KEEP"
@@ -1944,6 +1951,7 @@ ADULT_FACE_POSTS = (
     ("MISS LADYCAKEZ69", ("miss_ladycakez69", "missladycakez69", "lady_cakez69")),
     ("EXOTICAXXX", ("exoticaslim", "exoticaxxx", "ilovekaylaxx", "missskaylax", "iloveekaylaaa")),
     ("GABRIELLETHEGODDESSS", ("charneciamuriel", "gabriellethegoddesss")),
+    ("PORSHABOO", ("porshabunz", "porshafitness")),
 )
 ADULT_FACE_STILLS = (
     ("P283XrKRjsV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"),
@@ -2027,6 +2035,7 @@ ADULT_FACE_GIFTS = (
         "iloveekaylaaa",
     )),
     ("GABRIELLETHEGODDESSS", ("gabriellethegoddesss", "charneciamuriel", "goddessgabrielle")),
+    ("PORSHABOO", ("porshaboo", "porshabunz", "porshafitness")),
 )
 ADULT_FACE_KILL = (
     "loli",
@@ -3898,6 +3907,7 @@ class AdultDeskTests(unittest.TestCase):
                 "MISS LADYCAKEZ69",
                 "EXOTICAXXX",
                 "GABRIELLETHEGODDESSS",
+                "PORSHABOO",
             ],
         )
         fat_kinds = [f"KIND{index:02d}" for index in range(40)]
@@ -5123,12 +5133,23 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("gabriellethegoddesss", desk)
         self.assertIn("charneciamuriel", desk)
         self.assertIn("goddessgabrielle", desk)
+        self.assertIn("PORSHABOO", desk)
+        self.assertIn("porshaNeedles", desk)
+        self.assertIn("porshaboo", desk)
+        self.assertIn("porshabunz", desk)
+        self.assertIn("porshafitness", desk)
         self.assertIn("xwTo2lME", desk)
         self.assertIn("kdgY4R08", desk)
         self.assertIn("hymCYrmN", desk)
         self.assertNotIn("milkmami89", desk.lower())
         self.assertNotIn("killnation123", desk.lower())
         self.assertNotIn("gabrielle union", desk.lower())
+        self.assertNotIn("porsha carrera", desk.lower())
+        self.assertNotIn("leesha bunz", desk.lower())
+        self.assertNotIn("porscha ride", desk.lower())
+        self.assertNotIn("snow bunny", desk.lower())
+        self.assertNotIn("RLjdRbks", desk)
+        self.assertNotIn("IbfwSy8D", desk)
         self.assertNotIn("creamy exotica", desk.lower())
         self.assertNotIn("kayla otto", desk.lower())
         self.assertNotIn("persianbrat", desk.lower())
@@ -5679,6 +5700,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("MISS LADYCAKEZ69", adult_rail([]))
         self.assertIn("EXOTICAXXX", adult_rail([]))
         self.assertIn("GABRIELLETHEGODDESSS", adult_rail([]))
+        self.assertIn("PORSHABOO", adult_rail([]))
         self.assertGreaterEqual(len(adult_face_hold_rooms("ITISASHLEY")), 20)
         self.assertEqual(adult_face_hold_rooms("ITISASHLEY")[0]["seconds"], 696)
         self.assertEqual(
@@ -5915,6 +5937,62 @@ class AdultDeskTests(unittest.TestCase):
         self.assertNotIn("milkmami89", adult_face_needles("GABRIELLETHEGODDESSS") or [])
         self.assertNotIn("milkmami", adult_face_needles("GABRIELLETHEGODDESSS") or [])
         self.assertNotIn("goddessgabrielle", adult_face_needles("GABRIELLETHEGODDESSS") or [])
+        self.assertEqual(adult_face_hold_rooms("PORSHABOO"), [])
+        self.assertEqual(adult_pick([], "PORSHABOO"), [])
+        self.assertEqual(
+            [row["id"] for row in adult_pick(
+                [
+                    {
+                        "id": "carrera",
+                        "name": "Porsha Carrera",
+                        "handle": "",
+                        "seek": "porsha carrera",
+                        "seconds": 180,
+                        "kinds": ["ALL"],
+                    },
+                    {
+                        "id": "guest",
+                        "name": "Porshaboo guest cut",
+                        "handle": "",
+                        "seek": "porshaboo",
+                        "seconds": 48,
+                        "kinds": ["ALL"],
+                    },
+                ],
+                "PORSHABOO",
+            )],
+            ["guest"],
+        )
+        self.assertEqual(adult_hunt_needles("porshaboo"), list(ADULT_PORSHA))
+        self.assertEqual(adult_hunt_needles("porshabunz"), list(ADULT_PORSHA))
+        self.assertEqual(adult_hunt_needles("porsha bunz"), list(ADULT_PORSHA))
+        self.assertEqual(
+            adult_hunt_needles("https://x.com/porshabunz"),
+            list(ADULT_PORSHA),
+        )
+        self.assertEqual(
+            adult_hunt_needles("https://www.erome.com/porshaboo"),
+            list(ADULT_PORSHA),
+        )
+        self.assertEqual(adult_page_name("https://x.com/porshabunz"), "porshabunz")
+        self.assertEqual(
+            adult_page_name("https://www.erome.com/porshaboo"),
+            "porshaboo",
+        )
+        self.assertTrue(any("erome.com/porshaboo" in path for path in adult_face_hunt("PORSHABOO")))
+        self.assertTrue(any("erome.com/porshabunz" in path for path in adult_face_hunt("PORSHABOO")))
+        self.assertTrue(any("erome.com/search?q=porshaboo" in path for path in adult_face_hunt("PORSHABOO")))
+        self.assertTrue(any("users/porshaboo/search" in path for path in adult_face_hunt("PORSHABOO")))
+        self.assertTrue(any("screen-name/porshabunz" in path for path in adult_face_hunt("PORSHABOO")))
+        self.assertTrue(any("query=porshaboo" in path for path in adult_face_hunt("PORSHABOO")))
+        self.assertTrue(any("porshafitness" in path for path in adult_face_hunt("PORSHABOO")))
+        self.assertNotIn("porsha", adult_face_needles("PORSHABOO") or [])
+        self.assertNotIn("bunz", adult_face_needles("PORSHABOO") or [])
+        self.assertNotIn("boo", adult_face_needles("PORSHABOO") or [])
+        self.assertNotIn("elisa", adult_face_needles("PORSHABOO") or [])
+        self.assertNotIn("elisamiki", adult_face_needles("PORSHABOO") or [])
+        self.assertNotIn("carrera", adult_face_needles("PORSHABOO") or [])
+        self.assertNotIn("porshafitness", adult_face_needles("PORSHABOO") or [])
         self.assertFalse(
             any("44hnTwXR" in row["url"] for row in adult_face_hold_rooms("GABRIELLETHEGODDESSS"))
         )
@@ -6150,6 +6228,71 @@ class AdultDeskTests(unittest.TestCase):
                 "GABRIELLETHEGODDESSS",
             )],
             [],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "porsha-thick-snow-bunny",
+                            "title": "Porsha Thick Snow Bunny",
+                            "creator": "MrFatSacks",
+                            "durationSeconds": 240,
+                        },
+                        {
+                            "slug": "porsha-carrera-scene",
+                            "title": "Porsha Carrera",
+                            "creator": "Porsha Carrera",
+                            "durationSeconds": 180,
+                        },
+                        {
+                            "slug": "leesha-bunz-tease",
+                            "title": "Leesha Bunz",
+                            "creator": "Leesha Bunz",
+                            "durationSeconds": 90,
+                        },
+                        {
+                            "slug": "porscha-ride-archive",
+                            "title": "Porscha Ride",
+                            "creator": "Porscha Ride",
+                            "durationSeconds": 80,
+                        },
+                        {
+                            "slug": "xxx-big-booty",
+                            "title": "XXX BIG-BOOTY",
+                            "creator": "XXX",
+                            "durationSeconds": 70,
+                        },
+                        {
+                            "slug": "princess-miki-live-action",
+                            "title": "Princess Miki",
+                            "creator": "Princess Miki",
+                            "durationSeconds": 60,
+                        },
+                    ]
+                },
+                "PORSHABOO",
+            )],
+            [],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "porshaboo-guest-cut",
+                            "title": "Porshaboo guest cut",
+                            "creator": "Porshaboo",
+                            "durationSeconds": 48,
+                            "default_thumb": {
+                                "src": "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"
+                            },
+                        }
+                    ]
+                },
+                "PORSHABOO",
+            )],
+            ["adult-face-star-porshaboo-guest-cut"],
         )
         self.assertEqual(
             [row["id"] for row in adult_parse_face(
@@ -6775,6 +6918,13 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("8:58", tv)
         self.assertIn("charneciamuriel", tv)
         self.assertIn("goddessgabrielle", tv)
+        self.assertIn("PORSHABOO", tv)
+        self.assertIn("porshabunz", tv)
+        self.assertIn("porsha bunz", tv)
+        self.assertIn("Porsha Carrera", tv)
+        self.assertIn("Leesha Bunz", tv)
+        self.assertIn("Porscha Ride", tv)
+        self.assertIn("Porsha Thick Snow Bunny", tv)
         self.assertIn("Gabrielle Union", tv)
         self.assertIn("milkmami89", tv)
         self.assertIn("0:28", tv)
@@ -7254,6 +7404,76 @@ class NaTheaterReadyCrashTests(unittest.TestCase):
         self.assertNotIn("span(player, packed: packed)", scrub)
         self.assertNotIn("toleranceBefore", scrub)
         self.assertIn("cancelPendingSeeks", scrub)
+        self.assertEqual(adult_face_hold_rooms("PORSHABOO"), [])
+        self.assertEqual(adult_pick([], "PORSHABOO"), [])
+        self.assertEqual(
+            adult_pick(
+                [
+                    {
+                        "id": "carrera",
+                        "name": "Porsha Carrera",
+                        "handle": "",
+                        "seek": "porsha carrera",
+                        "seconds": 180,
+                        "kinds": ["ALL"],
+                    },
+                    {
+                        "id": "snow",
+                        "name": "Porsha Thick Snow Bunny",
+                        "handle": "",
+                        "seek": "porsha thick snow bunny",
+                        "seconds": 240,
+                        "kinds": ["ALL"],
+                    },
+                    {
+                        "id": "leesha",
+                        "name": "Leesha Bunz",
+                        "handle": "",
+                        "seek": "leesha bunz",
+                        "seconds": 90,
+                        "kinds": ["ALL"],
+                    },
+                ],
+                "PORSHABOO",
+            ),
+            [],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(
+                [
+                    {
+                        "id": "carrera",
+                        "name": "Porsha Carrera",
+                        "handle": "",
+                        "seek": "porsha carrera",
+                        "seconds": 180,
+                        "kinds": ["ALL"],
+                    },
+                    {
+                        "id": "guest",
+                        "name": "Porshaboo guest cut",
+                        "handle": "",
+                        "seek": "porshaboo",
+                        "seconds": 48,
+                        "kinds": ["ALL"],
+                    },
+                ],
+                "PORSHABOO",
+            )],
+            ["guest"],
+        )
+        self.assertEqual(adult_rail([])[-1], "PORSHABOO")
+        plate = read("Blackout", "NaPlate.swift")
+        self.assertIn("if let row = naStageRow", plate)
+        self.assertIn("Text(naEmptyChrome)", plate)
+        self.assertIn("NO MATCH", plate)
+        app = read("Blackout", "AppRuntime.swift")
+        open_live = app.split("func openLive(")[1].split("func stepLive(")[0]
+        self.assertIn("guard !token.isEmpty else { return }", open_live)
+        self.assertIn("guard naQueue.indices.contains(naIndex) else { return }", open_live)
+        go_full = read("Blackout", "NaLive.swift").split("private func goFull()")[1].split("private func toggle()")[0]
+        self.assertIn("next.url = keep", go_full)
+        self.assertLess(go_full.find("player = nil"), go_full.find("Task.yield()"))
 
     def test_na_scrub_timeline_does_not_own_the_drag(self):
         live = read("Blackout", "NaLive.swift")
