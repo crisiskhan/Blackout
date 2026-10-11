@@ -126,6 +126,8 @@ enum NaWatch {
         guard let old else { return }
         let seen = era
         if pipe === old { pipe = nil }
+        if pane.player === old { pane.player = nil }
+        pane.removeFromSuperview()
         old.pause()
         old.currentItem?.cancelPendingSeeks()
         Task { @MainActor in
@@ -139,6 +141,46 @@ enum NaWatch {
     static func drop(ifEra seen: UInt) {
         guard seen == era else { return }
         drop()
+    }
+
+    /// One AVPlayerLayer for the well and TAP FULL. Reparent it.
+    /// A second layer on the same player crashes the phone (ASC 72).
+    @MainActor
+    static let pane = Pane()
+
+    final class Pane: UIView {
+        override class var layerClass: AnyClass { AVPlayerLayer.self }
+
+        var player: AVPlayer? {
+            get { (layer as? AVPlayerLayer)?.player }
+            set {
+                let layer = layer as? AVPlayerLayer
+                if layer?.player === newValue {
+                    layer?.videoGravity = .resizeAspect
+                    return
+                }
+                layer?.player = newValue
+                layer?.videoGravity = .resizeAspect
+            }
+        }
+    }
+
+    @MainActor
+    static func seat(_ player: AVPlayer, in parent: UIView) {
+        pane.backgroundColor = .clear
+        pane.isUserInteractionEnabled = false
+        pane.player = player
+        if pane.superview === parent { return }
+        pane.removeFromSuperview()
+        pane.frame = parent.bounds
+        pane.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        parent.addSubview(pane)
+    }
+
+    @MainActor
+    static func evict(from parent: UIView) {
+        guard pane.superview === parent else { return }
+        pane.removeFromSuperview()
     }
 
     static func still(id: String, maxEdge: Int) -> UIImage? {
@@ -686,31 +728,19 @@ struct NaScrub: View {
 private struct NaLiveLayer: UIViewRepresentable {
     let player: AVPlayer
 
-    func makeUIView(context: Context) -> PlayerView {
-        let view = PlayerView()
-        view.player = player
-        return view
+    func makeUIView(context: Context) -> UIView {
+        let box = UIView()
+        box.backgroundColor = .clear
+        box.clipsToBounds = true
+        NaWatch.seat(player, in: box)
+        return box
     }
 
-    func updateUIView(_ uiView: PlayerView, context: Context) {
-        if uiView.player === player { return }
-        uiView.player = player
+    func updateUIView(_ box: UIView, context: Context) {
+        NaWatch.seat(player, in: box)
     }
 
-    static func dismantleUIView(_ uiView: PlayerView, coordinator: ()) {
-        uiView.player = nil
-    }
-
-    final class PlayerView: UIView {
-        override class var layerClass: AnyClass { AVPlayerLayer.self }
-
-        var player: AVPlayer? {
-            get { (layer as? AVPlayerLayer)?.player }
-            set {
-                let layer = layer as? AVPlayerLayer
-                layer?.player = newValue
-                layer?.videoGravity = .resizeAspect
-            }
-        }
+    static func dismantleUIView(_ box: UIView, coordinator: ()) {
+        NaWatch.evict(from: box)
     }
 }

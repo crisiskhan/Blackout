@@ -237,7 +237,7 @@ private struct LiveZoomScroll: UIViewRepresentable {
 
     static func dismantleUIView(_ uiView: ZoomView, coordinator: Coordinator) {
         uiView.coordinator = nil
-        uiView.apply(nil)
+        NaWatch.evict(from: uiView.box)
     }
 
     final class Coordinator {
@@ -251,7 +251,7 @@ private struct LiveZoomScroll: UIViewRepresentable {
     }
 
     final class ZoomView: UIScrollView, UIScrollViewDelegate {
-        let host = PlayerHost()
+        let box = UIView()
         var coordinator: Coordinator?
         private var lastSize: CGSize = .zero
 
@@ -265,9 +265,10 @@ private struct LiveZoomScroll: UIViewRepresentable {
             showsVerticalScrollIndicator = false
             bouncesZoom = true
             contentInsetAdjustmentBehavior = .never
-            host.player = player
-            host.isUserInteractionEnabled = true
-            addSubview(host)
+            box.backgroundColor = .clear
+            box.isUserInteractionEnabled = true
+            addSubview(box)
+            NaWatch.seat(player, in: box)
             let zoomTap = UITapGestureRecognizer(target: self, action: #selector(toggleZoom(_:)))
             zoomTap.numberOfTapsRequired = 2
             let fieldTap = UITapGestureRecognizer(target: self, action: #selector(tapField))
@@ -280,12 +281,15 @@ private struct LiveZoomScroll: UIViewRepresentable {
         required init?(coder: NSCoder) { nil }
 
         func apply(_ player: AVPlayer?) {
-            if host.player === player { return }
-            host.player = player
+            if let player {
+                NaWatch.seat(player, in: box)
+            } else {
+                NaWatch.evict(from: box)
+            }
         }
 
         func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-            host
+            box
         }
 
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
@@ -321,15 +325,15 @@ private struct LiveZoomScroll: UIViewRepresentable {
                 width = height * ratio
             }
             zoomScale = 1
-            host.frame = CGRect(origin: .zero, size: CGSize(width: width, height: height))
-            contentSize = host.frame.size
+            box.frame = CGRect(origin: .zero, size: CGSize(width: width, height: height))
+            contentSize = box.frame.size
             minimumZoomScale = 1
             maximumZoomScale = 8
         }
 
         private func centerHost() {
             let bounds = bounds.size
-            let frame = host.frame
+            let frame = box.frame
             let insetX = max(0, (bounds.width - frame.width) / 2)
             let insetY = max(0, (bounds.height - frame.height) / 2)
             contentInset = UIEdgeInsets(top: insetY, left: insetX, bottom: insetY, right: insetX)
@@ -345,7 +349,7 @@ private struct LiveZoomScroll: UIViewRepresentable {
                 return
             }
             let target = min(maximumZoomScale, max(2, maximumZoomScale / 2))
-            let point = tap.location(in: host)
+            let point = tap.location(in: box)
             let size = CGSize(
                 width: bounds.width / target,
                 height: bounds.height / target
@@ -357,19 +361,6 @@ private struct LiveZoomScroll: UIViewRepresentable {
                 height: size.height
             )
             zoom(to: rect, animated: true)
-        }
-    }
-
-    final class PlayerHost: UIView {
-        override class var layerClass: AnyClass { AVPlayerLayer.self }
-
-        var player: AVPlayer? {
-            get { (layer as? AVPlayerLayer)?.player }
-            set {
-                let layer = layer as? AVPlayerLayer
-                layer?.player = newValue
-                layer?.videoGravity = .resizeAspect
-            }
         }
     }
 }

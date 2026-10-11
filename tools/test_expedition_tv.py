@@ -6809,15 +6809,9 @@ class NaTheaterReadyCrashTests(unittest.TestCase):
 
     def test_live_layer_does_not_rebind_the_same_player(self):
         live = read("Blackout", "NaLive.swift")
-        zoom = read("Blackout", "LiveZoom.swift")
-        apply = zoom.split("func apply(_ player")[1].split("func viewForZooming")[0]
-        self.assertIn("===", apply)
-        self.assertIn("return", apply)
-        update = live.split("func updateUIView(_ uiView: PlayerView")[1].split(
-            "static func dismantleUIView"
-        )[0]
-        self.assertIn("===", update)
-        self.assertIn("return", update)
+        seat = live.split("static func seat(")[1].split("static func evict(")[0]
+        self.assertIn("superview === parent", seat)
+        self.assertIn("return", seat)
 
     def test_tap_full_waits_the_next_run_loop(self):
         live = read("Blackout", "NaLive.swift")
@@ -6850,6 +6844,40 @@ class NaTheaterReadyCrashTests(unittest.TestCase):
             "static func play("
         )[1].split("static func drop(_ victim")[0]
         self.assertGreaterEqual(play.count("cancelPendingSeeks"), 2)
+
+
+class NaTheaterOneLayerTests(unittest.TestCase):
+    def test_well_and_full_share_one_player_layer(self):
+        live = read("Blackout", "NaLive.swift")
+        zoom = read("Blackout", "LiveZoom.swift")
+        qa = read("docs", "SOLO_QA.md")
+        watch = live.split("enum NaWatch")[1].split("struct NaLiveWell")[0]
+        well_layer = live.split("struct NaLiveLayer")[1]
+        self.assertEqual(watch.count("AVPlayerLayer.self"), 1)
+        self.assertEqual(live.count("AVPlayerLayer.self"), 1)
+        self.assertEqual(zoom.count("AVPlayerLayer.self"), 0)
+        self.assertEqual(zoom.count("override class var layerClass"), 0)
+        self.assertNotIn("final class PlayerHost", zoom)
+        self.assertNotIn("final class PlayerView", live)
+        self.assertIn("static func seat(", watch)
+        self.assertIn("static func evict(", watch)
+        self.assertIn("NaWatch.seat(", well_layer)
+        self.assertIn("NaWatch.evict(", well_layer)
+        self.assertIn("NaWatch.seat(", zoom)
+        self.assertIn("NaWatch.evict(", zoom)
+        dismantle = well_layer.split("static func dismantleUIView")[1]
+        self.assertIn("NaWatch.evict(", dismantle)
+        self.assertNotIn("player = nil", dismantle)
+        zoom_dismantle = zoom.split("static func dismantleUIView")[1].split(
+            "final class Coordinator"
+        )[0]
+        self.assertIn("NaWatch.evict(", zoom_dismantle)
+        drop = watch.split("static func drop(_ victim")[1].split("static func drop(ifEra")[0]
+        self.assertIn(".player = nil", drop)
+        self.assertLess(drop.find(".player = nil"), drop.find("replaceCurrentItem"))
+        tv = next(line for line in qa.splitlines() if "EXPEDITION `TV`" in line)
+        self.assertIn("one player layer", tv)
+        self.assertIn("reparents", tv)
 
 
 def desk_text() -> str:
