@@ -543,7 +543,7 @@ enum AdultDesk {
             "iloveekaylaaa",
         ]),
         ("GABRIELLETHEGODDESSS", ["gabriellethegoddesss", "charneciamuriel", "goddessgabrielle"]),
-        ("PORSHABOO", ["porshaboo", "porshabunz", "porshafitness"]),
+        ("PORSHABOO", ["porshaboo", "porshabunz", "porshafitness", "porsha_fitness", "pmoneybunz"]),
     ]
     /// Proven guest albums. Hunt these first so a JSON desk cannot blank the chip.
     static let faceDesks: [(String, [String])] = [
@@ -662,7 +662,7 @@ enum AdultDesk {
         ("MISS LADYCAKEZ69", ["miss_ladycakez69", "missladycakez69", "lady_cakez69"]),
         ("EXOTICAXXX", ["exoticaslim", "exoticaxxx", "ilovekaylaxx", "missskaylax", "iloveekaylaaa"]),
         ("GABRIELLETHEGODDESSS", ["charneciamuriel", "gabriellethegoddesss"]),
-        ("PORSHABOO", ["porshabunz", "porshafitness"]),
+        ("PORSHABOO", ["porshabunz", "porshafitness", "porsha_fitness", "pmoneybunz"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"

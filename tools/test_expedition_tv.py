@@ -1951,7 +1951,7 @@ ADULT_FACE_POSTS = (
     ("MISS LADYCAKEZ69", ("miss_ladycakez69", "missladycakez69", "lady_cakez69")),
     ("EXOTICAXXX", ("exoticaslim", "exoticaxxx", "ilovekaylaxx", "missskaylax", "iloveekaylaaa")),
     ("GABRIELLETHEGODDESSS", ("charneciamuriel", "gabriellethegoddesss")),
-    ("PORSHABOO", ("porshabunz", "porshafitness")),
+    ("PORSHABOO", ("porshabunz", "porshafitness", "porsha_fitness", "pmoneybunz")),
 )
 ADULT_FACE_STILLS = (
     ("P283XrKRjsV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"),
@@ -2035,7 +2035,7 @@ ADULT_FACE_GIFTS = (
         "iloveekaylaaa",
     )),
     ("GABRIELLETHEGODDESSS", ("gabriellethegoddesss", "charneciamuriel", "goddessgabrielle")),
-    ("PORSHABOO", ("porshaboo", "porshabunz", "porshafitness")),
+    ("PORSHABOO", ("porshaboo", "porshabunz", "porshafitness", "porsha_fitness", "pmoneybunz")),
 )
 ADULT_FACE_KILL = (
     "loli",
@@ -5138,6 +5138,8 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("porshaboo", desk)
         self.assertIn("porshabunz", desk)
         self.assertIn("porshafitness", desk)
+        self.assertIn("porsha_fitness", desk)
+        self.assertIn("pmoneybunz", desk)
         self.assertIn("xwTo2lME", desk)
         self.assertIn("kdgY4R08", desk)
         self.assertIn("hymCYrmN", desk)
@@ -5150,6 +5152,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertNotIn("snow bunny", desk.lower())
         self.assertNotIn("RLjdRbks", desk)
         self.assertNotIn("IbfwSy8D", desk)
+        self.assertNotIn("instagram", desk.lower())
         self.assertNotIn("creamy exotica", desk.lower())
         self.assertNotIn("kayla otto", desk.lower())
         self.assertNotIn("persianbrat", desk.lower())
@@ -5668,6 +5671,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("guest album", tv.lower())
         self.assertIn("public video search", tv.lower())
         self.assertEqual(adult_face_hold_rooms("ITOCHIANATA"), [])
+        self.assertEqual(adult_face_hold_rooms("EUNICEG"), [])
         self.assertEqual(adult_face_hold_rooms("MONA ACUTEE"), [])
         self.assertGreaterEqual(len(adult_face_hold_rooms("GRACIE BONN")), 2)
         self.assertGreaterEqual(len(adult_face_hold_rooms("ANNABELLE RIOS")), 4)
@@ -5986,6 +5990,25 @@ class AdultDeskTests(unittest.TestCase):
         self.assertTrue(any("screen-name/porshabunz" in path for path in adult_face_hunt("PORSHABOO")))
         self.assertTrue(any("query=porshaboo" in path for path in adult_face_hunt("PORSHABOO")))
         self.assertTrue(any("porshafitness" in path for path in adult_face_hunt("PORSHABOO")))
+        self.assertTrue(any("porsha_fitness" in path for path in adult_face_hunt("PORSHABOO")))
+        self.assertTrue(any("pmoneybunz" in path for path in adult_face_hunt("PORSHABOO")))
+        self.assertEqual(adult_face_hold_rooms("EUNICEG"), [])
+        self.assertEqual(adult_pick([], "EUNICEG"), [])
+        self.assertEqual(adult_hunt_needles("euniceg___"), list(ADULT_EUNICE))
+        self.assertEqual(adult_hunt_needles("euniceg"), list(ADULT_EUNICE))
+        self.assertEqual(
+            adult_page_name("https://www.erome.com/euniceg___?vrfl=abc"),
+            "euniceg___",
+        )
+        self.assertEqual(
+            adult_hunt_needles(
+                "https://www.example.com/euniceg___?vrfl=MWExNnZhNHppNHF1MQ%3D%3D"
+            ),
+            list(ADULT_EUNICE),
+        )
+        self.assertTrue(any("erome.com/euniceg___" in path for path in adult_face_hunt("EUNICEG")))
+        self.assertTrue(any("screen-name/euniceg___" in path for path in adult_face_hunt("EUNICEG")))
+        self.assertTrue(any("query=euniceg" in path for path in adult_face_hunt("EUNICEG")))
         self.assertNotIn("porsha", adult_face_needles("PORSHABOO") or [])
         self.assertNotIn("bunz", adult_face_needles("PORSHABOO") or [])
         self.assertNotIn("boo", adult_face_needles("PORSHABOO") or [])
@@ -6921,6 +6944,10 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("PORSHABOO", tv)
         self.assertIn("porshabunz", tv)
         self.assertIn("porsha bunz", tv)
+        self.assertIn("porsha_fitness", tv)
+        self.assertIn("pmoneybunz", tv)
+        self.assertIn("euniceg___", tv)
+        self.assertIn("Instagram store page", tv)
         self.assertIn("Porsha Carrera", tv)
         self.assertIn("Leesha Bunz", tv)
         self.assertIn("Porscha Ride", tv)
@@ -7406,6 +7433,8 @@ class NaTheaterReadyCrashTests(unittest.TestCase):
         self.assertIn("cancelPendingSeeks", scrub)
         self.assertEqual(adult_face_hold_rooms("PORSHABOO"), [])
         self.assertEqual(adult_pick([], "PORSHABOO"), [])
+        self.assertEqual(adult_face_hold_rooms("EUNICEG"), [])
+        self.assertEqual(adult_pick([], "EUNICEG"), [])
         self.assertEqual(
             adult_pick(
                 [
