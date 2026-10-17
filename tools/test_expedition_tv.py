@@ -529,6 +529,13 @@ ADULT_PORSHA = (
     "porshabunz",
     "porsha bunz",
 )
+ADULT_JAIL = (
+    "jailhailet",
+    "jail hailet",
+    "jailhailet06",
+    "jailhailet 06",
+    "jailhaliet06",
+)
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
     ("ITSSTEPHHONEYXO21", ADULT_STEPH),
@@ -574,6 +581,7 @@ ADULT_FACES = (
     ("EXOTICAXXX", ADULT_EXOTICA),
     ("GABRIELLETHEGODDESSS", ADULT_GABRIELLE),
     ("PORSHABOO", ADULT_PORSHA),
+    ("JAILHAILET", ADULT_JAIL),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_KEEP_CHIP = "KEEP"
@@ -1822,6 +1830,47 @@ ADULT_FACE_HOLDS = (
         ("file", "https://v333.erome.com/2716/kdgY4R08/Tjg5SlNM_720p.mp4", 6, "Gabriellethegoddesss"),
         ("file", "https://v333.erome.com/2716/kdgY4R08/9tmV02Vf_720p.mp4", 5, "Gabriellethegoddesss"),
     )),
+    ("JAILHAILET", (
+        ("file", "https://v201.erome.com/692/nimHrwOM/cWoJIJd7_720p.mp4", 836, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/EVO5ykEh_720p.mp4", 790, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/lDrsV0lq_720p.mp4", 622, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/B5UrnZBD_720p.mp4", 462, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/SQGUZ6oP_720p.mp4", 407, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/JqsIhgiS_720p.mp4", 365, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/PZDtTwB6_720p.mp4", 288, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/CpYDc3R0_720p.mp4", 265, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/bo1cFCLW_720p.mp4", 262, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/GHnY48QW_720p.mp4", 255, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/Pfh81KA0_720p.mp4", 250, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/GBc6efOV_720p.mp4", 213, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/78Z49MID_720p.mp4", 209, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/2SA09PnO_720p.mp4", 203, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/p117VzR7_720p.mp4", 180, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/cM9472g1_720p.mp4", 179, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/1QR4RZhz_720p.mp4", 159, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/amvE9W5s_720p.mp4", 153, "Jailhaliet06"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/MM8IQ2Ai_720p.mp4", 150, "Jailhaliet06"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/fZ5G6zFw_720p.mp4", 140, "Jailhailet"),
+        ("file", "https://v201.erome.com/692/nimHrwOM/qO2jyzIj_720p.mp4", 89, "Jailhaliet06"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/F44Vkh9S_720p.mp4", 39, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/MnDJL1Zh_720p.mp4", 38, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/ep4w5I4R_720p.mp4", 27, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/m9XI9Ku8_720p.mp4", 26, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/QzaqHT5J_720p.mp4", 24, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/qW2GlunX_720p.mp4", 24, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/hX6oMuFS_720p.mp4", 20, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/vsfVttSu_720p.mp4", 20, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/YIOdt2wa_720p.mp4", 18, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/e3zhtZJZ_720p.mp4", 16, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/njK37eEI_720p.mp4", 15, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/OH99Deym_720p.mp4", 14, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/ThSgvSm2_720p.mp4", 13, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/Fm4uC82Z_720p.mp4", 11, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/VNrw6dqw_720p.mp4", 11, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/UDqMZR0Y_720p.mp4", 7, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/YI1Fi2sw_720p.mp4", 6, "Jailhailet"),
+        ("file", "https://v205.erome.com/3661/KkjKCNXl/0ccOSdQ3_720p.mp4", 4, "Jailhailet"),
+    )),
 )
 ADULT_FACE_DESKS = (
     ("ITSSTEPHHONEY21", ("RUX8bZH5",)),
@@ -1845,6 +1894,7 @@ ADULT_FACE_DESKS = (
     ("LUST4LIZZY", ("7YfN2Aly",)),
     ("EXOTICAXXX", ("64PV5qNR", "e1YBZ1zA", "KMootfxL")),
     ("GABRIELLETHEGODDESSS", ("xwTo2lME", "kdgY4R08")),
+    ("JAILHAILET", ("KkjKCNXl", "nimHrwOM")),
 )
 ADULT_DESK_ORIGIN = "https://www.erome.com"
 ADULT_DESK_FOLLOW = 12
@@ -1952,6 +2002,7 @@ ADULT_FACE_POSTS = (
     ("EXOTICAXXX", ("exoticaslim", "exoticaxxx", "ilovekaylaxx", "missskaylax", "iloveekaylaaa")),
     ("GABRIELLETHEGODDESSS", ("charneciamuriel", "gabriellethegoddesss")),
     ("PORSHABOO", ("porshabunz", "porshafitness", "porsha_fitness", "pmoneybunz")),
+    ("JAILHAILET", ("jailhailet", "jailhailet06", "jailhaliet06", "jailhailet_")),
 )
 ADULT_FACE_STILLS = (
     ("P283XrKRjsV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"),
@@ -2036,6 +2087,7 @@ ADULT_FACE_GIFTS = (
     )),
     ("GABRIELLETHEGODDESSS", ("gabriellethegoddesss", "charneciamuriel", "goddessgabrielle")),
     ("PORSHABOO", ("porshaboo", "porshabunz", "porshafitness", "porsha_fitness", "pmoneybunz")),
+    ("JAILHAILET", ("jailhailet", "jailhailet06", "jailhaliet06", "jailhailet_", "jailhailet066")),
 )
 ADULT_FACE_KILL = (
     "loli",
@@ -3908,6 +3960,7 @@ class AdultDeskTests(unittest.TestCase):
                 "EXOTICAXXX",
                 "GABRIELLETHEGODDESSS",
                 "PORSHABOO",
+                "JAILHAILET",
             ],
         )
         fat_kinds = [f"KIND{index:02d}" for index in range(40)]
@@ -5140,6 +5193,17 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("porshafitness", desk)
         self.assertIn("porsha_fitness", desk)
         self.assertIn("pmoneybunz", desk)
+        self.assertIn("JAILHAILET", desk)
+        self.assertIn("jailNeedles", desk)
+        self.assertIn("jailhailet", desk)
+        self.assertIn("jailhailet06", desk)
+        self.assertIn("jailhaliet06", desk)
+        self.assertIn("jailhailet_", desk)
+        self.assertIn("jailhailet066", desk)
+        self.assertIn("KkjKCNXl", desk)
+        self.assertIn("nimHrwOM", desk)
+        self.assertIn("cWoJIJd7", desk)
+        self.assertIn("fZ5G6zFw", desk)
         self.assertIn("xwTo2lME", desk)
         self.assertIn("kdgY4R08", desk)
         self.assertIn("hymCYrmN", desk)
@@ -5152,6 +5216,11 @@ class AdultDeskTests(unittest.TestCase):
         self.assertNotIn("snow bunny", desk.lower())
         self.assertNotIn("RLjdRbks", desk)
         self.assertNotIn("IbfwSy8D", desk)
+        self.assertNotIn("XDtN7U2M", desk)
+        self.assertNotIn("fHxiDKdj", desk)
+        self.assertNotIn("gyCTHtDc", desk)
+        self.assertNotIn("vallery ray", desk.lower())
+        self.assertNotIn("roberta franco", desk.lower())
         self.assertNotIn("instagram", desk.lower())
         self.assertNotIn("creamy exotica", desk.lower())
         self.assertNotIn("kayla otto", desk.lower())
@@ -5705,6 +5774,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("EXOTICAXXX", adult_rail([]))
         self.assertIn("GABRIELLETHEGODDESSS", adult_rail([]))
         self.assertIn("PORSHABOO", adult_rail([]))
+        self.assertIn("JAILHAILET", adult_rail([]))
         self.assertGreaterEqual(len(adult_face_hold_rooms("ITISASHLEY")), 20)
         self.assertEqual(adult_face_hold_rooms("ITISASHLEY")[0]["seconds"], 696)
         self.assertEqual(
@@ -6016,6 +6086,90 @@ class AdultDeskTests(unittest.TestCase):
         self.assertNotIn("elisamiki", adult_face_needles("PORSHABOO") or [])
         self.assertNotIn("carrera", adult_face_needles("PORSHABOO") or [])
         self.assertNotIn("porshafitness", adult_face_needles("PORSHABOO") or [])
+        self.assertTrue(_adult_face_ok("jailhailet"))
+        self.assertTrue(_adult_face_ok("Jailhailet"))
+        self.assertTrue(_adult_face_ok("Jailhaliet06"))
+        self.assertFalse(_adult_face_ok("jailbait"))
+        self.assertGreaterEqual(len(adult_face_hold_rooms("JAILHAILET")), 39)
+        self.assertEqual(
+            [row["seconds"] for row in adult_face_hold_rooms("JAILHAILET")],
+            [
+                836,
+                790,
+                622,
+                462,
+                407,
+                365,
+                288,
+                265,
+                262,
+                255,
+                250,
+                213,
+                209,
+                203,
+                180,
+                179,
+                159,
+                153,
+                150,
+                140,
+                89,
+                39,
+                38,
+                27,
+                26,
+                24,
+                24,
+                20,
+                20,
+                18,
+                16,
+                15,
+                14,
+                13,
+                11,
+                11,
+                7,
+                6,
+                4,
+            ],
+        )
+        self.assertEqual(adult_hunt_needles("jailhailet"), list(ADULT_JAIL))
+        self.assertEqual(adult_hunt_needles("jailhailet06"), list(ADULT_JAIL))
+        self.assertEqual(adult_hunt_needles("jailhaliet06"), list(ADULT_JAIL))
+        self.assertEqual(
+            adult_hunt_needles("https://x.com/jailhailet"),
+            list(ADULT_JAIL),
+        )
+        self.assertEqual(
+            adult_hunt_needles("https://www.erome.com/jailhailet"),
+            list(ADULT_JAIL),
+        )
+        self.assertEqual(adult_page_name("https://x.com/jailhailet"), "jailhailet")
+        self.assertEqual(
+            adult_page_name("https://www.erome.com/jailhailet06"),
+            "jailhailet06",
+        )
+        self.assertTrue(any("erome.com/jailhailet" in path for path in adult_face_hunt("JAILHAILET")))
+        self.assertTrue(any("erome.com/jailhailet06" in path for path in adult_face_hunt("JAILHAILET")))
+        self.assertTrue(any("erome.com/a/KkjKCNXl" in path for path in adult_face_hunt("JAILHAILET")))
+        self.assertTrue(any("erome.com/a/nimHrwOM" in path for path in adult_face_hunt("JAILHAILET")))
+        self.assertTrue(any("erome.com/search?q=jailhailet" in path for path in adult_face_hunt("JAILHAILET")))
+        self.assertTrue(any("users/jailhailet/search" in path for path in adult_face_hunt("JAILHAILET")))
+        self.assertTrue(any("screen-name/jailhailet" in path for path in adult_face_hunt("JAILHAILET")))
+        self.assertTrue(any("query=jailhailet" in path for path in adult_face_hunt("JAILHAILET")))
+        self.assertTrue(any("jailhaliet06" in path for path in adult_face_hunt("JAILHAILET")))
+        self.assertNotIn("jail", adult_face_needles("JAILHAILET") or [])
+        self.assertNotIn("hailet", adult_face_needles("JAILHAILET") or [])
+        self.assertNotIn("jailbait", adult_face_needles("JAILHAILET") or [])
+        self.assertFalse(any("XDtN7U2M" in row["url"] for row in adult_face_hold_rooms("JAILHAILET")))
+        self.assertFalse(any("fHxiDKdj" in row["url"] for row in adult_face_hold_rooms("JAILHAILET")))
+        for row in adult_face_hold_rooms("JAILHAILET"):
+            self.assertNotIn("onlyfans", row["name"].lower())
+            self.assertNotIn("onlyfans", row["url"].lower())
+            self.assertNotIn("leaks", row["name"].lower())
+            self.assertTrue("jailhailet" in row["seek"] or "jailhaliet06" in row["seek"])
         self.assertFalse(
             any("44hnTwXR" in row["url"] for row in adult_face_hold_rooms("GABRIELLETHEGODDESSS"))
         )
@@ -6316,6 +6470,53 @@ class AdultDeskTests(unittest.TestCase):
                 "PORSHABOO",
             )],
             ["adult-face-star-porshaboo-guest-cut"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "lick-this-policewoman-s-pink-pussy-instead-of-going-to-jail",
+                            "title": "Vallery Ray - Lick This Policewoman's Pink Pussy Instead Of Going To Jail",
+                            "creator": "Vallery Ray",
+                            "durationSeconds": 1257,
+                        },
+                        {
+                            "slug": "bunny-roberta-franco-gets-locked-in-jail",
+                            "title": "Bunny Roberta Franco Gets Locked In Jail",
+                            "creator": "Roberta Franco",
+                            "durationSeconds": 58,
+                        },
+                        {
+                            "slug": "solo-teen-satisfies-her-pussy-with-a-vibrator",
+                            "title": "solo teen satisfies her pussy with a vibrator",
+                            "creator": "Unknown",
+                            "durationSeconds": 90,
+                        },
+                    ]
+                },
+                "JAILHAILET",
+            )],
+            [],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "jailhailet-guest-cut",
+                            "title": "Jailhailet guest cut",
+                            "creator": "Jailhailet",
+                            "durationSeconds": 48,
+                            "default_thumb": {
+                                "src": "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"
+                            },
+                        }
+                    ]
+                },
+                "JAILHAILET",
+            )],
+            ["adult-face-star-jailhailet-guest-cut"],
         )
         self.assertEqual(
             [row["id"] for row in adult_parse_face(
@@ -6946,6 +7147,12 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("porsha bunz", tv)
         self.assertIn("porsha_fitness", tv)
         self.assertIn("pmoneybunz", tv)
+        self.assertIn("JAILHAILET", tv)
+        self.assertIn("jailhailet06", tv)
+        self.assertIn("jailhaliet06", tv)
+        self.assertIn("13:56", tv)
+        self.assertIn("Vallery Ray", tv)
+        self.assertIn("Roberta Franco", tv)
         self.assertIn("euniceg___", tv)
         self.assertIn("Instagram store page", tv)
         self.assertIn("Porsha Carrera", tv)
@@ -7491,7 +7698,10 @@ class NaTheaterReadyCrashTests(unittest.TestCase):
             )],
             ["guest"],
         )
-        self.assertEqual(adult_rail([])[-1], "PORSHABOO")
+        self.assertEqual(adult_rail([])[-1], "JAILHAILET")
+        self.assertGreaterEqual(len(adult_face_hold_rooms("JAILHAILET")), 39)
+        self.assertEqual(adult_face_hold_rooms("JAILHAILET")[0]["seconds"], 836)
+        self.assertIn("adult-face-desk-nimhrwom-cwojijd7", adult_face_hold_rooms("JAILHAILET")[0]["id"])
         plate = read("Blackout", "NaPlate.swift")
         self.assertIn("if let row = naStageRow", plate)
         self.assertIn("Text(naEmptyChrome)", plate)

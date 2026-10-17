@@ -427,6 +427,13 @@ enum AdultDesk {
         "porshabunz",
         "porsha bunz",
     ]
+    static let jailNeedles = [
+        "jailhailet",
+        "jail hailet",
+        "jailhailet06",
+        "jailhailet 06",
+        "jailhaliet06",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
@@ -472,6 +479,7 @@ enum AdultDesk {
         ("EXOTICAXXX", exoticaNeedles),
         ("GABRIELLETHEGODDESSS", gabrielleNeedles),
         ("PORSHABOO", porshaNeedles),
+        ("JAILHAILET", jailNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -544,6 +552,7 @@ enum AdultDesk {
         ]),
         ("GABRIELLETHEGODDESSS", ["gabriellethegoddesss", "charneciamuriel", "goddessgabrielle"]),
         ("PORSHABOO", ["porshaboo", "porshabunz", "porshafitness", "porsha_fitness", "pmoneybunz"]),
+        ("JAILHAILET", ["jailhailet", "jailhailet06", "jailhaliet06", "jailhailet_", "jailhailet066"]),
     ]
     /// Proven guest albums. Hunt these first so a JSON desk cannot blank the chip.
     static let faceDesks: [(String, [String])] = [
@@ -617,6 +626,7 @@ enum AdultDesk {
         ("LUST4LIZZY", ["7YfN2Aly"]),
         ("EXOTICAXXX", ["64PV5qNR", "e1YBZ1zA", "KMootfxL"]),
         ("GABRIELLETHEGODDESSS", ["xwTo2lME", "kdgY4R08"]),
+        ("JAILHAILET", ["KkjKCNXl", "nimHrwOM"]),
     ]
     /// Public X handles. Hunt the guest timeline, not a paywalled store.
     static let facePosts: [(String, [String])] = [
@@ -663,6 +673,7 @@ enum AdultDesk {
         ("EXOTICAXXX", ["exoticaslim", "exoticaxxx", "ilovekaylaxx", "missskaylax", "iloveekaylaaa"]),
         ("GABRIELLETHEGODDESSS", ["charneciamuriel", "gabriellethegoddesss"]),
         ("PORSHABOO", ["porshabunz", "porshafitness", "porsha_fitness", "pmoneybunz"]),
+        ("JAILHAILET", ["jailhailet", "jailhailet06", "jailhaliet06", "jailhailet_"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
@@ -1053,6 +1064,47 @@ enum AdultDesk {
             ("file", "https://v90.erome.com/6445/xwTo2lME/4zILDaYo_720p.mp4", 6, "Gabriellethegoddesss"),
             ("file", "https://v333.erome.com/2716/kdgY4R08/Tjg5SlNM_720p.mp4", 6, "Gabriellethegoddesss"),
             ("file", "https://v333.erome.com/2716/kdgY4R08/9tmV02Vf_720p.mp4", 5, "Gabriellethegoddesss"),
+        ]),
+        ("JAILHAILET", [
+            ("file", "https://v201.erome.com/692/nimHrwOM/cWoJIJd7_720p.mp4", 836, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/EVO5ykEh_720p.mp4", 790, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/lDrsV0lq_720p.mp4", 622, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/B5UrnZBD_720p.mp4", 462, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/SQGUZ6oP_720p.mp4", 407, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/JqsIhgiS_720p.mp4", 365, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/PZDtTwB6_720p.mp4", 288, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/CpYDc3R0_720p.mp4", 265, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/bo1cFCLW_720p.mp4", 262, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/GHnY48QW_720p.mp4", 255, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/Pfh81KA0_720p.mp4", 250, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/GBc6efOV_720p.mp4", 213, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/78Z49MID_720p.mp4", 209, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/2SA09PnO_720p.mp4", 203, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/p117VzR7_720p.mp4", 180, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/cM9472g1_720p.mp4", 179, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/1QR4RZhz_720p.mp4", 159, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/amvE9W5s_720p.mp4", 153, "Jailhaliet06"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/MM8IQ2Ai_720p.mp4", 150, "Jailhaliet06"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/fZ5G6zFw_720p.mp4", 140, "Jailhailet"),
+            ("file", "https://v201.erome.com/692/nimHrwOM/qO2jyzIj_720p.mp4", 89, "Jailhaliet06"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/F44Vkh9S_720p.mp4", 39, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/MnDJL1Zh_720p.mp4", 38, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/ep4w5I4R_720p.mp4", 27, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/m9XI9Ku8_720p.mp4", 26, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/QzaqHT5J_720p.mp4", 24, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/qW2GlunX_720p.mp4", 24, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/hX6oMuFS_720p.mp4", 20, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/vsfVttSu_720p.mp4", 20, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/YIOdt2wa_720p.mp4", 18, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/e3zhtZJZ_720p.mp4", 16, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/njK37eEI_720p.mp4", 15, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/OH99Deym_720p.mp4", 14, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/ThSgvSm2_720p.mp4", 13, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/Fm4uC82Z_720p.mp4", 11, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/VNrw6dqw_720p.mp4", 11, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/UDqMZR0Y_720p.mp4", 7, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/YI1Fi2sw_720p.mp4", 6, "Jailhailet"),
+            ("file", "https://v205.erome.com/3661/KkjKCNXl/0ccOSdQ3_720p.mp4", 4, "Jailhailet"),
         ]),
     ]
     /// Guest stills for baked pin tokens. Star stills are `preview-batch/{slug}/thumb.webp`.
