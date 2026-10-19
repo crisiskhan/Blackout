@@ -434,6 +434,11 @@ enum AdultDesk {
         "jailhailet 06",
         "jailhaliet06",
     ]
+    static let christyNeedles = [
+        "christyxmarie",
+        "christy x marie",
+        "christyx marie",
+    ]
     static let faces: [(String, [String])] = [
         ("ITSSTEPHHONEY21", stephNeedles),
         ("ITSSTEPHHONEYXO21", stephNeedles),
@@ -480,6 +485,7 @@ enum AdultDesk {
         ("GABRIELLETHEGODDESSS", gabrielleNeedles),
         ("PORSHABOO", porshaNeedles),
         ("JAILHAILET", jailNeedles),
+        ("CHRISTYXMARIE", christyNeedles),
     ]
     static let facePins: [(String, [String])] = [
         ("ITSSTEPHHONEY21", ["P283XrKRjsV"]),
@@ -553,6 +559,7 @@ enum AdultDesk {
         ("GABRIELLETHEGODDESSS", ["gabriellethegoddesss", "charneciamuriel", "goddessgabrielle"]),
         ("PORSHABOO", ["porshaboo", "porshabunz", "porshafitness", "porsha_fitness", "pmoneybunz"]),
         ("JAILHAILET", ["jailhailet", "jailhailet06", "jailhaliet06", "jailhailet_", "jailhailet066"]),
+        ("CHRISTYXMARIE", ["christyxmarie"]),
     ]
     /// Proven guest albums. Hunt these first so a JSON desk cannot blank the chip.
     static let faceDesks: [(String, [String])] = [
@@ -627,6 +634,7 @@ enum AdultDesk {
         ("EXOTICAXXX", ["64PV5qNR", "e1YBZ1zA", "KMootfxL"]),
         ("GABRIELLETHEGODDESSS", ["xwTo2lME", "kdgY4R08"]),
         ("JAILHAILET", ["KkjKCNXl", "nimHrwOM"]),
+        ("CHRISTYXMARIE", ["IIg15aT6"]),
     ]
     /// Public X handles. Hunt the guest timeline, not a paywalled store.
     static let facePosts: [(String, [String])] = [
@@ -674,6 +682,7 @@ enum AdultDesk {
         ("GABRIELLETHEGODDESSS", ["charneciamuriel", "gabriellethegoddesss"]),
         ("PORSHABOO", ["porshabunz", "porshafitness", "porsha_fitness", "pmoneybunz"]),
         ("JAILHAILET", ["jailhailet", "jailhailet06", "jailhaliet06", "jailhailet_"]),
+        ("CHRISTYXMARIE", ["Christyxmarie"]),
     ]
     static let giftAuth = "https://api.redgifs.com/v2/auth/temporary"
     static let giftOrigin = "https://www.redgifs.com"
@@ -1105,6 +1114,9 @@ enum AdultDesk {
             ("file", "https://v205.erome.com/3661/KkjKCNXl/UDqMZR0Y_720p.mp4", 7, "Jailhailet"),
             ("file", "https://v205.erome.com/3661/KkjKCNXl/YI1Fi2sw_720p.mp4", 6, "Jailhailet"),
             ("file", "https://v205.erome.com/3661/KkjKCNXl/0ccOSdQ3_720p.mp4", 4, "Jailhailet"),
+        ]),
+        ("CHRISTYXMARIE", [
+            ("file", "https://v6.erome.com/4530/IIg15aT6/zRVLvb6u_720p.mp4", 16, "Christyxmarie"),
         ]),
     ]
     /// Guest stills for baked pin tokens. Star stills are `preview-batch/{slug}/thumb.webp`.
