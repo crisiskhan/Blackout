@@ -536,6 +536,11 @@ ADULT_JAIL = (
     "jailhailet 06",
     "jailhaliet06",
 )
+ADULT_CHRISTY = (
+    "christyxmarie",
+    "christy x marie",
+    "christyx marie",
+)
 ADULT_FACES = (
     ("ITSSTEPHHONEY21", ADULT_STEPH),
     ("ITSSTEPHHONEYXO21", ADULT_STEPH),
@@ -582,6 +587,7 @@ ADULT_FACES = (
     ("GABRIELLETHEGODDESSS", ADULT_GABRIELLE),
     ("PORSHABOO", ADULT_PORSHA),
     ("JAILHAILET", ADULT_JAIL),
+    ("CHRISTYXMARIE", ADULT_CHRISTY),
 )
 ADULT_LOVE_CHIP = "LOVESCAPE"
 ADULT_KEEP_CHIP = "KEEP"
@@ -1871,6 +1877,9 @@ ADULT_FACE_HOLDS = (
         ("file", "https://v205.erome.com/3661/KkjKCNXl/YI1Fi2sw_720p.mp4", 6, "Jailhailet"),
         ("file", "https://v205.erome.com/3661/KkjKCNXl/0ccOSdQ3_720p.mp4", 4, "Jailhailet"),
     )),
+    ("CHRISTYXMARIE", (
+        ("file", "https://v6.erome.com/4530/IIg15aT6/zRVLvb6u_720p.mp4", 16, "Christyxmarie"),
+    )),
 )
 ADULT_FACE_DESKS = (
     ("ITSSTEPHHONEY21", ("RUX8bZH5",)),
@@ -1895,6 +1904,7 @@ ADULT_FACE_DESKS = (
     ("EXOTICAXXX", ("64PV5qNR", "e1YBZ1zA", "KMootfxL")),
     ("GABRIELLETHEGODDESSS", ("xwTo2lME", "kdgY4R08")),
     ("JAILHAILET", ("KkjKCNXl", "nimHrwOM")),
+    ("CHRISTYXMARIE", ("IIg15aT6",)),
 )
 ADULT_DESK_ORIGIN = "https://www.erome.com"
 ADULT_DESK_FOLLOW = 12
@@ -2003,6 +2013,7 @@ ADULT_FACE_POSTS = (
     ("GABRIELLETHEGODDESSS", ("charneciamuriel", "gabriellethegoddesss")),
     ("PORSHABOO", ("porshabunz", "porshafitness", "porsha_fitness", "pmoneybunz")),
     ("JAILHAILET", ("jailhailet", "jailhailet06", "jailhaliet06", "jailhailet_")),
+    ("CHRISTYXMARIE", ("Christyxmarie",)),
 )
 ADULT_FACE_STILLS = (
     ("P283XrKRjsV", "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"),
@@ -2088,6 +2099,7 @@ ADULT_FACE_GIFTS = (
     ("GABRIELLETHEGODDESSS", ("gabriellethegoddesss", "charneciamuriel", "goddessgabrielle")),
     ("PORSHABOO", ("porshaboo", "porshabunz", "porshafitness", "porsha_fitness", "pmoneybunz")),
     ("JAILHAILET", ("jailhailet", "jailhailet06", "jailhaliet06", "jailhailet_", "jailhailet066")),
+    ("CHRISTYXMARIE", ("christyxmarie",)),
 )
 ADULT_FACE_KILL = (
     "loli",
@@ -3961,6 +3973,7 @@ class AdultDeskTests(unittest.TestCase):
                 "GABRIELLETHEGODDESSS",
                 "PORSHABOO",
                 "JAILHAILET",
+                "CHRISTYXMARIE",
             ],
         )
         fat_kinds = [f"KIND{index:02d}" for index in range(40)]
@@ -5202,6 +5215,14 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("jailhailet066", desk)
         self.assertIn("KkjKCNXl", desk)
         self.assertIn("nimHrwOM", desk)
+        self.assertIn("CHRISTYXMARIE", desk)
+        self.assertIn("christyNeedles", desk)
+        self.assertIn("christyxmarie", desk)
+        self.assertIn("christy x marie", desk)
+        self.assertIn("christyx marie", desk)
+        self.assertIn("Christyxmarie", desk)
+        self.assertIn("IIg15aT6", desk)
+        self.assertIn("zRVLvb6u", desk)
         self.assertIn("cWoJIJd7", desk)
         self.assertIn("fZ5G6zFw", desk)
         self.assertIn("xwTo2lME", desk)
@@ -5221,6 +5242,14 @@ class AdultDeskTests(unittest.TestCase):
         self.assertNotIn("gyCTHtDc", desk)
         self.assertNotIn("vallery ray", desk.lower())
         self.assertNotIn("roberta franco", desk.lower())
+        self.assertNotIn("6yuXZWJu", desk)
+        self.assertNotIn("bOcXRK6K", desk)
+        self.assertNotIn("mommyrosee", desk.lower())
+        self.assertNotIn("christyespinosa", desk.lower())
+        self.assertNotIn("christy mack", desk.lower())
+        self.assertNotIn("melanie marie", desk.lower())
+        self.assertNotIn("xxlayna marie", desk.lower())
+        self.assertNotIn("katrina marie", desk.lower())
         self.assertNotIn("instagram", desk.lower())
         self.assertNotIn("creamy exotica", desk.lower())
         self.assertNotIn("kayla otto", desk.lower())
@@ -5775,6 +5804,7 @@ class AdultDeskTests(unittest.TestCase):
         self.assertIn("GABRIELLETHEGODDESSS", adult_rail([]))
         self.assertIn("PORSHABOO", adult_rail([]))
         self.assertIn("JAILHAILET", adult_rail([]))
+        self.assertIn("CHRISTYXMARIE", adult_rail([]))
         self.assertGreaterEqual(len(adult_face_hold_rooms("ITISASHLEY")), 20)
         self.assertEqual(adult_face_hold_rooms("ITISASHLEY")[0]["seconds"], 696)
         self.assertEqual(
@@ -6170,6 +6200,45 @@ class AdultDeskTests(unittest.TestCase):
             self.assertNotIn("onlyfans", row["url"].lower())
             self.assertNotIn("leaks", row["name"].lower())
             self.assertTrue("jailhailet" in row["seek"] or "jailhaliet06" in row["seek"])
+        self.assertEqual(len(adult_face_hold_rooms("CHRISTYXMARIE")), 1)
+        self.assertEqual(adult_face_hold_rooms("CHRISTYXMARIE")[0]["seconds"], 16)
+        self.assertIn(
+            "adult-face-desk-iig15at6-zrvlvb6u",
+            adult_face_hold_rooms("CHRISTYXMARIE")[0]["id"],
+        )
+        self.assertEqual(adult_hunt_needles("christyxmarie"), list(ADULT_CHRISTY))
+        self.assertEqual(adult_hunt_needles("christy x marie"), list(ADULT_CHRISTY))
+        self.assertEqual(
+            adult_hunt_needles("https://x.com/Christyxmarie"),
+            list(ADULT_CHRISTY),
+        )
+        self.assertEqual(
+            adult_hunt_needles("https://www.erome.com/christyxmarie"),
+            list(ADULT_CHRISTY),
+        )
+        self.assertEqual(adult_page_name("https://x.com/Christyxmarie"), "Christyxmarie")
+        self.assertEqual(
+            adult_page_name("https://www.erome.com/christyxmarie"),
+            "christyxmarie",
+        )
+        self.assertTrue(any("erome.com/christyxmarie" in path for path in adult_face_hunt("CHRISTYXMARIE")))
+        self.assertTrue(any("erome.com/a/IIg15aT6" in path for path in adult_face_hunt("CHRISTYXMARIE")))
+        self.assertTrue(any("erome.com/search?q=christyxmarie" in path for path in adult_face_hunt("CHRISTYXMARIE")))
+        self.assertTrue(any("users/christyxmarie/search" in path for path in adult_face_hunt("CHRISTYXMARIE")))
+        self.assertTrue(any("screen-name/Christyxmarie" in path for path in adult_face_hunt("CHRISTYXMARIE")))
+        self.assertTrue(any("query=christyxmarie" in path for path in adult_face_hunt("CHRISTYXMARIE")))
+        self.assertNotIn("christy", adult_face_needles("CHRISTYXMARIE") or [])
+        self.assertNotIn("marie", adult_face_needles("CHRISTYXMARIE") or [])
+        self.assertNotIn("christymarie", adult_face_needles("CHRISTYXMARIE") or [])
+        self.assertNotIn("christy marie", adult_face_needles("CHRISTYXMARIE") or [])
+        self.assertNotIn("mommyrosee", adult_face_needles("CHRISTYXMARIE") or [])
+        self.assertFalse(any("6yuXZWJu" in row["url"] for row in adult_face_hold_rooms("CHRISTYXMARIE")))
+        self.assertFalse(any("bOcXRK6K" in row["url"] for row in adult_face_hold_rooms("CHRISTYXMARIE")))
+        for row in adult_face_hold_rooms("CHRISTYXMARIE"):
+            self.assertNotIn("onlyfans", row["name"].lower())
+            self.assertNotIn("onlyfans", row["url"].lower())
+            self.assertNotIn("leaks", row["name"].lower())
+            self.assertIn("christyxmarie", row["seek"])
         self.assertFalse(
             any("44hnTwXR" in row["url"] for row in adult_face_hold_rooms("GABRIELLETHEGODDESSS"))
         )
@@ -6517,6 +6586,77 @@ class AdultDeskTests(unittest.TestCase):
                 "JAILHAILET",
             )],
             ["adult-face-star-jailhailet-guest-cut"],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "melanie-marie-lookalike",
+                            "title": "Melanie Marie lookalike",
+                            "creator": "Melanie Marie",
+                            "durationSeconds": 90,
+                        },
+                        {
+                            "slug": "xxlayna-marie-lookalike",
+                            "title": "Xxlayna Marie lookalike",
+                            "creator": "Xxlayna Marie",
+                            "durationSeconds": 80,
+                        },
+                        {
+                            "slug": "sno-marie-lookalike",
+                            "title": "Sno Marie lookalike",
+                            "creator": "Sno Marie",
+                            "durationSeconds": 70,
+                        },
+                        {
+                            "slug": "katrina-marie-lookalike",
+                            "title": "Katrina Marie lookalike",
+                            "creator": "Katrina Marie",
+                            "durationSeconds": 60,
+                        },
+                        {
+                            "slug": "christy-mack-lookalike",
+                            "title": "Christy Mack lookalike",
+                            "creator": "Christy Mack",
+                            "durationSeconds": 50,
+                        },
+                        {
+                            "slug": "mommyrosee-lookalike",
+                            "title": "MommyRosee lookalike",
+                            "creator": "MommyRosee",
+                            "durationSeconds": 40,
+                        },
+                        {
+                            "slug": "christxmarie-empty",
+                            "title": "Christxmarie empty album",
+                            "creator": "Christxmarie",
+                            "durationSeconds": 16,
+                        },
+                    ]
+                },
+                "CHRISTYXMARIE",
+            )],
+            [],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_parse_face(
+                {
+                    "videos": [
+                        {
+                            "slug": "christyxmarie-guest-cut",
+                            "title": "ChristyxMarie guest cut",
+                            "creator": "Christyxmarie",
+                            "durationSeconds": 16,
+                            "default_thumb": {
+                                "src": "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17213787/14_360.jpg"
+                            },
+                        }
+                    ]
+                },
+                "CHRISTYXMARIE",
+            )],
+            ["adult-face-star-christyxmarie-guest-cut"],
         )
         self.assertEqual(
             [row["id"] for row in adult_parse_face(
@@ -7151,6 +7291,14 @@ class DeviceScriptTests(unittest.TestCase):
         self.assertIn("jailhailet06", tv)
         self.assertIn("jailhaliet06", tv)
         self.assertIn("13:56", tv)
+        self.assertIn("CHRISTYXMARIE", tv)
+        self.assertIn("christyxmarie", tv)
+        self.assertIn("Christyxmarie", tv)
+        self.assertIn("0:16", tv)
+        self.assertIn("Melanie Marie", tv)
+        self.assertIn("Xxlayna Marie", tv)
+        self.assertIn("Christy Mack", tv)
+        self.assertIn("MommyRosee", tv)
         self.assertIn("Vallery Ray", tv)
         self.assertIn("Roberta Franco", tv)
         self.assertIn("euniceg___", tv)
@@ -7698,10 +7846,69 @@ class NaTheaterReadyCrashTests(unittest.TestCase):
             )],
             ["guest"],
         )
-        self.assertEqual(adult_rail([])[-1], "JAILHAILET")
+        self.assertEqual(adult_rail([])[-1], "CHRISTYXMARIE")
         self.assertGreaterEqual(len(adult_face_hold_rooms("JAILHAILET")), 39)
         self.assertEqual(adult_face_hold_rooms("JAILHAILET")[0]["seconds"], 836)
         self.assertIn("adult-face-desk-nimhrwom-cwojijd7", adult_face_hold_rooms("JAILHAILET")[0]["id"])
+        self.assertEqual(len(adult_face_hold_rooms("CHRISTYXMARIE")), 1)
+        self.assertEqual(adult_face_hold_rooms("CHRISTYXMARIE")[0]["seconds"], 16)
+        self.assertIn("adult-face-desk-iig15at6-zrvlvb6u", adult_face_hold_rooms("CHRISTYXMARIE")[0]["id"])
+        self.assertEqual(
+            adult_pick(
+                [
+                    {
+                        "id": "melanie",
+                        "name": "Melanie Marie",
+                        "handle": "",
+                        "seek": "melanie marie",
+                        "seconds": 90,
+                        "kinds": ["ALL"],
+                    },
+                    {
+                        "id": "mack",
+                        "name": "Christy Mack",
+                        "handle": "",
+                        "seek": "christy mack",
+                        "seconds": 80,
+                        "kinds": ["ALL"],
+                    },
+                    {
+                        "id": "mommy",
+                        "name": "MommyRosee",
+                        "handle": "",
+                        "seek": "mommyrosee",
+                        "seconds": 40,
+                        "kinds": ["ALL"],
+                    },
+                ],
+                "CHRISTYXMARIE",
+            ),
+            [],
+        )
+        self.assertEqual(
+            [row["id"] for row in adult_pick(
+                [
+                    {
+                        "id": "mack",
+                        "name": "Christy Mack",
+                        "handle": "",
+                        "seek": "christy mack",
+                        "seconds": 80,
+                        "kinds": ["ALL"],
+                    },
+                    {
+                        "id": "guest",
+                        "name": "Christyxmarie guest cut",
+                        "handle": "",
+                        "seek": "christyxmarie",
+                        "seconds": 16,
+                        "kinds": ["ALL"],
+                    },
+                ],
+                "CHRISTYXMARIE",
+            )],
+            ["guest"],
+        )
         plate = read("Blackout", "NaPlate.swift")
         self.assertIn("if let row = naStageRow", plate)
         self.assertIn("Text(naEmptyChrome)", plate)
